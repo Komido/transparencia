@@ -2055,35 +2055,41 @@ function valorDaPof(ctx, familia, chave, serieIpca) {
   return valor2018 == null || !f2 ? null : { valor: valor2018 * f2.fator, ate: f2.ate };
 }
 
+// "nota" é a linha curta embaixo do item; "fonte", a explicação completa,
+// que vai para a planilha.
 function gastoDaPof(ctx, familia, chave, serieIpca, nomeDaInflacao) {
   const v = valorDaPof(ctx, familia, chave, serieIpca);
   return v && {
     valor: v.valor,
-    nota: `Gasto médio das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE), corrigido pela inflação ${nomeDaInflacao} até ${f.mesCurto(v.ate)}`,
+    nota: null,
+    pof: true,
+    fonte: `Gasto médio das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE), corrigido pela inflação ${nomeDaInflacao} até ${f.mesCurto(v.ate)}`,
   };
 }
 
+// grupo: a cor na barra da renda (luz, água e gás são as contas da casa).
 const ITENS_ORCAMENTO = [
   {
-    id: 'comida', nome: 'Comida',
+    id: 'comida', nome: 'Comida', grupo: 'comida',
     padrao: ({ meses, s }, familia) => {
       const local = familia.local?.series?.cesta_total;
       const u = c.ultimoValor(meses, local ?? s.cesta_total);
       if (!u) return null;
       const cestas = familia.unidades;
-      const textoCestas = cestas === 1 ? 'Uma cesta básica' : `${f.numero(cestas, cestas % 1 ? 1 : 0)} cestas básicas`;
+      const textoCestas = cestas === 1 ? '1 cesta básica' : `${f.numero(cestas, cestas % 1 ? 1 : 0)} cestas básicas`;
       const onde = local ? `em ${familia.local.nome}` : 'média de capitais';
       return {
         valor: u.valor * cestas,
-        nota: `${textoCestas} do DIEESE, ${onde}, em ${f.mesCurto(u.mes)}${familia.criancas ? ' (cada criança conta como meia cesta, como no cálculo do DIEESE)' : ''}`,
+        nota: `${textoCestas} do DIEESE${familia.criancas ? ' (criança conta meia)' : ''}, ${f.mesCurto(u.mes)}`,
+        fonte: `${textoCestas} do DIEESE, ${onde}, em ${f.mesCurto(u.mes)}${familia.criancas ? ' (cada criança conta como meia cesta, como no cálculo do DIEESE)' : ''}`,
       };
     },
   },
   {
-    id: 'aluguel', nome: 'Aluguel',
+    id: 'aluguel', nome: 'Aluguel', grupo: 'aluguel',
     opcoes: [
-      { id: 'pof', nome: 'Moradias das famílias com essa renda (IBGE)' },
-      { id: 'anuncio', nome: `Apartamento anunciado de ${AREA_EXEMPLO_M2} m² (FipeZAP)` },
+      { id: 'pof', nome: 'Média das famílias' },
+      { id: 'anuncio', nome: `Anúncio de ${AREA_EXEMPLO_M2} m²` },
     ],
     padrao: (ctx, familia, opcao) => {
       const { meses, s } = ctx;
@@ -2091,7 +2097,9 @@ const ITENS_ORCAMENTO = [
         const v = valorDaPof(ctx, familia, 'aluguel', 'ipca_aluguel_var');
         return v && {
           valor: v.valor,
-          nota: `Valor médio de aluguel das moradias das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE; para quem tem casa própria, o IBGE usa o aluguel estimado), corrigido pela inflação do aluguel até ${f.mesCurto(v.ate)}`,
+          nota: null,
+          pof: true,
+          fonte: `Valor médio de aluguel das moradias das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE; para quem tem casa própria, o IBGE usa o aluguel estimado), corrigido pela inflação do aluguel até ${f.mesCurto(v.ate)}`,
         };
       }
       const local = familia.local?.series?.aluguel_m2;
@@ -2099,21 +2107,29 @@ const ITENS_ORCAMENTO = [
       const onde = local ? `em ${familia.local.nome}` : 'nas cidades do Índice FipeZAP';
       return u && {
         valor: u.valor * AREA_EXEMPLO_M2,
-        nota: `Apartamento de ${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} por m², preço médio pedido em anúncios ${onde} em ${f.mesCurto(u.mes)}. Em bairros mais simples costuma ser menor`,
+        nota: `${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} o m², preço pedido em anúncios ${local ? onde : 'em cidades grandes'} (FipeZAP, ${f.mesCurto(u.mes)}); em bairros mais simples costuma ser menor`,
+        fonte: `Apartamento de ${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} por m², preço médio pedido em anúncios ${onde} em ${f.mesCurto(u.mes)}`,
       };
     },
   },
-  { id: 'luz', nome: 'Luz', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'luz', 'ipca_luz_var', 'da energia elétrica') },
-  { id: 'agua', nome: 'Água', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'agua', 'ipca_agua_var', 'da conta de água e esgoto') },
+  { id: 'luz', nome: 'Luz', grupo: 'contas', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'luz', 'ipca_luz_var', 'da energia elétrica') },
+  { id: 'agua', nome: 'Água', grupo: 'contas', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'agua', 'ipca_agua_var', 'da conta de água e esgoto') },
   {
-    id: 'gas', nome: 'Gás de cozinha',
+    id: 'gas', nome: 'Gás de cozinha', grupo: 'contas',
     padrao: (ctx, familia) => {
       const g = gastoDaPof(ctx, familia, 'gas', 'ipca_gas_var', 'do gás de botijão');
       const botijao = c.ultimoValor(ctx.meses, familia.local?.series?.comb_glp ?? ctx.s.comb_glp);
-      if (g && botijao) g.nota += `. Dá cerca de ${f.numero(g.valor / botijao.valor, 1)} botijão por mês`;
+      if (g && botijao) g.nota = `cerca de ${f.numero(g.valor / botijao.valor, 1)} botijão por mês`;
       return g;
     },
   },
+];
+
+// Partes da barra da renda, na ordem em que aparecem.
+const GRUPOS_ORCAMENTO = [
+  { id: 'comida', nome: 'Comida' },
+  { id: 'aluguel', nome: 'Aluguel' },
+  { id: 'contas', nome: 'Luz, água e gás' },
 ];
 
 const RENDAS_EM_SALARIOS = [1, 1.5, 2, 3, 4, 5];
@@ -2128,6 +2144,7 @@ function montarOrcamento(ctx) {
   const caixaOutra = $('#orc-renda-outra-caixa');
   const selAdultos = $('#orc-adultos');
   const selCriancas = $('#orc-criancas');
+  const botaoRestaurar = $('#orc-restaurar');
   const pof = ctx.d.orcamento?.pof;
   selRenda.replaceChildren();
   for (const n of RENDAS_EM_SALARIOS) {
@@ -2142,50 +2159,93 @@ function montarOrcamento(ctx) {
   const digitados = new Map();
   const opcoesEscolhidas = new Map();
   const lista = $('#orc-lista');
+  lista.replaceChildren();
   const linhas = new Map();
   for (const item of ITENS_ORCAMENTO) {
-    const li = el('li', 'orc-item', null, lista);
-    const topo = el('div', 'orc-topo', null, li);
-    const rotulo = el('label', 'orc-nome', item.nome, topo);
+    const li = el('li', `orc-item orc-${item.grupo}`, null, lista);
+    el('span', 'orc-cor', null, li).setAttribute('aria-hidden', 'true');
+    const texto = el('div', 'orc-texto', null, li);
+    const rotulo = el('label', 'orc-nome', item.nome, texto);
     rotulo.htmlFor = `orc-${item.id}`;
-    const campo = el('div', 'orc-campo', null, topo);
-    el('span', null, 'R$', campo);
-    const input = el('input', null, null, campo);
+    const nota = el('span', 'orc-nota', null, texto);
+    const campoValor = el('div', 'orc-campo', null, li);
+    el('span', null, 'R$', campoValor);
+    const input = el('input', null, null, campoValor);
     input.id = `orc-${item.id}`;
     input.type = 'number';
     input.inputMode = 'numeric';
     input.min = '0';
     input.max = '1000000';
     input.step = '1';
+    const parte = el('span', 'orc-parte', null, li);
+    let radios = null;
     if (item.opcoes) {
-      const rotuloRef = el('label', 'seletor orc-referencia', 'Referência', li);
-      const sel = el('select', null, null, rotuloRef);
-      sel.id = `orc-${item.id}-ref`;
-      for (const op of item.opcoes) el('option', null, op.nome, sel).value = op.id;
-      sel.addEventListener('change', () => {
-        opcoesEscolhidas.set(item.id, sel.value);
-        digitados.delete(item.id);
-        calcular(false);
+      const grupo = el('div', 'segmentos orc-referencia', null, li);
+      grupo.setAttribute('role', 'radiogroup');
+      grupo.setAttribute('aria-label', `Referência do ${item.nome.toLowerCase()}`);
+      radios = item.opcoes.map((op, k) => {
+        const rotuloOp = el('label', null, null, grupo);
+        const radio = el('input', null, null, rotuloOp);
+        radio.type = 'radio';
+        radio.name = `orc-${item.id}-ref`;
+        radio.value = op.id;
+        radio.checked = k === 0;
+        const textoOp = el('span', null, op.nome, rotuloOp);
+        radio.addEventListener('change', () => {
+          opcoesEscolhidas.set(item.id, radio.value);
+          digitados.delete(item.id);
+          calcular(false);
+        });
+        return { radio, texto: textoOp, op };
       });
     }
-    const nota = el('p', 'orc-nota', null, li);
-    const trilho = el('div', 'barra-trilho', null, li);
-    trilho.setAttribute('aria-hidden', 'true');
-    const barra = el('div', 'barra', null, trilho);
-    const parte = el('p', 'orc-parte', null, li);
     input.addEventListener('input', () => {
       const v = Number(input.value);
       if (input.value === '' || !Number.isFinite(v) || v < 0) digitados.delete(item.id);
       else digitados.set(item.id, Math.min(v, 1000000));
       calcular(false);
     });
-    linhas.set(item.id, { input, nota, barra, parte });
+    linhas.set(item.id, { input, nota, parte, radios });
   }
 
   const renda = () => {
     if (selRenda.value !== 'outro') return sm.valor * Number(selRenda.value);
     const v = Number(campoOutra.value);
     return Number.isFinite(v) && v > 0 ? Math.min(v, 10000000) : 0;
+  };
+
+  // Barra da renda: comida, aluguel e contas da casa, cada um com sua cor, e
+  // o que sobra no fim. Se o básico passa da renda, a escala é o básico e
+  // uma linha marca onde a renda acaba.
+  const desenharBarra = (r, res) => {
+    const barra = $('#orc-barra');
+    const legenda = $('#orc-legenda');
+    barra.replaceChildren();
+    legenda.replaceChildren();
+    if (!(r > 0) || !(res.total > 0)) { barra.hidden = true; legenda.hidden = true; return; }
+    barra.hidden = false;
+    legenda.hidden = false;
+    const escala = Math.max(r, res.total);
+    const partes = GRUPOS_ORCAMENTO.map((g) => ({
+      ...g, valor: res.itens.filter((d) => ITENS_ORCAMENTO.find((it) => it.id === d.id)?.grupo === g.id).reduce((a, d) => a + (d.valor ?? 0), 0),
+    })).filter((g) => g.valor > 0);
+    if (res.sobra > 0) partes.push({ id: 'sobra', nome: 'Sobra', valor: res.sobra });
+    for (const g of partes) el('div', `orc-seg orc-seg-${g.id}`, null, barra).style.flexGrow = String(g.valor / escala);
+    if (res.sobra < 0) el('div', 'orc-marca', null, barra).style.left = `${(r / escala) * 100}%`;
+    const pct = (v) => f.porcentagem((v / r) * 100, 0);
+    // Quando o básico passa da renda, "151% da renda" confunde: vai em reais.
+    const rotulo = (v) => (res.sobra < 0 ? f.moeda(v, 0) : pct(v));
+    for (const g of partes) {
+      const li = el('li', `orc-leg orc-leg-${g.id}`, null, legenda);
+      el('span', 'orc-leg-cor', null, li).setAttribute('aria-hidden', 'true');
+      li.append(`${g.nome} ${rotulo(g.valor)}`);
+    }
+    if (res.sobra < 0) {
+      const li = el('li', 'orc-leg orc-leg-marca', null, legenda);
+      el('span', 'orc-leg-cor', null, li).setAttribute('aria-hidden', 'true');
+      li.append('onde a renda acaba');
+    }
+    barra.setAttribute('aria-label', `Da renda de ${f.moeda(r, 0)}: ${partes.map((g) => `${g.nome.toLowerCase()} ${rotulo(g.valor)}`).join(', ')}${res.sobra < 0 ? `; o básico passa a renda em ${f.moeda(-res.sobra, 0)}` : ''}.`);
   };
 
   const calcular = (reescreverCampos = true) => {
@@ -2203,50 +2263,71 @@ function montarOrcamento(ctx) {
       faixa: classes?.length && pof ? c.faixaDaPof(classes, r / sm.valor, pof.salario_minimo_referencia) : null,
     };
     // Sem aluguel do FipeZAP para a cidade, fica só a referência do IBGE.
-    const selRef = $('#orc-aluguel-ref');
     const semAnuncio = Boolean(local) && !local.series?.aluguel_m2;
-    const opAnuncio = selRef?.querySelector('option[value="anuncio"]');
-    if (opAnuncio) {
-      opAnuncio.disabled = semAnuncio;
-      opAnuncio.textContent = semAnuncio
-        ? 'Apartamento anunciado (sem dado do FipeZAP para esta cidade)'
-        : `Apartamento anunciado de ${AREA_EXEMPLO_M2} m² (FipeZAP)`;
-      if (semAnuncio && selRef.value === 'anuncio') { selRef.value = 'pof'; opcoesEscolhidas.set('aluguel', 'pof'); }
+    const radiosAluguel = linhas.get('aluguel').radios;
+    const anuncio = radiosAluguel?.find((x) => x.op.id === 'anuncio');
+    if (anuncio) {
+      anuncio.radio.disabled = semAnuncio;
+      anuncio.texto.textContent = semAnuncio ? 'Anúncio (sem dado aqui)' : anuncio.op.nome;
+      if (semAnuncio && anuncio.radio.checked) {
+        radiosAluguel[0].radio.checked = true;
+        opcoesEscolhidas.set('aluguel', 'pof');
+      }
     }
     const despesas = ITENS_ORCAMENTO.map((item) => {
       const p = item.padrao(ctx, familia, opcoesEscolhidas.get(item.id) ?? item.opcoes?.[0]?.id);
-      const valor = digitados.has(item.id) ? digitados.get(item.id) : (p ? Math.round(p.valor) : null);
-      return { id: item.id, nome: item.nome, valor, nota: digitados.has(item.id) ? 'Valor digitado por você' : (p?.nota ?? 'Ainda sem fonte automática para este item. Digite o valor da sua casa.') };
+      const digitado = digitados.has(item.id);
+      const valor = digitado ? digitados.get(item.id) : (p ? Math.round(p.valor) : null);
+      return {
+        id: item.id, nome: item.nome, valor, daPof: !digitado && Boolean(p?.pof),
+        nota: digitado ? 'valor digitado por você' : (p ? p.nota : 'sem fonte automática: digite o valor da sua casa'),
+        fonte: digitado ? 'Valor digitado por você' : (p?.fonte ?? 'Sem fonte automática'),
+      };
     });
     const res = c.orcamento(r, despesas);
 
     for (const d of res.itens) {
       const linha = linhas.get(d.id);
       if (reescreverCampos || !digitados.has(d.id)) linha.input.value = d.valor == null ? '' : String(d.valor);
-      linha.nota.textContent = d.nota;
-      linha.barra.style.width = `${Math.max(0, Math.min(100, d.parte ?? 0))}%`;
-      linha.parte.textContent = d.parte == null ? '' : `${f.porcentagem(d.parte, 0)} da renda`;
+      linha.nota.textContent = d.nota ?? '';
+      linha.nota.hidden = !d.nota;
+      linha.parte.textContent = d.parte == null ? '' : f.porcentagem(d.parte, 0);
     }
+    botaoRestaurar.hidden = !digitados.size;
 
-    const semValor = res.itens.filter((d) => d.valor == null).map((d) => d.nome.toLowerCase());
+    // Resposta: quem é a casa, quanto sobra ou falta e para quê.
     const pessoasTexto = `${adultos === 1 ? '1 adulto' : `${adultos} adultos`}${criancas ? ` e ${criancas === 1 ? '1 criança' : `${criancas} crianças`}` : ''}`;
-    const pessoas = `${adultos === 1 && !criancas ? 'Uma pessoa que mora sozinha' : `Uma casa com ${pessoasTexto}`}${local ? ` em ${local.nome}` : ''}`;
     const rendaTexto = selRenda.value === 'outro'
       ? `renda de ${f.moeda(r, 0)}`
-      : `renda de ${selRenda.selectedOptions[0].textContent.replace(/ \(.*\)$/, '')} (${f.moeda(r, 0)})`;
-    let resumo = r > 0
-      ? `${pessoas}, com ${rendaTexto}, gasta cerca de ${f.moeda(res.total, 0)} por mês com o básico da casa: ${f.porcentagem(res.parteTotal, 0)} da renda. `
-      : 'Informe a renda da casa. ';
+      : `renda de ${f.moeda(r, 0)} (${selRenda.selectedOptions[0].textContent.replace(/ \(.*\)$/, '')})`;
+    const caixa = campo('orc-resumo')[0];
+    caixa.replaceChildren();
+    el('p', 'orc-quem', `${pessoasTexto} · ${rendaTexto} · ${local ? local.nome : 'média do país'}`, caixa);
+    const semValor = res.itens.filter((d) => d.valor == null).map((d) => d.nome.toLowerCase());
     if (r > 0) {
-      resumo += res.sobra >= 0
-        ? `Sobram ${f.moeda(res.sobra, 0)} para transporte, saúde, roupas, escola e todo o resto.`
-        : `Faltam ${f.moeda(-res.sobra, 0)} só para o básico.`;
+      const falta = res.sobra < 0;
+      el('p', `orc-grande${falta ? ' orc-falta' : ''}`, `${falta ? 'Faltam' : 'Sobram'} ${f.moeda(Math.abs(res.sobra), 0)} por mês`, caixa);
+      el('p', 'orc-explica', falta
+        ? 'só para comida, aluguel, luz, água e gás, sem contar transporte, saúde, roupas e escola.'
+        : `depois de comida, aluguel, luz, água e gás (${f.porcentagem(res.parteTotal, 0)} da renda). É o que fica para transporte, saúde, roupas, escola e todo o resto.`, caixa);
+    } else {
+      el('p', 'orc-grande', 'Informe a renda da casa', caixa);
     }
-    if (semValor.length) resumo += ` A conta ainda não inclui ${listaDeAnos(semValor)}: digite esses valores abaixo para completar.`;
-    definirTopicos('orc-resumo', resumo);
+    if (semValor.length) el('p', 'orc-explica', `A conta ainda não inclui ${listaDeAnos(semValor)}: digite esses valores na lista abaixo.`, caixa);
+    desenharBarra(r, res);
+
+    definir('orc-renda-total', f.moeda(r, 0));
     definir('orc-total', f.moeda(res.total, 0));
+    definir('orc-total-parte', r > 0 ? f.porcentagem(res.parteTotal, 0) : '');
     definir('orc-sobra-rotulo', res.sobra >= 0 ? 'Sobra' : 'Falta');
     definir('orc-sobra', f.moeda(Math.abs(res.sobra), 0));
+    definir('orc-sobra-parte', r > 0 ? f.porcentagem((Math.abs(res.sobra) / r) * 100, 0) : '');
+    campo('orc-sobra').forEach((e) => e.classList.toggle('orc-falta', res.sobra < 0));
+    // Fonte comum de aluguel, luz, água e gás, quando vêm da POF.
+    const daPof = despesas.filter((d) => d.daPof).map((d) => d.nome.toLowerCase().replace('gás de cozinha', 'gás'));
+    const notaPof = $('.orc-fonte-curta');
+    notaPof.hidden = !daPof.length;
+    if (daPof.length) notaPof.textContent = `${comMaiuscula(listaDeAnos(daPof))}: média das famílias com a mesma renda${local ? ` no estado (${local.uf})` : ' no país'}, pela pesquisa de orçamentos do IBGE (2017-2018), corrigida pela inflação de cada conta.`;
 
     // Salário necessário do DIEESE: calculado para 2 adultos e 2 crianças
     // (3 adultos equivalentes). Para outra família, o mesmo método dá o valor
@@ -2255,19 +2336,21 @@ function montarOrcamento(ctx) {
     if (nec) {
       const smNec = c.ultimoValor(meses, s.salario_minimo.map((v, i) => (s.smn_dieese[i] == null ? null : v)));
       const necFamilia = (nec.valor * familia.unidades) / 3;
-      let texto = `Pelas contas do DIEESE, uma família de 2 adultos e 2 crianças precisaria de ${f.moeda(nec.valor, 0)} por mês, em ${f.mesLongo(nec.mes)}, para pagar comida, moradia, saúde, educação, roupas, higiene, transporte, lazer e previdência: ${f.numero(nec.valor / smNec.valor, 1)} salários mínimos. `;
-      if (familia.unidades !== 3) {
-        texto += `Pelo mesmo método, para ${pessoasTexto}, o valor seria ${f.moeda(necFamilia, 0)} (${f.numero(necFamilia / smNec.valor, 1)} salários mínimos). `;
-      }
-      if (r > 0) texto += `A renda escolhida cobre ${f.porcentagem((r / necFamilia) * 100, 0)} desse valor.`;
-      definirTopicos('orc-digno', texto);
+      const cobre = r > 0 ? (r / necFamilia) * 100 : null;
+      const caixaNec = campo('orc-digno')[0];
+      caixaNec.replaceChildren();
+      el('p', null, `Para ${pessoasTexto}, ${f.moeda(necFamilia, 0)} por mês (${f.numero(necFamilia / smNec.valor, 1)} salários mínimos, ${f.mesCurto(nec.mes)}), contando também transporte, saúde, educação, roupas, higiene, lazer e previdência.${cobre == null ? '' : ` A renda escolhida cobre ${f.porcentagem(cobre, 0)} disso.`}`, caixaNec);
+      $('#orc-cobre-barra').style.width = `${Math.max(1, Math.min(100, cobre ?? 0))}%`;
+      definir('orc-dieese-familia', familia.unidades === 3
+        ? `Em ${f.mesLongo(nec.mes)}, o DIEESE calculou ${f.moeda(nec.valor, 0)} para 2 adultos e 2 crianças.`
+        : `Em ${f.mesLongo(nec.mes)}, o DIEESE calculou ${f.moeda(nec.valor, 0)} para 2 adultos e 2 crianças (${f.numero(nec.valor / smNec.valor, 1)} salários mínimos). Para ${pessoasTexto}, o site aplica a mesma conta ao número de pessoas, com cada criança valendo meio adulto.`);
     }
 
     registrarDownload('orcamento', () => ({
       nome: 'orcamento-da-familia.csv',
       cabecalhos: ['item', 'valor (R$)', 'parte da renda (%)', 'origem do valor'],
       linhas: [['renda', arred(r, 2), 100, selRenda.value === 'outro' ? 'digitado' : `${selRenda.value} salário(s) mínimo(s)`],
-        ...res.itens.map((d) => [d.nome, d.valor, arred(d.parte, 1), d.nota])],
+        ...res.itens.map((d) => [d.nome, d.valor, arred(d.parte, 1), d.fonte])],
     }));
   };
 
@@ -2276,7 +2359,7 @@ function montarOrcamento(ctx) {
   selAdultos.addEventListener('change', () => calcular(false));
   selCriancas.addEventListener('change', () => calcular(false));
   aoMudarCidade(() => calcular(false));
-  $('#orc-restaurar').addEventListener('click', () => { digitados.clear(); calcular(true); });
+  botaoRestaurar.addEventListener('click', () => { digitados.clear(); calcular(true); });
   calcular(true);
 }
 

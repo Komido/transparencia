@@ -21,6 +21,7 @@
   --foco: #1a56a0;
   --serie-1: #2a6fc9;
   --serie-2: #c8561c;
+  --serie-3: #7a4fb5;
   --aviso: #8a5300;
   --aviso-fundo: #fbf3e2;
   --bom: #1b6f37;
@@ -62,7 +63,8 @@
     --link: #8dbbf2;
     --foco: #8dbbf2;
     --serie-1: #4b93ea;
-    --serie-2: #e2753f;
+    --serie-2: #dc6d33;
+    --serie-3: #9b7dd8;
     --aviso: #f5b13a;
     --aviso-fundo: #2a2416;
     --bom: #63c483;
@@ -86,7 +88,8 @@
   --link: #8dbbf2;
   --foco: #8dbbf2;
   --serie-1: #4b93ea;
-  --serie-2: #e2753f;
+  --serie-2: #dc6d33;
+  --serie-3: #9b7dd8;
   --aviso: #f5b13a;
   --aviso-fundo: #2a2416;
   --bom: #63c483;
@@ -880,18 +883,60 @@ td.num .detalhe { white-space: normal; }
 
 /* Orçamento da família --------------------------------------------------- */
 
-.orc-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; gap: 14px; }
-.orc-item { display: grid; gap: var(--e-1); min-width: 0; }
-.orc-topo { display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); }
-.orc-nome { font-weight: 600; }
-.orc-campo { display: flex; align-items: center; gap: 6px; color: var(--tinta-2); }
-.orc-campo input { width: 7.5rem; text-align: right; }
-.orc-nota { margin: 0; font-size: var(--fs-1); color: var(--tinta-2); }
-.orc-parte { margin: 0; font-size: var(--fs-1); color: var(--tinta-2); font-variant-numeric: tabular-nums; }
-.orc-referencia { font-size: var(--fs-1); }
-.orc-referencia select { width: 100%; }
-.orc-totais { margin-top: var(--e-1); }
-#orc-restaurar { margin-bottom: var(--e-2); }
+/* Resposta do orçamento: quem é a casa, quanto sobra e a barra da renda. */
+.orc-resumo { margin-bottom: var(--e-3); }
+.orc-quem { margin: 0 0 var(--e-1); font-size: var(--fs-2); color: var(--tinta-2); }
+.orc-grande { margin: 0; font-size: var(--fs-6); font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.orc-explica { margin: var(--e-1) 0 0; color: var(--tinta-2); }
+.orc-falta { color: var(--ruim); }
+.orc-barra { position: relative; display: flex; gap: 2px; height: 22px; margin: var(--e-3) 0 var(--e-2); }
+.orc-seg { flex-basis: 0; min-width: 3px; }
+.orc-seg:first-child { border-radius: 4px 0 0 4px; }
+.orc-seg:last-child { border-radius: 0 4px 4px 0; }
+.orc-seg-comida, .orc-comida .orc-cor, .orc-leg-comida .orc-leg-cor { background: var(--serie-1); }
+.orc-seg-aluguel, .orc-aluguel .orc-cor, .orc-leg-aluguel .orc-leg-cor { background: var(--serie-2); }
+.orc-seg-contas, .orc-contas .orc-cor, .orc-leg-contas .orc-leg-cor { background: var(--serie-3); }
+.orc-seg-sobra, .orc-leg-sobra .orc-leg-cor { background: var(--trilho); }
+.orc-leg-sobra .orc-leg-cor { border: 1px solid var(--borda-controle); }
+.orc-marca { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--tinta); }
+.orc-leg-marca .orc-leg-cor { width: 2px; height: 14px; border-radius: 0; background: var(--tinta); }
+.orc-legenda { list-style: none; display: flex; flex-wrap: wrap; gap: var(--e-1) var(--e-4); margin: 0 0 var(--e-4); padding: 0; font-size: var(--fs-2); color: var(--tinta-2); }
+.orc-leg { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.orc-leg-cor { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+/* Lista do básico da casa: cor, nome, valor editável e parte da renda. */
+.orc-lista { list-style: none; margin: var(--e-2) 0 0; padding: 0; }
+.orc-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto 2.75rem;
+  align-items: center;
+  column-gap: var(--e-2);
+  row-gap: var(--e-2);
+  padding: var(--e-2) 0;
+  border-top: 1px solid var(--borda);
+}
+.orc-item:first-child { border-top: 0; }
+.orc-cor { width: 10px; height: 10px; border-radius: 3px; align-self: start; margin-top: 0.55em; }
+.orc-texto { display: flex; flex-direction: column; min-width: 0; }
+.orc-nome { font-weight: 600; line-height: 1.35; }
+.orc-nota { font-size: var(--fs-1); color: var(--tinta-2); line-height: 1.35; }
+.orc-campo { display: flex; align-items: center; gap: 4px; color: var(--tinta-2); }
+.orc-campo input { width: 6.25rem; text-align: right; }
+.orc-parte { text-align: right; font-size: var(--fs-2); color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.orc-referencia { grid-column: 2 / -1; width: 100%; }
+.orc-referencia span { font-size: var(--fs-2); }
+/* A conta: renda menos o básico dá a sobra. */
+.orc-conta { margin: var(--e-2) 0 var(--e-2); padding-top: var(--e-2); border-top: 2px solid var(--tinta); }
+.orc-conta div { display: grid; grid-template-columns: minmax(0, 1fr) auto 2.75rem; column-gap: var(--e-2); align-items: baseline; padding: 2px 0; }
+.orc-conta dt { color: var(--tinta-2); }
+.orc-conta dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.orc-conta dd + dd { font-size: var(--fs-2); color: var(--tinta-2); }
+.orc-conta-fim dt, .orc-conta-fim dd:first-of-type { font-weight: 700; color: var(--tinta); font-size: var(--fs-4); }
+.orc-conta-fim dd.orc-falta { color: var(--ruim); }
+.orc-fonte-curta { margin-top: var(--e-1); }
+#orc-restaurar { margin: var(--e-1) 0 var(--e-2); }
+.orc-cobre { margin: var(--e-2) 0 var(--e-4); }
+.orc-cobre .comp-barra { background: var(--serie-1); border-radius: 0 5px 5px 0; }
 
 /* Avisos ----------------------------------------------------------------- */
 
