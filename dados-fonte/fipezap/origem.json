@@ -1,6 +1,6 @@
 {
-  "fonte": "Fipe, Índice FipeZAP, locação residencial, preço médio (R$/m²), média das cidades acompanhadas",
-  "convertido_em": "2026-11-15T16:41:06Z",
+  "fonte": "Fipe, Índice FipeZAP, locação residencial, preço médio (R$/m²), média das cidades e cada cidade",
+  "convertido_em": "2026-11-15T17:04:54Z",
   "arquivos": [
     {
       "url": "https://downloads.fipe.org.br/indices/fipezap/fipezap-serieshistoricas.xlsx",
