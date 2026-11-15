@@ -2,7 +2,7 @@ import * as c from './calculos.js';
 import * as f from './formato.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -860,6 +860,203 @@ function montarEstados(ctx) {
       limiteDivida, ind(uf, 'pessoal', k), ind(uf, 'pessoal_rcl_pct', k), ind(uf, 'pessoal_limite_pct', k),
       ind(uf, 'pessoal_prudencial_pct', k), ind(uf, 'pessoal_alerta_pct', k)])),
   }));
+}
+
+// ---------------------------------------------------------------------------
+// Cota parlamentar (deputados e senadores)
+// ---------------------------------------------------------------------------
+
+const NOMES_CASA = {
+  camara: { titulo: 'Câmara', plural: 'deputados', singular: 'deputado', rotulo: 'Deputado', daCasa: 'da Câmara' },
+  senado: { titulo: 'Senado', plural: 'senadores', singular: 'senador', rotulo: 'Senador', daCasa: 'do Senado' },
+};
+
+function barrasDeGrupos(lista, grupos, valores) {
+  lista.replaceChildren();
+  const total = valores.reduce((a, v) => a + v, 0);
+  const itens = grupos.map((g, k) => ({ nome: g.nome, valor: valores[k] })).filter((g) => g.valor > 0).sort((a, b) => b.valor - a.valor);
+  const maior = itens[0]?.valor ?? 1;
+  for (const g of itens) {
+    const li = el('li', null, null, lista);
+    const topo = el('div', 'barra-topo', null, li);
+    el('span', 'barra-nome', g.nome, topo);
+    const pct = total > 0 ? (g.valor / total) * 100 : 0;
+    el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.valor)}`, topo);
+    const trilho = el('div', 'barra-trilho', null, li);
+    trilho.setAttribute('aria-hidden', 'true');
+    el('div', 'barra', null, trilho).style.width = `${Math.max(1, (g.valor / maior) * 100)}%`;
+  }
+}
+
+const rotuloParlamentar = (p) => {
+  const extra = [p.partido, p.uf].filter(Boolean).join('-');
+  return extra ? `${p.nome} (${extra})` : p.nome;
+};
+
+async function montarCota(ctx) {
+  const secao = $('#cota');
+  let indice;
+  try {
+    indice = await carregarIndiceCota();
+  } catch (erro) {
+    console.error(erro);
+    secao.hidden = true;
+    return;
+  }
+  definir('cota-atualizado', f.dataCurta(indice.atualizado_em));
+  const nomesUf = new Map((ctx.d.estados_fiscal?.estados ?? []).map((e) => [e.sigla, e.nome]));
+  const nomeUf = (uf) => nomesUf.get(uf) ?? uf;
+  const cache = new Map();
+
+  // Ano: começa no último ano fechado; o ano corrente fica disponível.
+  const anos = [...indice.anos].sort((a, b) => b - a);
+  const selAno = $('#cota-ano');
+  selAno.replaceChildren();
+  anos.forEach((ano) => { el('option', null, String(ano), selAno).value = String(ano); });
+  const anoAtual = new Date().getFullYear();
+  selAno.value = String(anos.find((a) => a < anoAtual) ?? anos[0]);
+
+  const selUf = $('#cota-uf');
+  selUf.replaceChildren();
+  el('option', null, 'Todos os estados', selUf).value = '';
+  [...nomesUf.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'))
+    .forEach(([sigla, nome]) => { el('option', null, nome, selUf).value = sigla; });
+  if (cidade.dados?.uf && nomesUf.has(cidade.dados.uf)) selUf.value = cidade.dados.uf;
+
+  const selParl = $('#cota-parlamentar');
+  let atual = null;
+
+  const desenharParlamentar = () => {
+    if (!atual) return;
+    const { d, casaId, ano } = atual;
+    const casa = d[casaId];
+    const nomes = NOMES_CASA[casaId];
+    const p = casa.parlamentares.find((x) => x.id === selParl.value);
+    if (!p) {
+      definirItens('cota-parlamentar-resumo', []);
+      $('#cota-parlamentar-grupos').replaceChildren();
+      return;
+    }
+    const itens = [{
+      rotulo: p.nome,
+      texto: `gastou ${f.reaisPorExtenso(p.total)} da cota em ${ano}, com despesas em ${p.meses === 1 ? '1 mês' : `${p.meses} meses`}`
+        + (p.meses ? `, média de ${f.moeda(p.total / p.meses, 0)} por mês.` : '.'),
+    }];
+    const mesmos = p.uf ? casa.parlamentares.filter((x) => x.uf === p.uf) : [];
+    if (mesmos.length > 1) {
+      const media = mesmos.reduce((a, x) => a + x.total, 0) / mesmos.length;
+      const v = t.variacao((p.total / media - 1) * 100, 0);
+      itens.push({ rotulo: null, texto: `A média dos ${nomes.plural} ${t.doEstado(p.uf, nomeUf(p.uf))} foi ${f.moeda(media, 0)}${v ? `; ${p.nome} gastou ${v === 'praticamente o mesmo valor' ? v : `${v} que a média`}` : ''}.` });
+    }
+    definirItens('cota-parlamentar-resumo', itens);
+    barrasDeGrupos($('#cota-parlamentar-grupos'), d.grupos, p.grupos);
+  };
+
+  const desenharAno = (d, ano) => {
+    const casaId = valorRadio('cota-casa') ?? 'camara';
+    const casa = d[casaId];
+    const nomes = NOMES_CASA[casaId];
+    const uf = selUf.value || null;
+    const todos = casa.parlamentares;
+    const recorte = uf ? todos.filter((p) => p.uf === uf) : todos;
+    const soma = (lista) => lista.reduce((a, p) => a + p.total, 0);
+    const mediaCasa = todos.length ? soma(todos) / todos.length : null;
+    const ateMes = d.ate_mes?.[casaId];
+
+    // Resumo.
+    const itens = [];
+    if (ateMes && ateMes < 12) {
+      itens.push({ rotulo: 'Ano em curso', texto: `os dados vão até ${f.mesLongo(`${ano}-${String(ateMes).padStart(2, '0')}`)}.` });
+    }
+    if (recorte.length) {
+      const total = soma(recorte);
+      itens.push(uf
+        ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${recorte.length === 1 ? `1 ${nomes.singular} do estado usou` : `${recorte.length} ${nomes.plural} do estado usaram`} a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(total / recorte.length, 0)} por ${nomes.singular}. A média ${nomes.daCasa} foi ${f.moeda(mediaCasa, 0)}.` }
+        : { rotulo: nomes.titulo, texto: `em ${ano}, ${todos.length} ${nomes.plural} usaram a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(mediaCasa, 0)} por ${nomes.singular}.` });
+      const porGrupo = d.grupos.map((g, k) => ({ nome: g.nome.toLowerCase(), v: recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0) }))
+        .filter((g) => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 3);
+      if (porGrupo.length) itens.push({ rotulo: 'O que mais pesou', texto: `${listaDeAnos(porGrupo.map((g) => `${g.nome} (${f.porcentagem((g.v / total) * 100, 0)})`))}.` });
+      barrasDeGrupos($('#cota-grupos'), d.grupos, d.grupos.map((_, k) => recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0)));
+    } else {
+      itens.push({ rotulo: null, texto: `Nenhum ${nomes.singular} ${uf ? t.doEstado(uf, nomeUf(uf)) : ''} usou a cota em ${ano}.` });
+      $('#cota-grupos').replaceChildren();
+    }
+    definirItens('cota-resumo', itens);
+
+    // Parlamentar: lista do recorte, em ordem alfabética.
+    definir('cota-rotulo-parlamentar', nomes.rotulo);
+    const anterior = selParl.value;
+    selParl.replaceChildren();
+    recorte.forEach((p) => { el('option', null, rotuloParlamentar(p), selParl).value = p.id; });
+    selParl.value = recorte.some((p) => p.id === anterior) ? anterior : (recorte[0]?.id ?? '');
+    atual = { d, casaId, ano };
+    desenharParlamentar();
+
+    // Quem não usou.
+    const sem = casa.sem_gasto;
+    if (sem == null) {
+      definirItens('cota-sem-gasto', [{ rotulo: null, texto: casaId === 'senado'
+        ? 'No Senado, essa lista só existe para o ano corrente: a lista oficial de senadores não traz as datas em que cada um esteve no cargo.'
+        : 'Sem lista para esse ano.' }]);
+    } else {
+      const doRecorte = uf ? sem.filter((p) => p.uf === uf) : sem;
+      const onde = uf ? ` ${t.doEstado(uf, nomeUf(uf))}` : '';
+      definirItens('cota-sem-gasto', doRecorte.length
+        ? [
+          { rotulo: null, texto: `Em ${ano}, ${doRecorte.length === 1 ? `1 ${nomes.singular}` : `${doRecorte.length} ${nomes.plural}`}${onde} em exercício não ${doRecorte.length === 1 ? 'teve' : 'tiveram'} nenhum gasto da cota: ${listaDeAnos(doRecorte.map(rotuloParlamentar))}.` },
+          { rotulo: null, texto: 'A lista inclui quem ficou pouco tempo no cargo, como suplentes que assumiram por poucos dias. Não ter gasto também não prova que a pessoa recusou a cota de forma declarada.' },
+        ]
+        : [{ rotulo: null, texto: `Em ${ano}, todos os ${nomes.plural}${onde} em exercício usaram a cota.` }]);
+    }
+
+    // Por estado, em ordem alfabética.
+    const porUf = new Map();
+    for (const p of todos) {
+      if (!p.uf) continue;
+      const x = porUf.get(p.uf) ?? { n: 0, total: 0 };
+      x.n += 1;
+      x.total += p.total;
+      porUf.set(p.uf, x);
+    }
+    const linhas = [...porUf.entries()].sort((a, b) => nomeUf(a[0]).localeCompare(nomeUf(b[0]), 'pt-BR'))
+      .map(([sigla, x]) => [nomeUf(sigla), String(x.n), f.reaisCompacto(x.total), f.moeda(x.total / x.n, 0)]);
+    preencherTabela($('#tabela-cota-estados'),
+      ['Estado', `${nomes.titulo === 'Câmara' ? 'Deputados' : 'Senadores'} com gasto`, 'Total', `Média por ${nomes.singular}`],
+      linhas,
+      `${nomes.titulo}, ${ano}. Cada estado tem um limite diferente; compare a média do estado com a dos outros parlamentares dele.`);
+  };
+
+  const desenhar = async () => {
+    const ano = Number(selAno.value);
+    let d = cache.get(ano);
+    if (!d) {
+      try {
+        d = await carregarCotaAno(ano);
+        cache.set(ano, d);
+      } catch (erro) {
+        console.error(erro);
+        definirItens('cota-resumo', [{ rotulo: null, texto: 'Não foi possível carregar os dados desse ano agora. Tente de novo em instantes.' }]);
+        return;
+      }
+    }
+    if (Number(selAno.value) !== ano) return;
+    desenharAno(d, ano);
+  };
+  selAno.addEventListener('change', desenhar);
+  selUf.addEventListener('change', desenhar);
+  document.querySelectorAll('input[name="cota-casa"]').forEach((r) => r.addEventListener('change', desenhar));
+  selParl.addEventListener('change', desenharParlamentar);
+  await desenhar();
+
+  registrarDownload('cota', () => {
+    const { d, casaId, ano } = atual ?? {};
+    if (!d) return { nome: 'cota-parlamentar.csv', cabecalhos: [], linhas: [] };
+    return {
+      nome: `cota-parlamentar-${casaId}-${ano}.csv`,
+      cabecalhos: ['nome', 'partido', 'UF', 'total reembolsado (R$)', 'meses com despesa', ...d.grupos.map((g) => `${g.nome} (R$)`)],
+      linhas: d[casaId].parlamentares.map((p) => [p.nome, p.partido ?? '', p.uf ?? '', p.total, p.meses, ...p.grupos]),
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2126,7 +2323,7 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarComposicaoEstados, montarGastos, montarContas, montarEstados, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarComposicaoEstados, montarGastos, montarContas, montarEstados, montarCota, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

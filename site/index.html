@@ -67,6 +67,7 @@
       <a href="#gastos">Para onde vai</a>
       <a href="#contas">Contas públicas</a>
       <a href="#estados">Estados</a>
+      <a href="#cota">Cota parlamentar</a>
       <a href="#dolar">Dólar</a>
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
@@ -441,6 +442,51 @@
       <p class="nota">Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
       <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
       <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
+    </section>
+
+    <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">
+      <header>
+        <h2 id="cota-titulo">Quanto deputados e senadores gastam da cota?</h2>
+      </header>
+      <p class="nota">A cota parlamentar paga despesas do mandato: passagens, escritório no estado, combustível, divulgação e outras. O parlamentar gasta e pede o reembolso. Usar a cota dentro do limite é permitido por lei. O limite muda de estado para estado, por causa da distância até Brasília.</p>
+      <div class="controles controles-coluna">
+        <fieldset class="segmentos">
+          <legend>Casa</legend>
+          <label><input type="radio" name="cota-casa" value="camara" checked><span>Câmara</span></label>
+          <label><input type="radio" name="cota-casa" value="senado"><span>Senado</span></label>
+        </fieldset>
+        <label class="seletor">Ano
+          <select id="cota-ano"></select>
+        </label>
+        <label class="seletor seletor-bloco seletor-largo">Estado
+          <select id="cota-uf"></select>
+        </label>
+      </div>
+      <div class="resumo" data-campo="cota-resumo"></div>
+      <h3>Com o que o dinheiro foi gasto</h3>
+      <ul class="barras" id="cota-grupos"></ul>
+
+      <h3>Por parlamentar</h3>
+      <div class="controles controles-coluna">
+        <label class="seletor seletor-bloco seletor-largo"><span data-campo="cota-rotulo-parlamentar">Deputado</span>
+          <select id="cota-parlamentar"></select>
+        </label>
+      </div>
+      <div class="resumo" data-campo="cota-parlamentar-resumo"></div>
+      <ul class="barras" id="cota-parlamentar-grupos"></ul>
+
+      <h3>Quem não usou a cota no ano</h3>
+      <div class="resumo" data-campo="cota-sem-gasto"></div>
+
+      <h3>Por estado</h3>
+      <div class="tabela-rolagem"><table id="tabela-cota-estados"></table></div>
+      <details class="glossario">
+        <summary>Como ler esses números?</summary>
+        <p>O valor é o que foi reembolsado, já descontadas as passagens devolvidas. A comparação justa é com a média dos parlamentares do mesmo estado, que têm o mesmo limite. Quem ficou só parte do ano no cargo, como um suplente, gasta menos por isso; o número de meses com despesa ajuda a ver esse caso.</p>
+        <p>Gasto alto não quer dizer irregularidade, e gasto baixo não quer dizer mais trabalho. Os números mostram quanto foi usado, não se o uso foi bom.</p>
+      </details>
+      <button type="button" class="botao" data-baixar="cota">Baixar planilha com os dados</button>
+      <p class="fonte">Fontes: Câmara dos Deputados (Cota para o Exercício da Atividade Parlamentar, arquivo anual, e lista de deputados em exercício da API de Dados Abertos) e Senado Federal (Cota para o Exercício da Atividade Parlamentar dos Senadores, arquivo anual, e lista de senadores dos Dados Abertos). Atualizado uma vez por dia. Atualização: <span data-campo="cota-atualizado">n/d</span>.</p>
     </section>
 
     <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">

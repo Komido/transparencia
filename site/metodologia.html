@@ -217,6 +217,17 @@
         <li><strong>Total de tributos do país:</strong> a carga tributária bruta do mesmo boletim, que soma União, estados e municípios. Não inclui o FGTS nem o Sistema S, que o Tesouro deixa de fora por não serem tributos.</li>
       </ul>
 
+      <h2 id="cota">Cota parlamentar</h2>
+      <ul>
+        <li><strong>Fontes:</strong> Câmara dos Deputados, arquivo anual da Cota para o Exercício da Atividade Parlamentar (camara.leg.br/cotas/Ano-AAAA.csv.zip), e Senado Federal, arquivo anual da cota dos senadores (senado.leg.br/transparencia/LAI/verba/despesa_ceaps_AAAA.csv), desde 2019. Uma tarefa diária baixa os arquivos do ano corrente e do anterior, e aos domingos todos os anos, para pegar correções. Ela confere colunas, valores e totais e grava só as somas; o SHA-256 de cada original fica registrado. Se algo não bater, nada é gravado e o site continua com a versão anterior.</li>
+        <li><strong>Valor:</strong> o líquido reembolsado (vlrLiquido na Câmara, VALOR_REEMBOLSADO no Senado). Passagens devolvidas entram com sinal negativo, como no arquivo. Despesas das lideranças de partido na Câmara, que não são de um deputado, ficam fora das somas por parlamentar.</li>
+        <li><strong>Tipos de despesa:</strong> as duas Casas usam nomes diferentes. Cada tipo entra num grupo comum pelas palavras do nome: passagens; divulgação do mandato; consultorias e pesquisas; segurança; escritório (aluguel, contas e material); telefone e correio; carro, combustível, hospedagem e alimentação; outros. O Senado junta locomoção, hospedagem, alimentação e combustível num tipo só, por isso esses itens formam um grupo único também na Câmara.</li>
+        <li><strong>Estado e partido:</strong> na Câmara, os do próprio arquivo (o partido do último mês com despesa no ano). No Senado, o arquivo traz só o nome; estado e partido vêm da lista oficial de senadores das legislaturas desde 2019, pelo nome.</li>
+        <li><strong>Quem não usou a cota:</strong> na Câmara, deputados que estiveram em exercício em algum momento do ano, pela API de Dados Abertos da Câmara, e que não aparecem no arquivo da cota. A lista inclui suplentes que ficaram poucos dias no cargo. No Senado, a lista oficial não traz as datas de exercício, então a comparação só é feita no ano corrente, com os senadores atuais.</li>
+        <li><strong>Comparações:</strong> cada estado tem um limite mensal diferente, por causa das passagens até Brasília. O site compara cada parlamentar com a média dos parlamentares do mesmo estado e não ordena ninguém do maior para o menor gasto. Nos anos de troca de legislatura (2019 e 2023), quem saiu em janeiro e quem entrou em fevereiro aparecem no mesmo ano.</li>
+        <li><strong>Fora do site:</strong> salário, auxílio-moradia, apartamento funcional e a verba para pagar funcionários do gabinete não fazem parte da cota e não estão aqui. Doação ou recusa de salário declarada por um parlamentar, em geral, não aparece em dado oficial que permita conferir.</li>
+      </ul>
+
       <h2 id="cidades">Números por capital</h2>
       <p>No orçamento da família e na seção "O que o salário compra", a pessoa pode escolher uma das 27 capitais. A escolha fica guardada só no navegador dela.</p>
       <ul>

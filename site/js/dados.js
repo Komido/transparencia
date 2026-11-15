@@ -96,3 +96,40 @@ export async function carregarCidade(codigo, n) {
   if (!resposta.ok) throw new Error(`Falha ao carregar a cidade (HTTP ${resposta.status})`);
   return validarCidade(await resposta.json(), codigo, n);
 }
+
+// Cota parlamentar: resumo por ano gerado por scripts/cota_para_json.py.
+export async function carregarIndiceCota() {
+  const resposta = await fetch('dados/cota/indice.json', { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar a cota parlamentar (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2000 && a <= 2100)) {
+    falhar('índice da cota parlamentar');
+  }
+  return d;
+}
+
+function validarCasa(casa, nGrupos, nome) {
+  if (!casa || typeof casa !== 'object' || !Array.isArray(casa.parlamentares)) falhar(`cota: ${nome}`);
+  if (!ehNumeroOuNulo(casa.total)) falhar(`cota: total de ${nome}`);
+  for (const p of casa.parlamentares) {
+    if (!p || !ehTexto(p.id) || !ehTexto(p.nome) || !(p.uf === null || /^[A-Z]{2}$/.test(p.uf))
+      || !ehNumeroOuNulo(p.total) || !Number.isInteger(p.meses)
+      || !Array.isArray(p.grupos) || p.grupos.length !== nGrupos || !p.grupos.every(ehNumeroOuNulo)) {
+      falhar(`cota: parlamentar de ${nome}`);
+    }
+  }
+  if (casa.sem_gasto != null) {
+    if (!Array.isArray(casa.sem_gasto) || !casa.sem_gasto.every((p) => p && ehTexto(p.nome))) falhar(`cota: sem gasto de ${nome}`);
+  }
+}
+
+export async function carregarCotaAno(ano) {
+  if (!Number.isInteger(ano)) falhar('ano da cota');
+  const resposta = await fetch(`dados/cota/${ano}.json`, { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar a cota de ${ano} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.ano !== ano || !Array.isArray(d.grupos) || !d.grupos.every((g) => g && ehTexto(g.id) && ehTexto(g.nome))) falhar('cota do ano');
+  validarCasa(d.camara, d.grupos.length, 'Câmara');
+  validarCasa(d.senado, d.grupos.length, 'Senado');
+  return d;
+}
