@@ -9,6 +9,11 @@ name: Resumir o Portal da Transparência (cartão, despesa e viagens)
 #
 # Toda segunda-feira: ano corrente e anterior. No dia 2 de cada mês e quando
 # rodada à mão: todos os anos, para pegar correções feitas depois.
+#
+# Uma parte por vez (viagens, cartão, ministérios), cada uma com seu tempo e
+# gravando o próprio resultado: se uma falhar ou passar do tempo, as outras
+# não se perdem. As partes rodam em sequência para respeitar o limite de
+# pedidos do Portal.
 
 on:
   schedule:
@@ -27,22 +32,33 @@ jobs:
   resumir:
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        base: [viagens, cartao, ministerios]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Pegar o que a parte anterior gravou
+        run: git pull --rebase --quiet
 
       - name: Resumir
         env:
           AGENDA: ${{ github.event.schedule }}
+          BASE: ${{ matrix.base }}
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
           if [ "${AGENDA:-}" = "23 9 * * 1" ]; then
-            python3 scripts/portal_para_json.py --recentes
+            python3 scripts/portal_para_json.py --recentes --so "$BASE"
           else
-            python3 scripts/portal_para_json.py
+            python3 scripts/portal_para_json.py --so "$BASE"
           fi
 
       - name: Gravar se mudou
+        env:
+          BASE: ${{ matrix.base }}
         run: |
           set -euo pipefail
           if git diff --quiet -- site/dados/portal dados-fonte/portal \
@@ -53,6 +69,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site/dados/portal dados-fonte/portal
-          git commit -m "Atualiza resumo do Portal da Transparência"
-          git pull --rebase --quiet
-          git push
+          git commit -m "Atualiza resumo do Portal da Transparência ($BASE)"
+          for k in 1 2 3 4; do
+            git pull --rebase --quiet && git push && exit 0
+            sleep $((k * 10))
+          done
+          exit 1
