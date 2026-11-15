@@ -2,11 +2,16 @@
 """Converte as médias mensais de preços de combustíveis da ANP (Excel) em CSV.
 
 Fonte: Levantamento de Preços de Combustíveis (LPC) da Agência Nacional do
-Petróleo, Gás Natural e Biocombustíveis, médias mensais para o Brasil.
+Petróleo, Gás Natural e Biocombustíveis, médias mensais para o Brasil e para
+cada estado.
 
 Saída:
-  dados-fonte/anp/precos-mensais-brasil.csv  (mes, produto, unidade, preco_medio_revenda, postos_pesquisados)
-  dados-fonte/anp/origem.json                (URL, tamanho e SHA-256 de cada arquivo original)
+  dados-fonte/anp/precos-mensais-brasil.csv   (mes, produto, unidade, preco_medio_revenda, postos_pesquisados)
+  dados-fonte/anp/precos-mensais-estados.csv  (mes, uf, produto, unidade, preco_medio_revenda, postos_pesquisados)
+  dados-fonte/anp/origem.json                 (URL, tamanho e SHA-256 de cada arquivo original)
+
+O nome do estado na planilha é trocado pela sigla (lista fixa das 27 UFs);
+nome desconhecido faz o script falhar.
 
 O script não interpreta nem corrige valores: só copia as colunas da planilha.
 Se o layout mudar (cabeçalho não encontrado, mês ou preço inválido), ele falha
@@ -31,6 +36,18 @@ ARQUIVOS = [
     f"{BASE}/2001-2012/mensal-brasil-2001-a-2012.xlsx",
     f"{BASE}/mensal/mensal-brasil-desde-jan2013.xlsx",
 ]
+ARQUIVOS_ESTADOS = [
+    f"{BASE}/2001-2012/mensal-estados-2001-a-2012.xlsx",
+    f"{BASE}/mensal/mensal-estados-desde-jan2013.xlsx",
+]
+UFS = {
+    "ACRE": "AC", "ALAGOAS": "AL", "AMAPA": "AP", "AMAZONAS": "AM", "BAHIA": "BA", "CEARA": "CE",
+    "DISTRITO FEDERAL": "DF", "ESPIRITO SANTO": "ES", "GOIAS": "GO", "MARANHAO": "MA",
+    "MATO GROSSO": "MT", "MATO GROSSO DO SUL": "MS", "MINAS GERAIS": "MG", "PARA": "PA",
+    "PARAIBA": "PB", "PARANA": "PR", "PERNAMBUCO": "PE", "PIAUI": "PI", "RIO DE JANEIRO": "RJ",
+    "RIO GRANDE DO NORTE": "RN", "RIO GRANDE DO SUL": "RS", "RONDONIA": "RO", "RORAIMA": "RR",
+    "SANTA CATARINA": "SC", "SAO PAULO": "SP", "SERGIPE": "SE", "TOCANTINS": "TO",
+}
 DESTINO = "dados-fonte/anp"
 PRODUTOS_ESPERADOS = {"GASOLINA COMUM", "ETANOL HIDRATADO", "OLEO DIESEL", "GLP"}
 MESES = {"JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
@@ -85,7 +102,7 @@ def mostrar_estrutura(planilha, linhas):
             print(f"    {i:>3}: {' | '.join(celulas)}")
 
 
-def ler(conteudo, url):
+def ler(conteudo, url, com_estado=False):
     livro = load_workbook(io.BytesIO(conteudo), read_only=True, data_only=True)
     registros = []
     for planilha in livro.worksheets:
@@ -94,7 +111,8 @@ def ler(conteudo, url):
         cabecalho = None
         for i, linha in enumerate(linhas[:80]):
             norm = [normalizar(c) for c in linha]
-            if "PRODUTO" in norm and any(c in ("MES", "DATA") for c in norm) and "PRECO MEDIO REVENDA" in norm:
+            if ("PRODUTO" in norm and any(c in ("MES", "DATA") for c in norm) and "PRECO MEDIO REVENDA" in norm
+                    and (not com_estado or "ESTADO" in norm)):
                 cabecalho = (i, norm)
                 break
         if not cabecalho:
@@ -105,6 +123,7 @@ def ler(conteudo, url):
         i_preco = norm.index("PRECO MEDIO REVENDA")
         i_unid = next((k for k, c in enumerate(norm) if c.startswith("UNIDADE")), None)
         i_postos = next((k for k, c in enumerate(norm) if "POSTOS" in c), None)
+        i_estado = norm.index("ESTADO") if com_estado else None
         print(f"  cabeçalho na linha {inicio}: mês={i_mes} produto={i_prod} preço={i_preco} unidade={i_unid} postos={i_postos}")
         for linha in linhas[inicio + 1:]:
             if all(c is None for c in linha):
@@ -117,7 +136,14 @@ def ler(conteudo, url):
             if preco is None or preco <= 0:
                 # A ANP deixa em branco produtos não pesquisados naquele mês.
                 continue
+            uf = None
+            if com_estado:
+                nome_estado = normalizar(linha[i_estado])
+                uf = UFS.get(nome_estado)
+                if uf is None:
+                    raise SystemExit(f"Estado desconhecido em {url}: '{linha[i_estado]}'")
             registros.append({
+                **({"uf": uf} if com_estado else {}),
                 "mes": mes,
                 "produto": produto,
                 "unidade": normalizar(linha[i_unid]) if i_unid is not None else "",
@@ -129,19 +155,17 @@ def ler(conteudo, url):
     return registros
 
 
-def main():
+def juntar(arquivos, com_estado, origem):
     todos = {}
-    origem = []
-    for url in ARQUIVOS:
+    for url in arquivos:
         print(f"Baixando {url}")
         conteudo = baixar(url)
         origem.append({"url": url, "bytes": len(conteudo), "sha256": hashlib.sha256(conteudo).hexdigest()})
-        for r in ler(conteudo, url):
-            chave = (r["mes"], r["produto"])
+        for r in ler(conteudo, url, com_estado):
+            chave = (r.get("uf", ""), r["mes"], r["produto"])
             if chave in todos and todos[chave]["preco_medio_revenda"] != r["preco_medio_revenda"]:
                 raise SystemExit(f"Valores diferentes para o mesmo mês e produto: {chave}")
             todos[chave] = r
-
     produtos = {r["produto"] for r in todos.values()}
     faltando = PRODUTOS_ESPERADOS - produtos
     if faltando:
@@ -149,26 +173,49 @@ def main():
     meses = sorted({r["mes"] for r in todos.values()})
     if len(meses) < 200:
         raise SystemExit(f"Poucos meses ({len(meses)}); o layout pode ter mudado.")
+    if com_estado:
+        ufs = {r["uf"] for r in todos.values() if r["produto"] == "GASOLINA COMUM"}
+        if len(ufs) != 27:
+            raise SystemExit(f"Esperava 27 estados com gasolina; vieram {len(ufs)}: {sorted(ufs)}")
     print(f"OK: {len(todos)} registros, {len(meses)} meses ({meses[0]} a {meses[-1]}), produtos: {sorted(produtos)}")
+    return todos
 
-    os.makedirs(DESTINO, exist_ok=True)
-    caminho_csv = os.path.join(DESTINO, "precos-mensais-brasil.csv")
+
+def gerar_csv(campos, todos):
     buffer = io.StringIO()
-    escritor = csv.DictWriter(buffer, fieldnames=["mes", "produto", "unidade", "preco_medio_revenda", "postos_pesquisados"], lineterminator="\n")
+    escritor = csv.DictWriter(buffer, fieldnames=campos, lineterminator="\n")
     escritor.writeheader()
     for chave in sorted(todos):
         escritor.writerow(todos[chave])
-    novo = buffer.getvalue()
+    return buffer.getvalue()
 
-    anterior = open(caminho_csv, encoding="utf-8").read() if os.path.exists(caminho_csv) else None
-    if novo == anterior:
-        print("CSV sem mudança.")
+
+def main():
+    origem = []
+    brasil = juntar(ARQUIVOS, False, origem)
+    estados = juntar(ARQUIVOS_ESTADOS, True, origem)
+    arquivos = {
+        "precos-mensais-brasil.csv": gerar_csv(
+            ["mes", "produto", "unidade", "preco_medio_revenda", "postos_pesquisados"], brasil),
+        "precos-mensais-estados.csv": gerar_csv(
+            ["mes", "uf", "produto", "unidade", "preco_medio_revenda", "postos_pesquisados"], estados),
+    }
+
+    os.makedirs(DESTINO, exist_ok=True)
+    mudou = False
+    for nome, novo in arquivos.items():
+        caminho = os.path.join(DESTINO, nome)
+        anterior = open(caminho, encoding="utf-8").read() if os.path.exists(caminho) else None
+        if novo != anterior:
+            with open(caminho, "w", encoding="utf-8") as f:
+                f.write(novo)
+            mudou = True
+    if not mudou:
+        print("CSVs sem mudança.")
         return
-    with open(caminho_csv, "w", encoding="utf-8") as f:
-        f.write(novo)
     with open(os.path.join(DESTINO, "origem.json"), "w", encoding="utf-8") as f:
         json.dump({
-            "fonte": "ANP, Levantamento de Preços de Combustíveis, médias mensais Brasil",
+            "fonte": "ANP, Levantamento de Preços de Combustíveis, médias mensais Brasil e estados",
             "convertido_em": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "arquivos": origem,
         }, f, ensure_ascii=False, indent=2)
