@@ -310,6 +310,23 @@ def senadores_conhecidos():
     return mapa, atuais
 
 
+def casar_senador(chave, conhecidos):
+    """Chave da lista oficial para um nome do arquivo da cota. Primeiro o nome
+    igual; depois, se houver um único candidato, o nome em que um começa com
+    as palavras do outro ("WEVERTON ROCHA" no arquivo e "WEVERTON" na lista).
+    Sem candidato único, devolve None."""
+    if chave in conhecidos:
+        return chave
+    palavras = chave.split()
+    candidatos = {k for k in conhecidos
+                  if (len(k.split()) <= len(palavras) and palavras[:len(k.split())] == k.split())
+                  or (len(k.split()) > len(palavras) and k.split()[:len(palavras)] == palavras)}
+    canonicos = {chave_nome(conhecidos[k]["nome"]) for k in candidatos}
+    if len(canonicos) == 1:
+        return next(iter(candidatos))
+    return None
+
+
 def ler_senado(ano, origem, conhecidos):
     url = f"https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_{ano}.csv"
     bruto = baixar(url)
@@ -343,8 +360,11 @@ def ler_senado(ano, origem, conhecidos):
             falhar(f"{onde}: ano {ano_linha}, mês {mes} fora do arquivo de {ano}")
         ultimo_mes = max(ultimo_mes, mes)
         nome = (linha["SENADOR"] or "").strip()
-        chave = chave_nome(nome)
-        info = conhecidos.get(chave, {})
+        # O senador entra pela chave da lista oficial, para que a conferência
+        # de quem não usou a cota compare o mesmo nome dos dois lados.
+        encontrada = casar_senador(chave_nome(nome), conhecidos)
+        chave = chave_nome(conhecidos[encontrada]["nome"]) if encontrada else chave_nome(nome)
+        info = conhecidos.get(encontrada, {}) if encontrada else {}
         if not info:
             sem_estado.add(f"{nome} (nome não encontrado)")
         elif not info.get("uf"):
@@ -403,7 +423,7 @@ def main():
         sem_gasto_s = None
         if ano == hoje.year:
             sem_gasto_s = sorted(({"id": k, "nome": conhecidos[k]["nome"], "uf": conhecidos[k]["uf"], "partido": conhecidos[k]["partido"]}
-                                  for k in senadores_atuais if k not in senadores),
+                                  for k in senadores_atuais if chave_nome(conhecidos[k]["nome"]) not in senadores),
                                  key=lambda x: sem_acento(x["nome"]).lower())
 
         saidas[ano] = {
