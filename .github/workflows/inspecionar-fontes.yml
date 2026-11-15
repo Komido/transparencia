@@ -23,75 +23,46 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      - name: Cota parlamentar, Câmara e Senado (formato dos arquivos)
+      - name: Cota parlamentar, limites por estado (Câmara e Senado)
         continue-on-error: true
         run: |
           set -u
-          mkdir -p /tmp/cota && cd /tmp/cota
-          cat > resumo.py <<'PY'
-          import csv, sys, collections
-          caminho, separador = sys.argv[1], sys.argv[2]
-          bruto = open(caminho, 'rb').read()
-          print('bytes', len(bruto), 'começo', bruto[:4])
-          for codificacao in ('utf-8-sig', 'cp1252', 'latin-1'):
-              try:
-                  texto = bruto.decode(codificacao)
-                  print('codificação que funciona:', codificacao)
-                  break
-              except UnicodeDecodeError:
-                  continue
-          linhas = texto.splitlines()
-          print('primeiras linhas:')
-          for l in linhas[:3]:
-              print('  ', l[:400])
-          inicio = 0
-          while inicio < len(linhas) and separador not in linhas[inicio]:
-              inicio += 1
-          if linhas and linhas[0].count(separador) <= 1 and len(linhas) > 1:
-              inicio = 1
-          leitor = csv.DictReader(linhas[inicio:], delimiter=separador)
-          print('colunas:', leitor.fieldnames)
-          contagens = collections.defaultdict(collections.Counter)
-          n = 0
-          exemplos = []
-          for linha in leitor:
-              n += 1
-              for coluna in leitor.fieldnames:
-                  if any(p in coluna.lower() for p in ('descri', 'tipo', 'uf', 'partido', 'mes', 'ano', 'senador', 'nucarteira', 'idecadastro', 'txnomeparlamentar', 'numano', 'nummes', 'codlegislatura')):
-                      contagens[coluna][linha.get(coluna)] += 1
-              if n <= 2:
-                  exemplos.append(linha)
-          print('linhas de dados', n)
-          for coluna, cont in contagens.items():
-              print(f'{coluna}: {len(cont)} valores distintos; mais comuns {cont.most_common(12)}')
-          for e in exemplos:
-              print('exemplo', e)
-          PY
-          echo "=== Câmara, arquivo anual"
-          for ano in 2025 2016; do
-            url="https://www.camara.leg.br/cotas/Ano-${ano}.csv.zip"
-            echo "--- $url"
-            curl -sSL --max-time 300 -A "ArrecadometroBrasil/1.0" -o "camara-${ano}.zip" -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
-            unzip -o -q "camara-${ano}.zip" -d "camara-${ano}" || { echo "não é zip"; head -c 500 "camara-${ano}.zip"; continue; }
-            ls -la "camara-${ano}"
-            arquivo=$(ls camara-${ano}/* | head -1)
-            python3 resumo.py "$arquivo" ";"
-          done
-          echo "=== Senado"
+          mkdir -p /tmp/lim && cd /tmp/lim
+          baixar() { curl -sSL --max-time 120 -A "ArrecadometroBrasil/1.0" -o "$2" -w "%{http_code} %{size_download} bytes %{content_type}\n" "$1" || echo "falhou"; }
+          texto() {  # $1 arquivo; imprime texto puro
+            case "$(file -b --mime-type "$1")" in
+              application/pdf) pdftotext -layout "$1" - ;;
+              *) python3 -c "import sys,html,re; t=open(sys.argv[1],'rb').read().decode('utf-8','replace'); t=re.sub(r'(?is)<(script|style).*?</\\1>',' ',t); t=re.sub(r'(?i)<br\\s*/?>|</(p|tr|li|div|h[1-6])>','\\n',t); t=re.sub(r'<[^>]+>',' ',t); print(html.unescape(t))" "$1" ;;
+            esac
+          }
+          linhas_uf() {  # linhas com sigla de UF ou nome de estado e um valor em reais
+            grep -n -E "(\b(AC|AL|AM|AP|BA|CE|DF|ES|GO|MA|MG|MS|MT|PA|PB|PE|PI|PR|RJ|RN|RO|RR|RS|SC|SE|SP|TO)\b|Acre|Alagoas|Amap|Amazonas|Bahia|Cear|Distrito Federal|Esp.rito Santo|Goi|Maranh|Mato Grosso|Minas|Par[aá]|Pernambuco|Piau|Rio de Janeiro|Rio Grande|Rond|Roraima|Santa Catarina|S.o Paulo|Sergipe|Tocantins).*[0-9]{1,3}\.[0-9]{3},[0-9]{2}" | sed 's/[[:space:]]\+/ /g' | head -80
+          }
+          echo "=== Câmara: Ato da Mesa 43/2009, norma atualizada"
           for url in \
-            "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2025.csv" \
-            "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2016.csv"; do
+            "https://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-normaatualizada-cd-mesa.html" \
+            "https://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-normaatualizada-cd-mesa.pdf" \
+            "https://www2.camara.leg.br/comunicacao/assessoria-de-imprensa/guia-para-jornalistas/cota-parlamentar"; do
             echo "--- $url"
-            curl -sSL --max-time 180 -A "ArrecadometroBrasil/1.0" -o senado.csv -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
-            python3 resumo.py senado.csv ";"
+            baixar "$url" doc
+            texto doc > doc.txt
+            wc -c doc.txt
+            grep -n -i -E "anexo|reda..o dada|vig.ncia|a partir de|produz(ir)? efeitos|atualiza" doc.txt | sed 's/[[:space:]]\+/ /g' | tail -40
+            linhas_uf < doc.txt
           done
+          echo "=== Senado: tabela da transparência e normas"
           for url in \
-            "https://adm.senado.gov.br/adm-dadosabertos/api/v1/senadores/despesas_ceaps/2025" \
-            "https://dadosabertos.camara.leg.br/api/v2/deputados?itens=2" \
-            "https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json"; do
+            "https://www12.senado.leg.br/transparencia/leg/pdf/CotaExercicioAtivParlamSenadores.pdf" \
+            "https://www12.senado.leg.br/transparencia/leg/pdf/normas/APS-5-2014-compilado.pdf" \
+            "https://www12.senado.leg.br/institucional/documentos/seminarios/conhecendo-o-senado/pdfs/cotas-safin.pdf" \
+            "https://www12.senado.leg.br/transparencia/perguntas-frequentes-1/sobre-os-senadores/o-que-e-ceaps"; do
             echo "--- $url"
-            curl -sSL --max-time 120 -A "ArrecadometroBrasil/1.0" -H "Accept: application/json" -o api.out -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
-            head -c 1500 api.out; echo
+            baixar "$url" doc
+            texto doc > doc.txt
+            wc -c doc.txt
+            head -c 400 doc.txt | tr -s '[:space:]' ' '; echo
+            grep -n -i -E "vig.ncia|a partir de|reajust|atualiza|ato d[ao]|exerc.cio de" doc.txt | sed 's/[[:space:]]\+/ /g' | head -30
+            linhas_uf < doc.txt
           done
 
       - name: DIEESE, metodologia da cesta e do salário necessário
