@@ -8,7 +8,7 @@ import * as f from './formato.js';
 // Quantidade legível: sem casas quando é inteira ou maior que 10; uma casa
 // decimal nos demais casos ("1,3", "2", "62").
 export function quantidade(q) {
-  if (q == null || !Number.isFinite(q)) return 'n/d';
+  if (q == null || !Number.isFinite(q)) return 'sem dado';
   if (q >= 10) return f.numero(q, 0);
   const arredondado = Math.round(q * 10) / 10;
   return Number.isInteger(arredondado) ? f.numero(arredondado, 0) : f.numero(arredondado, 1);
@@ -51,7 +51,7 @@ export function variacao(percentual, casas = 1) {
 // Parte do salário mínimo em palavras quando é uma fração conhecida:
 // "metade do salário mínimo", "um terço do salário mínimo", "1,4 salário mínimo".
 export function parteDoSalario(percentual) {
-  if (percentual == null || !Number.isFinite(percentual)) return 'n/d';
+  if (percentual == null || !Number.isFinite(percentual)) return 'sem dado';
   if (percentual >= 115) {
     const vezes = percentual / 100;
     return `${f.numero(vezes, 1)} ${vezes < 2 ? 'salário mínimo' : 'salários mínimos'}`;

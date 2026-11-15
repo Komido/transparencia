@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Metodologia · Arrecadômetro Brasil</title>
   <meta name="description" content="Como o Arrecadômetro Brasil calcula cada número: fontes oficiais, correção pela inflação e a mesma regra para todos os governos e partidos.">
-  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1c1b" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/estilo.css">
   <script type="module" src="js/metodologia.js"></script>
@@ -15,12 +15,10 @@
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
-    <div class="conteiner">
+    <div class="conteiner topo-linha">
       <a class="marca" href="./">Arrecadômetro Brasil</a>
       <nav class="navegacao" aria-label="Principal">
-        <a href="./">Brasil</a>
-        <a href="./#proximas">Estados e cidades</a>
-        <a href="metodologia.html" aria-current="page">Metodologia</a>
+        <a href="./">Início</a>
         <a href="./#fontes">Fontes</a>
       </nav>
     </div>
@@ -111,7 +109,7 @@
       <h3>Alimentos e cesta básica</h3>
       <p><strong>Fonte:</strong> Pesquisa Nacional da Cesta Básica de Alimentos, do DIEESE, que publica todo mês o preço médio de cada alimento e o custo da cesta em cada capital pesquisada.</p>
       <ul>
-        <li><strong>Média do país:</strong> média simples das <span data-campo="precos-capitais-qtd">15</span> capitais pesquisadas todo mês desde 1995 (<span data-campo="precos-capitais">n/d</span>). Usar sempre as mesmas capitais evita que a média mude só porque uma capital entrou ou saiu da pesquisa. Um mês só tem valor quando pelo menos <span data-campo="precos-minimo">12</span> dessas capitais têm preço publicado; caso contrário, fica sem dado.</li>
+        <li><strong>Média do país:</strong> média simples das <span data-campo="precos-capitais-qtd">15</span> capitais pesquisadas todo mês desde 1995 (<span data-campo="precos-capitais">sem dado</span>). Usar sempre as mesmas capitais evita que a média mude só porque uma capital entrou ou saiu da pesquisa. Um mês só tem valor quando pelo menos <span data-campo="precos-minimo">12</span> dessas capitais têm preço publicado; caso contrário, fica sem dado.</li>
         <li><strong>A média não é ponderada pela população.</strong> Ela descreve o preço típico nas capitais, não no interior.</li>
         <li><strong>Unidades:</strong> a unidade de cada preço foi conferida dividindo o gasto mensal com o item pelo seu preço médio, o que devolve a quantidade da cesta definida em lei (por exemplo, 6 kg de carne e 7,5 litros de leite em São Paulo). O óleo de soja não aparece porque essa conta não confirmou a unidade com segurança.</li>
         <li><strong>Cesta básica:</strong> a quantidade de cada alimento segue o Decreto-Lei 399/1938 e muda conforme a região, então a média do país mistura cestas regionais diferentes.</li>
@@ -274,7 +272,7 @@
   <footer class="rodape">
     <div class="conteiner">
       <p>Arrecadômetro Brasil. Projeto independente, sem vínculo com governos ou partidos.</p>
-      <p>Dados atualizados em <span data-campo="atualizado-em">n/d</span>. <a href="./">Voltar ao painel</a></p>
+      <p>Dados atualizados em <span data-campo="atualizado-em">sem dado</span>. <a href="./">Voltar ao painel</a></p>
       <p>Textos sob licença <a href="https://creativecommons.org/licenses/by/4.0/deed.pt" rel="license noopener">CC BY 4.0</a>. Código sob licença MIT, aberto em <a href="https://github.com/Komido/transparencia" rel="noopener">github.com/Komido/transparencia</a>. Os dados pertencem às fontes oficiais citadas.</p>
     </div>
   </footer>

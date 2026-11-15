@@ -14,6 +14,11 @@ function definirTopicos(nome, texto) {
   const partes = texto.trim().split(/\.\s+(?=[A-ZÀ-Ý])/);
   const frases = partes.map((fr, i) => (i < partes.length - 1 ? `${fr}.` : fr)).filter((fr) => fr.trim());
   campo(nome).forEach((e) => {
+    // Uma frase só é a resposta da seção: parágrafo, sem marcador.
+    if (frases.length === 1) {
+      e.replaceChildren(el('p', 'resposta', frases[0]));
+      return;
+    }
     const lista = document.createElement('ul');
     frases.forEach((fr) => el('li', null, fr, lista));
     e.replaceChildren(lista);
@@ -82,11 +87,13 @@ function iniciarContador(ctx) {
   const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const intervalo = reduzir ? 1000 : 100;
 
+  const curto = campo('contador-curto')[0];
   const atualizar = () => {
     const agora = Date.now();
     const est = dados.estimadoEm(agora);
     alvo.textContent = `R$\u00A0${formatoCheio.format(dados.confirmado + est)}`;
     estimado.textContent = f.reaisCompacto(est);
+    if (curto) curto.textContent = f.reaisPorExtenso(dados.confirmado + est);
   };
   atualizar();
   let timer = setInterval(atualizar, intervalo);
@@ -196,7 +203,7 @@ function montarArrecadacao(ctx) {
           detalhe: `${agrupar ? r.mandatos.join(', ') : r.partido} · ${descreverAnos(r)}`,
         },
         f.porcentagem(r.medias.carga, 2),
-        r.anosComDado.variacaoReal ? f.porcentagem(r.medias.variacaoReal, 1, true) : 'n/d',
+        r.anosComDado.variacaoReal ? f.porcentagem(r.medias.variacaoReal, 1, true) : 'sem dado',
       ]));
   };
   desenharGovernos();
@@ -259,7 +266,7 @@ function montarComposicao(ctx) {
   }
   const lista = $('#lista-composicao');
   lista.replaceChildren();
-  const maior = somas[0]?.soma ?? 1;
+  // A barra mostra a parte do total: 32% ocupa 32% do trilho.
   for (const g of somas) {
     const li = el('li', null, null, lista);
     const topo = el('div', 'barra-topo', null, li);
@@ -271,7 +278,7 @@ function montarComposicao(ctx) {
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
     const barra = el('div', 'barra', null, trilho);
-    barra.style.width = `${Math.max(1, (g.soma / maior) * 100)}%`;
+    barra.style.width = `${Math.max(1, (g.soma / total) * 100)}%`;
   }
 }
 
@@ -370,7 +377,6 @@ function montarGastos(ctx) {
 
     const lista = $('#lista-gastos');
     lista.replaceChildren();
-    const maior = grandes[0]?.valor ?? 1;
     const linha = (nome, explica, valor) => {
       const li = el('li', null, null, lista);
       const topo = el('div', 'barra-topo', null, li);
@@ -379,7 +385,7 @@ function montarGastos(ctx) {
       el('span', 'barra-valor', `${porCem((valor / totalAno) * 100)} de cada R$ 100 · ${f.reaisCompacto(valor)}`, topo);
       const trilho = el('div', 'barra-trilho', null, li);
       trilho.setAttribute('aria-hidden', 'true');
-      el('div', 'barra', null, trilho).style.width = `${Math.max(1, (valor / maior) * 100)}%`;
+      el('div', 'barra', null, trilho).style.width = `${Math.max(1, (valor / totalAno) * 100)}%`;
     };
     grandes.forEach((a) => linha(a.nome, a.explica, a.valor));
     if (pequenas.length) {
@@ -557,7 +563,7 @@ function montarContas(ctx) {
   // Por governo -------------------------------------------------------------
   const linhasAno = anos.map((a) => ({ ano: a, primario: pPib.anos.get(a) ?? null, nominal: nPib.anos.get(a) ?? null, divida: dPib.anos.get(a) ?? null }));
   const resumo = c.resumoPorGoverno(linhasAno, mandatos, ['primario', 'nominal']);
-  const sinal = (x) => (x == null ? 'n/d' : f.porcentagem(x, 1, true));
+  const sinal = (x) => (x == null ? 'sem dado' : f.porcentagem(x, 1, true));
   preencherTabela($('#tabela-contas-governos'),
     ['Mandato', 'Antes dos juros (média por ano, % do PIB)', 'Resultado final (média por ano, % do PIB)', 'Dívida bruta no fim (% do PIB)'],
     resumo.map((r) => {
@@ -565,9 +571,9 @@ function montarContas(ctx) {
       const divida = ultimo != null ? dPib.anos.get(ultimo) : null;
       return [
         { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
-        r.anosComDado.primario ? sinal(r.medias.primario) : 'n/d',
-        r.anosComDado.nominal ? sinal(r.medias.nominal) : 'n/d',
-        divida == null ? 'n/d' : f.porcentagem(divida, 0),
+        r.anosComDado.primario ? sinal(r.medias.primario) : 'sem dado',
+        r.anosComDado.nominal ? sinal(r.medias.nominal) : 'sem dado',
+        divida == null ? 'sem dado' : f.porcentagem(divida, 0),
       ];
     }),
     'Positivo: sobrou dinheiro. Negativo: faltou.');
@@ -718,7 +724,7 @@ function montarEstados(ctx) {
         { nome: uf.nome, classe: 'serie-1', valores },
         { nome: 'Limite da lei', classe: 'serie-limite', valores: limites, degrau: true },
       ],
-      formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : (v == null ? 'n/d' : `${porCemReais(v)} de cada R$ 100`)),
+      formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : (v == null ? 'sem dado' : `${porCemReais(v)} de cada R$ 100`)),
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => String(anos[i]),
       descricao: visao === 'divida'
@@ -776,7 +782,7 @@ function montarEstados(ctx) {
       rotulos: anosSerie,
       series: [{ nome, classe: 'serie-1', valores, parciais: new Set() }],
       formatoY: (v, eixo) => (eixo ? f.numero(v, maior / escala.div < 10 ? 1 : 0)
-        : (v == null ? 'n/d' : `R$ ${f.numero(v, 1)} ${escala.sufixo} em dinheiro de hoje`)),
+        : (v == null ? 'sem dado' : `R$ ${f.numero(v, 1)} ${escala.sufixo} em dinheiro de hoje`)),
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => String(anosSerie[i]),
       descricao: `${nome} arrecadado ${quem.startsWith('a ') ? 'pela' : 'pelo'} ${quemSemArtigo} por ano, em ${escala.nome} de reais de hoje.`,
@@ -835,8 +841,8 @@ function montarEstados(ctx) {
       const marca = (sit) => (sit === 'dentro do limite' ? null : sit);
       return [
         uf.nome,
-        div == null ? 'n/d' : { texto: porCemReais(div, limiteDivida, alertaDivida), detalhe: marca(sitDiv) },
-        fol == null ? 'n/d' : { texto: porCemReais(fol, limite, alerta), detalhe: marca(sitFol) },
+        div == null ? 'sem dado' : { texto: porCemReais(div, limiteDivida, alertaDivida), detalhe: marca(sitDiv) },
+        fol == null ? 'sem dado' : { texto: porCemReais(fol, limite, alerta), detalhe: marca(sitFol) },
       ];
     });
     const frase = (lista, oque) => (lista.length
@@ -875,7 +881,6 @@ function barrasDeGrupos(lista, grupos, valores) {
   lista.replaceChildren();
   const total = valores.reduce((a, v) => a + v, 0);
   const itens = grupos.map((g, k) => ({ nome: g.nome, valor: valores[k] })).filter((g) => g.valor > 0).sort((a, b) => b.valor - a.valor);
-  const maior = itens[0]?.valor ?? 1;
   for (const g of itens) {
     const li = el('li', null, null, lista);
     const topo = el('div', 'barra-topo', null, li);
@@ -884,7 +889,7 @@ function barrasDeGrupos(lista, grupos, valores) {
     el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.valor)}`, topo);
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
-    el('div', 'barra', null, trilho).style.width = `${Math.max(1, (g.valor / maior) * 100)}%`;
+    el('div', 'barra', null, trilho).style.width = `${Math.max(1, total > 0 ? (g.valor / total) * 100 : 0)}%`;
   }
 }
 
@@ -1027,7 +1032,8 @@ async function montarCota(ctx) {
     const nomes = NOMES_CASA[casaId];
     const p = casa.parlamentares.find((x) => x.id === selParl.value);
     if (!p) {
-      definirItens('cota-parlamentar-resumo', []);
+      campo('cota-parlamentar-resumo').forEach((e) => e.replaceChildren(el('p', 'resumo-vazio',
+        `Escolha ${casaId === 'camara' ? 'um deputado' : 'um senador'} na lista para ver quanto gastou, com o quê, e como fica perto da média do estado.`)));
       $('#cota-parlamentar-grupos').replaceChildren();
       return;
     }
@@ -1102,8 +1108,11 @@ async function montarCota(ctx) {
     definir('cota-rotulo-parlamentar', nomes.rotulo);
     const anterior = selParl.value;
     selParl.replaceChildren();
+    // Ninguém escolhido de início: o site não expõe uma pessoa só porque o
+    // nome dela vem primeiro na ordem alfabética.
+    el('option', null, `Escolha ${casaId === 'camara' ? 'um deputado' : 'um senador'}`, selParl).value = '';
     recorte.forEach((p) => { el('option', null, rotuloParlamentar(p), selParl).value = p.id; });
-    selParl.value = recorte.some((p) => p.id === anterior) ? anterior : (recorte[0]?.id ?? '');
+    selParl.value = recorte.some((p) => p.id === anterior) ? anterior : '';
     atual = { d, casaId, ano };
     desenharParlamentar();
 
@@ -1246,9 +1255,9 @@ function montarSalario(ctx) {
           { nome: `Salário de ${nomeBase} só com a inflação`, classe: 'serie-2', valores: corrigido },
         ],
         formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
-        explicacao: `A linha azul é o salário mínimo de cada mês. A laranja mostra quanto ele seria se, a partir de ${f.mesLongo(meses[iB])} (${f.moeda(s.salario_minimo[iB], 0)}), só tivesse sido corrigido pela inflação (INPC). `
+        explicacao: `A linha cheia é o salário mínimo de cada mês. A tracejada mostra quanto ele seria se, a partir de ${f.mesLongo(meses[iB])} (${f.moeda(s.salario_minimo[iB], 0)}), só tivesse sido corrigido pela inflação (INPC). `
           + `Em ${f.mesLongo(meses[iFim])}, essa conta dá ${f.moeda(corrigido[iFim], 0)}, e o salário é ${f.moeda(s.salario_minimo[iFim], 0)}. `
-          + 'Quando a azul fica acima da laranja, o salário ganhou da inflação; abaixo, perdeu.',
+          + 'Quando a cheia fica acima da tracejada, o salário ganhou da inflação; abaixo, perdeu.',
       };
     },
     dolar: () => ({
@@ -1267,7 +1276,7 @@ function montarSalario(ctx) {
           { nome: 'Necessário (DIEESE)', classe: 'serie-2', valores: s.smn_dieese },
         ],
         formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
-        explicacao: `A linha laranja é quanto o DIEESE calcula que uma família de 2 adultos e 2 crianças precisa por mês para viver com o básico. A distância até a linha azul é quanto falta ao salário mínimo: em ${f.mesLongo(meses[iN])}, ${f.moeda(s.smn_dieese[iN] - s.salario_minimo[iN], 0)}, e o mínimo cobre ${f.porcentagem(sm.frenteNecessario[iN], 0)} do necessário.`,
+        explicacao: `A linha tracejada é quanto o DIEESE calcula que uma família de 2 adultos e 2 crianças precisa por mês para viver com o básico. A distância até a linha cheia é quanto falta ao salário mínimo: em ${f.mesLongo(meses[iN])}, ${f.moeda(s.smn_dieese[iN] - s.salario_minimo[iN], 0)}, e o mínimo cobre ${f.porcentagem(sm.frenteNecessario[iN], 0)} do necessário.`,
       };
     },
   };
@@ -1360,9 +1369,7 @@ function montarDolar(ctx) {
   let efeito = '';
   if (desvio >= 0.5) efeito = ' Dólar mais caro encarece produtos importados e viagens ao exterior.';
   else if (desvio <= -0.5) efeito = ' Dólar mais barato barateia produtos importados e viagens ao exterior.';
-  definirTopicos('dolar-resumo',
-    `Em ${f.mesLongo(meses[iUlt])}, um dólar custou em média ${f.moeda(s.dolar_ptax[iUlt], 2)}. `
-    + `Descontada a inflação do Brasil e a dos Estados Unidos, ${posicao}${efeito}`);
+  definirTopicos('dolar-resumo', `Descontada a inflação do Brasil e a dos Estados Unidos, ${posicao}${efeito}`);
 
   criarGrafico($('#grafico-dolar'), {
     tipo: 'linhas',
@@ -1419,7 +1426,7 @@ function montarIR(ctx) {
 
   const primeiraIsencao = isencao[iIni];
   let resumoIr = `Hoje, quem ganha até ${f.moeda(isencao[iUlt], 0)} por mês não paga Imposto de Renda. `
-    + `Se o limite de ${f.moeda(primeiraIsencao, 0)} de 1996 tivesse acompanhado a inflação, ele seria de ${f.moeda(corrigida[iUlt], 0)}.`;
+    + `O limite de 1996 era ${f.moeda(primeiraIsencao, 0)}.`;
   const acima = (isencao[iUlt] / corrigida[iUlt] - 1) * 100;
   resumoIr += defasagem > 0.5
     ? ` Para repor a inflação desde 1996, o limite atual precisaria subir ${f.porcentagem(defasagem, 0)}.`
@@ -1575,8 +1582,7 @@ function montarCompras(ctx) {
     else if (comp) fecho = ` Hoje ele compra ${comp} do que em ${anoA}.`;
     const onde = naCidade(item) ? `${ondeLocal(item)}, com` : 'Com';
     definirTopicos('compras-resumo',
-      `${onde} um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}. `
-      + `Em ${f.mesLongo(meses[iA])}, com o salário da época (${f.moeda(s.salario_minimo[iA], 0)}), dava para comprar ${t.quantidade(qA)}.${fecho}`);
+      `${onde} um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}.${fecho}`);
 
     const numeros = $('#compras-numeros');
     numeros.replaceChildren();
@@ -1949,13 +1955,14 @@ function indicadoresDoAno(ctx) {
   const salario = { rotulo: 'o salário mínimo', serie: s.salario_minimo };
   const lista = [
     {
-      id: 'salario', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario',
+      id: 'salario', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario', dica: 'em dinheiro de hoje',
       explica: 'quanto vale em dinheiro de hoje (corrigido pela inflação, INPC)',
       valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
       causas: [salario, { rotulo: 'os preços (INPC)', serie: inpc }],
     },
     {
       id: 'cestas', nome: 'Cestas básicas por salário mínimo', curto: 'cestas básicas por salário', secao: '#compras',
+      nomeCurto: 'Cestas básicas', dica: 'quantas o salário mínimo compra',
       explica: 'quantas cestas do DIEESE um salário mínimo compra',
       valores: s.cesta_total ? c.quantidadeComprada(s.salario_minimo, s.cesta_total) : null,
       tipo: 'media', maiorMelhor: true, formato: (v) => f.numero(v, 2),
@@ -1967,24 +1974,25 @@ function indicadoresDoAno(ctx) {
       valores: s.desocupacao, tipo: 'trimestral', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'renda', nome: 'Renda de quem trabalha', curto: 'renda do trabalho', secao: null,
+      id: 'renda', nome: 'Renda de quem trabalha', curto: 'renda do trabalho', secao: null, dica: 'média, em dinheiro de hoje',
       explica: 'média de todos os trabalhos, com ou sem carteira, em dinheiro de hoje',
       valores: s.renda_trabalho, tipo: 'trimestral', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
     },
     {
       id: 'inflacao', nome: 'Inflação', curto: 'inflação', secao: null, meta: t.META_INFLACAO,
+      dica: `em 12 meses; meta: ${f.porcentagem(t.META_INFLACAO.centro, 0)} ao ano`,
       explica: 'quanto os preços subiram em 12 meses (IPCA)',
       valores: s.ipca_var, tipo: 'acumulado', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'botijao', nome: 'Botijão de gás', curto: 'botijão de gás', secao: '#combustiveis',
+      id: 'botijao', nome: 'Botijão de gás', curto: 'botijão de gás', secao: '#combustiveis', dica: 'parte do salário mínimo',
       explica: 'quanto pesa no salário mínimo',
       valores: s.comb_glp ? parteDoSalario(s.comb_glp, 1) : null,
       tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
       causas: [{ rotulo: 'o botijão', serie: s.comb_glp }, salario],
     },
     {
-      id: 'tanque', nome: 'Tanque de gasolina', curto: 'gasolina', secao: '#combustiveis',
+      id: 'tanque', nome: 'Tanque de gasolina', curto: 'gasolina', secao: '#combustiveis', dica: `${TANQUE_LITROS} litros, parte do salário mínimo`,
       explica: `quanto ${TANQUE_LITROS} litros pesam no salário mínimo`,
       valores: s.comb_gasolina ? parteDoSalario(s.comb_gasolina, TANQUE_LITROS) : null,
       tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 0),
@@ -1994,6 +2002,7 @@ function indicadoresDoAno(ctx) {
       id: 'divida', nome: 'Dívida do governo', curto: 'dívida do governo', secao: '#contas',
       explica: 'tudo o que União, estados e municípios devem, comparado com o que o país produz em um ano (PIB)',
       valores: s.divida_bruta_pib, tipo: 'fim', maiorMelhor: false, formato: (v) => `${f.porcentagem(v, 1)} do PIB`,
+      dica: 'parte do PIB', formatoCurto: (v) => f.porcentagem(v, 0),
       deficit: Array.isArray(s.nfsp_nominal) ? c.deflacionar(s.nfsp_nominal, ipca) : null,
     },
   ];
@@ -2026,7 +2035,7 @@ function nivelDeHoje(it) {
   return { nivel: p.nivel, frase: frasePosicao(p.vencidos, p.total, Math.min(...it.anos.keys())) };
 }
 
-const NOME_NIVEL = { bom: 'Bom', medio: 'Médio', ruim: 'Ruim' };
+const NOME_NIVEL = { bom: 'Bom', medio: 'Na média', ruim: 'Ruim' };
 
 function montarResumo(ctx) {
   const { meses, mandatos } = ctx;
@@ -2034,11 +2043,22 @@ function montarResumo(ctx) {
   if (!itens.length) { $('#resumo').hidden = true; return; }
   itens.forEach((it) => { it.situacao = nivelDeHoje(it); });
 
-  // Resumo geral: o que está bom, médio e ruim hoje.
-  const grupos = ['bom', 'medio', 'ruim'].map((nivel) => ({ nivel, nomes: itens.filter((it) => it.situacao?.nivel === nivel).map((it) => it.curto) }))
-    .filter((g) => g.nomes.length);
-  const rotuloGrupo = { bom: 'Está bom', medio: 'Está na média', ruim: 'Está ruim' };
-  definirItens('resumo-geral', grupos.map((g) => ({ rotulo: rotuloGrupo[g.nivel], texto: `${listaDeAnos(g.nomes)}.` })));
+  // Abertura: como está cada número hoje, comparado com a própria história.
+  // Primeiro o que está bom, depois na média e ruim; cada linha leva à seção.
+  const listaHoje = $('#hoje-lista');
+  if (listaHoje) {
+    listaHoje.replaceChildren();
+    const ordem = { bom: 0, medio: 1, ruim: 2 };
+    [...itens].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => {
+      const li = el('li', null, null, listaHoje);
+      const a = el('a', null, null, li);
+      a.href = it.secao ?? '#resumo';
+      const nome = el('span', 'hoje-nome', it.nomeCurto ?? it.nome, a);
+      if (it.dica) el('small', null, it.dica, nome);
+      el('span', 'hoje-valor', (it.formatoCurto ?? it.formato)(it.hoje.valor), a);
+      if (it.situacao) el('span', `selo selo-${it.situacao.nivel}`, NOME_NIVEL[it.situacao.nivel], a);
+    });
+  }
 
   // Opções de comparação: governos que já terminaram (o mais recente primeiro,
   // que é o padrão) e anos completos.
@@ -2064,7 +2084,7 @@ function montarResumo(ctx) {
   const grupoAno = el('optgroup', null, null, select);
   grupoAno.label = 'Anos';
   for (const [chave, p] of periodos) {
-    const texto = p.ano ? p.rotulo : `${p.rotulo} (${p.partido}), ${p.de} a ${p.ate}`;
+    const texto = p.ano ? p.rotulo : `${p.rotulo}, ${p.de} a ${p.ate}`;
     el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
   }
   select.value = periodos.keys().next().value;
@@ -2120,8 +2140,9 @@ function montarResumo(ctx) {
     for (const it of itens) {
       const li = el('li', 'ano-item', null, lista);
       const topo = el('div', 'ano-topo', null, li);
+      // O selo (bom, na média, ruim) compara com a história e fica na
+      // abertura; aqui o veredito compara só com o período escolhido.
       el('h3', 'ano-nome', it.nome, topo);
-      if (it.situacao) el('span', `selo selo-${it.situacao.nivel}`, NOME_NIVEL[it.situacao.nivel], topo);
       el('p', 'ano-explica', it.explica, li);
 
       const valores = el('dl', 'ano-valores', null, li);
@@ -2144,7 +2165,7 @@ function montarResumo(ctx) {
       }
       else {
         const r = c.comparar(it.hoje.valor, vSel, it.maiorMelhor);
-        veredito = r === 1 ? 'Melhor hoje.' : r === -1 ? `Era melhor ${p.quando}.` : 'Praticamente igual.';
+        veredito = r === 1 ? `Hoje está melhor do que ${p.quando}.` : r === -1 ? `Era melhor ${p.quando}.` : `Praticamente igual ${p.quando}.`;
       }
       el('p', 'ano-veredito', veredito, li);
       const porque = vSel == null ? null : fraseCausas(it, p);
@@ -2213,20 +2234,22 @@ function montarCombustiveis(ctx) {
     const conclusao = comparado
       ? `Para quem ganha um salário mínimo, ${item.sujeito} está ${comparado} do que em ${anoA}.`
       : `Para quem ganha um salário mínimo, ${item.sujeito} pesa praticamente o mesmo que em ${anoA}.`;
-    const textoCusto = item.litro
-      ? `Encher um tanque de ${TANQUE_LITROS} litros custa ${f.moeda(custo(iUlt), 0)}, ou ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 0)}).`
-      : `Um botijão custa ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 1)}).`;
-    definirTopicos('combustiveis-resumo',
-      `Em ${f.mesLongo(meses[iUlt])}, ${item.descricao} custa em média ${f.moeda(nominal[iUlt], 2)} ${onde}, com o salário mínimo em ${f.moeda(s.salario_minimo[iUlt], 0)}. `
-      + `Em ${f.mesLongo(meses[iA])}, custava ${f.moeda(nominal[iA], 2)}, quando o salário mínimo era ${f.moeda(s.salario_minimo[iA], 0)}; com o salário de hoje, aquele preço equivaleria a ${f.moeda(equivalente[iA], 2)}. `
-      + `${conclusao} ${textoCusto}`);
+    // O texto dá a resposta; os números ficam nos destaques, sem repetir.
+    definirTopicos('combustiveis-resumo', conclusao);
 
     const numeros = $('#combustiveis-numeros');
     numeros.replaceChildren();
-    itemNumero(numeros, `Preço em ${f.mesCurto(meses[iUlt])}`, f.moeda(nominal[iUlt], 2));
-    itemNumero(numeros, `Preço de ${f.mesCurto(meses[iA])} no salário de hoje`, f.moeda(equivalente[iA], 2), `Na época: ${f.moeda(nominal[iA], 2)}`);
-    itemNumero(numeros, item.litro ? `Tanque de ${TANQUE_LITROS} litros` : 'Um botijão', f.moeda(custo(iUlt), 0),
-      `${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), casas)})`);
+    const unidade = item.litro ? 'Litro' : 'Botijão';
+    itemNumero(numeros, `${unidade} hoje (${f.mesCurto(meses[iUlt])})`, f.moeda(nominal[iUlt], 2),
+      item.litro
+        ? `Média ${onde}. Salário mínimo: ${f.moeda(s.salario_minimo[iUlt], 0)}.`
+        : `Média ${onde}: ${t.parteDoSalario(parte(iUlt))}. Em ${anoA}: ${f.porcentagem(parte(iA), casas)}.`);
+    if (item.litro) {
+      itemNumero(numeros, `Tanque de ${TANQUE_LITROS} litros`, f.moeda(custo(iUlt), 0),
+        `${maiuscula(t.parteDoSalario(parte(iUlt)))}. Em ${anoA}: ${f.porcentagem(parte(iA), casas)}.`);
+    }
+    itemNumero(numeros, `${unidade} de ${f.mesCurto(meses[iA])} no salário de hoje`, f.moeda(equivalente[iA], 2),
+      `Na época custava ${f.moeda(nominal[iA], 2)}, com salário mínimo de ${f.moeda(s.salario_minimo[iA], 0)}.`);
 
     // O gráfico começa no primeiro mês com preço publicado.
     const iIni = nominal.findIndex((v) => v != null);
@@ -2395,41 +2418,29 @@ function reposicionarNaSecao() {
 }
 
 function iniciarNavegacao() {
-  const barra = $('.atalhos');
-  if (!barra) return;
-  const links = [...barra.querySelectorAll('a[href^="#"]')];
+  const menu = $('#secoes');
+  if (!menu) return;
+  const links = [...menu.querySelectorAll('a[href^="#"]')];
   const secoes = links.map((a) => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
 
-  // Linha divisória só quando a barra está presa no topo.
-  const sentinela = document.createElement('div');
-  sentinela.setAttribute('aria-hidden', 'true');
-  barra.before(sentinela);
-  new IntersectionObserver(([e]) => barra.classList.toggle('presa', !e.isIntersecting)).observe(sentinela);
+  // O menu fecha ao escolher uma seção, ao tocar fora dele e com Esc.
+  links.forEach((a) => a.addEventListener('click', () => { menu.open = false; }));
+  document.addEventListener('click', (ev) => { if (menu.open && !menu.contains(ev.target)) menu.open = false; });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
+  });
 
-  const marcar = (id) => {
-    links.forEach((a) => {
-      const ativo = a.getAttribute('href') === `#${id}`;
-      if (ativo) {
-        a.setAttribute('aria-current', 'true');
-        // Mantém o atalho ativo visível na barra, sem mexer na rolagem vertical.
-        const esquerda = a.offsetLeft - barra.offsetLeft;
-        if (esquerda < barra.scrollLeft || esquerda + a.offsetWidth > barra.scrollLeft + barra.clientWidth) {
-          barra.scrollLeft = esquerda - 16;
-        }
-      } else {
-        a.removeAttribute('aria-current');
-      }
-    });
-  };
-
-  // A seção ativa é a que ocupa a faixa logo abaixo da barra.
+  // A seção em leitura fica marcada no menu.
   const visiveis = new Set();
   const observador = new IntersectionObserver((entradas) => {
     entradas.forEach((e) => (e.isIntersecting ? visiveis.add(e.target.id) : visiveis.delete(e.target.id)));
-    const atual = secoes.find((s) => visiveis.has(s.id));
-    marcar(atual ? atual.id : null);
-  }, { rootMargin: '-80px 0px -55% 0px' });
-  secoes.forEach((s) => observador.observe(s));
+    const atual = secoes.find((sec) => visiveis.has(sec.id));
+    links.forEach((a) => {
+      if (atual && a.getAttribute('href') === `#${atual.id}`) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  }, { rootMargin: '-70px 0px -55% 0px' });
+  secoes.forEach((sec) => observador.observe(sec));
 }
 
 // ---------------------------------------------------------------------------
@@ -2460,11 +2471,13 @@ async function iniciar() {
     if (guardada) await escolherCidade(guardada);
   } catch (erro) {
     console.error(erro);
-    const caixa = $('#erro-carga');
-    caixa.textContent = 'Não foi possível carregar os dados agora. Tente recarregar a página em instantes.';
-    caixa.hidden = false;
+    // Sem dados, nenhum número aparece: melhor a mensagem do que "R$ 0".
+    main.classList.add('falhou');
+    $('#erro-carga').hidden = false;
+    $('#erro-recarregar')?.addEventListener('click', () => window.location.reload());
   } finally {
     main.classList.remove('carregando');
+    main.removeAttribute('aria-busy');
     // Depois que tudo foi desenhado, refaz o salto para #seção, se houver.
     requestAnimationFrame(reposicionarNaSecao);
   }

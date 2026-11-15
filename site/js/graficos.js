@@ -70,7 +70,9 @@ export function criarGrafico(container, opcoes) {
   }
 
   function desenhar() {
-    const largura = Math.max(280, Math.floor(area.clientWidth || 320));
+    // Largura real do espaço: com piso maior que a tela, o navegador encolhia o
+    // desenho e os rótulos ficavam com 9 a 10 px.
+    const largura = Math.max(240, Math.floor(area.clientWidth || 320));
     const altura = largura < 520 ? 240 : 300;
     const { series, rotulos, faixas = [], tipo } = atual;
     const n = rotulos.length;
@@ -86,7 +88,7 @@ export function criarGrafico(container, opcoes) {
       topo: 10,
       direita: 12,
       base: 26,
-      esquerda: Math.ceil(Math.max(...rotulosY.map((t) => larguraTexto(t, 11)))) + 12,
+      esquerda: Math.ceil(Math.max(...rotulosY.map((t) => larguraTexto(t, 12)))) + 12,
     };
     const lp = largura - margem.esquerda - margem.direita;
     const banda = tipo === 'colunas' ? lp / n : (n > 1 ? lp / (n - 1) : lp);
@@ -101,7 +103,7 @@ export function criarGrafico(container, opcoes) {
     const rotulosFaixa = faixas.map((fx) => {
       const x0 = borda(fx.inicio);
       const x1 = borda(fx.fim + 1);
-      return { fx, x0, x1, centro: (x0 + x1) / 2, largura: larguraTexto(fx.rotulo, 10) };
+      return { fx, x0, x1, centro: (x0 + x1) / 2, largura: larguraTexto(fx.rotulo, 11) };
     });
     const umaLinha = rotulosFaixa.every((r) => r.largura + 4 <= r.x1 - r.x0);
     const linhasRotulo = faixas.length ? (umaLinha ? 1 : 2) : 0;
@@ -118,7 +120,7 @@ export function criarGrafico(container, opcoes) {
       r.linha = linha ?? preferida;
       if (r.visivel) ocupado[linha] = x + r.largura / 2;
     });
-    if (linhasRotulo) margem.topo = 8 + linhasRotulo * 13;
+    if (linhasRotulo) margem.topo = 8 + linhasRotulo * 14;
     const ap = altura - margem.topo - margem.base;
     const y = (v) => margem.topo + ap - ((v - escala.min) / (escala.max - escala.min || 1)) * ap;
 
@@ -135,7 +137,7 @@ export function criarGrafico(container, opcoes) {
       }, svg);
       if (r.visivel) {
         const t = svgEl('text', {
-          x: r.x, y: 4 + 10 + r.linha * 13, class: 'faixa-rotulo', 'text-anchor': 'middle',
+          x: r.x, y: 4 + 11 + r.linha * 14, class: 'faixa-rotulo', 'text-anchor': 'middle',
         }, svg);
         t.textContent = r.fx.rotulo;
       }
@@ -154,7 +156,7 @@ export function criarGrafico(container, opcoes) {
     rotulos.forEach((rot, i) => {
       const texto = atual.rotuloEixoX(rot, i);
       if (!texto) return;
-      const meia = larguraTexto(texto, 11) / 2;
+      const meia = larguraTexto(texto, 12) / 2;
       // Rótulo das pontas encosta na borda em vez de sumir.
       const xx = Math.min(Math.max(x(i), meia + 2), largura - 2 - meia);
       if (xx - meia < ultimoX + 8) return;
@@ -337,6 +339,27 @@ export function preencherTabela(tabela, cabecalhos, linhas, rodape = null, colun
     const cap = document.createElement('caption');
     cap.textContent = rodape;
     tabela.prepend(cap);
+  }
+  avisarRolagem(tabela);
+}
+
+// Quando a tabela não cabe na largura, um aviso em texto diz que dá para
+// deslizar (sem sombra nem gradiente). Some quando a tabela passa a caber.
+function avisarRolagem(tabela) {
+  const caixa = tabela.closest('.tabela-rolagem');
+  if (!caixa) return;
+  let dica = caixa.nextElementSibling?.classList.contains('rolagem-dica') ? caixa.nextElementSibling : null;
+  if (!dica) {
+    dica = document.createElement('p');
+    dica.className = 'rolagem-dica';
+    dica.textContent = 'Deslize a tabela para o lado para ver todas as colunas.';
+    caixa.after(dica);
+  }
+  const conferir = () => { dica.hidden = caixa.scrollWidth <= caixa.clientWidth + 1; };
+  conferir();
+  if (!caixa.dataset.observada && 'ResizeObserver' in window) {
+    caixa.dataset.observada = '1';
+    new ResizeObserver(conferir).observe(caixa);
   }
 }
 
