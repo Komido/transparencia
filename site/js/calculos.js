@@ -1,0 +1,434 @@
+// Todas as regras de cálculo do Arrecadômetro Brasil.
+//
+// Este arquivo é a implementação da página de metodologia. As mesmas funções
+// são aplicadas a todos os governos e partidos; nenhuma recebe exceção.
+// Valores ausentes ficam ausentes: nada aqui estima ou interpola dado faltante.
+
+// ---------------------------------------------------------------------------
+// Meses
+// ---------------------------------------------------------------------------
+
+export function listaMeses(inicio, fim) {
+  const [ai, mi] = inicio.split('-').map(Number);
+  const [af, mf] = fim.split('-').map(Number);
+  const meses = [];
+  let a = ai;
+  let m = mi;
+  while (a < af || (a === af && m <= mf)) {
+    meses.push(`${a}-${String(m).padStart(2, '0')}`);
+    m += 1;
+    if (m > 12) { m = 1; a += 1; }
+  }
+  return meses;
+}
+
+export const anoDe = (mes) => Number(mes.slice(0, 4));
+export const mesDoAno = (mes) => Number(mes.slice(5, 7));
+
+export function ultimoIndice(valores) {
+  for (let i = valores.length - 1; i >= 0; i -= 1) if (valores[i] != null) return i;
+  return -1;
+}
+
+// ---------------------------------------------------------------------------
+// Inflação e valores reais
+// ---------------------------------------------------------------------------
+
+// Índice acumulado a partir das variações mensais (%). O índice do mês i já
+// inclui a inflação do próprio mês. Se faltar uma variação, o índice para ali.
+export function indiceAcumulado(variacoes) {
+  const indice = new Array(variacoes.length).fill(null);
+  let acumulado = 1;
+  for (let i = 0; i < variacoes.length; i += 1) {
+    if (variacoes[i] == null) break;
+    acumulado *= 1 + variacoes[i] / 100;
+    indice[i] = acumulado;
+  }
+  return indice;
+}
+
+// Converte valores nominais para reais do mês de referência
+// (padrão: o último mês com índice). valor_real = valor * I(ref) / I(mês).
+export function deflacionar(valores, indice, referencia = ultimoIndice(indice)) {
+  const base = indice[referencia];
+  return valores.map((v, i) => (v == null || indice[i] == null ? null : (v * base) / indice[i]));
+}
+
+// ---------------------------------------------------------------------------
+// Atribuição de períodos a governos (mesma regra para todos)
+// ---------------------------------------------------------------------------
+
+// O mês pertence a quem exercia o cargo no dia 15.
+export function governoDoMes(mandatos, mes) {
+  const dia = `${mes}-15`;
+  return mandatos.find((m) => m.inicio <= dia && (m.fim == null || m.fim >= dia)) ?? null;
+}
+
+// O ano pertence a quem governou mais meses dele. Em caso de empate, a quem
+// estava no cargo em dezembro.
+export function governoDoAno(mandatos, ano) {
+  const contagem = new Map();
+  for (let m = 1; m <= 12; m += 1) {
+    const g = governoDoMes(mandatos, `${ano}-${String(m).padStart(2, '0')}`);
+    if (g) contagem.set(g.id, (contagem.get(g.id) ?? 0) + 1);
+  }
+  if (contagem.size === 0) return null;
+  const maximo = Math.max(...contagem.values());
+  const empatados = [...contagem.entries()].filter(([, n]) => n === maximo).map(([id]) => id);
+  if (empatados.length === 1) return mandatos.find((m) => m.id === empatados[0]);
+  return governoDoMes(mandatos, `${ano}-12`);
+}
+
+// Primeiro ano atribuído a cada mandato, olhando o calendário inteiro (com ou
+// sem dado), para que a opção "excluir o 1º ano" seja igual para todos.
+export function primeiroAnoDeCadaMandato(mandatos, anoInicial, anoFinal) {
+  const primeiro = new Map();
+  for (let ano = anoInicial; ano <= anoFinal; ano += 1) {
+    const g = governoDoAno(mandatos, ano);
+    if (g && !primeiro.has(g.id)) primeiro.set(g.id, ano);
+  }
+  return primeiro;
+}
+
+// Faixas contínuas de meses de cada mandato, para o fundo dos gráficos.
+export function faixasDeMandato(mandatos, meses) {
+  const faixas = [];
+  let atual = null;
+  meses.forEach((mes, i) => {
+    const g = governoDoMes(mandatos, mes);
+    const id = g ? g.id : null;
+    if (!atual || atual.id !== id) {
+      atual = { id, rotulo: g ? g.rotulo : '', partido: g ? g.partido : '', inicio: i, fim: i };
+      faixas.push(atual);
+    } else {
+      atual.fim = i;
+    }
+  });
+  return faixas.filter((f) => f.id);
+}
+
+// Faixas por ano (para gráficos anuais).
+export function faixasAnuais(mandatos, anos) {
+  const faixas = [];
+  let atual = null;
+  anos.forEach((ano, i) => {
+    const g = governoDoAno(mandatos, ano);
+    const id = g ? g.id : null;
+    if (!atual || atual.id !== id) {
+      atual = { id, rotulo: g ? g.rotulo : '', partido: g ? g.partido : '', inicio: i, fim: i };
+      faixas.push(atual);
+    } else {
+      atual.fim = i;
+    }
+  });
+  return faixas.filter((f) => f.id);
+}
+
+// ---------------------------------------------------------------------------
+// Agregação anual
+// ---------------------------------------------------------------------------
+
+// Agrupa uma série mensal por ano. Devolve, para cada ano, os índices dos
+// meses com dado. A soma e a média usam só esses meses.
+export function porAno(meses, valores, modo = 'soma') {
+  const anos = new Map();
+  meses.forEach((mes, i) => {
+    const v = valores[i];
+    if (v == null) return;
+    const ano = anoDe(mes);
+    if (!anos.has(ano)) anos.set(ano, { ano, soma: 0, meses: [] });
+    const reg = anos.get(ano);
+    reg.soma += v;
+    reg.meses.push(mesDoAno(mes));
+  });
+  return [...anos.values()].map((r) => ({
+    ano: r.ano,
+    valor: modo === 'media' ? r.soma / r.meses.length : r.soma,
+    meses: r.meses,
+    parcial: r.meses.length < 12,
+  }));
+}
+
+// Variação real de cada ano contra os MESMOS meses do ano anterior. Para anos
+// completos, é a variação anual comum; para o ano em curso, compara o mesmo
+// pedaço do calendário. modo: 'soma' (fluxos) ou 'media' (preços e salários).
+export function variacaoMesmosMeses(meses, valores, modo = 'soma') {
+  const porMes = new Map();
+  meses.forEach((mes, i) => { if (valores[i] != null) porMes.set(mes, valores[i]); });
+  const resultado = new Map();
+  for (const linha of porAno(meses, valores, modo)) {
+    let atual = 0;
+    let anterior = 0;
+    let completo = true;
+    for (const m of linha.meses) {
+      const mm = String(m).padStart(2, '0');
+      const a = porMes.get(`${linha.ano}-${mm}`);
+      const b = porMes.get(`${linha.ano - 1}-${mm}`);
+      if (b == null) { completo = false; break; }
+      atual += a;
+      anterior += b;
+    }
+    resultado.set(linha.ano, completo && anterior !== 0 ? (atual / anterior - 1) * 100 : null);
+  }
+  return resultado;
+}
+
+// ---------------------------------------------------------------------------
+// Arrecadação federal
+// ---------------------------------------------------------------------------
+
+// Soma mensal dos grupos (R$ milhões correntes). comparavel=true usa só a série
+// comparável: sem receita previdenciária e sem receitas de outros órgãos.
+export function arrecadacaoMensal(grupos, comparavel) {
+  const usados = grupos.filter((g) => !comparavel || g.comparavel);
+  const n = usados[0]?.valores.length ?? 0;
+  const total = new Array(n).fill(null);
+  for (let i = 0; i < n; i += 1) {
+    let soma = null;
+    for (const g of usados) {
+      const v = g.valores[i];
+      if (v != null) soma = (soma ?? 0) + v;
+    }
+    total[i] = soma;
+  }
+  return total;
+}
+
+// Linhas anuais: arrecadação nominal e real (R$ milhões), carga em % do PIB
+// (mesmos meses no numerador e no denominador) e variação real.
+export function anualArrecadacao(meses, nominal, real, pib) {
+  const linhasNominais = porAno(meses, nominal, 'soma');
+  const reais = new Map(porAno(meses, real, 'soma').map((l) => [l.ano, l.valor]));
+  const variacao = variacaoMesmosMeses(meses, real, 'soma');
+  const pibPorMes = new Map(meses.map((m, i) => [m, pib[i]]));
+  return linhasNominais.map((l) => {
+    let somaPib = 0;
+    let pibCompleto = true;
+    for (const m of l.meses) {
+      const p = pibPorMes.get(`${l.ano}-${String(m).padStart(2, '0')}`);
+      if (p == null) { pibCompleto = false; break; }
+      somaPib += p;
+    }
+    return {
+      ano: l.ano,
+      meses: l.meses.length,
+      parcial: l.parcial,
+      nominal: l.valor,
+      real: reais.get(l.ano) ?? null,
+      carga: pibCompleto && somaPib > 0 ? (l.valor / somaPib) * 100 : null,
+      variacaoReal: variacao.get(l.ano) ?? null,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Resumo por governo ou por partido
+// ---------------------------------------------------------------------------
+
+// linhas: [{ano, parcial, ...métricas}]. Para cada mandato (ou partido), média
+// simples das métricas nos anos atribuídos a ele que têm o dado.
+export function resumoPorGoverno(linhas, mandatos, metricas, opcoes = {}) {
+  const { excluirPrimeiroAno = false, agruparPorPartido = false } = opcoes;
+  const anos = linhas.map((l) => l.ano);
+  const primeiro = primeiroAnoDeCadaMandato(mandatos, Math.min(...anos, 1995), Math.max(...anos));
+  const grupos = new Map();
+
+  for (const g of mandatos) {
+    const chave = agruparPorPartido ? g.partido : g.id;
+    if (!grupos.has(chave)) {
+      grupos.set(chave, {
+        chave,
+        rotulo: agruparPorPartido ? g.partido : g.rotulo,
+        partido: g.partido,
+        mandatos: [],
+        anos: [],
+        parciais: [],
+        excluidos: [],
+        somas: Object.fromEntries(metricas.map((m) => [m, { soma: 0, n: 0 }])),
+      });
+    }
+    grupos.get(chave).mandatos.push(g.rotulo);
+  }
+
+  for (const linha of linhas) {
+    const g = governoDoAno(mandatos, linha.ano);
+    if (!g) continue;
+    const grupo = grupos.get(agruparPorPartido ? g.partido : g.id);
+    if (excluirPrimeiroAno && primeiro.get(g.id) === linha.ano) {
+      grupo.excluidos.push(linha.ano);
+      continue;
+    }
+    grupo.anos.push(linha.ano);
+    if (linha.parcial) grupo.parciais.push(linha.ano);
+    for (const m of metricas) {
+      if (linha[m] != null) {
+        grupo.somas[m].soma += linha[m];
+        grupo.somas[m].n += 1;
+      }
+    }
+  }
+
+  return [...grupos.values()].map((g) => ({
+    chave: g.chave,
+    rotulo: g.rotulo,
+    partido: g.partido,
+    mandatos: [...new Set(g.mandatos)],
+    anos: g.anos,
+    parciais: g.parciais,
+    excluidos: g.excluidos,
+    medias: Object.fromEntries(metricas.map((m) => [m, g.somas[m].n ? g.somas[m].soma / g.somas[m].n : null])),
+    anosComDado: Object.fromEntries(metricas.map((m) => [m, g.somas[m].n])),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Salário mínimo
+// ---------------------------------------------------------------------------
+
+export function salarioMinimo(meses, s) {
+  const inpc = indiceAcumulado(s.inpc_var);
+  const real = deflacionar(s.salario_minimo, inpc);
+  const emDolar = s.salario_minimo.map((v, i) => (v == null || s.dolar_ptax[i] == null ? null : v / s.dolar_ptax[i]));
+  const frenteNecessario = s.salario_minimo.map((v, i) =>
+    (v == null || s.smn_dieese[i] == null ? null : (v / s.smn_dieese[i]) * 100));
+  return { real, emDolar, frenteNecessario, referencia: meses[ultimoIndice(inpc)] };
+}
+
+export function anualSalario(meses, sm) {
+  const real = porAno(meses, sm.real, 'media');
+  const variacao = variacaoMesmosMeses(meses, sm.real, 'media');
+  const dolar = new Map(porAno(meses, sm.emDolar, 'media').map((l) => [l.ano, l.valor]));
+  const necessario = new Map(porAno(meses, sm.frenteNecessario, 'media').map((l) => [l.ano, l.valor]));
+  return real.map((l) => ({
+    ano: l.ano,
+    parcial: l.parcial,
+    real: l.valor,
+    variacaoReal: variacao.get(l.ano) ?? null,
+    emDolar: dolar.get(l.ano) ?? null,
+    frenteNecessario: necessario.get(l.ano) ?? null,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Câmbio
+// ---------------------------------------------------------------------------
+
+// Dólar a preços de hoje: dólar do mês * (inflação do Brasil desde então)
+// / (inflação dos EUA desde então). Referência: último mês com os três dados.
+export function dolarReal(ptax, ipcaIndice, cpiEua) {
+  let base = -1;
+  for (let i = ptax.length - 1; i >= 0; i -= 1) {
+    if (ptax[i] != null && ipcaIndice[i] != null && cpiEua[i] != null) { base = i; break; }
+  }
+  if (base < 0) return { valores: ptax.map(() => null), base };
+  const valores = ptax.map((p, i) => {
+    if (p == null || ipcaIndice[i] == null || cpiEua[i] == null) return null;
+    return p * (ipcaIndice[base] / ipcaIndice[i]) * (cpiEua[i] / cpiEua[base]);
+  });
+  return { valores, base };
+}
+
+// ---------------------------------------------------------------------------
+// Tabela do Imposto de Renda
+// ---------------------------------------------------------------------------
+
+// Isenção vigente em cada mês (degrau), conforme a tabela publicada.
+export function serieIsencao(meses, tabela, campo = 'isencao_efetiva') {
+  return meses.map((mes) => {
+    let vigente = null;
+    for (const t of tabela) if (t.inicio <= mes) vigente = t;
+    return vigente ? Number(vigente[campo]) : null;
+  });
+}
+
+// Isenção da primeira tabela (jan/1996) corrigida pelo IPCA acumulado até o
+// mês anterior a cada mês.
+export function isencaoCorrigida(meses, ipcaIndice, tabela) {
+  const primeira = tabela[0];
+  const iBase = meses.indexOf(primeira.inicio);
+  if (iBase < 1) return meses.map(() => null);
+  const indiceBase = ipcaIndice[iBase - 1];
+  return meses.map((_, i) => {
+    if (i < iBase) return null;
+    const idx = ipcaIndice[i - 1];
+    return idx == null ? null : Number(primeira.isencao_efetiva) * (idx / indiceBase);
+  });
+}
+
+// Para cada mandato: quanto a isenção foi corrigida e quanto foi o IPCA no
+// mesmo período (do mês anterior à posse ao último mês no cargo ou com dado).
+export function irPorMandato(meses, mandatos, isencao, ipcaIndice) {
+  const iPrimeiro = isencao.findIndex((v) => v != null);
+  return mandatos.map((g) => {
+    const idxPosse = meses.findIndex((m) => governoDoMes(mandatos, m)?.id === g.id);
+    let idxFim = -1;
+    meses.forEach((m, i) => { if (governoDoMes(mandatos, m)?.id === g.id) idxFim = i; });
+    if (idxPosse < 0 || idxFim < 0) return { id: g.id, rotulo: g.rotulo, partido: g.partido, correcao: null, ipca: null };
+    const inicio = Math.max(idxPosse - 1, iPrimeiro);
+    const fim = Math.min(idxFim, ultimoIndice(ipcaIndice));
+    const ok = inicio >= 0 && fim > inicio && isencao[inicio] != null && isencao[fim] != null;
+    return {
+      id: g.id,
+      rotulo: g.rotulo,
+      partido: g.partido,
+      de: meses[inicio],
+      ate: meses[fim],
+      correcao: ok ? (isencao[fim] / isencao[inicio] - 1) * 100 : null,
+      ipca: ok ? (ipcaIndice[fim] / ipcaIndice[inicio] - 1) * 100 : null,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Arrecadômetro (estimativa em tempo real)
+// ---------------------------------------------------------------------------
+
+const BRASILIA = -3 * 3600 * 1000; // UTC-3, sem horário de verão desde 2019
+
+function inicioDoMesBrasilia(mes) {
+  const [a, m] = mes.split('-').map(Number);
+  return Date.UTC(a, m - 1, 1) - BRASILIA;
+}
+
+function mesSeguinte(mes) {
+  const [a, m] = mes.split('-').map(Number);
+  return m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, '0')}`;
+}
+
+// confirmado: soma dos meses do ano corrente já publicados pela Receita.
+// estimado: média por segundo dos últimos 12 meses publicados, aplicada do
+// início do mês seguinte ao último publicado até agora.
+export function arrecadometro(meses, totalMilhoes, agoraMs = Date.now()) {
+  const iUlt = ultimoIndice(totalMilhoes);
+  if (iUlt < 11) return null;
+  const ultimoMes = meses[iUlt];
+  const anoAtual = new Date(agoraMs + BRASILIA).getUTCFullYear();
+
+  let confirmado = 0;
+  const mesesConfirmados = [];
+  meses.forEach((mes, i) => {
+    if (anoDe(mes) === anoAtual && totalMilhoes[i] != null) {
+      confirmado += totalMilhoes[i] * 1e6;
+      mesesConfirmados.push(mes);
+    }
+  });
+
+  let somaDoze = 0;
+  for (let i = iUlt - 11; i <= iUlt; i += 1) somaDoze += totalMilhoes[i] * 1e6;
+  const segundosDoze = (inicioDoMesBrasilia(mesSeguinte(ultimoMes)) - inicioDoMesBrasilia(meses[iUlt - 11])) / 1000;
+  const porSegundo = somaDoze / segundosDoze;
+
+  const inicioAno = Date.UTC(anoAtual, 0, 1) - BRASILIA;
+  const inicioEstimativa = Math.max(inicioDoMesBrasilia(mesSeguinte(ultimoMes)), inicioAno);
+
+  return {
+    anoAtual,
+    ultimoMes,
+    mesesConfirmados,
+    confirmado,
+    porSegundo,
+    somaDoze,
+    inicioEstimativa,
+    estimadoEm: (ms) => Math.max(0, (ms - inicioEstimativa) / 1000) * porSegundo,
+  };
+}

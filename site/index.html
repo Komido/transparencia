@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arrecadômetro Brasil</title>
+  <meta name="description" content="Arrecadação federal, salário mínimo, dólar e tabela do Imposto de Renda com dados oficiais e a mesma régua para todos os governos.">
+  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="dados/painel.json" as="fetch" type="application/json" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/estilo.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo">
+    <div class="conteiner">
+      <a class="marca" href="./">Arrecadômetro Brasil</a>
+      <nav class="navegacao" aria-label="Principal">
+        <a href="./" aria-current="page">Brasil</a>
+        <a href="#proximas">Estados e cidades</a>
+        <a href="metodologia.html">Metodologia</a>
+        <a href="#fontes">Fontes</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="conteiner carregando">
+    <section class="regua" aria-label="Princípio do site">
+      <strong>Mesma régua para todos os governos e partidos</strong>
+      <p>As regras de cálculo foram definidas antes de olhar os resultados e valem igualmente para qualquer governo ou partido. O site mostra o que os dados oficiais registram em cada período, sem juízo de valor e sem atribuir causa. <a href="metodologia.html">Veja como calculamos</a>.</p>
+    </section>
+
+    <div id="erro-carga" class="erro-carga" hidden></div>
+
+    <section id="contador" class="bloco bloco-dados" aria-labelledby="contador-titulo">
+      <h1 id="contador-titulo" class="contador-rotulo">Tributos federais arrecadados em <span data-campo="ano-atual">2026</span></h1>
+      <p class="contador-valor" data-campo="contador" aria-live="off">R$ 0</p>
+      <dl class="contador-partes">
+        <div>
+          <dt>Confirmado pela Receita Federal (<span data-campo="meses-confirmados">n/d</span>)</dt>
+          <dd data-campo="confirmado">n/d</dd>
+        </div>
+        <div>
+          <dt>Estimado desde <span data-campo="inicio-estimativa">n/d</span>, pela média dos últimos 12 meses</dt>
+          <dd data-campo="estimado">n/d</dd>
+        </div>
+      </dl>
+      <p class="nota">O valor em tempo real é uma estimativa: a arrecadação oficial é publicada uma vez por mês. Inclui todas as receitas federais (impostos, contribuições e receita previdenciária). Estados e municípios ainda não estão incluídos.</p>
+      <p class="fonte">Fonte: Receita Federal, arrecadação mensal por tributo. Dado até <span data-campo="arrec-ultimo">n/d</span>.</p>
+    </section>
+
+    <nav class="atalhos" aria-label="Seções">
+      <a href="#arrecadacao">Arrecadação</a>
+      <a href="#composicao">De onde vem</a>
+      <a href="#salario">Salário mínimo</a>
+      <a href="#dolar">Dólar</a>
+      <a href="#ir">Imposto de Renda</a>
+      <a href="#avisos">Avisos</a>
+    </nav>
+
+    <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
+      <header>
+        <h2 id="arrecadacao-titulo">Arrecadação federal por ano</h2>
+        <p>Série comparável desde 2000: impostos e contribuições administrados pela Receita, sem a receita previdenciária e sem receitas de outros órgãos, que só entram na base em anos posteriores.</p>
+      </header>
+      <div class="controles">
+        <fieldset class="segmentos">
+          <legend>Medida</legend>
+          <label><input type="radio" name="arrec-medida" value="real" checked><span>Valor real</span></label>
+          <label><input type="radio" name="arrec-medida" value="pib"><span>% do PIB</span></label>
+        </fieldset>
+      </div>
+      <div id="grafico-arrecadacao"></div>
+      <p class="nota" data-campo="arrec-nota"></p>
+      <details class="tabela-dados">
+        <summary>Ver os números por ano</summary>
+        <div class="tabela-rolagem"><table id="tabela-arrecadacao-anual"></table></div>
+        <button type="button" class="botao" data-baixar="arrecadacao">Baixar CSV mensal</button>
+      </details>
+
+      <h3>Comparação entre governos</h3>
+      <div class="controles">
+        <fieldset class="segmentos">
+          <legend>Agrupar por</legend>
+          <label><input type="radio" name="arrec-agrupar" value="mandato" checked><span>Mandato</span></label>
+          <label><input type="radio" name="arrec-agrupar" value="partido"><span>Partido</span></label>
+        </fieldset>
+        <label class="opcao"><input type="checkbox" id="arrec-excluir-primeiro"> Excluir o 1º ano de cada mandato</label>
+      </div>
+      <div class="tabela-rolagem"><table id="tabela-arrecadacao-governos"></table></div>
+      <p class="nota">Cada ano conta para o governo que exerceu o cargo na maior parte dele. O 1º ano de cada mandato executa o orçamento aprovado no ano anterior; a opção acima permite tirá-lo da conta, para todos ao mesmo tempo. A arrecadação também depende da economia e de receitas extraordinárias, então a tabela descreve o período e não mede o mérito de ninguém.</p>
+      <p class="fonte">Fontes: Receita Federal (arrecadação), IBGE via Banco Central (IPCA, SGS 433) e Banco Central (PIB mensal, SGS 4380).</p>
+    </section>
+
+    <section id="composicao" class="bloco bloco-dados" aria-labelledby="composicao-titulo">
+      <header>
+        <h2 id="composicao-titulo">De onde vem a arrecadação federal</h2>
+        <p>Participação de cada grupo de tributos nos últimos 12 meses publicados (<span data-campo="composicao-periodo">n/d</span>).</p>
+      </header>
+      <ul class="barras" id="lista-composicao"></ul>
+      <p class="fonte">Fonte: Receita Federal.</p>
+    </section>
+
+    <section id="salario" class="bloco bloco-dados" aria-labelledby="salario-titulo">
+      <header>
+        <h2 id="salario-titulo">Salário mínimo</h2>
+        <p>O mesmo salário, medido de três jeitos.</p>
+      </header>
+      <dl class="numeros" id="numeros-salario"></dl>
+      <div class="controles">
+        <fieldset class="segmentos">
+          <legend>Régua</legend>
+          <label><input type="radio" name="sm-regua" value="real" checked><span>Poder de compra</span></label>
+          <label><input type="radio" name="sm-regua" value="dolar"><span>Em dólar</span></label>
+          <label><input type="radio" name="sm-regua" value="necessario"><span>Frente ao necessário</span></label>
+        </fieldset>
+      </div>
+      <p class="nota" data-campo="sm-explicacao"></p>
+      <div id="grafico-salario"></div>
+      <h3>Comparação entre governos</h3>
+      <div class="tabela-rolagem"><table id="tabela-salario-governos"></table></div>
+      <p class="nota">Ganho real médio: média, nos anos de cada governo, da variação do salário médio do ano corrigido pelo INPC. O ano em curso compara os mesmos meses do ano anterior.</p>
+      <button type="button" class="botao" data-baixar="salario">Baixar CSV mensal</button>
+      <p class="fonte">Fontes: salário mínimo (Banco Central, SGS 1619), INPC (IBGE via Banco Central, SGS 188), dólar (Banco Central, SGS 3698) e salário mínimo necessário (DIEESE).</p>
+    </section>
+
+    <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
+      <header>
+        <h2 id="dolar-titulo">Dólar</h2>
+        <p>Cotação média de cada mês e o mesmo valor trazido para preços de hoje, descontando a inflação do Brasil e a dos Estados Unidos.</p>
+      </header>
+      <dl class="numeros" id="numeros-dolar"></dl>
+      <div id="grafico-dolar"></div>
+      <p class="nota">O dólar a preços de hoje mostra se o real está mais forte ou mais fraco do que no passado em termos de poder de compra, o que a cotação nominal sozinha não mostra.</p>
+      <button type="button" class="botao" data-baixar="dolar">Baixar CSV mensal</button>
+      <p class="fonte">Fontes: dólar comercial, venda, média mensal (Banco Central, SGS 3698), IPCA (IBGE) e CPI-U dos EUA (U.S. Bureau of Labor Statistics).</p>
+    </section>
+
+    <section id="ir" class="bloco bloco-dados" aria-labelledby="ir-titulo">
+      <header>
+        <h2 id="ir-titulo">Tabela do Imposto de Renda</h2>
+        <p>Maior salário mensal tributável sem imposto, comparado com o limite de 1996 corrigido pela inflação.</p>
+      </header>
+      <dl class="numeros" id="numeros-ir"></dl>
+      <div id="grafico-ir"></div>
+      <h3>Correção em cada governo</h3>
+      <div class="tabela-rolagem"><table id="tabela-ir-governos"></table></div>
+      <p class="nota">Período de cada linha: do mês anterior à posse até o último mês no cargo (ou o último mês com dado). A série começa em janeiro de 1996, primeira tabela em reais da Lei 9.250/1995.</p>
+      <button type="button" class="botao" data-baixar="ir">Baixar CSV mensal</button>
+      <p class="fonte">Fonte: tabelas do IRPF publicadas pela Receita Federal, e IPCA (IBGE).</p>
+    </section>
+
+    <section id="avisos" class="bloco bloco-dados" aria-labelledby="avisos-titulo">
+      <header>
+        <h2 id="avisos-titulo">Avisos sobre os dados</h2>
+        <p>Problemas encontrados nas fontes oficiais. Os dados são mostrados como a fonte publica; os avisos dizem o que está errado e o que é afetado.</p>
+      </header>
+      <div id="lista-avisos"></div>
+    </section>
+
+    <section id="proximas" class="bloco" aria-labelledby="proximas-titulo">
+      <h2 id="proximas-titulo">Estados e cidades</h2>
+      <p>Em construção. As próximas etapas trazem a arrecadação própria dos estados (ICMS e IPVA), receitas e despesas de cada prefeitura, população e indicadores de emprego, sempre com a data do dado e a fonte oficial.</p>
+    </section>
+
+    <section id="fontes" class="bloco" aria-labelledby="fontes-titulo">
+      <h2 id="fontes-titulo">Fontes e atualização</h2>
+      <p>Os dados são coletados automaticamente todos os dias nas fontes oficiais, validados e publicados. Quando uma fonte muda de formato ou devolve dado incoerente, a carga é recusada e o site continua com a versão anterior.</p>
+      <ul class="lista-fontes" id="lista-fontes"></ul>
+      <p class="nota">Todos os dados usados nesta página: <a href="dados/painel.json" download>painel.json</a>. Versão dos dados: <code data-campo="versao">n/d</code>.</p>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="conteiner">
+      <p>Arrecadômetro Brasil. Projeto independente, sem vínculo com governos ou partidos.</p>
+      <p>Dados atualizados em <span data-campo="atualizado-em">n/d</span>. <a href="metodologia.html">Metodologia</a></p>
+    </div>
+  </footer>
+</body>
+</html>

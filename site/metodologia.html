@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metodologia · Arrecadômetro Brasil</title>
+  <meta name="description" content="Como o Arrecadômetro Brasil calcula cada número: fontes oficiais, correção pela inflação e a mesma regra para todos os governos e partidos.">
+  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/estilo.css">
+  <script type="module" src="js/metodologia.js"></script>
+</head>
+<body>
+  <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="topo">
+    <div class="conteiner">
+      <a class="marca" href="./">Arrecadômetro Brasil</a>
+      <nav class="navegacao" aria-label="Principal">
+        <a href="./">Brasil</a>
+        <a href="./#proximas">Estados e cidades</a>
+        <a href="metodologia.html" aria-current="page">Metodologia</a>
+        <a href="./#fontes">Fontes</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="conteiner">
+    <article class="bloco texto">
+      <h1>Metodologia</h1>
+      <p>Esta página explica como cada número do site é obtido. O código que faz os cálculos no seu navegador está em <a href="js/calculos.js">js/calculos.js</a> e pode ser lido por qualquer pessoa. A coleta e a validação dos dados rodam num banco de dados com as mesmas regras descritas aqui.</p>
+
+      <section class="regua" aria-labelledby="regua-titulo">
+        <strong id="regua-titulo">Mesma régua para todos os governos e partidos</strong>
+        <p>Todas as regras abaixo valem igualmente para qualquer governo, partido, estado ou cidade. Nenhum período recebe tratamento diferente.</p>
+      </section>
+
+      <h2 id="principios">Compromissos</h2>
+      <ol>
+        <li>As regras foram definidas antes de olhar os resultados e estão todas descritas nesta página.</li>
+        <li>As mesmas regras valem para todos. Quando uma opção existe (por exemplo, excluir o primeiro ano de cada mandato), ela muda o cálculo de todos ao mesmo tempo.</li>
+        <li>Só fontes oficiais e públicas, com link para o dado bruto e a data do último dado disponível.</li>
+        <li>Os textos descrevem o que os números mostram. Não há adjetivos, ranking de melhor ou pior governo, nem atribuição de causa.</li>
+        <li>Dado ausente fica ausente. Nada é estimado ou interpolado, com uma exceção identificada como tal: o contador em tempo real.</li>
+        <li>Erros encontrados nas fontes aparecem como avisos. O dado não é corrigido por nós.</li>
+        <li>Mudanças de regra ficam registradas, com data e motivo, no histórico do projeto.</li>
+      </ol>
+
+      <h2 id="governos">Como cada período é atribuído a um governo</h2>
+      <ul>
+        <li><strong>Mês:</strong> pertence a quem exercia a Presidência no dia 15.</li>
+        <li><strong>Ano:</strong> pertence a quem governou mais meses dele. Em caso de empate, a quem estava no cargo em dezembro.</li>
+        <li><strong>Primeiro ano de mandato:</strong> executa o orçamento aprovado no ano anterior. Nas tabelas de comparação existe a opção de excluí-lo, e ela vale para todos os mandatos, inclusive reeleições.</li>
+        <li><strong>Partido:</strong> o partido pelo qual a chapa foi registrada na eleição, segundo o TSE. Mudanças de filiação durante o mandato não alteram a atribuição.</li>
+      </ul>
+      <p>Exemplo de 2016: Dilma Rousseff foi afastada em 12/05/2016, e Michel Temer passou a exercer a Presidência nessa data. Pela regra do dia 15, maio a dezembro contam para Temer. Como ele governou 8 dos 12 meses, o ano de 2016 também conta para ele.</p>
+      <p><strong>O que a comparação não diz:</strong> resultados de um período dependem também do Congresso, da economia mundial, do preço das commodities, de decisões de governos anteriores e de receitas extraordinárias. As tabelas descrevem o que aconteceu em cada período; elas não medem o mérito de nenhum governo.</p>
+      <div class="tabela-rolagem"><table id="tabela-mandatos"></table></div>
+
+      <h2 id="inflacao">Valores corrigidos pela inflação</h2>
+      <p>Valores de épocas diferentes só são comparáveis depois de corrigidos pela inflação. O site usa:</p>
+      <ul>
+        <li><strong>IPCA (IBGE)</strong> para arrecadação, dólar e tabela do Imposto de Renda. É o índice oficial de inflação do país.</li>
+        <li><strong>INPC (IBGE)</strong> para o salário mínimo. É o índice usado nos reajustes do mínimo e mede a inflação das famílias de menor renda.</li>
+      </ul>
+      <p class="formula">valor real = valor do mês × índice do mês de referência ÷ índice do mês</p>
+      <p>O mês de referência é o último com inflação oficial publicada. A correção é feita mês a mês, antes de somar ou fazer médias anuais.</p>
+
+      <h2 id="arrecadacao">Arrecadação federal</h2>
+      <p><strong>Fonte:</strong> arquivo de dados abertos da Receita Federal com a arrecadação mensal por UF e por tributo, desde janeiro de 2000. Os valores estão em reais correntes.</p>
+      <h3>Série comparável</h3>
+      <p>A receita previdenciária só entra nessa base em agosto de 2005, e as receitas administradas por outros órgãos em setembro de 2010. Incluí-las faria os anos posteriores parecerem maiores só por mudança de cobertura. Por isso, as comparações entre anos e governos usam a série comparável: impostos e contribuições administrados pela Receita, sem essas duas rubricas.</p>
+      <p>O contador em tempo real e o gráfico de composição usam o total, porque mostram o retrato atual e não comparações no tempo.</p>
+      <h3>Em % do PIB</h3>
+      <p>Arrecadação dividida pelo PIB dos mesmos meses. O PIB mensal é a estimativa do Banco Central (série 4380 do SGS), compatível com o PIB trimestral do IBGE. Esta medida é a arrecadação federal em relação ao PIB; ela não é a carga tributária total do país, que inclui estados e municípios.</p>
+      <h3>Variação real</h3>
+      <p>Variação do valor corrigido pelo IPCA em relação aos mesmos meses do ano anterior. Para anos completos, é a variação anual comum. Para o ano em curso, compara o mesmo pedaço do calendário.</p>
+      <h3>Média por governo</h3>
+      <p>Média simples dos valores anuais atribuídos a cada mandato. A tabela informa quais anos entraram na conta. O primeiro mandato de FHC fica sem dado porque a base da Receita começa em 2000; o ano 2000 não tem variação calculada porque falta 1999.</p>
+      <h3>Formatos numéricos do arquivo da Receita</h3>
+      <p>O arquivo mistura formatos: na maior parte dos meses usa vírgula decimal; em junho de 2023 e maio de 2024 usa ponto como separador de milhar; em 2001 e 2002 usa vírgula como separador de milhar no mesmo mês em que aparecem centavos com duas casas. Regra adotada: um mês usa vírgula como milhar quando algum valor dele tem duas ou mais vírgulas em grupos de três dígitos; só nesses meses um valor como "408,348" é lido como 408.348 reais. A escolha muda o total mensal desses meses em no máximo 0,36%. Qualquer formato fora dessas regras faz a carga ser recusada.</p>
+      <div class="tabela-rolagem"><table id="tabela-rubricas"></table></div>
+
+      <h2 id="contador">Contador em tempo real</h2>
+      <p>A arrecadação oficial é publicada uma vez por mês. O contador soma:</p>
+      <ol>
+        <li>o total já publicado pela Receita para os meses do ano corrente;</li>
+        <li>uma estimativa para o período ainda não publicado: a média por segundo dos últimos 12 meses publicados, aplicada desde o primeiro dia do mês seguinte ao último publicado.</li>
+      </ol>
+      <p class="formula">estimado = (soma dos últimos 12 meses ÷ segundos desses 12 meses) × segundos desde o início do período não publicado</p>
+      <p>Quando a Receita publica um novo mês, a parte estimada é substituída pelo valor oficial.</p>
+
+      <h2 id="salario">Salário mínimo</h2>
+      <ul>
+        <li><strong>Poder de compra:</strong> salário corrigido pelo INPC até o mês de referência.</li>
+        <li><strong>Em dólar:</strong> salário do mês dividido pela cotação média do dólar no mesmo mês (dólares da época).</li>
+        <li><strong>Frente ao necessário:</strong> salário dividido pelo salário mínimo necessário estimado pelo DIEESE, que calcula o valor capaz de cobrir as despesas básicas de uma família de quatro pessoas. É uma estimativa do DIEESE, com metodologia própria.</li>
+      </ul>
+      <p>O ganho real médio por governo é a média, nos anos de cada mandato, da variação do salário médio do ano corrigido pelo INPC.</p>
+
+      <h2 id="dolar">Dólar a preços de hoje</h2>
+      <p>A cotação nominal de 1995 e a de hoje não são comparáveis diretamente, porque Brasil e Estados Unidos tiveram inflações diferentes. O site traz cada cotação para preços de hoje:</p>
+      <p class="formula">dólar a preços de hoje = cotação do mês × (IPCA de hoje ÷ IPCA do mês) × (CPI dos EUA no mês ÷ CPI dos EUA hoje)</p>
+      <p>O CPI-U é publicado pelo U.S. Bureau of Labor Statistics. Em outubro de 2025 o BLS não publicou o índice; esse mês fica sem valor a preços de hoje.</p>
+
+      <h2 id="ir">Tabela do Imposto de Renda</h2>
+      <p><strong>Isenção efetiva:</strong> maior rendimento tributável mensal sem imposto.</p>
+      <ul>
+        <li>Até abril de 2023: o limite da faixa isenta da tabela.</li>
+        <li>De maio de 2023 a dezembro de 2025: o limite da tabela mais o desconto simplificado mensal.</li>
+        <li>A partir de janeiro de 2026: R$ 5.000,00, pela tabela de redução da Lei 15.270/2025.</li>
+      </ul>
+      <p><strong>Limite de 1996 corrigido:</strong> R$ 900,00 de janeiro de 1996 corrigidos pelo IPCA acumulado até o mês anterior. A diferença entre as duas linhas é quanto a isenção precisaria subir para repor a inflação desde 1996.</p>
+      <p>Na tabela por governo, o período vai do mês anterior à posse até o último mês no cargo. Para o primeiro mandato de FHC, começa em janeiro de 1996, primeira tabela em reais.</p>
+      <div class="tabela-rolagem"><table id="tabela-ir"></table></div>
+
+      <h2 id="limitacoes">Limitações conhecidas</h2>
+      <ul>
+        <li>A arrecadação por tributo começa em 2000: não há dados de 1995 a 1999 nesta base.</li>
+        <li>No arquivo da Receita, a receita previdenciária e as receitas de outros órgãos de dezembro de 2025 repetem os valores de fevereiro de 2026 em todas as UFs. O total oficial de dezembro de 2025 divulgado pela Receita foi de R$ 292,7 bilhões; o arquivo soma R$ 261,7 bilhões. A série comparável não usa essas rubricas; o contador e a composição usam e ficam subestimados nesse mês. O site mostra um aviso enquanto a fonte não for corrigida.</li>
+        <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
+        <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
+        <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
+      </ul>
+
+      <h2 id="seguranca">Privacidade e segurança</h2>
+      <p>O site é composto só de arquivos estáticos. Ele não usa cookies, não tem login, não coleta dados pessoais e não carrega nada de outros domínios. Os dados são coletados e validados num servidor separado, e o site recebe apenas o arquivo final já pronto.</p>
+    </article>
+  </main>
+
+  <footer class="rodape">
+    <div class="conteiner">
+      <p>Arrecadômetro Brasil. Projeto independente, sem vínculo com governos ou partidos.</p>
+      <p>Dados atualizados em <span data-campo="atualizado-em">n/d</span>. <a href="./">Voltar ao painel</a></p>
+    </div>
+  </footer>
+</body>
+</html>
