@@ -56,6 +56,14 @@ import zipfile
 
 AGENTE = "Mozilla/5.0 (X11; Linux x86_64) ArrecadometroBrasil/1.0"
 BASE = "https://portaldatransparencia.gov.br/download-de-dados"
+# Os arquivos mensais ficam no servidor de arquivos da CGU, para onde o Portal
+# redireciona. Pedir direto evita o limite de pedidos do Portal (em 15/11/2026,
+# depois de cerca de 35 downloads em um minuto e meio, ele passou a responder
+# HTTP 405). O arquivo de viagens tem a data de geração no nome e continua
+# vindo pelo Portal.
+ARQUIVOS = "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida"
+SUFIXO_MENSAL = {"cpgf": "CPGF", "despesas-execucao": "Despesas"}
+INTERVALO = 2  # segundos entre um download e o próximo
 DESTINO = "site/dados/portal"
 INTERMEDIARIO = "dados-fonte/portal"
 ORIGEM = "dados-fonte/portal/origem.json"
@@ -94,9 +102,18 @@ def numero(texto, onde):
         return 0.0
 
 
-def baixar(url, origem, tentativas=4):
+def url_mensal(base, ano, mes):
+    return f"{ARQUIVOS}/{base}/{ano}{mes:02d}_{SUFIXO_MENSAL[base]}.zip"
+
+
+def baixar(url, origem, tentativas=5):
+    """Baixa com ritmo: espera INTERVALO segundos antes de cada pedido e, se o
+    servidor recusar por excesso de pedidos (405 ou 429), espera minutos antes
+    de tentar de novo."""
     for k in range(tentativas):
+        time.sleep(INTERVALO)
         inicio = time.monotonic()
+        espera = 10 * (k + 1)
         try:
             req = urllib.request.Request(url, headers={"User-Agent": AGENTE})
             with urllib.request.urlopen(req, timeout=900) as r:
@@ -108,12 +125,14 @@ def baixar(url, origem, tentativas=4):
             if erro.code in (403, 404):
                 print(f"  {url}: HTTP {erro.code}, arquivo ainda não publicado", flush=True)
                 return None
-            print(f"  tentativa {k + 1} falhou para {url}: {erro}", flush=True)
+            if erro.code in (405, 429):
+                espera = 120 * (k + 1)
+            print(f"  tentativa {k + 1} falhou para {url}: {erro}; nova tentativa em {espera} s", flush=True)
         except Exception as erro:  # noqa: BLE001
             print(f"  tentativa {k + 1} falhou para {url} depois de {time.monotonic() - inicio:.0f} s: {erro}", flush=True)
         if k == tentativas - 1:
             falhar(f"não foi possível baixar {url}")
-        time.sleep(10 * (k + 1))
+        time.sleep(espera)
     return None
 
 
@@ -193,7 +212,7 @@ def ano_cartao(ano, ate_mes, origem, orgaos):
     por = {}
     meses = 0
     for mes in range(1, ate_mes + 1):
-        url = f"{BASE}/cpgf/{ano}{mes:02d}"
+        url = url_mensal("cpgf", ano, mes)
         bruto = baixar(url, origem)
         if bruto is None:
             break
@@ -234,7 +253,7 @@ def ano_ministerios(ano, ate_mes, origem, orgaos):
     divida = {"juros": 0.0, "amortizacao": 0.0}
     meses = 0
     for mes in range(1, ate_mes + 1):
-        url = f"{BASE}/despesas-execucao/{ano}{mes:02d}"
+        url = url_mensal("despesas-execucao", ano, mes)
         bruto = baixar(url, origem)
         if bruto is None:
             break
@@ -325,8 +344,9 @@ def ano_viagens(ano, origem, orgaos):
         falhar(f"{url}: só {total['n']} viagens no ano")
     # O arquivo é do ano inteiro; no ano corrente, vale até o último mês com
     # viagem começada.
-    if ano < dt.date.today().year:
-        ultimo_mes = 12
+    # O arquivo do ano corrente já traz viagens marcadas para os próximos meses.
+    hoje = dt.date.today()
+    ultimo_mes = 12 if ano < hoje.year else min(ultimo_mes, hoje.month)
     return {"ano": ano, "ate_mes": ultimo_mes,
             "total": {k: round(v, 2) if isinstance(v, float) else v for k, v in total.items()},
             "orgaos": {c: {"valor": round(x["valor"], 2), "n": x["n"]} for c, x in por.items()},
