@@ -1100,7 +1100,7 @@ async function montarCota(ctx) {
     const sem = casa.sem_gasto;
     if (sem == null) {
       definirItens('cota-sem-gasto', [{ rotulo: null, texto: casaId === 'senado'
-        ? 'No Senado, essa lista só existe para o ano corrente: a lista oficial de senadores não traz as datas em que cada um esteve no cargo.'
+        ? 'Sem essa lista para o Senado nesse ano: a lista oficial de senadores não trouxe as datas em que cada um esteve no cargo.'
         : 'Sem lista para esse ano.' }]);
     } else {
       const doRecorte = uf ? sem.filter((p) => p.uf === uf) : sem;

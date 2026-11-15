@@ -504,7 +504,9 @@ def main():
         codigos_ano_todo = {c for c, v in no_ano.items() if all(em_exercicio(v["exercicios"], a, b) for a, b in trimestres(ano, hoje))}
         codigos_com_gasto = {x["codigo"] for x in senadores.values()}
         sem_dono = [x["nome"] for x in senadores.values() if x["codigo"] not in no_ano]
-        if 81 <= len(no_ano) <= 130 and 70 <= len(codigos_ano_todo) <= 81 and len(sem_dono) <= 3:
+        # Em ano de troca de legislatura, quem saiu em janeiro e quem entrou
+        # em fevereiro contam juntos (134 em 2019).
+        if 81 <= len(no_ano) <= 160 and 70 <= len(codigos_ano_todo) <= 81 and len(sem_dono) <= 3:
             ano_todo_s = {k for k, x in senadores.items() if x["codigo"] in codigos_ano_todo}
             sem_gasto_s = sorted(({"id": str(c), "nome": v["nome"], "uf": v["uf"], "partido": v["partido"], "ano_todo": c in codigos_ano_todo}
                                   for c, v in no_ano.items() if c not in codigos_com_gasto),
