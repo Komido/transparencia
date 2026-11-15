@@ -888,6 +888,13 @@ function barrasDeGrupos(lista, grupos, valores) {
   }
 }
 
+// Nomes curtos dos grupos para as frases do resumo.
+const GRUPO_CURTO = {
+  passagens: 'passagens', divulgacao: 'divulgação', consultoria: 'consultorias', seguranca: 'segurança',
+  escritorio: 'escritório', telefone: 'telefone e correio', locomocao: 'deslocamento, hospedagem e alimentação',
+  moradia: 'auxílio-moradia', outros: 'outros',
+};
+
 const rotuloParlamentar = (p) => {
   const extra = [p.partido, p.uf].filter(Boolean).join('-');
   return extra ? `${p.nome} (${extra})` : p.nome;
@@ -973,7 +980,7 @@ async function montarCota(ctx) {
       itens.push(uf
         ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${recorte.length === 1 ? `1 ${nomes.singular} do estado usou` : `${recorte.length} ${nomes.plural} do estado usaram`} a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(total / recorte.length, 0)} por ${nomes.singular}. A média ${nomes.daCasa} foi ${f.moeda(mediaCasa, 0)}.` }
         : { rotulo: nomes.titulo, texto: `em ${ano}, ${todos.length} ${nomes.plural} usaram a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(mediaCasa, 0)} por ${nomes.singular}.` });
-      const porGrupo = d.grupos.map((g, k) => ({ nome: g.nome.toLowerCase(), v: recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0) }))
+      const porGrupo = d.grupos.map((g, k) => ({ nome: GRUPO_CURTO[g.id] ?? g.nome.toLowerCase(), v: recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0) }))
         .filter((g) => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 3);
       if (porGrupo.length) itens.push({ rotulo: 'O que mais pesou', texto: `${listaDeAnos(porGrupo.map((g) => `${g.nome} (${f.porcentagem((g.v / total) * 100, 0)})`))}.` });
       barrasDeGrupos($('#cota-grupos'), d.grupos, d.grupos.map((_, k) => recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0)));
