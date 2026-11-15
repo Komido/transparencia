@@ -1,6 +1,8 @@
 name: Atualizar dados do painel
 
 # Busca no Supabase o JSON já validado e grava em site/dados/painel.json.
+# O bloco "cidades" é separado em site/dados/cidades/<código do IBGE>.json,
+# mais um índice, para o site baixar só a cidade escolhida.
 # O visitante do site nunca acessa o Supabase: só baixa arquivos estáticos.
 # O commit só acontece quando o conteúdo dos dados muda (campo "versao").
 
@@ -46,6 +48,8 @@ jobs:
             and (.mensal.arrecadacao_grupos | length > 5)
             and (.mandatos | length > 5)
             and (.ir_tabela | length > 5)
+            and (.cidades | type == "object" and length >= 20)
+            and ([.cidades[] | (.codigo | test("^[0-9]{7}$")) and (.series.cesta_total | length > 300)] | all)
           ' /tmp/painel.json > /dev/null
           tamanho=$(stat -c %s /tmp/painel.json)
           echo "Tamanho: ${tamanho} bytes"
@@ -61,10 +65,20 @@ jobs:
             exit 0
           fi
           mkdir -p "$(dirname "$DESTINO")"
-          jq -c . /tmp/painel.json > "$DESTINO"
+          pasta="$(dirname "$DESTINO")/cidades"
+          rm -rf "$pasta"
+          mkdir -p "$pasta"
+          # Um arquivo por cidade, com a versão do painel para conferência.
+          for codigo in $(jq -r '.cidades | keys[]' /tmp/painel.json); do
+            [[ "$codigo" =~ ^[0-9]{7}$ ]] || { echo "Código inválido: $codigo"; exit 1; }
+            jq -c --arg c "$codigo" '.cidades[$c] + {versao: .versao}' /tmp/painel.json > "$pasta/$codigo.json"
+          done
+          jq -c '{versao: .versao, cidades: ([.cidades[] | {codigo, nome, uf, aluguel: (.series.aluguel_m2 != null)}] | sort_by(.nome))}' \
+            /tmp/painel.json > "$pasta/indice.json"
+          jq -c 'del(.cidades)' /tmp/painel.json > "$DESTINO"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$DESTINO"
+          git add -A "$DESTINO" "$pasta"
           git commit -m "Atualiza dados do painel (versão ${nova:0:12})"
           git pull --rebase --quiet
           git push
