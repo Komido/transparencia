@@ -275,6 +275,33 @@ function montarComposicao(ctx) {
   }
 }
 
+// Impostos dos estados nos 12 meses até o último mês que os 27 já
+// informaram, comparados com a arrecadação federal dos mesmos meses.
+function montarComposicaoEstados(ctx) {
+  const rec = ctx.d.estados_receita;
+  const ate = rec?.doze_meses_ate;
+  if (!ate || !Array.isArray(rec.estados) || rec.estados.length < 27) return;
+  if (rec.estados.some((x) => x.doze_meses?.icms == null || x.doze_meses?.ipva == null || x.doze_meses?.itcd == null)) return;
+  const soma = (chave) => rec.estados.reduce((total, x) => total + x.doze_meses[chave], 0);
+  const icms = soma('icms');
+  const ipva = soma('ipva');
+  const itcd = soma('itcd');
+  const estaduais = icms + ipva + itcd;
+  const linhas = [`Nos 12 meses até ${f.mesLongo(ate)}, os estados e o Distrito Federal arrecadaram ${f.reaisPorExtenso(icms)} de ICMS, `
+    + `${f.reaisPorExtenso(ipva)} de IPVA e ${f.reaisPorExtenso(itcd)} de ITCMD (herança e doação).`];
+  const k = ctx.meses.indexOf(ate);
+  const janela = k >= 11 ? ctx.total.slice(k - 11, k + 1) : [];
+  if (janela.length === 12 && janela.every((v) => v != null)) {
+    const federal = janela.reduce((a, v) => a + v, 0) * 1e6;
+    linhas.push(`No mesmo período, a arrecadação federal foi de ${f.reaisPorExtenso(federal)}. `
+      + `Para cada R$\u00A0100 que o governo federal arrecadou, os estados arrecadaram ${f.moeda((estaduais / federal) * 100, 0)} com esses três impostos.`);
+    linhas.push(`Somando os dois, foram ${f.reaisPorExtenso(federal + estaduais)}.`);
+  }
+  linhas.push('Ainda faltam os impostos das prefeituras (ISS, IPTU e ITBI), que não estão nesta conta.');
+  definirTopicos('composicao-estados', linhas.join(' '));
+  $('#composicao-estados-caixa').hidden = false;
+}
+
 // ---------------------------------------------------------------------------
 // Para onde vai o dinheiro do governo federal
 // ---------------------------------------------------------------------------
@@ -652,13 +679,75 @@ function montarEstados(ctx) {
     };
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-estados'), opcoes);
   };
-  selUf.addEventListener('change', () => { escolhidoPelaPessoa = true; desenharEstado(); });
+  // Impostos do estado (ICMS, IPVA e ITCMD) --------------------------------
+  const rec = ctx.d.estados_receita;
+  const temReceita = Array.isArray(rec?.anos) && rec.anos.length && Array.isArray(rec.estados) && rec.estados.length;
+  let graficoReceita = null;
+  const fatoresReceita = temReceita ? c.fatoresAnuais(ctx.meses, ctx.ipca, rec.anos) : [];
+  const desenharReceita = () => {
+    if (!temReceita) return;
+    const uf = estados.find((x) => x.sigla === selUf.value) ?? estados[0];
+    const r = rec.estados.find((x) => x.sigla === uf.sigla);
+    const de = t.doEstado(uf.sigla, uf.nome);
+    const linhas = [];
+    const doze = r?.doze_meses;
+    if (doze?.icms != null && rec.doze_meses_ate) {
+      linhas.push(`Nos 12 meses até ${f.mesLongo(rec.doze_meses_ate)}, o governo ${de} arrecadou ${f.reaisPorExtenso(doze.icms)} de ICMS, `
+        + `${f.reaisPorExtenso(doze.ipva)} de IPVA e ${f.reaisPorExtenso(doze.itcd)} de ITCMD.`);
+      const totalIcms = rec.estados.reduce((soma, x) => soma + (x.doze_meses?.icms ?? 0), 0);
+      if (totalIcms > 0) linhas.push(`É ${f.porcentagem((doze.icms / totalIcms) * 100, doze.icms / totalIcms < 0.1 ? 1 : 0)} de todo o ICMS arrecadado no país.`);
+    }
+    const icms = r?.anual?.icms ?? [];
+    const k1 = c.ultimoIndice(icms);
+    const k0 = icms.findIndex((v) => v != null);
+    if (k1 > k0 && k0 >= 0 && fatoresReceita[k0] && fatoresReceita[k1]) {
+      const v = t.variacao(((icms[k1] * fatoresReceita[k1]) / (icms[k0] * fatoresReceita[k0]) - 1) * 100, 0);
+      if (v) linhas.push(`Descontada a inflação, o ICMS de ${rec.anos[k1]} rendeu ${v} do que o de ${rec.anos[k0]}.`);
+    }
+    linhas.push('Parte desse dinheiro vai para as prefeituras do estado: 25% do ICMS e 50% do IPVA.');
+    definirTopicos('estados-receita-resumo', linhas.join(' '));
+
+    const tributo = valorRadio('estados-tributo') ?? 'icms';
+    const nome = { icms: 'ICMS', ipva: 'IPVA', itcd: 'ITCMD' }[tributo];
+    const reais = (r?.anual?.[tributo] ?? []).map((v, k) => (v == null || fatoresReceita[k] == null ? null : v * fatoresReceita[k]));
+    const maior = Math.max(0, ...reais.filter((v) => v != null));
+    const escala = maior >= 1e9 ? { div: 1e9, sufixo: 'bi', nome: 'bilhões' } : { div: 1e6, sufixo: 'mi', nome: 'milhões' };
+    const valores = reais.map((v) => (v == null ? null : v / escala.div));
+    definir('estados-receita-explicacao',
+      `${nome} arrecadado pelo governo ${de} em cada ano, em ${escala.nome} de reais de hoje (corrigido pela inflação), antes dos repasses às prefeituras.`);
+    const opcoes = {
+      tipo: 'colunas',
+      rotulos: rec.anos,
+      series: [{ nome, classe: 'serie-1', valores, parciais: new Set() }],
+      formatoY: (v, eixo) => (eixo ? f.numero(v, maior / escala.div < 10 ? 1 : 0)
+        : (v == null ? 'n/d' : `R$\u00A0${f.numero(v, 1)} ${escala.sufixo} em dinheiro de hoje`)),
+      rotuloEixoX: (ano) => (rec.anos.length > 8 && ano % 2 ? null : String(ano)),
+      tituloTooltip: (i) => String(rec.anos[i]),
+      descricao: `${nome} arrecadado pelo governo ${de} por ano, em ${escala.nome} de reais de hoje.`,
+      incluirZero: true,
+    };
+    if (graficoReceita) graficoReceita.atualizar(opcoes); else graficoReceita = criarGrafico($('#grafico-estados-receita'), opcoes);
+  };
+  if (!temReceita) {
+    $('#estados-receita-caixa').hidden = true;
+  } else {
+    document.querySelectorAll('input[name="estados-tributo"]').forEach((r) => r.addEventListener('change', desenharReceita));
+    registrarDownload('estados-receita', () => ({
+      nome: 'impostos-dos-estados-por-ano.csv',
+      cabecalhos: ['estado', 'sigla', 'ano', 'ICMS (R$)', 'IPVA (R$)', 'ITCMD (R$)', `fator para dinheiro de ${ctx.referencia}`],
+      linhas: rec.estados.flatMap((x) => rec.anos.map((ano, k) => [x.nome, x.sigla, ano, x.anual?.icms?.[k] ?? null,
+        x.anual?.ipva?.[k] ?? null, x.anual?.itcd?.[k] ?? null, arred(fatoresReceita[k], 6)])),
+    }));
+  }
+
+  const desenharTudo = () => { desenharEstado(); desenharReceita(); };
+  selUf.addEventListener('change', () => { escolhidoPelaPessoa = true; desenharTudo(); });
   document.querySelectorAll('input[name="estados-visao"]').forEach((r) => r.addEventListener('change', desenharEstado));
   aoMudarCidade(() => {
     const sigla = ufDaCidade();
-    if (sigla && !escolhidoPelaPessoa && sigla !== selUf.value) { selUf.value = sigla; desenharEstado(); }
+    if (sigla && !escolhidoPelaPessoa && sigla !== selUf.value) { selUf.value = sigla; desenharTudo(); }
   });
-  desenharEstado();
+  desenharTudo();
 
   // Tabela com todos os estados -------------------------------------------
   const selAno = $('#estados-ano');
@@ -1860,7 +1949,7 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarGastos, montarContas, montarEstados, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarComposicaoEstados, montarGastos, montarContas, montarEstados, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

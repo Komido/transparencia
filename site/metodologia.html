@@ -194,6 +194,19 @@
         <li><strong>Fora do site:</strong> o resultado primário dos estados (RREO, anexo 6) não é mostrado porque a forma de cálculo mudou em 2018 e depois, e a série não é comparável entre anos.</li>
       </ul>
 
+      <h2 id="impostos-estados">Impostos dos estados</h2>
+      <p><strong>Fonte:</strong> Relatório Resumido da Execução Orçamentária (RREO) de cada estado e do Distrito Federal, anexo 3 (receita corrente líquida), obtido na API do Siconfi (Tesouro Nacional) desde 2015. O anexo traz a receita de cada um dos 12 meses que terminam no fim do bimestre e o total desses 12 meses.</p>
+      <ul>
+        <li><strong>O que entra:</strong> ICMS, IPVA e ITCD (ITCMD, imposto sobre herança e doação), nas linhas "líquido, exceto transferências e FUNDEB": depois das restituições, mas antes dos repasses às prefeituras (25% do ICMS e 50% do IPVA) e ao FUNDEB. É o que o estado arrecadou. Taxas, contribuições e outras receitas dos estados ficam de fora.</li>
+        <li><strong>Conferências:</strong> a carga é recusada se faltar algum dos 12 meses de um imposto ou se a soma dos meses não bater com o total do relatório (diferença acima de 5 centavos). Nos relatórios testados, a soma bateu centavo por centavo.</li>
+        <li><strong>Diferença em relação a outros números:</strong> o CONFAZ e as secretarias de Fazenda divulgam a arrecadação com outra forma de registro, e os totais podem diferir um pouco. Nos dois casos conferidos, ICMS de 2024: Mato Grosso do Sul, R$ 17,03 bilhões aqui e R$ 16,94 bilhões no CONFAZ (0,5%); São Paulo, R$ 223,8 bilhões aqui e R$ 226,3 bilhões noticiados (1,1%).</li>
+        <li><strong>Valores como informados:</strong> alguns meses têm valores fora do padrão, como IPVA ou ITCD negativos (restituições maiores que a arrecadação do mês) ou o ICMS do Acre em dezembro de 2018, o dobro da média do ano. O site não corrige esses valores.</li>
+        <li><strong>Mês em mais de um relatório:</strong> cada relatório repete meses dos anteriores. Vale o valor do relatório mais recente, para pegar correções feitas pelo estado.</li>
+        <li><strong>Ano:</strong> soma dos 12 meses de janeiro a dezembro. Em dinheiro de hoje, o ano é corrigido pela média do IPCA do ano, a mesma regra dos gastos federais.</li>
+        <li><strong>Últimos 12 meses:</strong> terminam no último mês que todos os 27 já informaram, para que a soma do país e a comparação com a arrecadação federal usem os mesmos meses. Os estados entregam o relatório até 30 dias depois do fim de cada bimestre, então esse mês costuma ficar de um a três meses atrás do federal; um estado atrasado atrasa a soma do país.</li>
+        <li><strong>Comparação com a arrecadação federal:</strong> a arrecadação federal dos mesmos 12 meses, com todos os tributos e as receitas de outros órgãos (a mesma base de "De onde vem"). Os impostos das prefeituras (ISS, IPTU e ITBI) não estão no site.</li>
+      </ul>
+
       <h2 id="cidades">Números por capital</h2>
       <p>No orçamento da família e na seção "O que o salário compra", a pessoa pode escolher uma das 27 capitais. A escolha fica guardada só no navegador dela.</p>
       <ul>
@@ -227,7 +240,7 @@
         <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
         <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
         <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias da ANP no país ou no estado. Na sua cidade os preços podem ser diferentes.</li>
-        <li>O contador e a composição da arrecadação mostram só tributos federais. Ficam de fora os impostos dos estados (ICMS, IPVA e ITCMD), os dos municípios (ISS, IPTU e ITBI) e o FGTS.</li>
+        <li>O contador e a lista da composição da arrecadação mostram só tributos federais. Os impostos dos estados (ICMS, IPVA e ITCMD) aparecem à parte, com até três meses de atraso em relação aos federais. Os dos municípios (ISS, IPTU e ITBI) e o FGTS não estão no site.</li>
         <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
       </ul>
 
