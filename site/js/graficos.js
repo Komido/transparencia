@@ -46,6 +46,7 @@ function larguraTexto(texto, px = 12) {
 //   series: [{ nome, valores, classe ('serie-1'|'serie-2'), degrau, parciais: Set(i) }]
 //   faixas: [{ inicio, fim, rotulo }] (índices em rotulos)
 //   formatoY(v), rotuloEixoX(rotulo, i) -> texto | null, tituloTooltip(i), extraTooltip(i)
+//   unidade: texto curto mostrado acima do gráfico ("R$ por litro", "% do PIB")
 //   descricao: texto para leitores de tela
 //   incluirZero: boolean
 export function criarGrafico(container, opcoes) {
@@ -54,12 +55,15 @@ export function criarGrafico(container, opcoes) {
   container.classList.add('grafico');
   container.replaceChildren();
 
+  const unidade = htmlEl('p', 'grafico-unidade', null, container);
   const legenda = htmlEl('div', 'grafico-legenda', null, container);
   const area = htmlEl('div', 'grafico-area', null, container);
   const dica = htmlEl('div', 'grafico-dica', null, container);
   dica.hidden = true;
 
   function montarLegenda() {
+    unidade.textContent = atual.unidade ? `Valores em ${atual.unidade}` : '';
+    unidade.hidden = !atual.unidade;
     legenda.replaceChildren();
     legenda.hidden = atual.series.length < 2;
     for (const s of atual.series) {
@@ -98,28 +102,46 @@ export function criarGrafico(container, opcoes) {
       return Math.min(Math.max(margem.esquerda + banda * (i - 0.5), margem.esquerda), margem.esquerda + lp);
     };
 
-    // Rótulos das faixas de mandato: uma linha quando todos cabem na própria
-    // faixa; senão, duas linhas alternadas, sem sobreposição.
-    const rotulosFaixa = faixas.map((fx) => {
-      const x0 = borda(fx.inicio);
-      const x1 = borda(fx.fim + 1);
-      return { fx, x0, x1, centro: (x0 + x1) / 2, largura: larguraTexto(fx.rotulo, 11) };
-    });
-    const umaLinha = rotulosFaixa.every((r) => r.largura + 4 <= r.x1 - r.x0);
-    const linhasRotulo = faixas.length ? (umaLinha ? 1 : 2) : 0;
-    const ocupado = [-Infinity, -Infinity];
-    rotulosFaixa.forEach((r, k) => {
-      const x = umaLinha
-        ? r.centro
-        : Math.min(Math.max(r.centro, margem.esquerda + r.largura / 2), margem.esquerda + lp - r.largura / 2);
-      const preferida = umaLinha ? 0 : k % 2;
-      const tentativas = umaLinha ? [0] : [preferida, 1 - preferida];
-      const linha = tentativas.find((l) => x - r.largura / 2 >= ocupado[l] + 4);
-      r.x = x;
-      r.visivel = linha !== undefined;
-      r.linha = linha ?? preferida;
-      if (r.visivel) ocupado[linha] = x + r.largura / 2;
-    });
+    // Faixas de mandato: o fundo alterna a cada mandato.
+    const bandas = faixas.map((fx) => ({ fx, x0: borda(fx.inicio), x1: borda(fx.fim + 1) }));
+
+    // Rótulos: uma linha quando todos cabem na própria faixa; senão, duas
+    // linhas alternadas, sem sobreposição. Se ainda assim algum não couber
+    // (telas estreitas), mandatos seguidos da mesma pessoa ganham um rótulo
+    // só ("Lula 1" e "Lula 2" viram "Lula"); o detalhe continua na dica.
+    const posicionar = (grupos) => {
+      const rotulos = grupos.map((g) => ({ ...g, centro: (g.x0 + g.x1) / 2, largura: larguraTexto(g.rotulo, 11) }));
+      const umaLinha = rotulos.every((r) => r.largura + 4 <= r.x1 - r.x0);
+      const ocupado = [-Infinity, -Infinity];
+      rotulos.forEach((r, k) => {
+        const x = umaLinha
+          ? r.centro
+          : Math.min(Math.max(r.centro, margem.esquerda + r.largura / 2), margem.esquerda + lp - r.largura / 2);
+        const preferida = umaLinha ? 0 : k % 2;
+        const tentativas = umaLinha ? [0] : [preferida, 1 - preferida];
+        const linha = tentativas.find((l) => x - r.largura / 2 >= ocupado[l] + 4);
+        r.x = x;
+        r.visivel = linha !== undefined;
+        r.linha = linha ?? preferida;
+        if (r.visivel) ocupado[linha] = x + r.largura / 2;
+      });
+      return { rotulos, umaLinha, ocultos: rotulos.filter((r) => !r.visivel).length };
+    };
+    let posicao = posicionar(bandas.map((b) => ({ rotulo: b.fx.rotulo, x0: b.x0, x1: b.x1 })));
+    if (posicao.ocultos || !posicao.umaLinha) {
+      const pessoa = (rotulo) => rotulo.replace(/\s+\d+$/, '');
+      const juntos = [];
+      bandas.forEach((b) => {
+        const ultimo = juntos[juntos.length - 1];
+        if (ultimo && ultimo.rotulo === pessoa(b.fx.rotulo)) ultimo.x1 = b.x1;
+        else juntos.push({ rotulo: pessoa(b.fx.rotulo), x0: b.x0, x1: b.x1 });
+      });
+      // Com duas linhas de rótulos a leitura já fica apertada: menos rótulos
+      // ajudam, desde que nenhum a mais fique escondido.
+      const alternativa = posicionar(juntos);
+      if (juntos.length < bandas.length && alternativa.ocultos <= posicao.ocultos) posicao = alternativa;
+    }
+    const linhasRotulo = faixas.length ? (posicao.umaLinha ? 1 : 2) : 0;
     if (linhasRotulo) margem.topo = 8 + linhasRotulo * 14;
     const ap = altura - margem.topo - margem.base;
     const y = (v) => margem.topo + ap - ((v - escala.min) / (escala.max - escala.min || 1)) * ap;
@@ -130,17 +152,17 @@ export function criarGrafico(container, opcoes) {
     });
 
     // Faixas de mandato (fundo neutro alternado, sem cores de partido).
-    rotulosFaixa.forEach((r, k) => {
+    bandas.forEach((r, k) => {
       svgEl('rect', {
         x: r.x0, y: margem.topo, width: Math.max(0, r.x1 - r.x0), height: ap,
         class: `faixa ${k % 2 ? 'faixa-b' : 'faixa-a'}`,
       }, svg);
-      if (r.visivel) {
-        const t = svgEl('text', {
-          x: r.x, y: 4 + 11 + r.linha * 14, class: 'faixa-rotulo', 'text-anchor': 'middle',
-        }, svg);
-        t.textContent = r.fx.rotulo;
-      }
+    });
+    posicao.rotulos.filter((r) => r.visivel).forEach((r) => {
+      const t = svgEl('text', {
+        x: r.x, y: 4 + 11 + r.linha * 14, class: 'faixa-rotulo', 'text-anchor': 'middle',
+      }, svg);
+      t.textContent = r.rotulo;
     });
 
     // Grade e eixo Y.
@@ -329,7 +351,7 @@ export function preencherTabela(tabela, cabecalhos, linhas, rodape = null, colun
       if (k === 0) c.scope = 'row';
       if (celula != null && typeof celula === 'object') {
         c.append(document.createTextNode(celula.texto));
-        if (celula.detalhe) htmlEl('span', 'detalhe', celula.detalhe, c);
+        if (celula.detalhe) htmlEl('span', celula.destaque ? 'detalhe destaque' : 'detalhe', celula.detalhe, c);
       } else {
         c.textContent = celula;
       }

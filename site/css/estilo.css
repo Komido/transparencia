@@ -700,6 +700,7 @@ details.tabela-dados > .filtros { margin-top: var(--e-2); }
 .grafico-svg:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
 .grafico-svg text { font-family: inherit; }
 
+.grafico-unidade { margin: 0 0 var(--e-1); font-size: var(--fs-2); font-weight: 600; color: var(--tinta-2); }
 .grafico-legenda {
   display: flex;
   flex-wrap: wrap;
@@ -956,3 +957,15 @@ td.num .detalhe { white-space: normal; }
 @media (min-width: 720px) {
   .campo > .segmentos { justify-self: start; min-width: 20rem; }
 }
+
+/* Lembrete de aviso no topo da seção afetada. */
+.aviso-curto {
+  margin: 0 0 var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  font-size: var(--fs-2);
+  background: var(--aviso-fundo);
+  border-left: 4px solid var(--aviso);
+  border-radius: var(--raio);
+}
+/* "Acima do limite" em negrito e na cor de alerta; o texto diz o que é. */
+.detalhe.destaque { color: var(--ruim); font-weight: 600; }

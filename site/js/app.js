@@ -147,6 +147,7 @@ function montarArrecadacao(ctx) {
       formatoY: real
         ? (v, eixo) => (eixo ? `${f.numero(v, 0)}` : `R$\u00A0${f.numero(v, 1)} bi`)
         : (v) => f.porcentagem(v, 1),
+      unidade: real ? 'bilhões de reais de hoje' : '% do PIB',
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => (anual[i].parcial ? `${anos[i]} (${anual[i].meses} meses)` : String(anos[i])),
       extraTooltip: (i) => {
@@ -442,6 +443,7 @@ function montarGastos(ctx) {
       formatoY: medida === 'parte'
         ? (v, eixo) => (eixo ? f.numero(v, v < 10 ? 1 : 0) : `${porCem(v)} de cada R$ 100`)
         : (v, eixo) => (eixo ? f.numero(v, 0) : `R$\u00A0${f.numero(v, 1)} bi`),
+      unidade: medida === 'parte' ? 'reais de cada R$ 100 gastos' : 'bilhões de reais de hoje',
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => String(anos[i]),
       extraTooltip: (i) => {
@@ -546,6 +548,7 @@ function montarContas(ctx) {
       formatoY: medida === 'pib'
         ? (x, eixo) => (eixo ? f.numero(x, 0) : `${f.porcentagem(x, 1)} do PIB`)
         : (x, eixo) => (eixo ? f.numero(x, 0) : `R$\u00A0${f.numero(x, 1)} bi`),
+      unidade: medida === 'pib' ? '% do PIB' : 'bilhões de reais de hoje',
       rotuloEixoX: (ano) => (ano % 5 === 0 ? String(ano) : null),
       tituloTooltip: (i) => String(anos[i]),
       extraTooltip: (i) => {
@@ -638,10 +641,13 @@ function montarEstados(ctx) {
   // escolhida, se houver.
   const selUf = $('#estados-uf');
   selUf.replaceChildren();
+  // Sem cidade escolhida, nenhum estado vem marcado: abrir sempre no Acre,
+  // só por ser o primeiro da ordem alfabética, não ajuda ninguém.
+  el('option', null, 'Escolha o estado', selUf).value = '';
   estados.forEach((uf) => { el('option', null, uf.nome, selUf).value = uf.sigla; });
   let escolhidoPelaPessoa = false;
   const ufDaCidade = () => (cidade.dados?.uf && estados.some((x) => x.sigla === cidade.dados.uf) ? cidade.dados.uf : null);
-  selUf.value = ufDaCidade() ?? estados[0].sigla;
+  selUf.value = ufDaCidade() ?? '';
 
   const rec = ctx.d.estados_receita;
   const temReceita = Array.isArray(rec?.anos) && rec.anos.length && Array.isArray(rec.estados) && rec.estados.length;
@@ -725,6 +731,7 @@ function montarEstados(ctx) {
         { nome: 'Limite da lei', classe: 'serie-limite', valores: limites, degrau: true },
       ],
       formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : (v == null ? 'sem dado' : `${porCemReais(v)} de cada R$ 100`)),
+      unidade: 'reais para cada R$ 100 que entram no ano',
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => String(anos[i]),
       descricao: visao === 'divida'
@@ -783,6 +790,7 @@ function montarEstados(ctx) {
       series: [{ nome, classe: 'serie-1', valores, parciais: new Set() }],
       formatoY: (v, eixo) => (eixo ? f.numero(v, maior / escala.div < 10 ? 1 : 0)
         : (v == null ? 'sem dado' : `R$ ${f.numero(v, 1)} ${escala.sufixo} em dinheiro de hoje`)),
+      unidade: `${escala.nome} de reais de hoje`,
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => String(anosSerie[i]),
       descricao: `${nome} arrecadado ${quem.startsWith('a ') ? 'pela' : 'pelo'} ${quemSemArtigo} por ano, em ${escala.nome} de reais de hoje.`,
@@ -812,7 +820,24 @@ function montarEstados(ctx) {
     });
   }
 
-  const desenharTudo = () => { desenharResumo(); desenharGrafico(); desenharReceita(); };
+  // A linha do estado escolhido fica destacada na tabela de todos os estados.
+  const marcarLinha = () => {
+    const nome = estados.find((x) => x.sigla === selUf.value)?.nome;
+    document.querySelectorAll('#tabela-estados tbody tr').forEach((tr) => {
+      tr.classList.toggle('atual', !!nome && tr.querySelector('th')?.textContent === nome);
+    });
+  };
+  const desenharTudo = () => {
+    const escolhido = !!selUf.value;
+    $('#estados-detalhe').hidden = !escolhido;
+    if (escolhido) {
+      desenharResumo(); desenharGrafico(); desenharReceita();
+    } else {
+      campo('estados-resumo').forEach((e) => e.replaceChildren(el('p', 'resumo-vazio',
+        'Escolha um estado para ver a dívida, a folha de pagamento e os impostos do governo estadual e da capital. A tabela abaixo mostra todos os estados.')));
+    }
+    marcarLinha();
+  };
   selUf.addEventListener('change', () => { escolhidoPelaPessoa = true; desenharTudo(); });
   document.querySelectorAll('input[name="estados-visao"]').forEach((r) => r.addEventListener('change', desenharGrafico));
   aoMudarCidade(() => {
@@ -841,8 +866,10 @@ function montarEstados(ctx) {
       const marca = (sit) => (sit === 'dentro do limite' ? null : sit);
       return [
         uf.nome,
-        div == null ? 'sem dado' : { texto: porCemReais(div, limiteDivida, alertaDivida), detalhe: marca(sitDiv) },
-        fol == null ? 'sem dado' : { texto: porCemReais(fol, limite, alerta), detalhe: marca(sitFol) },
+        // Mesmas casas decimais na coluna toda: dívida em reais inteiros (os
+        // limites são 200 e 180); folha com centavos (44,10, 46,55, 48,60, 49).
+        div == null ? 'sem dado' : { texto: f.moeda(div, 0), detalhe: marca(sitDiv), destaque: sitDiv === 'acima do limite' },
+        fol == null ? 'sem dado' : { texto: f.moeda(fol, 2), detalhe: marca(sitFol), destaque: sitFol === 'acima do limite' },
       ];
     });
     const frase = (lista, oque) => (lista.length
@@ -853,6 +880,7 @@ function montarEstados(ctx) {
       ['Estado', 'Dívida: deve, para cada R$ 100', 'Folha: gasta, de cada R$ 100'],
       linhas,
       `A lei permite dívida de até ${limiteReais(limiteDivida)} e folha de até R$ 49 para cada R$ 100 que entram no ano (R$ 48,60 em alguns estados).`);
+    marcarLinha();
   };
   selAno.addEventListener('change', desenharTabela);
   desenharTabela();
@@ -1255,6 +1283,7 @@ function montarSalario(ctx) {
           { nome: `Salário de ${nomeBase} só com a inflação`, classe: 'serie-2', valores: corrigido },
         ],
         formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
+        unidade: 'reais por mês',
         explicacao: `A linha cheia é o salário mínimo de cada mês. A tracejada mostra quanto ele seria se, a partir de ${f.mesLongo(meses[iB])} (${f.moeda(s.salario_minimo[iB], 0)}), só tivesse sido corrigido pela inflação (INPC). `
           + `Em ${f.mesLongo(meses[iFim])}, essa conta dá ${f.moeda(corrigido[iFim], 0)}, e o salário é ${f.moeda(s.salario_minimo[iFim], 0)}. `
           + 'Quando a cheia fica acima da tracejada, o salário ganhou da inflação; abaixo, perdeu.',
@@ -1264,6 +1293,7 @@ function montarSalario(ctx) {
       nome: 'Salário mínimo em dólares',
       valores: sm.emDolar,
       formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.dolar(v, 0)),
+      unidade: 'dólares por mês',
       explicacao: 'Quantos dólares o salário de cada mês comprava, pela cotação daquele mês.',
     }),
     necessario: () => {
@@ -1276,6 +1306,7 @@ function montarSalario(ctx) {
           { nome: 'Necessário (DIEESE)', classe: 'serie-2', valores: s.smn_dieese },
         ],
         formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
+        unidade: 'reais por mês',
         explicacao: `A linha tracejada é quanto o DIEESE calcula que uma família de 2 adultos e 2 crianças precisa por mês para viver com o básico. A distância até a linha cheia é quanto falta ao salário mínimo: em ${f.mesLongo(meses[iN])}, ${f.moeda(s.smn_dieese[iN] - s.salario_minimo[iN], 0)}, e o mínimo cobre ${f.porcentagem(sm.frenteNecessario[iN], 0)} do necessário.`,
       };
     },
@@ -1294,6 +1325,7 @@ function montarSalario(ctx) {
         faixas: c.faixasDeMandato(mandatos, mesesG),
         series,
         formatoY: r.formato,
+        unidade: r.unidade,
         rotuloEixoX: rotuloMesNoEixo(5),
         tituloTooltip: (i) => f.mesCurto(mesesG[i]),
         extraTooltip: (i) => textoGoverno(ctx, mesesG[i]),
@@ -1380,6 +1412,7 @@ function montarDolar(ctx) {
       { nome: 'Em dinheiro de hoje', classe: 'serie-2', valores: real.valores },
     ],
     formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 2)),
+    unidade: 'reais por dólar',
     rotuloEixoX: rotuloMesNoEixo(5),
     tituloTooltip: (i) => f.mesCurto(meses[i]),
     extraTooltip: (i) => textoGoverno(ctx, meses[i]),
@@ -1446,6 +1479,7 @@ function montarIR(ctx) {
       { nome: 'Limite de 1996 corrigido pela inflação', classe: 'serie-2', valores: recorte(corrigida) },
     ],
     formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 2)),
+    unidade: 'reais por mês',
     rotuloEixoX: rotuloMesNoEixo(5),
     tituloTooltip: (i) => f.mesCurto(mesesIR[i]),
     extraTooltip: (i) => {
@@ -1615,6 +1649,7 @@ function montarCompras(ctx) {
       faixas: c.faixasDeMandato(mandatos, mesesG),
       series: [{ nome: `${item.plural} com um salário mínimo`, classe: 'serie-1', valores: q.slice(iIni) }],
       formatoY: (v, eixo) => (eixo ? f.numero(v, v < 10 ? 1 : 0) : `${t.quantidade(v)} ${item.plural}`),
+      unidade: `${item.plural} por salário mínimo`,
       rotuloEixoX: rotuloMesNoEixo(5),
       tituloTooltip: (i) => f.mesCurto(mesesG[i]),
       extraTooltip: (i) => textoGoverno(ctx, mesesG[i]),
@@ -2263,6 +2298,7 @@ function montarCombustiveis(ctx) {
         { nome: 'No salário de hoje', classe: 'serie-2', valores: equivalente.slice(iIni) },
       ],
       formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 2)),
+      unidade: item.litro ? 'reais por litro' : 'reais por botijão',
       rotuloEixoX: rotuloMesNoEixo(5),
       tituloTooltip: (i) => f.mesCurto(mesesG[i]),
       extraTooltip: (i) => textoGoverno(ctx, mesesG[i]),
@@ -2307,19 +2343,34 @@ function nomeDaColeta(id) {
   return id;
 }
 
+// Nomes das partes da arrecadação como um leigo entende.
+const RUBRICA_SIMPLES = {
+  'Receita previdenciária': 'a contribuição ao INSS',
+  'Receitas administradas por outros órgãos': 'as receitas de outros órgãos federais (como royalties)',
+};
+
+// Seção afetada por cada coleta, para o lembrete curto no lugar certo.
+const SECAO_DA_COLETA = {
+  sgs_1619: '#salario', sgs_188: '#salario', sgs_3698: '#dolar', sgs_433: '#arrecadacao', sgs_4380: '#arrecadacao',
+  rfb_csv: '#arrecadacao', dieese_smn: '#salario', anp_csv: '#combustiveis',
+};
+
 function montarAvisos(ctx) {
   const lista = $('#lista-avisos');
   lista.replaceChildren();
+  document.querySelectorAll('.aviso-curto').forEach((e) => e.remove());
   const avisos = [];
 
   for (const a of ctx.d.avisos ?? []) {
     if (a.tipo === 'valores_repetidos') {
       const afetaComparavel = ctx.grupos.find((g) => g.grupo === a.grupo)?.comparavel;
+      const parte = RUBRICA_SIMPLES[a.rubrica] ?? `a parte "${a.rubrica.toLowerCase()}"`;
       avisos.push({
-        titulo: `Receita Federal: ${a.rubrica} de ${f.mesCurto(a.mes)} repete os valores de ${f.mesCurto(a.igual_a)}`,
-        texto: `Os valores são idênticos em todas as UFs, o que indica erro no arquivo da Receita. O site mostra o dado como publicado. ${afetaComparavel
-          ? 'A série comparável é afetada.'
-          : 'A série comparável não usa esta rubrica; o contador e a composição usam, e ficam subestimados nesse mês.'}`,
+        titulo: `A Receita Federal publicou ${parte} de ${f.mesLongo(a.mes)} com os mesmos números de ${f.mesLongo(a.igual_a)}`,
+        texto: `Os números são iguais em todos os estados, o que indica erro no arquivo da Receita. O site mostra o dado como foi publicado e corrige quando a Receita corrigir. ${afetaComparavel
+          ? 'Isso afeta a comparação da arrecadação entre os anos.'
+          : 'A comparação entre os anos não usa essa parte, então não muda. O contador e a lista "De onde vem o dinheiro" usam, e ficam menores do que deveriam nesse mês.'}`,
+        secoes: afetaComparavel ? ['#arrecadacao', '#composicao'] : ['#contador', '#composicao'],
       });
     }
   }
@@ -2328,14 +2379,15 @@ function montarAvisos(ctx) {
     if (k.ultimo_status === 'erro') {
       const nome = nomeDaColeta(k.id);
       avisos.push({
-        titulo: `A última coleta de ${nome} falhou`,
-        texto: `Os números exibidos são da última coleta válida${k.ultima_ok ? `, de ${f.dataDeTimestamp(k.ultima_ok)}` : ''}. A coleta é refeita todos os dias.`,
+        titulo: `Não foi possível atualizar ${nome} na última tentativa`,
+        texto: `Os números mostrados são da última atualização que deu certo${k.ultima_ok ? `, em ${f.dataDeTimestamp(k.ultima_ok)}` : ''}. O site tenta de novo todo dia.`,
+        secoes: SECAO_DA_COLETA[k.id] ? [SECAO_DA_COLETA[k.id]] : [],
       });
     }
   }
 
   if (!avisos.length) {
-    el('p', null, 'Nenhum problema detectado na última verificação.', lista);
+    el('p', null, 'Nenhum problema encontrado na última verificação.', lista);
     return;
   }
   for (const a of avisos) {
@@ -2345,6 +2397,20 @@ function montarAvisos(ctx) {
     const corpo = el('div', null, null, caixa);
     el('strong', null, a.titulo, corpo);
     el('p', null, a.texto, corpo);
+  }
+
+  // Lembrete curto no topo de cada seção afetada, com link para o aviso.
+  const porSecao = new Map();
+  avisos.forEach((a) => a.secoes.forEach((sec) => porSecao.set(sec, (porSecao.get(sec) ?? 0) + 1)));
+  for (const [sec, n] of porSecao) {
+    const secao = $(sec);
+    const titulo = secao?.querySelector('h2');
+    if (!titulo) continue;
+    const p = el('p', 'aviso-curto', n === 1 ? 'Há um aviso sobre os dados desta parte. ' : `Há ${n} avisos sobre os dados desta parte. `);
+    const link = el('a', null, n === 1 ? 'Ver o aviso' : 'Ver os avisos', p);
+    link.href = '#avisos';
+    // No contador, o lembrete vem depois do número, não entre o rótulo e ele.
+    (secao.querySelector('.contador-exato') ?? titulo).after(p);
   }
 }
 
