@@ -128,3 +128,8 @@ const PREPOSICAO_UF = {
   RJ: 'do', RN: 'do', RS: 'do', RO: 'de', RR: 'de', SC: 'de', SP: 'de', SE: 'de', TO: 'do',
 };
 export const doEstado = (uf, nome) => `${PREPOSICAO_UF[uf] ?? 'de'} ${nome}`;
+
+// Meta de inflação do Conselho Monetário Nacional: 3% ao ano, com tolerância
+// de 1,5 ponto para cima ou para baixo (meta contínua desde 2025; em 2024 a
+// meta do ano também era 3%).
+export const META_INFLACAO = { centro: 3, piso: 1.5, teto: 4.5 };

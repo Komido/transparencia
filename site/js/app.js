@@ -1539,42 +1539,64 @@ function montarOrcamento(ctx) {
 
 // Cada item é comparado separadamente. Não existe nota única: juntar os itens
 // exigiria decidir quanto vale cada um, e essa decisão é uma opinião.
+// Itens com um lado claramente melhor (dólar e arrecadação ficam de fora; ver
+// metodologia). "causas" são as séries de origem que explicam a mudança entre
+// o período escolhido e hoje; só entram onde os dados mostram o mecanismo.
 function indicadoresDoAno(ctx) {
-  const { meses, s } = ctx;
+  const { meses, s, ipca } = ctx;
   const sm = c.salarioMinimo(meses, s);
+  const inpc = c.indiceAcumulado(s.inpc_var);
   const parteDoSalario = (serie, multiplicador) => s.salario_minimo.map((v, i) =>
     (v == null || serie?.[i] == null ? null : ((serie[i] * multiplicador) / v) * 100));
+  const salario = { rotulo: 'o salário mínimo', serie: s.salario_minimo };
   const lista = [
     {
-      id: 'cestas', nome: 'Cestas básicas que um salário mínimo compra', explica: 'média do ano',
+      id: 'salario', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario',
+      explica: 'quanto vale em dinheiro de hoje (corrigido pela inflação, INPC)',
+      valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
+      causas: [salario, { rotulo: 'os preços (INPC)', serie: inpc }],
+    },
+    {
+      id: 'cestas', nome: 'Cestas básicas por salário mínimo', curto: 'cestas básicas por salário', secao: '#compras',
+      explica: 'quantas cestas do DIEESE um salário mínimo compra',
       valores: s.cesta_total ? c.quantidadeComprada(s.salario_minimo, s.cesta_total) : null,
       tipo: 'media', maiorMelhor: true, formato: (v) => f.numero(v, 2),
+      causas: [salario, { rotulo: 'a cesta básica', serie: s.cesta_total }],
     },
     {
-      id: 'salario', nome: 'Salário mínimo em dinheiro de hoje', explica: 'média do ano, corrigida pela inflação (INPC)',
-      valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
-    },
-    {
-      id: 'renda', nome: 'Renda média de quem trabalha, em dinheiro de hoje', explica: 'todos os trabalhos, com ou sem carteira',
-      valores: s.renda_trabalho, tipo: 'trimestral', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
-    },
-    {
-      id: 'desemprego', nome: 'Desemprego', explica: 'de cada 100 pessoas que trabalham ou procuram trabalho, quantas não encontram',
+      id: 'desemprego', nome: 'Desemprego', curto: 'desemprego', secao: null,
+      explica: 'de cada 100 pessoas que trabalham ou procuram trabalho, quantas não encontram',
       valores: s.desocupacao, tipo: 'trimestral', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'inflacao', nome: 'Inflação no ano', explica: 'quanto os preços subiram em 12 meses (IPCA)',
+      id: 'renda', nome: 'Renda de quem trabalha', curto: 'renda do trabalho', secao: null,
+      explica: 'média de todos os trabalhos, com ou sem carteira, em dinheiro de hoje',
+      valores: s.renda_trabalho, tipo: 'trimestral', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
+    },
+    {
+      id: 'inflacao', nome: 'Inflação', curto: 'inflação', secao: null, meta: t.META_INFLACAO,
+      explica: 'quanto os preços subiram em 12 meses (IPCA)',
       valores: s.ipca_var, tipo: 'acumulado', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'tanque', nome: 'Tanque de 50 litros de gasolina', explica: 'parte do salário mínimo',
-      valores: s.comb_gasolina ? parteDoSalario(s.comb_gasolina, TANQUE_LITROS) : null,
-      tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 0),
-    },
-    {
-      id: 'botijao', nome: 'Botijão de gás', explica: 'parte do salário mínimo',
+      id: 'botijao', nome: 'Botijão de gás', curto: 'botijão de gás', secao: '#combustiveis',
+      explica: 'quanto pesa no salário mínimo',
       valores: s.comb_glp ? parteDoSalario(s.comb_glp, 1) : null,
       tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
+      causas: [{ rotulo: 'o botijão', serie: s.comb_glp }, salario],
+    },
+    {
+      id: 'tanque', nome: 'Tanque de gasolina', curto: 'gasolina', secao: '#combustiveis',
+      explica: `quanto ${TANQUE_LITROS} litros pesam no salário mínimo`,
+      valores: s.comb_gasolina ? parteDoSalario(s.comb_gasolina, TANQUE_LITROS) : null,
+      tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 0),
+      causas: [{ rotulo: 'a gasolina', serie: s.comb_gasolina }, salario],
+    },
+    {
+      id: 'divida', nome: 'Dívida do governo', curto: 'dívida do governo', secao: '#contas',
+      explica: 'tudo o que União, estados e municípios devem, comparado com o que o país produz em um ano (PIB)',
+      valores: s.divida_bruta_pib, tipo: 'fim', maiorMelhor: false, formato: (v) => `${f.porcentagem(v, 1)} do PIB`,
+      deficit: Array.isArray(s.nfsp_nominal) ? c.deflacionar(s.nfsp_nominal, ipca) : null,
     },
   ];
   return lista
@@ -1585,82 +1607,168 @@ function indicadoresDoAno(ctx) {
 }
 
 function frasePosicao(vencidos, total, desde) {
-  if (vencidos === total) return `Hoje está melhor do que em todos os ${total} anos desde ${desde}.`;
-  if (vencidos === 0) return `Hoje não está melhor do que em nenhum dos ${total} anos desde ${desde}.`;
-  return `Hoje está melhor do que em ${vencidos} dos ${total} anos desde ${desde}.`;
+  if (vencidos === total) return `Nos últimos 12 meses, está melhor do que em todos os ${total} anos desde ${desde}.`;
+  if (vencidos === 0) return `Nos últimos 12 meses, não está melhor do que em nenhum dos ${total} anos desde ${desde}.`;
+  return `Nos últimos 12 meses, está melhor do que em ${vencidos} dos ${total} anos desde ${desde}.`;
 }
 
 const listaDeAnos = (anos) => (anos.length <= 1 ? anos.join('')
   : `${anos.slice(0, -1).join(', ')} e ${anos[anos.length - 1]}`);
 
-function montarAnos(ctx) {
+// Situação de hoje: inflação pela meta oficial; o resto pela própria história.
+function nivelDeHoje(it) {
+  if (it.meta) {
+    const v = it.hoje.valor;
+    if (v > it.meta.teto) return { nivel: 'ruim', frase: `Está acima da meta, que é ${f.porcentagem(it.meta.centro, 0)} ao ano, aceitando até ${f.porcentagem(it.meta.teto, 1)}.` };
+    if (v < it.meta.piso) return { nivel: 'medio', frase: `Está abaixo da meta, que é ${f.porcentagem(it.meta.centro, 0)} ao ano, aceitando a partir de ${f.porcentagem(it.meta.piso, 1)}.` };
+    return { nivel: 'bom', frase: `Está dentro da meta, que é ${f.porcentagem(it.meta.centro, 0)} ao ano, aceitando até ${f.porcentagem(it.meta.teto, 1)}.` };
+  }
+  const p = c.posicaoNaHistoria(it.hoje.valor, it.anos, it.maiorMelhor);
+  if (!p) return null;
+  return { nivel: p.nivel, frase: frasePosicao(p.vencidos, p.total, Math.min(...it.anos.keys())) };
+}
+
+const NOME_NIVEL = { bom: 'Bom', medio: 'Médio', ruim: 'Ruim' };
+
+function montarResumo(ctx) {
+  const { meses, mandatos } = ctx;
   const itens = indicadoresDoAno(ctx);
-  if (!itens.length) { $('#anos').hidden = true; return; }
+  if (!itens.length) { $('#resumo').hidden = true; return; }
+  itens.forEach((it) => { it.situacao = nivelDeHoje(it); });
 
-  // Anos que aparecem em todos os itens têm a comparação mais completa.
+  // Resumo geral: o que está bom, médio e ruim hoje.
+  const grupos = ['bom', 'medio', 'ruim'].map((nivel) => ({ nivel, nomes: itens.filter((it) => it.situacao?.nivel === nivel).map((it) => it.curto) }))
+    .filter((g) => g.nomes.length);
+  const rotuloGrupo = { bom: 'Está bom', medio: 'Está na média', ruim: 'Está ruim' };
+  definirItens('resumo-geral', grupos.map((g) => ({ rotulo: rotuloGrupo[g.nivel], texto: `${listaDeAnos(g.nomes)}.` })));
+
+  // Opções de comparação: governos que já terminaram (o mais recente primeiro,
+  // que é o padrão) e anos completos.
+  const anteriores = [...mandatos].filter((m) => m.fim).sort((a, b) => b.inicio.localeCompare(a.inicio));
+  const periodos = new Map();
+  anteriores.forEach((m) => {
+    const indices = c.mesesDoMandato(mandatos, meses, m.id);
+    if (!indices.length) return;
+    const de = c.anoDe(meses[indices[0]]);
+    const ate = c.anoDe(meses[indices[indices.length - 1]]);
+    periodos.set(`g:${m.id}`, { indices, rotulo: `Governo ${m.rotulo}`, quando: `no governo ${m.rotulo}`, de, ate, partido: m.partido });
+  });
   const todosOsAnos = [...new Set(itens.flatMap((it) => [...it.anos.keys()]))].sort((a, b) => b - a);
-  const comTudo = todosOsAnos.filter((ano) => itens.every((it) => it.anos.has(ano)));
-  const padrao = comTudo.length ? Math.min(...comTudo) : todosOsAnos[todosOsAnos.length - 1];
-
-  const select = $('#anos-ano');
-  select.replaceChildren();
   todosOsAnos.forEach((ano) => {
-    const op = el('option', null, String(ano), select);
-    op.value = String(ano);
-    if (ano === padrao) op.selected = true;
+    const indices = meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
+    periodos.set(`a:${ano}`, { indices, rotulo: String(ano), quando: `em ${ano}`, de: ano, ate: ano, ano });
   });
 
-  const melhores = [...new Set(itens.map((it) => it.ranking[0].ano))].sort((a, b) => a - b);
-  definirTopicos('anos-resumo', melhores.length === 1
-    ? `Em todos os itens abaixo, o ano mais favorável foi ${melhores[0]}.`
-    : `Nenhum ano foi o melhor em tudo. Cada item teve seu ano mais favorável: ${listaDeAnos(melhores)}.`);
-  definir('anos-nota-padrao', comTudo.length
-    ? `A comparação começa em ${padrao}, primeiro ano com todos os itens. Alguns itens começam depois de 1995 porque a pesquisa de origem começou depois.`
-    : '');
+  const select = $('#resumo-comparar');
+  select.replaceChildren();
+  const grupoGov = el('optgroup', null, null, select);
+  grupoGov.label = 'Governos anteriores';
+  const grupoAno = el('optgroup', null, null, select);
+  grupoAno.label = 'Anos';
+  for (const [chave, p] of periodos) {
+    const texto = p.ano ? p.rotulo : `${p.rotulo} (${p.partido}), ${p.de} a ${p.ate}`;
+    el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
+  }
+  select.value = periodos.keys().next().value;
+
+  const descricaoPeriodo = (it, p) => {
+    if (p.ano) return { media: 'média do ano', trimestral: 'média do ano', acumulado: 'no ano', fim: 'em dezembro' }[it.tipo];
+    const intervalo = `${p.de} a ${p.ate}`;
+    return { media: `média de ${intervalo}`, trimestral: `média de ${intervalo}`, acumulado: `média por ano, ${intervalo}`,
+      fim: `no fim, ${f.mesCurto(meses[p.indices[p.indices.length - 1]])}` }[it.tipo];
+  };
+  const descricaoHoje = (it) => (it.tipo === 'fim' ? f.mesCurto(it.hoje.ate) : `${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)}`);
+  // Governos: aceita até 10% dos meses sem dado (a ANP, por exemplo, não
+  // publicou setembro de 2020). Anos continuam exigindo os 12 meses.
+  const valorNoPeriodo = (it, p) => (p.ano ? it.anos.get(p.ano) ?? null : c.valorDoPeriodo(meses, it.valores, it.tipo, p.indices, 0.9));
+  const primeiroMesComDado = (it) => meses[it.valores.findIndex((v) => v != null)];
+
+  // "Por quê": variação das séries de origem entre o período e hoje.
+  const variacaoDaCausa = (serie, p) => {
+    const antes = c.valorDoPeriodo(meses, serie, 'media', p.indices, p.ano ? 1 : 0.9);
+    const depois = c.valoresAnuais(meses, serie, 'media').hoje?.valor;
+    return antes && depois ? (depois / antes - 1) * 100 : null;
+  };
+  const fraseCausas = (it, p) => {
+    if (it.causas) {
+      const partes = it.causas.map((causa) => ({ ...causa, v: variacaoDaCausa(causa.serie, p) }));
+      if (partes.some((x) => x.v == null)) return null;
+      const verbo = (v) => (Math.abs(v) < 0.5 ? 'ficou praticamente igual' : `${v > 0 ? 'subiu' : 'caiu'} ${f.porcentagem(Math.abs(v), 0)}`);
+      const [a, b] = partes;
+      // "o salário mínimo subiu 45% e os preços (INPC), 38%": o verbo só se
+      // repete quando o sentido muda.
+      const mesmoSentido = Math.abs(a.v) >= 0.5 && Math.abs(b.v) >= 0.5 && Math.sign(a.v) === Math.sign(b.v);
+      const segundo = mesmoSentido ? `${b.rotulo}, ${f.porcentagem(Math.abs(b.v), 0)}` : `${b.rotulo} ${verbo(b.v)}`;
+      return `Desde então, ${a.rotulo} ${verbo(a.v)} e ${segundo}.`;
+    }
+    if (it.deficit) {
+      const inicio = p.indices[p.indices.length - 1] + 1;
+      const fim = c.ultimoIndice(it.deficit);
+      if (inicio > fim) return null;
+      const trecho = it.deficit.slice(inicio, fim + 1);
+      if (trecho.some((v) => v == null)) return null;
+      const soma = trecho.reduce((a, v) => a + v, 0) * 1e6;
+      return soma >= 0
+        ? `Depois de ${f.mesLongo(meses[inicio - 1])}, o governo federal gastou ${f.reaisPorExtenso(soma)} a mais do que arrecadou, contando os juros da dívida, e pegou emprestada a diferença (em dinheiro de hoje).`
+        : `Depois de ${f.mesLongo(meses[inicio - 1])}, o governo federal arrecadou ${f.reaisPorExtenso(-soma)} a mais do que gastou, contando os juros da dívida (em dinheiro de hoje).`;
+    }
+    return null;
+  };
 
   const desenhar = () => {
-    const ano = Number(select.value);
-    const lista = $('#anos-lista');
+    const p = periodos.get(select.value);
+    const lista = $('#resumo-lista');
     lista.replaceChildren();
     for (const it of itens) {
       const li = el('li', 'ano-item', null, lista);
-      el('h3', 'ano-nome', it.nome, li);
+      const topo = el('div', 'ano-topo', null, li);
+      el('h3', 'ano-nome', it.nome, topo);
+      if (it.situacao) el('span', `selo selo-${it.situacao.nivel}`, NOME_NIVEL[it.situacao.nivel], topo);
       el('p', 'ano-explica', it.explica, li);
 
       const valores = el('dl', 'ano-valores', null, li);
-      const vAno = it.anos.get(ano);
-      const caixa = (rotulo, texto) => {
+      const caixa = (rotulo, texto, detalhe) => {
         const div = el('div', null, null, valores);
         el('dt', null, rotulo, div);
-        el('dd', null, texto, div);
+        const dd = el('dd', null, texto, div);
+        if (detalhe) el('span', 'ano-quando', detalhe, dd);
       };
-      caixa(String(ano), vAno == null ? 'sem dado' : it.formato(vAno));
-      caixa(`Hoje (${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)})`, it.formato(it.hoje.valor));
+      caixa('Hoje', it.formato(it.hoje.valor), descricaoHoje(it));
+      const vSel = valorNoPeriodo(it, p);
+      caixa(p.rotulo, vSel == null ? 'sem dado' : it.formato(vSel), vSel == null ? null : descricaoPeriodo(it, p));
 
-      const primeiroAno = Math.min(...it.anos.keys());
       let veredito;
-      if (vAno == null) veredito = `Sem dado para ${ano}: a série começa em ${primeiroAno}.`;
+      if (vSel == null) {
+        const inicio = primeiroMesComDado(it);
+        veredito = meses[p.indices[0]] < inicio
+          ? `Sem dado para esse período: a pesquisa começa em ${c.anoDe(inicio)}.`
+          : 'Faltam dados da pesquisa nesse período.';
+      }
       else {
-        const r = c.comparar(it.hoje.valor, vAno, it.maiorMelhor);
-        veredito = r === 1 ? 'Melhor hoje.' : r === -1 ? `Era melhor em ${ano}.` : 'Praticamente igual.';
+        const r = c.comparar(it.hoje.valor, vSel, it.maiorMelhor);
+        veredito = r === 1 ? 'Melhor hoje.' : r === -1 ? `Era melhor ${p.quando}.` : 'Praticamente igual.';
       }
       el('p', 'ano-veredito', veredito, li);
-
-      const melhoresAnos = it.ranking.slice(0, 3).map((x) => `${x.ano} (${it.formato(x.valor)})`);
-      const pior = it.ranking[it.ranking.length - 1];
-      const vencidos = it.ranking.filter((x) => c.comparar(it.hoje.valor, x.valor, it.maiorMelhor) === 1).length;
-      el('p', 'ano-ranking',
-        `Anos mais favoráveis: ${listaDeAnos(melhoresAnos)}. Menos favorável: ${pior.ano} (${it.formato(pior.valor)}). `
-        + frasePosicao(vencidos, it.ranking.length, primeiroAno), li);
+      const porque = vSel == null ? null : fraseCausas(it, p);
+      if (porque) el('p', 'ano-porque', porque, li);
+      if (it.situacao) el('p', 'ano-ranking', it.situacao.frase, li);
+      if (it.secao) {
+        const a = el('a', 'ano-link', 'Ver detalhes', li);
+        a.href = it.secao;
+      }
     }
   };
   select.addEventListener('change', desenhar);
   desenhar();
 
-  registrarDownload('anos', () => ({
-    nome: 'comparar-anos.csv',
-    cabecalhos: ['ano', ...itens.map((it) => it.nome)],
-    linhas: [...todosOsAnos].sort((a, b) => a - b).map((ano) => [ano, ...itens.map((it) => arred(it.anos.get(ano) ?? null, 2))]),
+  registrarDownload('resumo', () => ({
+    nome: 'resumo-por-ano-e-governo.csv',
+    cabecalhos: ['período', ...itens.map((it) => it.nome)],
+    linhas: [
+      ['hoje (últimos 12 meses)', ...itens.map((it) => arred(it.hoje.valor, 2))],
+      ...[...periodos.values()].map((p) => [p.ano ? String(p.ano) : `${p.rotulo} (${p.de} a ${p.ate})`,
+        ...itens.map((it) => arred(valorNoPeriodo(it, p), 2))]),
+    ],
   }));
 }
 
@@ -1941,7 +2049,7 @@ async function iniciar() {
       cidade.indice = [];
     }
     montarSeletoresDeCidade();
-    const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
+    const etapas = [iniciarContador, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarComposicaoEstados, montarGastos, montarContas, montarEstados, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {

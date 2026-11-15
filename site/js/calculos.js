@@ -438,6 +438,40 @@ export function valoresAnuais(meses, valores, tipo) {
 
 // Compara dois valores. 1: o primeiro é mais favorável; -1: menos favorável;
 // 0: diferença menor que 1% do segundo (praticamente igual).
+// Índices dos meses de um mandato (o mês é de quem governava no dia 15).
+export function mesesDoMandato(mandatos, meses, id) {
+  return meses.map((mes, i) => (governoDoMes(mandatos, mes)?.id === id ? i : -1)).filter((i) => i >= 0);
+}
+
+// Valor de um período (os meses de um mandato), com a mesma regra dos anos:
+// 'media' média dos meses; 'trimestral' média dos trimestres que fecham no
+// período (março, junho, setembro e dezembro); 'acumulado' média por ano da
+// variação acumulada; 'fim' o último mês. "cobertura" é a parte mínima dos
+// meses que precisa ter dado (1 = todos); 'fim' sempre exige o último mês.
+export function valorDoPeriodo(meses, valores, tipo, indices, cobertura = 1) {
+  if (!indices.length) return null;
+  let pontos = indices;
+  if (tipo === 'trimestral') pontos = indices.filter((i) => mesDoAno(meses[i]) % 3 === 0);
+  if (tipo === 'fim') pontos = [indices[indices.length - 1]];
+  const v = pontos.map((i) => valores[i]).filter((x) => x != null);
+  if (!v.length || v.length < Math.ceil(pontos.length * (tipo === 'fim' ? 1 : cobertura))) return null;
+  if (tipo === 'acumulado') return (v.reduce((a, x) => a * (1 + x / 100), 1) ** (12 / v.length) - 1) * 100;
+  if (tipo === 'soma') return v.reduce((a, x) => a + x, 0);
+  if (tipo === 'fim') return v[0];
+  return v.reduce((a, x) => a + x, 0) / v.length;
+}
+
+// Posição de hoje entre os anos completos: em quantos anos hoje está melhor.
+// "bom": melhor que em pelo menos dois terços dos anos; "ruim": em no máximo
+// um terço; "medio" no meio.
+export function posicaoNaHistoria(hoje, anos, maiorMelhor) {
+  const lista = [...anos.values()];
+  if (hoje == null || lista.length < 3) return null;
+  const vencidos = lista.filter((v) => comparar(hoje, v, maiorMelhor) === 1).length;
+  const fracao = vencidos / lista.length;
+  return { vencidos, total: lista.length, nivel: fracao >= 2 / 3 ? 'bom' : fracao <= 1 / 3 ? 'ruim' : 'medio' };
+}
+
 export function comparar(a, b, maiorMelhor) {
   if (a == null || b == null) return null;
   const base = Math.abs(b) > 0 ? Math.abs(b) : 1;

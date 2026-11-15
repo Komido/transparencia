@@ -17,6 +17,8 @@
   --trilho: #ecebe6;
   --aviso: #b26b00;
   --aviso-fundo: #fbf3e2;
+  --bom: #1e7a3c;
+  --ruim: #b42318;
   --foco: #2a78d6;
   --raio: 8px;
   --largura: 1080px;
@@ -40,6 +42,8 @@
     --trilho: #2a2a28;
     --aviso: #fab219;
     --aviso-fundo: #2a2416;
+    --bom: #5ec27f;
+    --ruim: #f2857a;
     --foco: #86b6ef;
   }
 }
@@ -61,6 +65,8 @@
   --trilho: #2a2a28;
   --aviso: #fab219;
   --aviso-fundo: #2a2416;
+  --bom: #5ec27f;
+  --ruim: #f2857a;
   --foco: #86b6ef;
 }
 
@@ -452,7 +458,23 @@ details.glossario > p {
   border: 1px solid var(--borda);
   border-radius: var(--raio);
 }
+.ano-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .ano-nome { margin: 0; font-size: 1rem; line-height: 1.35; }
+.selo {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid currentColor;
+}
+.selo-bom { color: var(--bom); }
+.selo-medio { color: var(--tinta-2); }
+.selo-ruim { color: var(--ruim); }
+.ano-quando { display: block; font-size: 0.75rem; font-weight: 400; color: var(--tinta-2); }
+.ano-porque { margin: 0 0 4px; font-size: 0.875rem; }
+.ano-link { display: inline-block; margin-top: 6px; font-size: 0.875rem; color: var(--link); }
 .ano-explica { margin: 2px 0 8px; font-size: 0.8125rem; color: var(--tinta-2); }
 .ano-valores {
   display: grid;
@@ -460,7 +482,7 @@ details.glossario > p {
   gap: 8px;
   margin: 0;
 }
-.ano-valores div { display: flex; flex-direction: column; justify-content: space-between; }
+.ano-valores div { display: flex; flex-direction: column; justify-content: flex-start; }
 .ano-valores dt { font-size: 0.8125rem; color: var(--tinta-2); }
 .ano-valores dd { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .ano-veredito { margin: 8px 0 4px; font-weight: 600; }
@@ -729,6 +751,7 @@ td.num .detalhe { white-space: normal; }
 .orc-referencia { display: grid; gap: 4px; font-size: 0.8125rem; min-width: 0; }
 .orc-referencia select { width: 100%; min-width: 0; min-height: 40px; font-size: 16px; }
 .seletor-bloco select { max-width: 100%; }
+.seletor-largo, .seletor-largo select { width: 100%; max-width: 28rem; }
 [hidden] { display: none !important; }
 
 /* Resumos em tópicos ---------------------------------------------------------- */

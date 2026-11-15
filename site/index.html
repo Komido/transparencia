@@ -57,8 +57,8 @@
     </section>
 
     <nav class="atalhos" aria-label="Seções">
+      <a href="#resumo">Resumo</a>
       <a href="#orcamento">Orçamento da família</a>
-      <a href="#anos">Comparar anos</a>
       <a href="#compras">O que o salário compra</a>
       <a href="#combustiveis">Combustíveis</a>
       <a href="#salario">Salário mínimo</a>
@@ -71,6 +71,31 @@
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
     </nav>
+
+    <section id="resumo" class="bloco bloco-dados" aria-labelledby="resumo-titulo">
+      <header>
+        <h2 id="resumo-titulo">Como está o Brasil hoje?</h2>
+      </header>
+      <div class="resumo" data-campo="resumo-geral"></div>
+      <div class="controles controles-coluna">
+        <label class="seletor seletor-bloco seletor-largo">Comparar hoje com
+          <select id="resumo-comparar"></select>
+        </label>
+      </div>
+      <ul class="anos-lista" id="resumo-lista"></ul>
+      <details class="glossario">
+        <summary>Como o site decide se está bom ou ruim?</summary>
+        <p>Cada item é comparado com a própria história: os últimos 12 meses contra cada ano completo desde o começo da pesquisa. Está bom quando hoje é melhor do que em pelo menos dois terços desses anos; ruim quando é melhor em no máximo um terço; na média no resto. A inflação é comparada com a meta oficial.</p>
+        <p>Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e isso é opinião. Dólar e arrecadação ficam de fora: dólar caro prejudica quem compra importados e ajuda quem exporta; mais arrecadação pode significar mais serviços ou mais peso no bolso.</p>
+      </details>
+      <details class="glossario">
+        <summary>Como os governos são comparados?</summary>
+        <p>Cada governo conta do mês em que tomou posse até o último mês no cargo, com a mesma regra para todos. O valor é a média do período; a inflação é a média por ano, e a dívida é a do último mês. O governo atual ainda não terminou e não aparece na lista: "hoje" são os últimos 12 meses.</p>
+        <p>O resultado depende também da economia mundial, do Congresso e de crises como a pandemia de 2020. Os números mostram o que aconteceu, não o mérito de quem governou.</p>
+      </details>
+      <button type="button" class="botao" data-baixar="resumo">Baixar planilha com os dados</button>
+      <p class="fonte">Fontes: Banco Central (salário mínimo e dívida), DIEESE (cesta básica), IBGE (inflação, desemprego e renda) e ANP (gasolina e gás). Cada item muda quando a sua fonte publica, em geral uma vez por mês.</p>
+    </section>
 
     <section id="orcamento" class="bloco bloco-dados" aria-labelledby="orcamento-titulo">
       <header>
@@ -129,30 +154,6 @@
       </details>
       <button type="button" class="botao" data-baixar="orcamento">Baixar planilha com os dados</button>
       <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), Fipe (Índice FipeZAP de aluguel), IBGE (POF 2017-2018 e inflação por item), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
-    </section>
-
-    <section id="anos" class="bloco bloco-dados" aria-labelledby="anos-titulo">
-      <header>
-        <h2 id="anos-titulo">Como era a vida em outros anos?</h2>
-      </header>
-      <div class="resumo" data-campo="anos-resumo"></div>
-      <div class="controles controles-coluna">
-        <label class="seletor">Comparar hoje com
-          <select id="anos-ano"></select>
-        </label>
-      </div>
-      <p class="nota" data-campo="anos-nota-padrao"></p>
-      <ul class="anos-lista" id="anos-lista"></ul>
-      <details class="glossario">
-        <summary>Por que não existe uma nota única para cada ano?</summary>
-        <p>Para dar uma nota a um ano seria preciso decidir quanto vale cada item: emprego vale mais que o preço do gás? Essa decisão é uma opinião, e cada pessoa daria pesos diferentes. Por isso cada item aparece separado, com a mesma regra para todos os anos.</p>
-      </details>
-      <details class="glossario">
-        <summary>Como cada item é calculado?</summary>
-        <p>Cada ano usa a média dos 12 meses. Desemprego e renda usam a média dos 4 trimestres do ano, e a inflação é o quanto os preços subiram de janeiro a dezembro. "Hoje" são os últimos 12 meses com dado publicado. Só entram anos completos. Diferença menor que 1% conta como "praticamente igual".</p>
-      </details>
-      <button type="button" class="botao" data-baixar="anos">Baixar planilha com os dados</button>
-      <p class="fonte">Fontes: DIEESE (cesta básica), ANP (gasolina e gás), IBGE (inflação e PNAD Contínua, com desemprego e renda) e Banco Central (salário mínimo). Cada item muda quando a sua fonte publica, em geral uma vez por mês.</p>
     </section>
 
     <section id="compras" class="bloco bloco-dados" aria-labelledby="compras-titulo">
