@@ -11,7 +11,8 @@ Saída:
   dados-fonte/anp/origem.json                 (URL, tamanho e SHA-256 de cada arquivo original)
 
 O nome do estado na planilha é trocado pela sigla (lista fixa das 27 UFs);
-nome desconhecido faz o script falhar.
+nome desconhecido faz o script falhar. O arquivo por estado leva só os
+produtos usados no site (gasolina comum, etanol, diesel e GLP).
 
 O script não interpreta nem corrige valores: só copia as colunas da planilha.
 Se o layout mudar (cabeçalho não encontrado, mês ou preço inválido), ele falha
@@ -162,6 +163,10 @@ def juntar(arquivos, com_estado, origem):
         conteudo = baixar(url)
         origem.append({"url": url, "bytes": len(conteudo), "sha256": hashlib.sha256(conteudo).hexdigest()})
         for r in ler(conteudo, url, com_estado):
+            # Por estado, só os produtos usados no site: a planilha tem linhas
+            # repetidas com valores diferentes em produtos que não usamos (GNV).
+            if com_estado and r["produto"] not in PRODUTOS_ESPERADOS:
+                continue
             chave = (r.get("uf", ""), r["mes"], r["produto"])
             if chave in todos and todos[chave]["preco_medio_revenda"] != r["preco_medio_revenda"]:
                 raise SystemExit(f"Valores diferentes para o mesmo mês e produto: {chave}")
