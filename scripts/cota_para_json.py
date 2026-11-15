@@ -154,14 +154,31 @@ def novo_parlamentar(ident, nome, uf):
             "total": 0.0, "meses": set(), "grupos": {g: 0.0 for g in ORDEM_GRUPOS}}
 
 
-def fechar(parlamentares):
+def fechar(parlamentares, ano_todo):
+    """ano_todo: ids de quem esteve no cargo o ano todo, ou None quando não há
+    como saber (o campo sai nulo)."""
     saida = []
     for p in sorted(parlamentares.values(), key=lambda x: (sem_acento(x["nome"]).lower(), x["id"])):
         saida.append({
             "id": p["id"], "nome": p["nome"], "uf": p["uf"], "partido": p["partido"],
             "total": round(p["total"], 2), "meses": len(p["meses"]),
             "grupos": [round(p["grupos"][g], 2) for g in ORDEM_GRUPOS],
+            "ano_todo": None if ano_todo is None else p["id"] in ano_todo,
         })
+    return saida
+
+
+def trimestres(ano, hoje):
+    """Trimestres do ano já começados, como (início, fim), com o último
+    cortado em hoje."""
+    fim_do_ano = min(dt.date(ano, 12, 31), hoje)
+    saida = []
+    for mes in (1, 4, 7, 10):
+        inicio = dt.date(ano, mes, 1)
+        if inicio > fim_do_ano:
+            break
+        fim = dt.date(ano + 1, 1, 1) if mes == 10 else dt.date(ano, mes + 3, 1)
+        saida.append((inicio, min(fim - dt.timedelta(days=1), fim_do_ano)))
     return saida
 
 
@@ -169,33 +186,45 @@ def fechar(parlamentares):
 # Câmara
 # ---------------------------------------------------------------------------
 
-def deputados_em_exercicio(ano, hoje):
-    fim = min(dt.date(ano, 12, 31), hoje)
+def deputados_no_periodo(inicio, fim):
+    """Deputados em exercício em algum momento entre as duas datas (API da Câmara)."""
     pagina = 1
     lista = {}
     while True:
         consulta = urllib.parse.urlencode({
-            "dataInicio": f"{ano}-01-01", "dataFim": fim.isoformat(),
+            "dataInicio": inicio.isoformat(), "dataFim": fim.isoformat(),
             "itens": 100, "pagina": pagina, "ordem": "ASC", "ordenarPor": "nome",
         })
         dados = json.loads(baixar(f"https://dadosabertos.camara.leg.br/api/v2/deputados?{consulta}", aceitar="application/json"))
         itens = dados.get("dados")
         if not isinstance(itens, list):
-            falhar(f"API da Câmara sem lista de deputados ({ano}, página {pagina})")
+            falhar(f"API da Câmara sem lista de deputados ({inicio} a {fim}, página {pagina})")
         for d in itens:
             if d.get("id") is None or d.get("siglaUf") not in UFS:
-                falhar(f"deputado sem id ou estado na API ({ano}): {d}")
+                falhar(f"deputado sem id ou estado na API ({inicio} a {fim}): {d}")
             lista[str(d["id"])] = {"id": str(d["id"]), "nome": d.get("nome", ""), "uf": d["siglaUf"], "partido": d.get("siglaPartido")}
         if not any(l.get("rel") == "next" for l in dados.get("links", [])):
             break
         pagina += 1
         time.sleep(0.3)
+    return lista
+
+
+def deputados_em_exercicio(ano, hoje):
+    """Quem esteve em exercício no ano e quem esteve em todos os trimestres
+    já começados (o ano todo, ou até hoje no ano corrente)."""
+    fim = min(dt.date(ano, 12, 31), hoje)
+    lista = deputados_no_periodo(dt.date(ano, 1, 1), fim)
     # 513 cadeiras; com suplentes que assumem no ano, um pouco mais. Nos anos
     # de troca de legislatura (2019, 2023, 2027), quem saiu em janeiro e quem
     # entrou em fevereiro contam no mesmo ano.
     if not 513 <= len(lista) <= 1100:
         falhar(f"API da Câmara: {len(lista)} deputados em exercício em {ano}, fora do esperado")
-    return lista
+    todos_os_trimestres = None
+    for inicio, fim_trimestre in trimestres(ano, hoje):
+        ids = set(deputados_no_periodo(inicio, fim_trimestre))
+        todos_os_trimestres = ids if todos_os_trimestres is None else todos_os_trimestres & ids
+    return lista, todos_os_trimestres or set()
 
 
 def ler_camara(ano, origem):
@@ -275,6 +304,32 @@ def primeiro(objeto, chave):
     return None
 
 
+def exercicios_de(item):
+    """Períodos de exercício (início, fim) dos mandatos de um item da lista do
+    Senado. Sem data de fim, o exercício continua."""
+    periodos = []
+    for mandato in procurar(item, "Exercicios"):
+        bloco = mandato["Exercicios"]
+        lista = bloco.get("Exercicio") if isinstance(bloco, dict) else bloco
+        if isinstance(lista, dict):
+            lista = [lista]
+        for e in lista if isinstance(lista, list) else []:
+            if not isinstance(e, dict):
+                continue
+            try:
+                inicio = dt.date.fromisoformat(str(e.get("DataInicio"))[:10])
+                fim = dt.date.fromisoformat(str(e["DataFim"])[:10]) if e.get("DataFim") else dt.date.max
+            except ValueError:
+                continue
+            if fim >= inicio:
+                periodos.append((inicio, fim))
+    return periodos
+
+
+def em_exercicio(periodos, inicio, fim):
+    return any(a <= fim and b >= inicio for a, b in periodos)
+
+
 def senadores_conhecidos():
     """Nome normalizado -> estado e partido, das legislaturas 55 a 57
     (2015 a 2027: em janeiro de 2019 ainda estavam no cargo senadores eleitos
@@ -297,7 +352,8 @@ def senadores_conhecidos():
             partido = ident.get("SiglaPartidoParlamentar") or primeiro(item, "SiglaPartidoParlamentar")
             info = {"nome": nome, "uf": uf if uf in UFS else anterior.get("uf"),
                     "partido": partido or anterior.get("partido"),
-                    "codigo": ident.get("CodigoParlamentar")}
+                    "codigo": ident.get("CodigoParlamentar"),
+                    "exercicios": sorted(set(anterior.get("exercicios", [])) | set(exercicios_de(item)))}
             mapa[chave] = info
             completo = chave_nome(ident.get("NomeCompletoParlamentar") or "")
             if completo and completo not in mapa:
@@ -306,7 +362,16 @@ def senadores_conhecidos():
                 atuais.add(chave)
     if len(mapa) < 81 or len(atuais) < 70:
         falhar(f"listas do Senado com {len(mapa)} senadores conhecidos e {len(atuais)} atuais, fora do esperado")
-    print(f"Senado: {len(mapa)} nomes nas listas, {sum(1 for v in mapa.values() if v['uf'])} com estado; {len(atuais)} senadores atuais", flush=True)
+    # O nome parlamentar pode mudar de uma lista para outra; o código do
+    # senador não muda. Os períodos de exercício são juntados pelo código.
+    por_codigo = {}
+    for v in mapa.values():
+        por_codigo.setdefault(v["codigo"], set()).update(v["exercicios"])
+    for v in mapa.values():
+        v["exercicios"] = sorted(por_codigo[v["codigo"]])
+    com_exercicio = sum(1 for v in por_codigo.values() if v)
+    print(f"Senado: {len(mapa)} nomes nas listas, {sum(1 for v in mapa.values() if v['uf'])} com estado, "
+          f"{com_exercicio} com períodos de exercício; {len(atuais)} senadores atuais", flush=True)
     return mapa, atuais
 
 
@@ -371,6 +436,7 @@ def ler_senado(ano, origem, conhecidos):
             sem_estado.add(f"{nome} (sem estado na lista)")
         s = senadores.setdefault(chave, novo_parlamentar(chave, info.get("nome") or nome.title(), info.get("uf")))
         s["partido"] = info.get("partido")
+        s["codigo"] = info.get("codigo")
         valor = numero(linha["VALOR_REEMBOLSADO"], onde)
         tipo = linha["TIPO_DESPESA"]
         g = grupo_de(tipo)
@@ -411,28 +477,58 @@ def main():
         deputados, outros_camara, fora, linhas_c, mes_c = ler_camara(ano, origem)
         total_c = sum(d["total"] for d in deputados.values())
         conferir("Câmara", ano, deputados, total_c, mes_c, 5_000_000, (300, 1100))
-        exercicio = deputados_em_exercicio(ano, hoje)
-        sem_gasto_c = sorted((v for k, v in exercicio.items() if k not in deputados),
-                             key=lambda x: sem_acento(x["nome"]).lower())
+        exercicio, ano_todo_c = deputados_em_exercicio(ano, hoje)
+        # "ano_todo": esteve em exercício em algum momento de cada trimestre do
+        # ano (até hoje, no ano corrente). Quem ficou só parte do ano gasta
+        # menos por isso; o site separa e não põe essas pessoas no ranking.
+        sem_gasto_c = sorted(({**v, "ano_todo": k in ano_todo_c} for k, v in exercicio.items() if k not in deputados),
+                             key=lambda x: (not x["ano_todo"], sem_acento(x["nome"]).lower()))
+        print(f"{ano}: Câmara, {len(exercicio)} deputados em exercício, {len(ano_todo_c)} o ano todo", flush=True)
 
         senadores, outros_senado, linhas_s, mes_s = ler_senado(ano, origem, conhecidos)
         total_s = sum(s["total"] for s in senadores.values())
         conferir("Senado", ano, senadores, total_s, mes_s, 500_000, (60, 160))
-        # Sem a data de exercício de cada senador, quem não usou a cota só é
-        # listado no ano corrente, entre os senadores atuais.
-        sem_gasto_s = None
-        if ano == hoje.year:
-            sem_gasto_s = sorted(({"id": k, "nome": conhecidos[k]["nome"], "uf": conhecidos[k]["uf"], "partido": conhecidos[k]["partido"]}
-                                  for k in senadores_atuais if chave_nome(conhecidos[k]["nome"]) not in senadores),
-                                 key=lambda x: sem_acento(x["nome"]).lower())
+        # Com os períodos de exercício das listas oficiais: quem esteve no
+        # cargo no ano, quem esteve o ano todo e quem não usou a cota. Se as
+        # listas não trouxerem os períodos (ou trouxerem algo fora do
+        # esperado), volta ao que dá para afirmar sem eles: no ano corrente,
+        # os senadores atuais sem gasto.
+        # Um senador por código; nome, estado e partido da lista atual quando
+        # ele está nela.
+        unicos = {}
+        for k, v in conhecidos.items():
+            if v["codigo"] not in unicos or k in senadores_atuais:
+                unicos[v["codigo"]] = v
+        fim_do_ano = min(dt.date(ano, 12, 31), hoje)
+        no_ano = {c: v for c, v in unicos.items() if em_exercicio(v["exercicios"], dt.date(ano, 1, 1), fim_do_ano)}
+        codigos_ano_todo = {c for c, v in no_ano.items() if all(em_exercicio(v["exercicios"], a, b) for a, b in trimestres(ano, hoje))}
+        codigos_com_gasto = {x["codigo"] for x in senadores.values()}
+        sem_dono = [x["nome"] for x in senadores.values() if x["codigo"] not in no_ano]
+        if 81 <= len(no_ano) <= 130 and 70 <= len(codigos_ano_todo) <= 81 and len(sem_dono) <= 3:
+            ano_todo_s = {k for k, x in senadores.items() if x["codigo"] in codigos_ano_todo}
+            sem_gasto_s = sorted(({"id": str(c), "nome": v["nome"], "uf": v["uf"], "partido": v["partido"], "ano_todo": c in codigos_ano_todo}
+                                  for c, v in no_ano.items() if c not in codigos_com_gasto),
+                                 key=lambda x: (not x["ano_todo"], sem_acento(x["nome"]).lower()))
+            print(f"{ano}: Senado, {len(no_ano)} senadores em exercício, {len(codigos_ano_todo)} o ano todo; "
+                  f"com gasto e sem exercício no ano: {sem_dono}", flush=True)
+        else:
+            print(f"Aviso: períodos de exercício do Senado fora do esperado em {ano} ({len(no_ano)} no ano, "
+                  f"{len(codigos_ano_todo)} o ano todo, {len(sem_dono)} com gasto sem exercício: {sem_dono[:10]}); "
+                  "sem ranking do Senado nesse ano", flush=True)
+            ano_todo_s = None
+            sem_gasto_s = None
+            if ano == hoje.year:
+                sem_gasto_s = sorted(({"id": k, "nome": conhecidos[k]["nome"], "uf": conhecidos[k]["uf"], "partido": conhecidos[k]["partido"]}
+                                      for k in senadores_atuais if chave_nome(conhecidos[k]["nome"]) not in senadores),
+                                     key=lambda x: sem_acento(x["nome"]).lower())
 
         saidas[ano] = {
             "ano": ano,
             "ate_mes": {"camara": mes_c, "senado": mes_s},
             "grupos": [{"id": g[0], "nome": g[1]} for g in GRUPOS] + [{"id": OUTROS[0], "nome": OUTROS[1]}],
-            "camara": {"total": round(total_c, 2), "parlamentares": fechar(deputados), "sem_gasto": sem_gasto_c,
+            "camara": {"total": round(total_c, 2), "parlamentares": fechar(deputados, ano_todo_c), "sem_gasto": sem_gasto_c,
                        "liderancas": fora, "linhas": linhas_c, "tipos_em_outros": outros_camara},
-            "senado": {"total": round(total_s, 2), "parlamentares": fechar(senadores), "sem_gasto": sem_gasto_s,
+            "senado": {"total": round(total_s, 2), "parlamentares": fechar(senadores, ano_todo_s), "sem_gasto": sem_gasto_s,
                        "linhas": linhas_s, "tipos_em_outros": outros_senado},
         }
         print(f"{ano}: Câmara {len(deputados)} deputados, R$ {total_c:,.2f} até o mês {mes_c}, {len(sem_gasto_c)} sem gasto; "
