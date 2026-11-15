@@ -779,13 +779,13 @@ function montarCompras(ctx) {
   let item = itens[0];
   let anoEscolhido = null;
 
-  // Com cidade escolhida, os alimentos usam o preço do DIEESE na cidade;
-  // gasolina e gás continuam com a média nacional da ANP.
-  const precoDe = (it) => {
-    const local = cidade.dados?.series?.[it.serie];
-    return it.fonte === 'dieese' && local ? local : s[it.serie];
-  };
-  const naCidade = (it) => Boolean(it.fonte === 'dieese' && cidade.dados?.series?.[it.serie]);
+  // Com cidade escolhida, os alimentos usam o preço do DIEESE na cidade e
+  // gasolina e gás usam a média da ANP no estado da cidade.
+  const precoDe = (it) => cidade.dados?.series?.[it.serie] ?? s[it.serie];
+  const naCidade = (it) => Boolean(cidade.dados?.series?.[it.serie]);
+  const ondeLocal = (it) => (it.fonte === 'anp'
+    ? `No estado ${t.doEstado(cidade.dados.uf, cidade.dados.uf_nome ?? cidade.dados.uf)}`
+    : `Em ${cidade.dados.nome}`);
 
   const desenhar = () => {
     const precos = precoDe(item);
@@ -802,7 +802,7 @@ function montarCompras(ctx) {
     let fecho = '';
     if (comp === 'a mesma quantidade') fecho = ` Hoje ele compra a mesma quantidade que em ${anoA}.`;
     else if (comp) fecho = ` Hoje ele compra ${comp} do que em ${anoA}.`;
-    const onde = naCidade(item) ? `Em ${cidade.dados.nome}, com` : 'Com';
+    const onde = naCidade(item) ? `${ondeLocal(item)}, com` : 'Com';
     definirTopicos('compras-resumo',
       `${onde} um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}. `
       + `Em ${f.mesLongo(meses[iA])}, com o salário da época (${f.moeda(s.salario_minimo[iA], 0)}), dava para comprar ${t.quantidade(qA)}.${fecho}`);
@@ -818,12 +818,14 @@ function montarCompras(ctx) {
 
     const cesta = 'A cesta básica é o conjunto de 13 alimentos que, pela lei, sustenta uma pessoa adulta por um mês.';
     let nota;
-    if (naCidade(item)) {
+    if (naCidade(item) && item.fonte === 'anp') {
+      nota = `O preço é a média dos postos pesquisados pela ANP no estado ${t.doEstado(cidade.dados.uf, cidade.dados.uf_nome ?? cidade.dados.uf)}. Na sua cidade o preço pode ser diferente.`;
+    } else if (naCidade(item)) {
       nota = `Os preços são os que o DIEESE pesquisa todo mês em ${cidade.dados.nome}. Meses sem pesquisa na cidade ficam em branco. ${cesta}`;
     } else if (item.fonte === 'dieese') {
       nota = `Os preços são a média de ${capitais.length} capitais que o DIEESE pesquisa todo mês desde 1995 (${capitais.join(', ')}). Na sua cidade o preço pode ser diferente. ${cesta}`;
     } else {
-      nota = `O preço é a média dos postos pesquisados pela ANP em todo o Brasil${cidade.dados ? '; o preço por cidade ainda não está no site' : ''}. Na sua cidade o preço pode ser diferente.`;
+      nota = 'O preço é a média dos postos pesquisados pela ANP em todo o Brasil. Na sua cidade o preço pode ser diferente.';
     }
     definir('compras-nota-fonte', nota);
 
@@ -987,7 +989,7 @@ const ITENS_ORCAMENTO = [
     id: 'gas', nome: 'Gás de cozinha',
     padrao: (ctx, familia) => {
       const g = gastoDaPof(ctx, familia, 'gas', 'ipca_gas_var', 'do gás de botijão');
-      const botijao = c.ultimoValor(ctx.meses, ctx.s.comb_glp);
+      const botijao = c.ultimoValor(ctx.meses, familia.local?.series?.comb_glp ?? ctx.s.comb_glp);
       if (g && botijao) g.nota += `. Dá cerca de ${f.numero(g.valor / botijao.valor, 1)} botijão por mês`;
       return g;
     },
@@ -1313,7 +1315,9 @@ function montarCombustiveis(ctx) {
   let anoEscolhido = null;
 
   const desenhar = () => {
-    const nominal = s[item.serie];
+    const local = cidade.dados?.series?.[item.serie];
+    const nominal = local ?? s[item.serie];
+    const onde = local ? `no estado ${t.doEstado(cidade.dados.uf, cidade.dados.uf_nome ?? cidade.dados.uf)}` : 'no país';
     const iUltPreco = c.ultimoIndice(nominal);
     const equivalente = c.noSalarioDeHoje(nominal, s.salario_minimo, iUltPreco);
     const { iUlt, candidatos } = mesesParaComparar(meses, equivalente);
@@ -1334,7 +1338,7 @@ function montarCombustiveis(ctx) {
       ? `Encher um tanque de ${TANQUE_LITROS} litros custa ${f.moeda(custo(iUlt), 0)}, ou ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 0)}).`
       : `Um botijão custa ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 1)}).`;
     definirTopicos('combustiveis-resumo',
-      `Em ${f.mesLongo(meses[iUlt])}, ${item.descricao} custa em média ${f.moeda(nominal[iUlt], 2)} no país, com o salário mínimo em ${f.moeda(s.salario_minimo[iUlt], 0)}. `
+      `Em ${f.mesLongo(meses[iUlt])}, ${item.descricao} custa em média ${f.moeda(nominal[iUlt], 2)} ${onde}, com o salário mínimo em ${f.moeda(s.salario_minimo[iUlt], 0)}. `
       + `Em ${f.mesLongo(meses[iA])}, custava ${f.moeda(nominal[iA], 2)}, quando o salário mínimo era ${f.moeda(s.salario_minimo[iA], 0)}; com o salário de hoje, aquele preço equivaleria a ${f.moeda(equivalente[iA], 2)}. `
       + `${conclusao} ${textoCusto}`);
 
@@ -1366,13 +1370,14 @@ function montarCombustiveis(ctx) {
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-combustiveis'), opcoes);
 
     registrarDownload('combustiveis', () => ({
-      nome: `combustivel-${item.id}-mensal.csv`,
+      nome: `combustivel-${item.id}-mensal${cidade.dados?.series?.[item.serie] ? `-${cidade.dados.uf}` : ''}.csv`,
       cabecalhos: ['mes', 'preco na epoca (R$)', 'salario minimo (R$)', `equivalente no salario de ${meses[iUltPreco]} (R$)`],
       linhas: meses.map((m, i) => [m, nominal[i], s.salario_minimo[i], arred(equivalente[i], 2)]).filter((l) => l[1] != null),
     }));
   };
 
   montarEscolhas($('#combustiveis-itens'), 'combustivel-item', itens, (novo) => { item = novo; desenhar(); });
+  aoMudarCidade(desenhar);
   $('#combustiveis-ano').addEventListener('change', (ev) => { anoEscolhido = c.anoDe(meses[Number(ev.target.value)]); desenhar(); });
   desenhar();
 }

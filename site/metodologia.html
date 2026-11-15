@@ -123,6 +123,7 @@
         <li>Produtos: gasolina comum, etanol hidratado, óleo diesel comum (a ANP publica o diesel S10 numa série separada e mais curta, que não entra aqui) e GLP em botijão de 13 kg.</li>
         <li>A ANP publica planilhas Excel. Uma rotina automática baixa as planilhas todos os dias, converte para CSV e guarda no repositório a assinatura digital (SHA-256) de cada planilha original, para que qualquer pessoa possa conferir se o arquivo usado é o mesmo que a ANP publicou.</li>
         <li>A ANP pesquisa uma amostra de postos, e o tamanho dela mudou bastante ao longo dos anos (na gasolina comum, de cerca de 14 mil a 58 mil postos pesquisados por mês).</li>
+        <li>Por estado, o site usa as planilhas mensais por estado da mesma pesquisa, só com gasolina comum, etanol, diesel e GLP. A planilha por estado tem linhas repetidas com valores diferentes em outro produto (GNV), que o site não usa.</li>
         <li><strong>No salário de hoje:</strong> preço do mês trazido para o salário mínimo do último mês com preço, pela regra de preços comparados pelo salário.</li>
         <li><strong>Tanque cheio:</strong> 50 litros vezes o preço médio do litro, dividido pelo salário mínimo do mesmo mês. O botijão é comparado ao salário mínimo da mesma forma.</li>
       </ul>
@@ -178,7 +179,7 @@
         <li><strong>Comida e alimentos:</strong> preços que o DIEESE pesquisa na própria capital. As capitais que entraram na pesquisa depois de 2015 têm histórico mais curto, e os meses sem pesquisa na cidade ficam em branco.</li>
         <li><strong>Luz, água, gás e aluguel (referência do IBGE):</strong> gasto das famílias da mesma faixa de renda no estado da capital, na POF 2017-2018 (tabela 6715 por unidade da federação), corrigido pela inflação nacional de cada item. A amostra da POF por estado é menor que a nacional, então a margem de erro é maior.</li>
         <li><strong>Aluguel anunciado (FipeZAP):</strong> preço médio por m² da própria cidade, nas 16 capitais acompanhadas pelo Índice FipeZAP. Nas demais, essa opção fica indisponível.</li>
-        <li><strong>Gasolina e botijão:</strong> continuam com a média nacional da ANP; o preço por cidade ainda não está no site.</li>
+        <li><strong>Gasolina, etanol, diesel e botijão:</strong> média mensal dos postos pesquisados pela ANP no estado da capital (planilhas mensais por estado, convertidas para CSV como as nacionais). Vale para a seção de combustíveis, para "O que o salário compra" e para a conta de botijões no orçamento. É a média do estado inteiro, não só da capital.</li>
         <li><strong>Salário necessário do DIEESE:</strong> é um valor único para o país, calculado com a cesta mais cara entre as capitais, e não muda com a cidade escolhida.</li>
       </ul>
 

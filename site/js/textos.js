@@ -120,3 +120,11 @@ export const AREAS_DE_GASTO = [
   { id: '25', contas: ['25'], nome: 'Energia', explica: null },
   { id: '27', contas: ['27'], nome: 'Esporte e lazer', explica: null },
 ];
+
+// Nome do estado com a preposição certa: "de São Paulo", "do Pará", "da Bahia".
+const PREPOSICAO_UF = {
+  AC: 'do', AL: 'de', AP: 'do', AM: 'do', BA: 'da', CE: 'do', DF: 'do', ES: 'do', GO: 'de',
+  MA: 'do', MT: 'de', MS: 'de', MG: 'de', PA: 'do', PB: 'da', PR: 'do', PE: 'de', PI: 'do',
+  RJ: 'do', RN: 'do', RS: 'do', RO: 'de', RR: 'de', SC: 'de', SP: 'de', SE: 'de', TO: 'do',
+};
+export const doEstado = (uf, nome) => `${PREPOSICAO_UF[uf] ?? 'de'} ${nome}`;
