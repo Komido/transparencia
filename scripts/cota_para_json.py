@@ -267,6 +267,14 @@ def procurar(objeto, chave):
             yield from procurar(v, chave)
 
 
+def primeiro(objeto, chave):
+    """Primeiro valor não vazio da chave pedida, em qualquer nível."""
+    for d in procurar(objeto, chave):
+        if d.get(chave):
+            return d[chave]
+    return None
+
+
 def senadores_conhecidos():
     """Nome normalizado -> estado e partido, das legislaturas 55 a 57
     (2015 a 2027: em janeiro de 2019 ainda estavam no cargo senadores eleitos
@@ -283,9 +291,12 @@ def senadores_conhecidos():
             if not chave:
                 continue
             anterior = mapa.get(chave, {})
-            uf = ident.get("UfParlamentar")
+            # Em algumas listas o estado fica no bloco do mandato, não na
+            # identificação do senador.
+            uf = ident.get("UfParlamentar") or primeiro(item, "UfParlamentar")
+            partido = ident.get("SiglaPartidoParlamentar") or primeiro(item, "SiglaPartidoParlamentar")
             info = {"nome": nome, "uf": uf if uf in UFS else anterior.get("uf"),
-                    "partido": ident.get("SiglaPartidoParlamentar") or anterior.get("partido"),
+                    "partido": partido or anterior.get("partido"),
                     "codigo": ident.get("CodigoParlamentar")}
             mapa[chave] = info
             completo = chave_nome(ident.get("NomeCompletoParlamentar") or "")
@@ -295,6 +306,7 @@ def senadores_conhecidos():
                 atuais.add(chave)
     if len(mapa) < 81 or len(atuais) < 70:
         falhar(f"listas do Senado com {len(mapa)} senadores conhecidos e {len(atuais)} atuais, fora do esperado")
+    print(f"Senado: {len(mapa)} nomes nas listas, {sum(1 for v in mapa.values() if v['uf'])} com estado; {len(atuais)} senadores atuais", flush=True)
     return mapa, atuais
 
 
@@ -333,8 +345,10 @@ def ler_senado(ano, origem, conhecidos):
         nome = (linha["SENADOR"] or "").strip()
         chave = chave_nome(nome)
         info = conhecidos.get(chave, {})
-        if not info.get("uf"):
-            sem_estado.add(nome)
+        if not info:
+            sem_estado.add(f"{nome} (nome não encontrado)")
+        elif not info.get("uf"):
+            sem_estado.add(f"{nome} (sem estado na lista)")
         s = senadores.setdefault(chave, novo_parlamentar(chave, info.get("nome") or nome.title(), info.get("uf")))
         s["partido"] = info.get("partido")
         valor = numero(linha["VALOR_REEMBOLSADO"], onde)
