@@ -7,8 +7,12 @@ locação nos portais do Grupo OLX (Zap, Viva Real e OLX). Planilha pública
 Segundo a própria planilha, os preços mensais são médias móveis de 3 meses.
 
 Saída:
-  dados-fonte/fipezap/aluguel-indice-fipezap.csv  (mes, aluguel_m2)
-  dados-fonte/fipezap/origem.json                 (URL, tamanho e SHA-256 do original)
+  dados-fonte/fipezap/aluguel-indice-fipezap.csv   (mes, aluguel_m2): média das cidades
+  dados-fonte/fipezap/aluguel-cidades-fipezap.csv  (mes, cidade, uf, aluguel_m2): uma aba por cidade
+  dados-fonte/fipezap/origem.json                  (URL, tamanho e SHA-256 do original)
+
+Cidades sem preço de locação na planilha ("não disponível") ficam de fora.
+A UF de cada cidade vem da aba de resumo.
 
 aluguel_m2 é a coluna "Locação > Preço médio (R$/m²) > Total". O script só
 copia o valor da planilha. Se o layout mudar, ele falha sem gravar nada e o
@@ -73,14 +77,15 @@ def localizar_coluna(linhas):
     raise SystemExit("Coluna 'Preço médio (R$/m²)' de locação não encontrada.")
 
 
-def ler(conteudo):
-    livro = load_workbook(io.BytesIO(conteudo), read_only=True, data_only=True)
-    aba = next((p for p in livro.worksheets if normalizar(p.title) == ABA), None)
-    if aba is None:
-        raise SystemExit(f"Aba '{ABA}' não encontrada. Abas: {livro.sheetnames}")
+def ler_aba(aba, obrigatoria):
+    """Série de preço de locação de uma aba, ou None se a aba não tem locação."""
     linhas = [tuple(l) for l in aba.iter_rows(values_only=True)]
-    primeira, col_data, col_preco = localizar_coluna(linhas)
-    print(f"dados a partir da linha {primeira + 1}; data na coluna {col_data}, preço na coluna {col_preco}")
+    try:
+        primeira, col_data, col_preco = localizar_coluna(linhas)
+    except SystemExit:
+        if obrigatoria:
+            raise
+        return None
 
     registros = []
     for linha in linhas[primeira:]:
@@ -94,45 +99,96 @@ def ler(conteudo):
             raise SystemExit(f"Preço por m² fora do esperado em {data:%Y-%m}: {valor}")
         registros.append({"mes": f"{data.year:04d}-{data.month:02d}", "aluguel_m2": round(float(valor), 4)})
 
+    if not registros:
+        if obrigatoria:
+            raise SystemExit(f"Aba '{aba.title}' sem preços de locação.")
+        return None
     meses = [r["mes"] for r in registros]
-    if len(registros) < 150:
-        raise SystemExit(f"Poucos meses ({len(registros)}); o layout pode ter mudado.")
     if meses != sorted(set(meses)):
-        raise SystemExit("Meses fora de ordem ou repetidos.")
-
-    # Conferência cruzada: o último valor precisa aparecer na aba de resumo.
-    resumo = next((p for p in livro.worksheets if normalizar(p.title) == "RESUMO"), None)
-    if resumo is not None:
-        numeros = [c for l in resumo.iter_rows(values_only=True) if normalizar(l[0]) == "INDICE FIPEZAP"
-                   for c in l if isinstance(c, (int, float))]
-        if not any(abs(n - registros[-1]["aluguel_m2"]) < 1e-3 for n in numeros):
-            raise SystemExit("O último preço da série não aparece na aba de resumo.")
+        raise SystemExit(f"Meses fora de ordem ou repetidos na aba '{aba.title}'.")
     return registros
+
+
+def ler(conteudo):
+    livro = load_workbook(io.BytesIO(conteudo), read_only=True, data_only=True)
+    abas = {normalizar(p.title): p for p in livro.worksheets}
+    if ABA not in abas or "RESUMO" not in abas:
+        raise SystemExit(f"Abas esperadas não encontradas. Abas: {livro.sheetnames}")
+
+    # Resumo: nome da cidade, UF e os números do último mês de cada linha.
+    resumo = {}
+    for linha in abas["RESUMO"].iter_rows(values_only=True):
+        nome = normalizar(linha[0])
+        uf = linha[2] if len(linha) > 2 else None
+        numeros = [c for c in linha if isinstance(c, (int, float))]
+        if nome:
+            resumo[nome] = {"uf": uf, "numeros": numeros}
+
+    def conferir(nome, registros):
+        # O último valor da série precisa aparecer na linha da aba de resumo.
+        linha = resumo.get(normalizar(nome))
+        if linha is None or not any(abs(n - registros[-1]["aluguel_m2"]) < 1e-3 for n in linha["numeros"]):
+            raise SystemExit(f"O último preço de '{nome}' não aparece na aba de resumo.")
+
+    indice = ler_aba(abas[ABA], obrigatoria=True)
+    if len(indice) < 150:
+        raise SystemExit(f"Poucos meses no índice ({len(indice)}); o layout pode ter mudado.")
+    conferir("Índice FipeZAP", indice)
+
+    cidades = []
+    for chave, aba in abas.items():
+        if chave in (ABA, "RESUMO", "AUX"):
+            continue
+        registros = ler_aba(aba, obrigatoria=False)
+        if registros is None:
+            print(f"  {aba.title}: sem locação")
+            continue
+        uf = resumo.get(chave, {}).get("uf")
+        if not (isinstance(uf, str) and re.fullmatch(r"[A-Z]{2}", uf)):
+            raise SystemExit(f"UF de '{aba.title}' não encontrada na aba de resumo.")
+        conferir(aba.title, registros)
+        for r in registros:
+            cidades.append({"mes": r["mes"], "cidade": aba.title.strip(), "uf": uf, "aluguel_m2": r["aluguel_m2"]})
+        print(f"  {aba.title} ({uf}): {len(registros)} meses, último R$ {registros[-1]['aluguel_m2']}/m²")
+    if len({c["cidade"] for c in cidades}) < 15:
+        raise SystemExit("Poucas cidades com locação; o layout pode ter mudado.")
+    return indice, cidades
 
 
 def main():
     print(f"Baixando {URL}")
     conteudo = baixar(URL)
-    registros = ler(conteudo)
+    registros, cidades = ler(conteudo)
     print(f"OK: {len(registros)} meses, de {registros[0]['mes']} a {registros[-1]['mes']}; último R$ {registros[-1]['aluguel_m2']}/m²")
+    print(f"OK: {len({c['cidade'] for c in cidades})} cidades com locação")
+
+    def gerar(campos, linhas):
+        buffer = io.StringIO()
+        escritor = csv.DictWriter(buffer, fieldnames=campos, lineterminator="\n")
+        escritor.writeheader()
+        escritor.writerows(linhas)
+        return buffer.getvalue()
 
     os.makedirs(DESTINO, exist_ok=True)
-    caminho_csv = os.path.join(DESTINO, "aluguel-indice-fipezap.csv")
-    buffer = io.StringIO()
-    escritor = csv.DictWriter(buffer, fieldnames=["mes", "aluguel_m2"], lineterminator="\n")
-    escritor.writeheader()
-    escritor.writerows(registros)
-    novo = buffer.getvalue()
-
-    anterior = open(caminho_csv, encoding="utf-8").read() if os.path.exists(caminho_csv) else None
-    if novo == anterior:
-        print("CSV sem mudança.")
+    arquivos = {
+        "aluguel-indice-fipezap.csv": gerar(["mes", "aluguel_m2"], registros),
+        "aluguel-cidades-fipezap.csv": gerar(["mes", "cidade", "uf", "aluguel_m2"],
+                                             sorted(cidades, key=lambda c: (c["uf"], c["cidade"], c["mes"]))),
+    }
+    mudou = False
+    for nome, novo in arquivos.items():
+        caminho = os.path.join(DESTINO, nome)
+        anterior = open(caminho, encoding="utf-8").read() if os.path.exists(caminho) else None
+        if novo != anterior:
+            with open(caminho, "w", encoding="utf-8") as f:
+                f.write(novo)
+            mudou = True
+    if not mudou:
+        print("CSVs sem mudança.")
         return
-    with open(caminho_csv, "w", encoding="utf-8") as f:
-        f.write(novo)
     with open(os.path.join(DESTINO, "origem.json"), "w", encoding="utf-8") as f:
         json.dump({
-            "fonte": "Fipe, Índice FipeZAP, locação residencial, preço médio (R$/m²), média das cidades acompanhadas",
+            "fonte": "Fipe, Índice FipeZAP, locação residencial, preço médio (R$/m²), média das cidades e cada cidade",
             "convertido_em": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "arquivos": [{"url": URL, "bytes": len(conteudo), "sha256": hashlib.sha256(conteudo).hexdigest()}],
         }, f, ensure_ascii=False, indent=2)
