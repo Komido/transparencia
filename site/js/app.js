@@ -370,10 +370,9 @@ function montarGastos(ctx) {
     const grandes = doAno.filter((a) => a.valor / totalAno >= 0.01);
     const pequenas = doAno.filter((a) => a.valor / totalAno < 0.01);
 
-    const cinco = grandes.slice(0, 5).map((a) => `${porCem((a.valor / totalAno) * 100)} para ${a.nome.toLowerCase().replace('inss', 'INSS')}`);
+    // A divisão por área fica nas barras logo abaixo; o resumo não repete.
     definirTopicos('gastos-resumo',
       `Em ${anos[k]}, o governo federal gastou ${f.reaisPorExtenso(totalAno)}, sem contar a rolagem da dívida. `
-      + `De cada R$ 100, foram ${listaDeAnos(cinco)}. `
       + `A rolagem, quando o governo paga dívida que venceu com dívida nova, somou mais ${f.reaisPorExtenso(rolagem[k] * 1e6)} e fica fora dessa conta.`);
 
     const lista = $('#lista-gastos');
@@ -1229,13 +1228,6 @@ function barrasDeGrupos(lista, grupos, valores) {
   }
 }
 
-// Nomes curtos dos grupos para as frases do resumo.
-const GRUPO_CURTO = {
-  passagens: 'passagens', divulgacao: 'divulgação', consultoria: 'consultorias', seguranca: 'segurança',
-  escritorio: 'escritório', telefone: 'telefone e correio', locomocao: 'deslocamento, hospedagem e alimentação',
-  moradia: 'auxílio-moradia', outros: 'outros',
-};
-
 // Quem esteve no cargo o ano todo (no ano corrente, desde o começo do ano),
 // com quem não usou a cota valendo zero. É a base das médias e do ranking:
 // quem ficou só parte do ano gasta menos por isso. Nulo quando o arquivo não
@@ -1306,8 +1298,18 @@ function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
   const crescente = [...comparaveis].sort(ordem);
   const n = Math.min(10, Math.floor(crescente.length / 2));
   caixa.hidden = n === 0;
+  // Quem fica de fora por ter poucos colegas no estado, dito com número e
+  // estado, para o total bater com o do resumo.
+  const fora = new Map();
+  for (const p of base) {
+    if (p.uf && !(medias.get(p.uf)?.media > 0 && medias.get(p.uf).n >= MINIMO_POR_ESTADO)) fora.set(p.uf, (fora.get(p.uf) ?? 0) + 1);
+  }
+  const nForaTotal = [...fora.values()].reduce((a, n) => a + n, 0);
+  const textoFora = nForaTotal
+    ? ` Ficam fora ${listaDeAnos([...fora].map(([sigla, n]) => `${n} ${t.doEstado(sigla, nomeUf(sigla))}`))}: com menos de ${MINIMO_POR_ESTADO} ${nomes.plural} no estado o ano todo, a média do estado não serve de régua.`
+    : '';
   definirItens('cota-ranking-nota', [
-    { rotulo: null, texto: `No Brasil todo, entre os ${comparaveis.length} ${nomes.plural} que ${fr.ficaram}. Cada um é comparado com a média dos colegas do mesmo estado, que têm o mesmo limite de gasto. Por isso a ordem não segue só o valor em reais.` },
+    { rotulo: null, texto: `O ranking reúne, no Brasil todo, os ${comparaveis.length} ${nomes.plural} que ${fr.ficaram}. Cada um é comparado com a média dos colegas do mesmo estado, que têm o mesmo limite de gasto. Por isso a ordem não segue só o valor em reais.${textoFora}` },
   ]);
   const item = (lista, { p, razao }) => {
     const li = el('li', null, null, lista);
@@ -1428,9 +1430,7 @@ async function montarCota(ctx) {
           ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${usaram}, média de ${f.moeda(total / recorte.length, 0)} por ${nomes.singular}. A média ${nomes.daCasa} foi ${f.moeda(mediaCasa, 0)}.` }
           : { rotulo: nomes.titulo, texto: `em ${ano}, ${usaram}, média de ${f.moeda(mediaCasa, 0)} por ${nomes.singular}.` });
       }
-      const porGrupo = d.grupos.map((g, k) => ({ nome: GRUPO_CURTO[g.id] ?? g.nome.toLowerCase(), v: recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0) }))
-        .filter((g) => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 3);
-      if (porGrupo.length) itens.push({ rotulo: 'O que mais pesou', texto: `${listaDeAnos(porGrupo.map((g) => `${g.nome} (${f.porcentagem((g.v / total) * 100, 0)})`))}.` });
+      // Com o que foi gasto: nas barras logo abaixo, sem repetir no resumo.
       barrasDeGrupos($('#cota-grupos'), d.grupos, d.grupos.map((_, k) => recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0)));
     } else {
       itens.push({ rotulo: null, texto: `Nenhum ${nomes.singular} ${uf ? t.doEstado(uf, nomeUf(uf)) : ''} usou a cota em ${ano}.` });
