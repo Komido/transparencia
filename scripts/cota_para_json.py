@@ -40,6 +40,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import sys
 import time
 import unicodedata
@@ -60,6 +61,9 @@ UFS = {"AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "
 GRUPOS = [
     ("passagens", "Passagens", ("passage",)),
     ("divulgacao", "Divulgação do mandato", ("divulga",)),
+    # A Câmara paga pela cota a complementação do auxílio-moradia; fica num
+    # grupo próprio para aparecer separado.
+    ("moradia", "Complemento de auxílio-moradia", ("auxilio-moradia", "auxilio moradia")),
     ("consultoria", "Consultorias e pesquisas", ("consultori",)),
     ("seguranca", "Segurança", ("seguranca",)),
     # Antes de "telefone": o tipo do Senado para material de escritório cita
@@ -80,6 +84,13 @@ def falhar(mensagem):
 def sem_acento(texto):
     texto = unicodedata.normalize("NFKD", texto or "")
     return "".join(c for c in texto if not unicodedata.combining(c)).strip()
+
+
+def chave_nome(nome):
+    """Nome sem acento, sem pontuação e em maiúsculas, para casar o arquivo
+    da cota do Senado com a lista oficial ("DR. HIRAN" = "DR HIRAN")."""
+    t = re.sub(r"[^A-Z0-9 ]", " ", sem_acento(nome).upper())
+    return " ".join(t.split())
 
 
 def grupo_de(tipo):
@@ -257,22 +268,29 @@ def procurar(objeto, chave):
 
 
 def senadores_conhecidos():
-    """Nome normalizado -> estado e partido, das legislaturas desde 2019 e da lista atual."""
+    """Nome normalizado -> estado e partido, das legislaturas 55 a 57
+    (2015 a 2027: em janeiro de 2019 ainda estavam no cargo senadores eleitos
+    em 2010) e da lista atual. Vale o nome parlamentar e o nome completo."""
     mapa = {}
     atuais = set()
-    for endereco, atual in (("https://legis.senado.leg.br/dadosabertos/senador/lista/legislatura/56/57.json", False),
+    for endereco, atual in (("https://legis.senado.leg.br/dadosabertos/senador/lista/legislatura/55/57.json", False),
                             ("https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json", True)):
         dados = json.loads(baixar(endereco, aceitar="application/json"))
         for item in procurar(dados, "IdentificacaoParlamentar"):
             ident = item["IdentificacaoParlamentar"]
             nome = ident.get("NomeParlamentar") or ""
-            chave = sem_acento(nome).upper()
+            chave = chave_nome(nome)
             if not chave:
                 continue
+            anterior = mapa.get(chave, {})
             uf = ident.get("UfParlamentar")
-            mapa[chave] = {"nome": nome, "uf": uf if uf in UFS else mapa.get(chave, {}).get("uf"),
-                           "partido": ident.get("SiglaPartidoParlamentar") or mapa.get(chave, {}).get("partido"),
-                           "codigo": ident.get("CodigoParlamentar")}
+            info = {"nome": nome, "uf": uf if uf in UFS else anterior.get("uf"),
+                    "partido": ident.get("SiglaPartidoParlamentar") or anterior.get("partido"),
+                    "codigo": ident.get("CodigoParlamentar")}
+            mapa[chave] = info
+            completo = chave_nome(ident.get("NomeCompletoParlamentar") or "")
+            if completo and completo not in mapa:
+                mapa[completo] = info
             if atual:
                 atuais.add(chave)
     if len(mapa) < 81 or len(atuais) < 70:
@@ -313,7 +331,7 @@ def ler_senado(ano, origem, conhecidos):
             falhar(f"{onde}: ano {ano_linha}, mês {mes} fora do arquivo de {ano}")
         ultimo_mes = max(ultimo_mes, mes)
         nome = (linha["SENADOR"] or "").strip()
-        chave = sem_acento(nome).upper()
+        chave = chave_nome(nome)
         info = conhecidos.get(chave, {})
         if not info.get("uf"):
             sem_estado.add(nome)
