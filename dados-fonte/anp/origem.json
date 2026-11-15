@@ -1,6 +1,6 @@
 {
-  "fonte": "ANP, Levantamento de Preços de Combustíveis, médias mensais Brasil",
-  "convertido_em": "2026-11-15T15:40:32Z",
+  "fonte": "ANP, Levantamento de Preços de Combustíveis, médias mensais Brasil e estados",
+  "convertido_em": "2026-11-15T17:19:21Z",
   "arquivos": [
     {
       "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/2001-2012/mensal-brasil-2001-a-2012.xlsx",
@@ -11,6 +11,16 @@
       "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/mensal/mensal-brasil-desde-jan2013.xlsx",
       "bytes": 113832,
       "sha256": "27617b9cf9115781a834cf056ae0565b703a7ff0d4c77886e884025d7ac1ba19"
+    },
+    {
+      "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/2001-2012/mensal-estados-2001-a-2012.xlsx",
+      "bytes": 2162108,
+      "sha256": "d9ce51fa35e70d105ad3b8cd34cf399af3b42191f23ef9cd8e245da3d62eb336"
+    },
+    {
+      "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/mensal/mensal-estados-desde-jan2013.xlsx",
+      "bytes": 2851856,
+      "sha256": "b8b3a8cb58f10321eab2cd6239ffec1cf863d20d41f5568bd08fd8e8314ea955"
     }
   ]
 }
