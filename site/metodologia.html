@@ -66,8 +66,8 @@
       <p>O mês de referência é o último com inflação oficial publicada. A correção é feita mês a mês, antes de somar ou fazer médias anuais.</p>
       <h3>Preços comparados pelo salário</h3>
       <p>Para preços de produtos (alimentos, combustíveis e gás), a pergunta que interessa a quem vive de salário é se ficou mais fácil ou mais difícil pagar. Por isso esses preços são comparados pelo salário mínimo, e não pela inflação:</p>
-      <p class="formula">preço no salário de hoje = preço da época × salário mínimo de hoje ÷ salário mínimo da época</p>
-      <p>É o preço que o produto teria hoje se pesasse no salário o mesmo que pesava na época. As duas réguas respondem perguntas diferentes: a inflação mostra se o produto ficou caro em relação aos outros preços; o salário mostra se ficou mais fácil de pagar para quem ganha o mínimo. Como o salário mínimo subiu mais do que a inflação desde 1995, preços antigos parecem maiores na régua do salário. A régua usa o salário mínimo; para quem teve aumentos diferentes, o resultado muda.</p>
+      <p class="formula">parte do salário = preço do mês ÷ salário mínimo do mesmo mês</p>
+      <p>Preço e salário são sempre da mesma época, então não é preciso corrigir nada pela inflação. A comparação entre a data escolhida e hoje mostra, lado a lado, o salário, o preço e a parte do salário (ou a quantidade) em cada data. As duas réguas respondem perguntas diferentes: a inflação mostra se o produto ficou caro em relação aos outros preços; o salário mostra se ficou mais fácil de pagar para quem ganha o mínimo. A régua usa o salário mínimo; para quem teve aumentos diferentes, o resultado muda.</p>
 
       <h2 id="arrecadacao">Arrecadação federal</h2>
       <p><strong>Fonte:</strong> arquivo de dados abertos da Receita Federal com a arrecadação mensal por UF e por tributo, desde janeiro de 2000. Os valores estão em reais correntes.</p>
@@ -122,7 +122,6 @@
         <li>A ANP publica planilhas Excel. Uma rotina automática baixa as planilhas todos os dias, converte para CSV e guarda no repositório a assinatura digital (SHA-256) de cada planilha original, para que qualquer pessoa possa conferir se o arquivo usado é o mesmo que a ANP publicou.</li>
         <li>A ANP pesquisa uma amostra de postos, e o tamanho dela mudou bastante ao longo dos anos (na gasolina comum, de cerca de 14 mil a 58 mil postos pesquisados por mês).</li>
         <li>Por estado, o site usa as planilhas mensais por estado da mesma pesquisa, só com gasolina comum, etanol, diesel e GLP. A planilha por estado tem linhas repetidas com valores diferentes em outro produto (GNV), que o site não usa.</li>
-        <li><strong>No salário de hoje:</strong> preço do mês trazido para o salário mínimo do último mês com preço, pela regra de preços comparados pelo salário.</li>
         <li><strong>Tanque cheio:</strong> 50 litros vezes o preço médio do litro, dividido pelo salário mínimo do mesmo mês. O botijão é comparado ao salário mínimo da mesma forma.</li>
       </ul>
 

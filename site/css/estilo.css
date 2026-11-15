@@ -1003,3 +1003,28 @@ td.num .detalhe { white-space: normal; }
 }
 /* "Acima do limite" em negrito e na cor de alerta; o texto diz o que é. */
 .detalhe.destaque { color: var(--ruim); font-weight: 600; }
+
+/* Caixa de comparação nas seções com "Comparar com". */
+.comparacao-caixa {
+  margin: 0 0 var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.comparacao-caixa:empty { display: none; }
+.comparacao-caixa .comparacao { margin-bottom: 0; }
+.comp-cabeca { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--e-2); }
+.comp-titulo { margin: 0; font-weight: 600; line-height: 1.35; }
+/* Hoje à esquerda, data escolhida à direita, com os mesmos itens. */
+.comp-lados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); margin-top: var(--e-3); }
+.comp-lado { min-width: 0; }
+.comp-lado.comp-antes { padding-left: var(--e-3); border-left: 1px solid var(--borda); }
+.comp-quando { margin: 0 0 var(--e-2); font-weight: 600; }
+.comp-itens { margin: 0; display: grid; gap: var(--e-2); }
+.comp-itens dt { font-size: var(--fs-1); color: var(--tinta-2); }
+.comp-itens dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.comp-principal { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px; margin: var(--e-3) 0 var(--e-1); padding-top: var(--e-2); border-top: 1px solid var(--borda); }
+.comp-numero { font-size: clamp(1.5rem, 7vw, 1.75rem); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.comp-unidade { font-size: var(--fs-2); color: var(--tinta-2); }
+.comp-antes .comp-numero { color: var(--tinta-2); }
+.comp-frase { margin: var(--e-3) 0 0; }

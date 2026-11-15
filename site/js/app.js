@@ -1541,62 +1541,58 @@ function montarSalario(ctx) {
   const iDolar = c.ultimoIndice(sm.emDolar);
   const iNec = c.ultimoIndice(sm.frenteNecessario);
 
-  // Resumo e números do topo acompanham o ano escolhido em "Comparar com".
+  // Resposta, caixa de comparação e números acompanham o ano escolhido em
+  // "Comparar com".
   const atualizarTopo = (iBase) => {
     const razaoReal = sm.real[iUlt] / sm.real[iBase];
+    const quando = f.mesLongo(meses[iBase]);
     const ganho = razaoReal >= 1.5
-      ? `compra ${f.numero(razaoReal, 1)} vezes o que comprava em ${f.mesLongo(meses[iBase])}`
-      : `compra ${t.variacao((razaoReal - 1) * 100, 0)} do que em ${f.mesLongo(meses[iBase])}`;
-    let resumoSm = `Em ${f.mesLongo(meses[iUlt])}, o salário mínimo é de ${f.moeda(s.salario_minimo[iUlt], 0)}. Descontada a inflação, ele ${ganho}.`;
-    if (s.smn_dieese[iNec] != null) {
-      resumoSm += ` Pelas contas do DIEESE, uma família de quatro pessoas precisaria de ${f.moeda(s.smn_dieese[iNec], 0)} por mês para viver com o básico, `
-        + `o equivalente a ${f.numero(s.smn_dieese[iNec] / s.salario_minimo[iNec], 1)} salários mínimos.`;
-    }
-    definirTopicos('sm-resumo', resumoSm);
+      ? `compra ${f.numero(razaoReal, 1)} vezes o que comprava em ${quando}`
+      : Math.abs(razaoReal - 1) < 0.005
+        ? `compra praticamente o mesmo que em ${quando}`
+        : `compra ${t.variacao((razaoReal - 1) * 100, 0)} do que em ${quando}`;
+    definirTopicos('sm-resumo', `Descontada a inflação, o salário mínimo de hoje (${f.moeda(s.salario_minimo[iUlt], 0)}) ${ganho}.`);
+
+    caixaComparacao($('#sm-comparacao'), {
+      titulo: 'Salário mínimo, descontada a inflação',
+      hoje: `Hoje (${f.mesCurto(meses[iUlt])})`,
+      antes: comMaiuscula(f.mesCurto(meses[iBase])),
+      itens: [{ rotulo: 'Valor na época', valores: [f.moeda(s.salario_minimo[iUlt], 0), f.moeda(s.salario_minimo[iBase], 0)] }],
+      principal: { rotulo: 'em dinheiro de hoje', valores: [sm.real[iUlt], sm.real[iBase]], formato: (v) => f.moeda(v, 0) },
+      maiorMelhor: true,
+      frase: (r) => (r === 1 ? `Melhor hoje: o salário de hoje ${ganho}.`
+        : r === -1 ? `Pior hoje: o salário de hoje ${ganho}.` : `Quase igual: o salário de hoje ${ganho}.`),
+    });
 
     const numeros = $('#numeros-salario');
     numeros.replaceChildren();
-    const item = (rotulo, valor) => {
-      const div = el('div', null, null, numeros);
-      el('dt', null, rotulo, div);
-      el('dd', null, valor, div);
-    };
-    item(`Salário mínimo em ${f.mesCurto(meses[iUlt])}`, f.moeda(s.salario_minimo[iUlt], 0));
-    item(`Salário de ${f.mesCurto(meses[iBase])} em dinheiro de hoje`, f.moeda(sm.real[iBase], 0));
-    item(`Em dólar (${f.mesCurto(meses[iDolar])})`, f.dolar(sm.emDolar[iDolar], 0));
-    item(`Parte do salário necessário, segundo o DIEESE (${f.mesCurto(meses[iNec])})`, f.porcentagem(sm.frenteNecessario[iNec], 0));
+    itemNumero(numeros, `Em dólar (${f.mesCurto(meses[iDolar])})`, f.dolar(sm.emDolar[iDolar], 0));
+    if (s.smn_dieese[iNec] != null) {
+      itemNumero(numeros, `Parte do salário necessário (DIEESE, ${f.mesCurto(meses[iNec])})`, f.porcentagem(sm.frenteNecessario[iNec], 0),
+        `Pelas contas do DIEESE, uma família de quatro pessoas precisaria de ${f.moeda(s.smn_dieese[iNec], 0)} por mês.`);
+    }
   };
 
-  // Poder de compra: o salário de um mês-base, corrigido só pela inflação
-  // (INPC) dali em diante, ao lado do salário de verdade. A distância entre as
-  // linhas é o ganho (ou a perda) acima da inflação desde o mês-base.
-  const inpc = c.indiceAcumulado(s.inpc_var);
+  // Ao longo do tempo: o salário de cada mês em dinheiro de hoje, em dólar ou
+  // ao lado do necessário do DIEESE.
   const { candidatos: basesPossiveis } = mesesParaComparar(meses, sm.real);
   let anoBase = null;
   const selBase = $('#sm-ano');
+  const desenharTopo = () => {
+    const iB = indiceDoAno(meses, basesPossiveis, anoBase);
+    preencherAnos(selBase, meses, basesPossiveis, iB);
+    atualizarTopo(iB);
+  };
 
   const reguas = {
-    real: () => {
-      const iB = indiceDoAno(meses, basesPossiveis, anoBase);
-      preencherAnos(selBase, meses, basesPossiveis, iB);
-      atualizarTopo(iB);
-      const corrigido = meses.map((m, i) => (i < iB || inpc[i] == null ? null : (s.salario_minimo[iB] * inpc[i]) / inpc[iB]));
-      const iFim = c.ultimoIndice(corrigido);
-      const nomeBase = f.mesCurto(meses[iB]);
-      return {
-        inicio: iB,
-        nome: `Salário mínimo e o salário de ${nomeBase} corrigido só pela inflação`,
-        series: [
-          { nome: 'Salário mínimo', classe: 'serie-1', valores: s.salario_minimo },
-          { nome: `Salário de ${nomeBase} só com a inflação`, classe: 'serie-2', valores: corrigido },
-        ],
-        formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
-        unidade: 'reais por mês',
-        explicacao: `A linha cheia é o salário mínimo de cada mês. A tracejada mostra quanto ele seria se, a partir de ${f.mesLongo(meses[iB])} (${f.moeda(s.salario_minimo[iB], 0)}), só tivesse sido corrigido pela inflação (INPC). `
-          + `Em ${f.mesLongo(meses[iFim])}, essa conta dá ${f.moeda(corrigido[iFim], 0)}, e o salário é ${f.moeda(s.salario_minimo[iFim], 0)}. `
-          + 'Quando a cheia fica acima da tracejada, o salário ganhou da inflação; abaixo, perdeu.',
-      };
-    },
+    real: () => ({
+      inicio: sm.real.findIndex((v) => v != null),
+      nome: 'Salário mínimo em dinheiro de hoje',
+      valores: sm.real,
+      formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
+      unidade: 'reais de hoje por mês',
+      explicacao: 'Cada ponto é o salário mínimo daquele mês corrigido pela inflação até hoje (INPC). Quanto mais alta a linha, mais o salário comprava.',
+    }),
     dolar: () => ({
       nome: 'Salário mínimo em dólares',
       valores: sm.emDolar,
@@ -1647,13 +1643,13 @@ function montarSalario(ctx) {
   let grafico = null;
   const desenharSalario = () => {
     const chave = valorRadio('sm-regua') ?? 'real';
-    $('#sm-ano-caixa').hidden = chave !== 'real';
     const { opcoes, explicacao } = configurar(chave);
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-salario'), opcoes);
     definir('sm-explicacao', explicacao);
   };
   document.querySelectorAll('input[name="sm-regua"]').forEach((r) => r.addEventListener('change', desenharSalario));
-  selBase.addEventListener('change', (ev) => { anoBase = c.anoDe(meses[Number(ev.target.value)]); desenharSalario(); });
+  selBase.addEventListener('change', (ev) => { anoBase = c.anoDe(meses[Number(ev.target.value)]); desenharTopo(); });
+  desenharTopo();
   desenharSalario();
 
   const resumo = c.resumoPorGoverno(anual, mandatos, ['variacaoReal', 'emDolar', 'frenteNecessario']);
@@ -1918,22 +1914,26 @@ function montarCompras(ctx) {
     const qA = q[iA];
     const qB = q[iUlt];
     const anoA = c.anoDe(meses[iA]);
-    const comp = t.compraMaisOuMenos(qB, qA);
-    let fecho = '';
-    if (comp === 'a mesma quantidade') fecho = ` Hoje ele compra a mesma quantidade que em ${anoA}.`;
-    else if (comp) fecho = ` Hoje ele compra ${comp} do que em ${anoA}.`;
-    const onde = naCidade(item) ? `${ondeLocal(item)}, com` : 'Com';
+    const onde = naCidade(item) ? `${ondeLocal(item)}, um` : 'Um';
     definirTopicos('compras-resumo',
-      `${onde} um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}.${fecho}`);
+      `${onde} salário mínimo compra ${t.quantidadeCom(qB, item.unidade, item.plural)} hoje; em ${f.mesLongo(meses[iA])}, comprava ${t.quantidade(qA)}.`);
 
-    const numeros = $('#compras-numeros');
-    numeros.replaceChildren();
+    $('#compras-numeros').replaceChildren();
     const precoItem = (i) => precos[i] * item.tamanho;
-    itemNumero(numeros, `Em ${f.mesCurto(meses[iA])}`, t.quantidade(qA), item.plural);
-    itemNumero(numeros, `Em ${f.mesCurto(meses[iUlt])}`, t.quantidade(qB), item.plural);
-    const equivalente = (precoItem(iA) * s.salario_minimo[iUlt]) / s.salario_minimo[iA];
-    itemNumero(numeros, `${maiuscula(item.singular)} custa hoje`, f.moeda(precoItem(iUlt), 2),
-      `Em ${anoA} custava ${f.moeda(precoItem(iA), 2)}, o equivalente a ${f.moeda(equivalente, 2)} no salário de hoje.`);
+    caixaComparacao($('#compras-comparacao'), {
+      titulo: `Quanto um salário mínimo compra de ${item.nome.toLowerCase()}`,
+      hoje: `Hoje (${f.mesCurto(meses[iUlt])})`,
+      antes: comMaiuscula(f.mesCurto(meses[iA])),
+      itens: [
+        { rotulo: 'Salário mínimo', valores: [f.moeda(s.salario_minimo[iUlt], 0), f.moeda(s.salario_minimo[iA], 0)] },
+        { rotulo: comMaiuscula(item.unidade), valores: [f.moeda(precoItem(iUlt), 2), f.moeda(precoItem(iA), 2)] },
+      ],
+      principal: { rotulo: item.plural, valores: [qB, qA], formato: (v) => t.quantidade(v) },
+      maiorMelhor: true,
+      frase: (r) => (r === 1 ? `Melhor hoje: o salário mínimo compra mais ${item.plural} do que em ${anoA}.`
+        : r === -1 ? `Pior hoje: o salário mínimo compra menos ${item.plural} do que em ${anoA}.`
+          : `Quase igual: o salário mínimo compra praticamente o mesmo que em ${anoA}.`),
+    });
 
     const cesta = 'A cesta básica é o conjunto de 13 alimentos que, pela lei, sustenta uma pessoa adulta por um mês.';
     let nota;
@@ -2380,6 +2380,67 @@ function nivelDeHoje(it) {
 
 const NOME_NIVEL = { bom: 'Bom', medio: 'Na média', ruim: 'Ruim' };
 
+// Comparação entre um momento escolhido e hoje -----------------------------
+// Selo curto com o veredito e duas barras na mesma escala, começando do zero:
+// a diferença de tamanho mostra quanto mudou. Usada no resumo e nas seções
+// que têm "Comparar com".
+function seloVeredito(pai, r) {
+  const [classe, texto] = r === 1 ? ['melhor', 'Melhor hoje'] : r === -1 ? ['pior', 'Pior hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado'];
+  return el('span', `veredito veredito-${classe}`, texto, pai);
+}
+
+function barrasAntesHoje(pai, linhas, formato) {
+  const comp = el('div', 'comparacao', null, pai);
+  const maior = Math.max(...linhas.map((l) => Math.abs(l.valor ?? 0))) || 1;
+  for (const l of linhas) {
+    const div = el('div', `comp-linha ${l.classe}`, null, comp);
+    const topoLinha = el('div', 'comp-topo', null, div);
+    const nome = el('span', 'comp-rotulo', l.rotulo, topoLinha);
+    if (l.quando) el('small', null, l.quando, nome);
+    el('span', 'comp-valor', l.valor == null ? 'sem dado' : formato(l.valor), topoLinha);
+    const trilho = el('div', 'comp-trilho', null, div);
+    trilho.setAttribute('aria-hidden', 'true');
+    if (l.valor != null) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (Math.max(0, l.valor) / maior) * 100)}%`;
+  }
+  return comp;
+}
+
+// Caixa das seções com "Comparar com": hoje à esquerda e a data escolhida à
+// direita, cada lado com os mesmos itens (salário, preço) e, em destaque, a
+// medida comparada, com barra na mesma escala. Embaixo, o veredito em uma
+// frase.
+function caixaComparacao(caixa, { titulo, hoje, antes, itens, principal, maiorMelhor, frase }) {
+  caixa.replaceChildren();
+  const [vHoje, vAntes] = principal.valores;
+  const r = vHoje == null || vAntes == null ? null : c.comparar(vHoje, vAntes, maiorMelhor);
+  const cabeca = el('div', 'comp-cabeca', null, caixa);
+  el('p', 'comp-titulo', titulo, cabeca);
+  seloVeredito(cabeca, r);
+  const grade = el('div', 'comp-lados', null, caixa);
+  const maior = Math.max(Math.abs(vHoje ?? 0), Math.abs(vAntes ?? 0)) || 1;
+  [[hoje, 0, 'comp-hoje'], [antes, 1, 'comp-antes']].forEach(([quando, k, classe]) => {
+    const lado = el('div', `comp-lado ${classe}`, null, grade);
+    el('p', 'comp-quando', quando, lado);
+    const dl = el('dl', 'comp-itens', null, lado);
+    for (const it of itens) {
+      const div = el('div', null, null, dl);
+      el('dt', null, it.rotulo, div);
+      el('dd', null, it.valores[k], div);
+    }
+    const v = principal.valores[k];
+    const destaque = el('p', 'comp-principal', null, lado);
+    el('span', 'comp-numero', v == null ? 'sem dado' : principal.formato(v), destaque);
+    el('span', 'comp-unidade', principal.rotulo, destaque);
+    const trilho = el('div', 'comp-trilho', null, lado);
+    trilho.setAttribute('aria-hidden', 'true');
+    if (v != null) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (Math.max(0, v) / maior) * 100)}%`;
+  });
+  if (frase) el('p', 'comp-frase', frase(r), caixa);
+}
+
+const comMaiuscula = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1);
+const anoDe = (mes) => c.anoDe(mes);
+
 function montarResumo(ctx) {
   const { meses, mandatos } = ctx;
   const itens = indicadoresDoAno(ctx);
@@ -2490,26 +2551,14 @@ function montarResumo(ctx) {
       // o período escolhido.
       const topo = el('div', 'ano-topo', null, li);
       el('h3', 'ano-nome', it.nome, topo);
-      const veredito = r === 1 ? ['melhor', 'Melhor hoje'] : r === -1 ? ['pior', 'Pior hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado'];
-      el('span', `veredito veredito-${veredito[0]}`, veredito[1], topo);
+      seloVeredito(topo, r);
       el('p', 'ano-explica', it.explica, li);
 
-      // Duas barras na mesma escala, começando do zero: o período escolhido e
-      // hoje. A diferença de tamanho mostra quanto mudou.
-      const comp = el('div', 'comparacao', null, li);
-      const maior = Math.max(Math.abs(it.hoje.valor), Math.abs(vSel ?? 0)) || 1;
-      const linha = (classe, rotulo, quando, valor) => {
-        const div = el('div', `comp-linha ${classe}`, null, comp);
-        const topoLinha = el('div', 'comp-topo', null, div);
-        const nome = el('span', 'comp-rotulo', rotulo, topoLinha);
-        if (quando) el('small', null, quando, nome);
-        el('span', 'comp-valor', valor == null ? 'sem dado' : it.formato(valor), topoLinha);
-        const trilho = el('div', 'comp-trilho', null, div);
-        trilho.setAttribute('aria-hidden', 'true');
-        if (valor != null) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (Math.max(0, valor) / maior) * 100)}%`;
-      };
-      linha('comp-antes', p.rotulo, vSel == null ? null : descricaoPeriodo(it, p), vSel);
-      linha('comp-hoje', 'Hoje', descricaoHoje(it), it.hoje.valor);
+      // Duas barras na mesma escala, começando do zero: o período escolhido e hoje.
+      barrasAntesHoje(li, [
+        { classe: 'comp-antes', rotulo: p.rotulo, quando: vSel == null ? null : descricaoPeriodo(it, p), valor: vSel },
+        { classe: 'comp-hoje', rotulo: 'Hoje', quando: descricaoHoje(it), valor: it.hoje.valor },
+      ], it.formato);
 
       if (vSel == null) {
         const inicio = primeiroMesComDado(it);
@@ -2567,64 +2616,62 @@ function montarCombustiveis(ctx) {
     const local = cidade.dados?.series?.[item.serie];
     const nominal = local ?? s[item.serie];
     const onde = local ? `no estado ${t.doEstado(cidade.dados.uf, cidade.dados.uf_nome ?? cidade.dados.uf)}` : 'no país';
-    const iUltPreco = c.ultimoIndice(nominal);
-    const equivalente = c.noSalarioDeHoje(nominal, s.salario_minimo, iUltPreco);
-    const { iUlt, candidatos } = mesesParaComparar(meses, equivalente);
+    // Régua: quanto do salário mínimo do mesmo mês vai para encher o tanque
+    // (ou comprar o botijão). Preço e salário da mesma época, sem precisar
+    // corrigir pela inflação.
+    const custo = (i) => (nominal[i] == null ? null : (item.litro ? nominal[i] * TANQUE_LITROS : nominal[i]));
+    const partes = meses.map((m, i) => (custo(i) == null || !s.salario_minimo[i] ? null : (custo(i) / s.salario_minimo[i]) * 100));
+    const { iUlt, candidatos } = mesesParaComparar(meses, partes);
     if (iUlt < 0 || !candidatos.length) return;
     const iA = indiceDoAno(meses, candidatos, anoEscolhido);
     preencherAnos($('#combustiveis-ano'), meses, candidatos, iA);
-
-    const anoA = c.anoDe(meses[iA]);
-    const comparado = t.maisCaroOuBarato(nominal[iUlt], equivalente[iA], item.feminino);
-    const custo = (i) => (item.litro ? nominal[i] * TANQUE_LITROS : nominal[i]);
-    const parte = (i) => (custo(i) / s.salario_minimo[i]) * 100;
     const casas = item.litro ? 0 : 1;
+    const pct = (v) => f.porcentagem(v, casas);
+    const oque = item.litro ? `Encher um tanque de ${TANQUE_LITROS} litros de ${item.nome.toLowerCase()}` : 'Um botijão de gás de 13 kg';
 
-    const conclusao = comparado
-      ? `Para quem ganha um salário mínimo, ${item.sujeito} está ${comparado} do que em ${anoA}.`
-      : `Para quem ganha um salário mínimo, ${item.sujeito} pesa praticamente o mesmo que em ${anoA}.`;
-    // O texto dá a resposta; os números ficam nos destaques, sem repetir.
-    definirTopicos('combustiveis-resumo', conclusao);
+    definirTopicos('combustiveis-resumo',
+      `${oque} custa ${f.moeda(custo(iUlt), 0)} ${onde}, ${pct(partes[iUlt])} do salário mínimo; em ${f.mesLongo(meses[iA])}, ${item.litro ? 'levava' : 'levava'} ${pct(partes[iA])}.`);
 
-    const numeros = $('#combustiveis-numeros');
-    numeros.replaceChildren();
-    const unidade = item.litro ? 'Litro' : 'Botijão';
-    itemNumero(numeros, `${unidade} hoje (${f.mesCurto(meses[iUlt])})`, f.moeda(nominal[iUlt], 2),
-      item.litro
-        ? `Média ${onde}. Salário mínimo: ${f.moeda(s.salario_minimo[iUlt], 0)}.`
-        : `Média ${onde}: ${t.parteDoSalario(parte(iUlt))}. Em ${anoA}: ${f.porcentagem(parte(iA), casas)}.`);
-    if (item.litro) {
-      itemNumero(numeros, `Tanque de ${TANQUE_LITROS} litros`, f.moeda(custo(iUlt), 0),
-        `${maiuscula(t.parteDoSalario(parte(iUlt)))}. Em ${anoA}: ${f.porcentagem(parte(iA), casas)}.`);
-    }
-    itemNumero(numeros, `${unidade} de ${f.mesCurto(meses[iA])} no salário de hoje`, f.moeda(equivalente[iA], 2),
-      `Na época custava ${f.moeda(nominal[iA], 2)}, com salário mínimo de ${f.moeda(s.salario_minimo[iA], 0)}.`);
+    const unidade = item.litro ? 'litro' : 'botijão';
+    const coisa = item.litro ? `Tanque (${TANQUE_LITROS} L)` : 'Botijão';
+    caixaComparacao($('#combustiveis-comparacao'), {
+      titulo: item.litro ? `Encher o tanque de ${item.nome.toLowerCase()}` : 'Comprar um botijão de gás',
+      hoje: `Hoje (${f.mesCurto(meses[iUlt])})`,
+      antes: comMaiuscula(f.mesCurto(meses[iA])),
+      itens: [
+        { rotulo: 'Salário mínimo', valores: [f.moeda(s.salario_minimo[iUlt], 0), f.moeda(s.salario_minimo[iA], 0)] },
+        { rotulo: coisa, valores: [f.moeda(custo(iUlt), 0), f.moeda(custo(iA), 0)] },
+      ],
+      principal: { rotulo: 'do salário', valores: [partes[iUlt], partes[iA]], formato: pct },
+      maiorMelhor: false,
+      frase: (r) => (r === 1 ? `Melhor hoje: ${item.litro ? 'o tanque' : 'o botijão'} leva uma parte menor do salário do que em ${anoDe(meses[iA])}.`
+        : r === -1 ? `Pior hoje: ${item.litro ? 'o tanque' : 'o botijão'} leva uma parte maior do salário do que em ${anoDe(meses[iA])}.`
+          : `Quase igual: ${item.litro ? 'o tanque' : 'o botijão'} leva do salário praticamente o mesmo que em ${anoDe(meses[iA])}.`),
+    });
+    $('#combustiveis-numeros').replaceChildren();
 
     // O gráfico começa no primeiro mês com preço publicado.
-    const iIni = nominal.findIndex((v) => v != null);
+    const iIni = partes.findIndex((v) => v != null);
     const mesesG = meses.slice(iIni);
     const opcoes = {
       tipo: 'linhas',
       rotulos: mesesG,
       faixas: c.faixasDeMandato(mandatos, mesesG),
-      series: [
-        { nome: 'Preço na época', classe: 'serie-1', valores: nominal.slice(iIni) },
-        { nome: 'No salário de hoje', classe: 'serie-2', valores: equivalente.slice(iIni) },
-      ],
-      formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 2)),
-      unidade: item.litro ? 'reais por litro' : 'reais por botijão',
+      series: [{ nome: item.litro ? 'Tanque de 50 litros' : 'Botijão', classe: 'serie-1', valores: partes.slice(iIni) }],
+      formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : `${pct(v)} do salário mínimo`),
+      unidade: '% do salário mínimo do mês',
       rotuloEixoX: rotuloMesNoEixo(5),
       tituloTooltip: (i) => f.mesCurto(mesesG[i]),
-      extraTooltip: (i) => textoGoverno(ctx, mesesG[i]),
-      descricao: `Preço médio de ${item.descricao}, na época e trazido para o salário mínimo de hoje.`,
+      extraTooltip: (i) => [`${comMaiuscula(unidade)} a ${f.moeda(nominal[iIni + i], 2)}; salário de ${f.moeda(s.salario_minimo[iIni + i], 0)}`, textoGoverno(ctx, mesesG[i])].filter(Boolean).join(' · '),
+      descricao: `Quanto ${item.litro ? 'encher o tanque' : 'o botijão'} levava do salário mínimo em cada mês.`,
       incluirZero: true,
     };
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-combustiveis'), opcoes);
 
     registrarDownload('combustiveis', () => ({
       nome: `combustivel-${item.id}-mensal${cidade.dados?.series?.[item.serie] ? `-${cidade.dados.uf}` : ''}.csv`,
-      cabecalhos: ['mes', 'preco na epoca (R$)', 'salario minimo (R$)', `equivalente no salario de ${meses[iUltPreco]} (R$)`],
-      linhas: meses.map((m, i) => [m, nominal[i], s.salario_minimo[i], arred(equivalente[i], 2)]).filter((l) => l[1] != null),
+      cabecalhos: ['mes', `preco do ${unidade} (R$)`, 'salario minimo (R$)', `% do salario minimo (${item.litro ? `tanque de ${TANQUE_LITROS} litros` : 'botijao'})`],
+      linhas: meses.map((m, i) => [m, nominal[i], s.salario_minimo[i], arred(partes[i], 2)]).filter((l) => l[1] != null),
     }));
   };
 

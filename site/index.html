@@ -230,9 +230,11 @@
           <div class="escolhas-lista" id="compras-itens"></div>
         </fieldset>
       </div>
+      <div class="comparacao-caixa" id="compras-comparacao"></div>
       <dl class="numeros" id="compras-numeros"></dl>
+      <h3>Mês a mês</h3>
       <div id="grafico-compras"></div>
-      <p class="como-ler">Quanto mais alto o ponto, mais o salário comprava. Toque no gráfico para ver cada mês.</p>
+      <p class="como-ler">Cada ponto é quanto um salário mínimo comprava naquele mês, com o preço e o salário daquele mesmo mês. Quanto mais alto, mais o salário comprava. Toque no gráfico para ver cada mês.</p>
       <details class="entenda">
         <summary>Entenda e baixe os dados</summary>
         <div class="entenda-corpo">
@@ -262,14 +264,16 @@
           <div class="escolhas-lista" id="combustiveis-itens"></div>
         </fieldset>
       </div>
+      <div class="comparacao-caixa" id="combustiveis-comparacao"></div>
       <dl class="numeros" id="combustiveis-numeros"></dl>
+      <h3>Mês a mês</h3>
       <div id="grafico-combustiveis"></div>
-      <p class="como-ler">A linha cheia é o preço que se pagava em cada mês. A tracejada é quanto aquele preço custaria se pesasse no salário mínimo de hoje o mesmo que pesava no salário da época. Quando a tracejada está acima do preço de hoje, ficou mais fácil pagar.</p>
+      <p class="como-ler">Cada ponto mostra quanto o tanque (ou o botijão) levava do salário mínimo naquele mês. Quanto mais baixa a linha, mais fácil era pagar. Toque no gráfico para ver o preço e o salário de cada mês.</p>
       <details class="entenda">
         <summary>Entenda e baixe os dados</summary>
         <div class="entenda-corpo">
-          <h3>O que é "no salário de hoje"?</h3>
-          <p>Em 2001 o salário mínimo era R$ 180 e o litro da gasolina custava R$ 1,78, quase 1% do salário. A pergunta é: quanto é quase 1% do salário mínimo de hoje? Esse é o preço daquele litro "no salário de hoje". A conta mostra se ficou mais fácil ou mais difícil pagar para quem ganha o mínimo. Ela é diferente de descontar a inflação: como o salário mínimo subiu mais do que os preços desde 1995, os preços antigos parecem maiores nessa régua.</p>
+          <h3>Por que comparar com o salário mínimo?</h3>
+          <p>Um preço de 2001 e um de hoje não podem ser comparados direto, porque o dinheiro mudou de valor. Dividir o preço pelo salário mínimo da mesma época mostra quanto do salário ele levava, e isso pode ser comparado entre épocas. É a conta de quem ganha o mínimo: se o tanque leva uma parte menor do salário, ficou mais fácil pagar.</p>
           <button type="button" class="botao" data-baixar="combustiveis">Baixar planilha com os dados</button>
         </div>
       </details>
@@ -280,19 +284,23 @@
       <p class="tema">Seu bolso</p>
       <h2 id="salario-titulo">O salário mínimo vale mais ou menos do que antes?</h2>
       <div class="resumo" data-campo="sm-resumo"></div>
+      <div class="filtros">
+        <label class="campo" id="sm-ano-caixa"><span>Comparar com</span>
+          <select id="sm-ano"></select>
+        </label>
+      </div>
+      <div class="comparacao-caixa" id="sm-comparacao"></div>
       <dl class="numeros" id="numeros-salario"></dl>
+      <h3>Ao longo do tempo</h3>
       <div class="filtros">
         <fieldset class="campo largo">
-          <legend>Comparar por</legend>
+          <legend>Mostrar</legend>
           <div class="segmentos">
-            <label><input type="radio" name="sm-regua" value="real" checked><span>Poder de compra</span></label>
+            <label><input type="radio" name="sm-regua" value="real" checked><span>Em dinheiro de hoje</span></label>
             <label><input type="radio" name="sm-regua" value="dolar"><span>Em dólar</span></label>
             <label><input type="radio" name="sm-regua" value="necessario"><span>Com o necessário</span></label>
           </div>
         </fieldset>
-        <label class="campo" id="sm-ano-caixa"><span>Comparar com</span>
-          <select id="sm-ano"></select>
-        </label>
       </div>
       <p class="nota" data-campo="sm-explicacao"></p>
       <div id="grafico-salario"></div>
