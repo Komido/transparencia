@@ -1,0 +1,160 @@
+-- Dados de referência. Cada valor aqui tem fonte citada; o que não pôde ser
+-- conferido automaticamente na fonte está marcado como tal.
+
+insert into ref.fonte (id, nome, orgao, url_documentacao, observacao) values
+  ('bcb_sgs', 'Sistema Gerenciador de Séries Temporais (SGS)', 'Banco Central do Brasil',
+   'https://dadosabertos.bcb.gov.br/', 'Séries coletadas pela API pública do SGS.'),
+  ('ibge', 'Índices de preços ao consumidor (IPCA e INPC)', 'IBGE',
+   'https://www.ibge.gov.br/', 'Índices calculados pelo IBGE e republicados no SGS do Banco Central, de onde são coletados.'),
+  ('rfb_arrecadacao', 'Resultado da arrecadação federal (dados abertos)', 'Receita Federal do Brasil',
+   'https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/receitadata/arrecadacao',
+   'Arquivo arrecadacao-estado.csv: valores mensais em reais correntes, por UF e por tributo, desde janeiro de 2000.'),
+  ('rfb_irpf', 'Tabelas do Imposto de Renda da Pessoa Física', 'Receita Federal do Brasil',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas', null),
+  ('dieese', 'Salário mínimo nominal e necessário', 'DIEESE',
+   'https://www.dieese.org.br/analisecestabasica/salarioMinimo.html',
+   'Estimativa do DIEESE para o salário capaz de cobrir as despesas básicas de uma família de quatro pessoas.'),
+  ('bls_cpi', 'Consumer Price Index for All Urban Consumers (CPI-U)', 'U.S. Bureau of Labor Statistics',
+   'https://www.bls.gov/cpi/', 'Inflação ao consumidor dos EUA, usada só para calcular o câmbio real.'),
+  ('tse', 'Resultados de eleições', 'Tribunal Superior Eleitoral',
+   'https://dadosabertos.tse.jus.br/', null);
+
+insert into ref.serie (id, nome, unidade, fonte_id, codigo_origem, observacao) values
+  ('salario_minimo', 'Salário mínimo nominal', 'R$', 'bcb_sgs', 'SGS 1619', null),
+  ('ipca_var', 'IPCA, variação mensal', '%', 'ibge', 'SGS 433', null),
+  ('inpc_var', 'INPC, variação mensal', '%', 'ibge', 'SGS 188', null),
+  ('dolar_ptax', 'Dólar comercial (venda), média do mês', 'R$ por US$', 'bcb_sgs', 'SGS 3698', null),
+  ('pib_mensal', 'PIB mensal em valores correntes', 'R$ milhões', 'bcb_sgs', 'SGS 4380',
+   'Estimativa mensal do Banco Central, compatível com o PIB trimestral do IBGE.'),
+  ('cpi_eua', 'Índice de preços ao consumidor dos EUA (CPI-U)', 'índice, 1982-84 = 100', 'bls_cpi', 'CUUR0000SA0', null),
+  ('smn_dieese', 'Salário mínimo necessário', 'R$', 'dieese', null, null);
+
+insert into ref.coleta (id, fonte_id, url, formato, serie_id) values
+  ('sgs_1619', 'bcb_sgs', 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.1619/dados?formato=json', 'sgs_json', 'salario_minimo'),
+  ('sgs_433',  'bcb_sgs', 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=json',  'sgs_json', 'ipca_var'),
+  ('sgs_188',  'bcb_sgs', 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.188/dados?formato=json',  'sgs_json', 'inpc_var'),
+  ('sgs_3698', 'bcb_sgs', 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.3698/dados?formato=json', 'sgs_json', 'dolar_ptax'),
+  ('sgs_4380', 'bcb_sgs', 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.4380/dados?formato=json', 'sgs_json', 'pib_mensal'),
+  -- A API v1 do BLS (sem chave) aceita no máximo 10 anos por consulta.
+  ('bls_1995', 'bls_cpi', 'https://api.bls.gov/publicAPI/v1/timeseries/data/CUUR0000SA0?startyear=1995&endyear=2004', 'bls_json', 'cpi_eua'),
+  ('bls_2005', 'bls_cpi', 'https://api.bls.gov/publicAPI/v1/timeseries/data/CUUR0000SA0?startyear=2005&endyear=2014', 'bls_json', 'cpi_eua'),
+  ('bls_2015', 'bls_cpi', 'https://api.bls.gov/publicAPI/v1/timeseries/data/CUUR0000SA0?startyear=2015&endyear=2024', 'bls_json', 'cpi_eua'),
+  ('bls_2025', 'bls_cpi', 'https://api.bls.gov/publicAPI/v1/timeseries/data/CUUR0000SA0?startyear=2025&endyear=2034', 'bls_json', 'cpi_eua'),
+  ('rfb_csv',  'rfb_arrecadacao', 'https://www.gov.br/receitafederal/dados/arrecadacao-estado.csv', 'rfb_csv', null),
+  ('dieese_smn', 'dieese', 'https://www.dieese.org.br/analisecestabasica/salarioMinimo.html', 'dieese_html', 'smn_dieese');
+
+-- Períodos de exercício da Presidência desde o primeiro ano completo do Plano Real.
+-- Partido: o da chapa registrada na eleição (mesma regra para todos).
+insert into ref.mandato (id, ordem, cargo, nome, rotulo, partido, inicio, fim, observacao, fonte_url) values
+  ('fhc1', 1, 'presidente', 'Fernando Henrique Cardoso', 'FHC 1', 'PSDB', '1995-01-01', '1998-12-31', 'Eleito em 1994.', 'https://dadosabertos.tse.jus.br/'),
+  ('fhc2', 2, 'presidente', 'Fernando Henrique Cardoso', 'FHC 2', 'PSDB', '1999-01-01', '2002-12-31', 'Reeleito em 1998.', 'https://dadosabertos.tse.jus.br/'),
+  ('lula1', 3, 'presidente', 'Luiz Inácio Lula da Silva', 'Lula 1', 'PT', '2003-01-01', '2006-12-31', 'Eleito em 2002.', 'https://dadosabertos.tse.jus.br/'),
+  ('lula2', 4, 'presidente', 'Luiz Inácio Lula da Silva', 'Lula 2', 'PT', '2007-01-01', '2010-12-31', 'Reeleito em 2006.', 'https://dadosabertos.tse.jus.br/'),
+  ('dilma1', 5, 'presidente', 'Dilma Rousseff', 'Dilma 1', 'PT', '2011-01-01', '2014-12-31', 'Eleita em 2010.', 'https://dadosabertos.tse.jus.br/'),
+  ('dilma2', 6, 'presidente', 'Dilma Rousseff', 'Dilma 2', 'PT', '2015-01-01', '2016-05-11',
+   'Reeleita em 2014. Afastada do cargo em 12/05/2016, com a abertura do processo de impeachment no Senado; o mandato foi cassado em 31/08/2016.',
+   'https://dadosabertos.tse.jus.br/'),
+  ('temer', 7, 'presidente', 'Michel Temer', 'Temer', 'PMDB', '2016-05-12', '2018-12-31',
+   'Eleito vice-presidente em 2014 pelo PMDB (hoje MDB). Exerceu a Presidência como interino de 12/05/2016 a 30/08/2016 e como titular a partir de 31/08/2016.',
+   'https://dadosabertos.tse.jus.br/'),
+  ('bolsonaro', 8, 'presidente', 'Jair Bolsonaro', 'Bolsonaro', 'PSL', '2019-01-01', '2022-12-31',
+   'Eleito pelo PSL em 2018. Deixou o partido em 2019 e filiou-se ao PL em 2021; pela regra, conta o partido da eleição.',
+   'https://dadosabertos.tse.jus.br/'),
+  ('lula3', 9, 'presidente', 'Luiz Inácio Lula da Silva', 'Lula 3', 'PT', '2023-01-01', null, 'Eleito em 2022. Mandato em curso.', 'https://dadosabertos.tse.jus.br/');
+
+-- Colunas do arrecadacao-estado.csv (posição 1 = Ano, 2 = Mês, 3 = UF).
+-- Série comparável: exclui a receita previdenciária (só aparece nesta base a
+-- partir de quando a Receita passou a administrá-la) e as receitas de outros órgãos.
+insert into ref.rubrica_receita (posicao, nome, fragmento_cabecalho, grupo, serie_comparavel) values
+  (4,  'Imposto sobre Importação', 'IMPOSTO SOBRE IMPORTA', 'Comércio exterior (II e IE)', true),
+  (5,  'Imposto sobre Exportação', 'IMPOSTO SOBRE EXPORTA', 'Comércio exterior (II e IE)', true),
+  (6,  'IPI - Fumo', 'IPI - FUMO', 'IPI', true),
+  (7,  'IPI - Bebidas', 'IPI - BEBIDAS', 'IPI', true),
+  (8,  'IPI - Automóveis', 'IPI - AUTOM', 'IPI', true),
+  (9,  'IPI - Vinculado à importação', 'IPI - VINCULADO', 'IPI', true),
+  (10, 'IPI - Outros', 'IPI - OUTROS', 'IPI', true),
+  (11, 'IRPF', 'IRPF', 'Imposto de Renda', true),
+  (12, 'IRPJ - Entidades financeiras', 'IRPJ - ENTIDADES FINANCEIRAS', 'Imposto de Renda', true),
+  (13, 'IRPJ - Demais empresas', 'IRPJ - DEMAIS EMPRESAS', 'Imposto de Renda', true),
+  (14, 'IRRF - Rendimentos do trabalho', 'IRRF - RENDIMENTOS DO TRABALHO', 'Imposto de Renda', true),
+  (15, 'IRRF - Rendimentos do capital', 'IRRF - RENDIMENTOS DO CAPITAL', 'Imposto de Renda', true),
+  (16, 'IRRF - Remessas ao exterior', 'IRRF - REMESSAS', 'Imposto de Renda', true),
+  (17, 'IRRF - Outros rendimentos', 'IRRF - OUTROS RENDIMENTOS', 'Imposto de Renda', true),
+  (18, 'IOF', 'IMPOSTO S/ OPERA', 'IOF', true),
+  (19, 'ITR', 'IMPOSTO TERRITORIAL RURAL', 'Outras receitas', true),
+  (20, 'IPMF', 'IPMF', 'CPMF e IPMF', true),
+  (21, 'CPMF', 'CPMF', 'CPMF e IPMF', true),
+  (22, 'Cofins', 'COFINS', 'Cofins', true),
+  (23, 'Cofins - Financeiras', 'COFINS - FINANCEIRAS', 'Cofins', true),
+  (24, 'Cofins - Demais', 'COFINS - DEMAIS', 'Cofins', true),
+  (25, 'PIS/Pasep', 'PIS/PASEP', 'PIS/Pasep', true),
+  (26, 'PIS/Pasep - Financeiras', 'PIS/PASEP - FINANCEIRAS', 'PIS/Pasep', true),
+  (27, 'PIS/Pasep - Demais', 'PIS/PASEP - DEMAIS', 'PIS/Pasep', true),
+  (28, 'CSLL', 'CSLL', 'CSLL', true),
+  (29, 'CSLL - Financeiras', 'CSLL - FINANCEIRAS', 'CSLL', true),
+  (30, 'CSLL - Demais', 'CSLL - DEMAIS', 'CSLL', true),
+  (31, 'Cide-Combustíveis (parcela não dedutível)', 'CIDE-COMBUST', 'Cide-Combustíveis', true),
+  (32, 'Cide-Combustíveis', 'CIDE-COMBUST', 'Cide-Combustíveis', true),
+  (33, 'Contribuição para o Plano de Seguridade Social do Servidor', 'PLANO SEG. SOC. SERVIDORES', 'Outras receitas', true),
+  (34, 'CPSSS - Contribuição para o Plano de Seguridade Social do Servidor Público', 'CPSSS', 'Outras receitas', true),
+  (35, 'Contribuições para o Fundaf', 'FUNDAF', 'Outras receitas', true),
+  (36, 'Refis', 'REFIS', 'Outras receitas', true),
+  (37, 'Paes', 'PAES', 'Outras receitas', true),
+  (38, 'Retenção na fonte (Lei 10.833, art. 30)', 'LEI 10.833', 'Outras receitas', true),
+  (39, 'Pagamento unificado', 'PAGAMENTO UNIFICADO', 'Outras receitas', true),
+  (40, 'Outras receitas administradas', 'OUTRAS RECEITAS ADMINISTRADAS', 'Outras receitas', true),
+  (41, 'Demais receitas', 'DEMAIS RECEITAS', 'Outras receitas', true),
+  (42, 'Receita previdenciária', 'RECEITA PREVIDENCI', 'Receita previdenciária', false),
+  (43, 'Receita previdenciária - Própria', 'RECEITA PREVIDENCI', 'Receita previdenciária', false),
+  (44, 'Receita previdenciária - Demais', 'RECEITA PREVIDENCI', 'Receita previdenciária', false),
+  (45, 'Receitas administradas por outros órgãos', 'ADMINISTRADAS POR OUTROS', 'Receitas de outros órgãos', false);
+
+-- Tabela mensal do IRPF.
+-- isencao_efetiva: maior rendimento tributável mensal sem imposto.
+--   Até abril/2023: o limite da tabela.
+--   De maio/2023 a dezembro/2025: limite da tabela + desconto simplificado mensal.
+--   A partir de janeiro/2026: R$ 5.000,00, pela tabela de redução da Lei 15.270/2025.
+insert into ref.ir_tabela (vigencia_inicio, limite_tabela, desconto_simplificado, isencao_efetiva, norma, fonte_url, conferido_na_fonte, observacao) values
+  ('1996-01-01',  900.00, null,  900.00, 'Lei 9.250/1995',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/anteriores', false,
+   'A página da Receita mostra R$ 10.800,00 anuais (R$ 900,00 por mês) a partir do ano-calendário 2001. O mesmo valor vigora desde janeiro de 1996 pela Lei 9.250/1995, cujo texto não pôde ser conferido automaticamente nesta versão.'),
+  ('2002-01-01', 1058.00, null, 1058.00, 'Tabela anual publicada pela Receita',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/anteriores', true,
+   'Tabela anual de R$ 12.696,00 (anos-calendário 2002 a 2004) dividida por 12.'),
+  ('2005-01-01', 1164.00, null, 1164.00, 'Tabela anual publicada pela Receita',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/anteriores', true,
+   'Tabela anual de R$ 13.968,00 (ano-calendário 2005) dividida por 12.'),
+  ('2006-02-01', 1257.12, null, 1257.12, 'Tabela anual publicada pela Receita',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/anteriores', true,
+   'A tabela anual do ano-calendário 2006 (R$ 14.992,32) corresponde a R$ 1.164,00 em janeiro mais 11 meses de R$ 1.257,12.'),
+  ('2007-01-01', 1313.69, null, 1313.69, 'Lei 11.482/2007',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2007', true, null),
+  ('2008-01-01', 1372.81, null, 1372.81, 'Lei 11.482/2007',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2008', true, null),
+  ('2009-01-01', 1434.59, null, 1434.59, 'Lei 11.945/2009',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2009', true,
+   'Primeiro ano com as faixas de 7,5% e 22,5%.'),
+  ('2010-01-01', 1499.15, null, 1499.15, 'Lei 11.945/2009',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2010', true, null),
+  ('2011-04-01', 1566.61, null, 1566.61, 'Lei 12.469/2011',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2011', true,
+   'De janeiro a março de 2011 valeu a tabela de 2010.'),
+  ('2012-01-01', 1637.11, null, 1637.11, 'Lei 12.469/2011',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2012', true, null),
+  ('2013-01-01', 1710.78, null, 1710.78, 'Lei 12.469/2011',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2013', true, null),
+  ('2014-01-01', 1787.77, null, 1787.77, 'Lei 12.469/2011',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2014', true, null),
+  ('2015-04-01', 1903.98, null, 1903.98, 'Lei 13.149/2015',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2015', true,
+   'De janeiro a março de 2015 valeu a tabela de 2014. Este limite ficou sem correção até abril de 2023.'),
+  ('2023-05-01', 2112.00, 528.00, 2640.00, 'Lei 14.663/2023',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2023', true,
+   'Criação do desconto simplificado mensal de R$ 528,00.'),
+  ('2024-02-01', 2259.20, 564.80, 2824.00, 'Lei 14.848/2024',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/copy_of_2024', true, null),
+  ('2025-05-01', 2428.80, 607.20, 3036.00, 'Lei 15.191/2025',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2025', true, null),
+  ('2026-01-01', 2428.80, 607.20, 5000.00, 'Lei 15.270/2025',
+   'https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026', true,
+   'Tabela de redução mensal: imposto zero para rendimentos até R$ 5.000,00 e redução decrescente até R$ 7.350,00.');
