@@ -33,6 +33,7 @@ jobs:
       - name: Resumir
         env:
           AGENDA: ${{ github.event.schedule }}
+          PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
           if [ "${AGENDA:-}" = "37 8 * * 1-6" ]; then

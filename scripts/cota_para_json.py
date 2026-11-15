@@ -98,10 +98,15 @@ def baixar(url, tentativas=4, aceitar=None):
     if aceitar:
         cabecalhos["Accept"] = aceitar
     for k in range(tentativas):
+        inicio = time.monotonic()
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers=cabecalhos), timeout=180) as r:
-                return r.read()
+                bruto = r.read()
+            if "api/v2/deputados" not in url:
+                print(f"  baixado {url}: {len(bruto):,} bytes em {time.monotonic() - inicio:.0f} s", flush=True)
+            return bruto
         except Exception as erro:  # noqa: BLE001
+            print(f"  tentativa {k + 1} falhou para {url} depois de {time.monotonic() - inicio:.0f} s: {erro}", flush=True)
             if k == tentativas - 1:
                 falhar(f"não foi possível baixar {url}: {erro}")
             time.sleep(5 * (k + 1))
