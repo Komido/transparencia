@@ -2482,35 +2482,41 @@ function montarResumo(ctx) {
     lista.replaceChildren();
     for (const it of itens) {
       const li = el('li', 'ano-item', null, lista);
+      const vSel = valorNoPeriodo(it, p);
+      const r = vSel == null ? null : c.comparar(it.hoje.valor, vSel, it.maiorMelhor);
+
+      // Topo: nome do item e um selo curto com o veredito. O selo (bom, na
+      // média, ruim) da abertura compara com a história; este compara só com
+      // o período escolhido.
       const topo = el('div', 'ano-topo', null, li);
-      // O selo (bom, na média, ruim) compara com a história e fica na
-      // abertura; aqui o veredito compara só com o período escolhido.
       el('h3', 'ano-nome', it.nome, topo);
+      const veredito = r === 1 ? ['melhor', 'Melhor hoje'] : r === -1 ? ['pior', 'Pior hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado'];
+      el('span', `veredito veredito-${veredito[0]}`, veredito[1], topo);
       el('p', 'ano-explica', it.explica, li);
 
-      const valores = el('dl', 'ano-valores', null, li);
-      const caixa = (rotulo, texto, detalhe) => {
-        const div = el('div', null, null, valores);
-        el('dt', null, rotulo, div);
-        const dd = el('dd', null, texto, div);
-        if (detalhe) el('span', 'ano-quando', detalhe, dd);
+      // Duas barras na mesma escala, começando do zero: o período escolhido e
+      // hoje. A diferença de tamanho mostra quanto mudou.
+      const comp = el('div', 'comparacao', null, li);
+      const maior = Math.max(Math.abs(it.hoje.valor), Math.abs(vSel ?? 0)) || 1;
+      const linha = (classe, rotulo, quando, valor) => {
+        const div = el('div', `comp-linha ${classe}`, null, comp);
+        const topoLinha = el('div', 'comp-topo', null, div);
+        const nome = el('span', 'comp-rotulo', rotulo, topoLinha);
+        if (quando) el('small', null, quando, nome);
+        el('span', 'comp-valor', valor == null ? 'sem dado' : it.formato(valor), topoLinha);
+        const trilho = el('div', 'comp-trilho', null, div);
+        trilho.setAttribute('aria-hidden', 'true');
+        if (valor != null) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (Math.max(0, valor) / maior) * 100)}%`;
       };
-      caixa('Hoje', it.formato(it.hoje.valor), descricaoHoje(it));
-      const vSel = valorNoPeriodo(it, p);
-      caixa(p.rotulo, vSel == null ? 'sem dado' : it.formato(vSel), vSel == null ? null : descricaoPeriodo(it, p));
+      linha('comp-antes', p.rotulo, vSel == null ? null : descricaoPeriodo(it, p), vSel);
+      linha('comp-hoje', 'Hoje', descricaoHoje(it), it.hoje.valor);
 
-      let veredito;
       if (vSel == null) {
         const inicio = primeiroMesComDado(it);
-        veredito = meses[p.indices[0]] < inicio
+        el('p', 'ano-porque', meses[p.indices[0]] < inicio
           ? `Sem dado para esse período: a pesquisa começa em ${c.anoDe(inicio)}.`
-          : 'Faltam dados da pesquisa nesse período.';
+          : 'Faltam dados da pesquisa nesse período.', li);
       }
-      else {
-        const r = c.comparar(it.hoje.valor, vSel, it.maiorMelhor);
-        veredito = r === 1 ? `Hoje está melhor do que ${p.quando}.` : r === -1 ? `Era melhor ${p.quando}.` : `Praticamente igual ${p.quando}.`;
-      }
-      el('p', 'ano-veredito', veredito, li);
       const porque = vSel == null ? null : fraseCausas(it, p);
       if (porque) el('p', 'ano-porque', porque, li);
       if (it.situacao) el('p', 'ano-ranking', it.situacao.frase, li);
