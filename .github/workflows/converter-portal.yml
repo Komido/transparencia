@@ -1,0 +1,58 @@
+name: Resumir o Portal da Transparência (cartão, despesa e viagens)
+
+# O Portal da Transparência (CGU) publica o cartão de pagamento do governo
+# federal e a execução da despesa em arquivos mensais, e as viagens a serviço
+# em um arquivo por ano. Esta tarefa baixa os arquivos oficiais, confere e
+# resume por ano e órgão superior (scripts/portal_para_json.py) e grava o
+# resumo em site/dados/portal/, com o SHA-256 de cada original em
+# dados-fonte/portal/origem.json. O site lê só o resumo; nada passa pelo banco.
+#
+# Toda segunda-feira: ano corrente e anterior. No dia 2 de cada mês e quando
+# rodada à mão: todos os anos, para pegar correções feitas depois.
+
+on:
+  schedule:
+    - cron: "23 9 * * 1" # 06:23 em Brasília
+    - cron: "41 9 2 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gravar-no-repositorio
+  cancel-in-progress: false
+
+jobs:
+  resumir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resumir
+        env:
+          AGENDA: ${{ github.event.schedule }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -euo pipefail
+          if [ "${AGENDA:-}" = "23 9 * * 1" ]; then
+            python3 scripts/portal_para_json.py --recentes
+          else
+            python3 scripts/portal_para_json.py
+          fi
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/portal dados-fonte/portal \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/portal dados-fonte/portal)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/portal dados-fonte/portal
+          git commit -m "Atualiza resumo do Portal da Transparência"
+          git pull --rebase --quiet
+          git push
