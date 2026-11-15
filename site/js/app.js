@@ -414,6 +414,126 @@ function montarGastos(ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// As contas do governo federal fecham?
+// ---------------------------------------------------------------------------
+
+// As séries do Banco Central (NFSP) vêm com positivo = déficit. Aqui o sinal
+// é invertido para a leitura do dia a dia: positivo = sobrou, negativo = faltou.
+function montarContas(ctx) {
+  const { meses, s, ipca, mandatos } = ctx;
+  if (!Array.isArray(s.nfsp_primario_pib) || !Array.isArray(s.divida_bruta_pib)) { $('#contas').hidden = true; return; }
+  const inverter = (v) => (v == null ? null : -v);
+  const pPib = c.valoresAnuais(meses, s.nfsp_primario_pib.map(inverter), 'fim');
+  const jPib = c.valoresAnuais(meses, s.nfsp_juros_pib, 'fim');
+  const nPib = c.valoresAnuais(meses, s.nfsp_nominal_pib.map(inverter), 'fim');
+  const dPib = c.valoresAnuais(meses, s.divida_bruta_pib, 'fim');
+  const pR = c.valoresAnuais(meses, s.nfsp_primario.map(inverter), 'soma');
+  const jR = c.valoresAnuais(meses, s.nfsp_juros, 'soma');
+  const nR = c.valoresAnuais(meses, s.nfsp_nominal.map(inverter), 'soma');
+  const real = (serie) => c.valoresAnuais(meses, c.deflacionar(serie, ipca), 'soma');
+  const pReal = real(s.nfsp_primario.map(inverter));
+  const jReal = real(s.nfsp_juros);
+  const nReal = real(s.nfsp_nominal.map(inverter));
+
+  // Resumo: últimos 12 meses publicados.
+  if (pPib.hoje && pR.hoje && jR.hoje && nR.hoje) {
+    const ate = f.mesLongo(pPib.hoje.ate);
+    const p = pR.hoje.valor * 1e6;
+    const n = nR.hoje.valor * 1e6;
+    const linhas = [];
+    linhas.push(p >= 0
+      ? `Nos 12 meses até ${ate}, o governo federal arrecadou ${f.reaisPorExtenso(p)} a mais do que gastou, sem contar os juros da dívida (${f.porcentagem(pPib.hoje.valor, 1)} do PIB).`
+      : `Nos 12 meses até ${ate}, o governo federal gastou ${f.reaisPorExtenso(-p)} a mais do que arrecadou, sem contar os juros da dívida (${f.porcentagem(-pPib.hoje.valor, 1)} do PIB).`);
+    linhas.push(`Os juros da dívida custaram ${f.reaisPorExtenso(jR.hoje.valor * 1e6)} (${f.porcentagem(jPib.hoje.valor, 1)} do PIB).`);
+    linhas.push(n >= 0
+      ? `Mesmo com os juros, sobraram ${f.reaisPorExtenso(n)} (${f.porcentagem(nPib.hoje.valor, 1)} do PIB).`
+      : `Somando os juros, faltaram ${f.reaisPorExtenso(-n)} (${f.porcentagem(-nPib.hoje.valor, 1)} do PIB), cobertos com dívida nova.`);
+    if (dPib.hoje) {
+      linhas.push(`A dívida bruta do governo (União, estados e municípios) está em ${f.porcentagem(dPib.hoje.valor, 0)} do PIB em ${f.mesLongo(dPib.hoje.ate)}: para cada R$ 100 que o país produz em um ano, o governo deve ${f.moeda(dPib.hoje.valor, 0)}.`);
+    }
+    definirTopicos('contas-resumo', linhas.join(' '));
+  }
+
+  // Gráfico por ano --------------------------------------------------------
+  const anos = [...new Set([...pPib.anos.keys(), ...dPib.anos.keys()])].filter((a) => a >= 1995).sort((a, b) => a - b);
+  const faixas = c.faixasAnuais(mandatos, anos);
+  const visoes = {
+    primario: {
+      nome: 'Antes dos juros: sobrou (+) ou faltou (−)', pib: pPib, real: pReal,
+      explicacao: 'Diferença entre o que o governo federal arrecadou e o que gastou no ano, sem contar os juros da dívida. Acima de zero, sobrou dinheiro (superávit); abaixo, faltou (déficit).',
+    },
+    juros: {
+      nome: 'Juros da dívida', pib: jPib, real: jReal,
+      explicacao: 'Quanto a dívida custou em juros no ano.',
+    },
+    nominal: {
+      nome: 'Resultado final, com os juros', pib: nPib, real: nReal,
+      explicacao: 'O que sobrou ou faltou depois de pagar os juros. Quando falta, o governo pega dinheiro emprestado e a dívida cresce.',
+    },
+    divida: {
+      nome: 'Dívida bruta do governo', pib: dPib, real: null,
+      explicacao: 'Tudo o que União, estados e municípios devem, comparado com o que o país produz em um ano. Valor de dezembro de cada ano; a série começa em 2006.',
+    },
+  };
+  let grafico = null;
+  const desenhar = () => {
+    const chave = valorRadio('contas-visao') ?? 'primario';
+    const v = visoes[chave];
+    const medida = chave === 'divida' ? 'pib' : (valorRadio('contas-medida') ?? 'pib');
+    $('#contas-medida-caixa').hidden = chave === 'divida';
+    const fonte = medida === 'pib' ? v.pib : v.real;
+    const valores = anos.map((a) => fonte.anos.get(a) ?? null).map((x) => (x == null ? null : (medida === 'pib' ? x : x / 1e3)));
+    definir('contas-explicacao', v.explicacao);
+    const opcoes = {
+      tipo: 'colunas',
+      rotulos: anos,
+      faixas,
+      series: [{ nome: v.nome, classe: 'serie-1', valores, parciais: new Set() }],
+      formatoY: medida === 'pib'
+        ? (x, eixo) => (eixo ? f.numero(x, 0) : `${f.porcentagem(x, 1)} do PIB`)
+        : (x, eixo) => (eixo ? f.numero(x, 0) : `R$\u00A0${f.numero(x, 1)} bi`),
+      rotuloEixoX: (ano) => (ano % 5 === 0 ? String(ano) : null),
+      tituloTooltip: (i) => String(anos[i]),
+      extraTooltip: (i) => {
+        const g = c.governoDoAno(mandatos, anos[i]);
+        return g ? `Governo: ${g.rotulo} (${g.partido})` : null;
+      },
+      descricao: `${v.nome}, por ano, ${medida === 'pib' ? 'em % do PIB' : 'em bilhões de reais de hoje'}.`,
+      incluirZero: true,
+    };
+    if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-contas'), opcoes);
+  };
+  document.querySelectorAll('input[name="contas-visao"], input[name="contas-medida"]').forEach((r) => r.addEventListener('change', desenhar));
+  desenhar();
+
+  // Por governo -------------------------------------------------------------
+  const linhasAno = anos.map((a) => ({ ano: a, primario: pPib.anos.get(a) ?? null, nominal: nPib.anos.get(a) ?? null, divida: dPib.anos.get(a) ?? null }));
+  const resumo = c.resumoPorGoverno(linhasAno, mandatos, ['primario', 'nominal']);
+  const sinal = (x) => (x == null ? 'n/d' : f.porcentagem(x, 1, true));
+  preencherTabela($('#tabela-contas-governos'),
+    ['Mandato', 'Antes dos juros (média por ano, % do PIB)', 'Resultado final (média por ano, % do PIB)', 'Dívida bruta no fim (% do PIB)'],
+    resumo.map((r) => {
+      const ultimo = r.anos.length ? Math.max(...r.anos) : null;
+      const divida = ultimo != null ? dPib.anos.get(ultimo) : null;
+      return [
+        { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
+        r.anosComDado.primario ? sinal(r.medias.primario) : 'n/d',
+        r.anosComDado.nominal ? sinal(r.medias.nominal) : 'n/d',
+        divida == null ? 'n/d' : f.porcentagem(divida, 0),
+      ];
+    }),
+    'Positivo: sobrou dinheiro. Negativo: faltou.');
+
+  registrarDownload('contas', () => ({
+    nome: 'contas-publicas-por-ano.csv',
+    cabecalhos: ['ano', 'antes dos juros (% PIB, + sobrou)', 'juros (% PIB)', 'resultado final (% PIB, + sobrou)', 'divida bruta (% PIB, dezembro)',
+      `antes dos juros (R$ milhões de ${ctx.referencia})`, `juros (R$ milhões de ${ctx.referencia})`, `resultado final (R$ milhões de ${ctx.referencia})`],
+    linhas: anos.map((a) => [a, pPib.anos.get(a) ?? null, jPib.anos.get(a) ?? null, nPib.anos.get(a) ?? null, dPib.anos.get(a) ?? null,
+      arred(pReal.anos.get(a) ?? null, 1), arred(jReal.anos.get(a) ?? null, 1), arred(nReal.anos.get(a) ?? null, 1)]),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Salário mínimo
 // ---------------------------------------------------------------------------
 
@@ -1569,7 +1689,7 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarGastos, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarGastos, montarContas, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

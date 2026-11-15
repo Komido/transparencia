@@ -732,3 +732,10 @@ tbody th { font-weight: 600; min-width: 7rem; }
 .resumo ul { margin: 0; padding-left: 1.15em; display: grid; gap: 6px; }
 .resumo li { padding-left: 2px; }
 .resumo li::marker { color: var(--tinta-2); }
+
+/* Quatro opções lado a lado viram 2 x 2 no celular. */
+@media (max-width: 480px) {
+  .segmentos-quatro { display: grid; grid-auto-flow: row; grid-template-columns: 1fr 1fr; width: 100%; }
+  .segmentos-quatro label:nth-of-type(odd) { border-left: 0; }
+  .segmentos-quatro label:nth-of-type(n+3) { border-top: 1px solid var(--borda); }
+}

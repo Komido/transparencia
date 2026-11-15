@@ -64,6 +64,7 @@
       <a href="#arrecadacao">Impostos</a>
       <a href="#composicao">De onde vem</a>
       <a href="#gastos">Para onde vai</a>
+      <a href="#contas">Contas públicas</a>
       <a href="#dolar">Dólar</a>
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
@@ -171,7 +172,7 @@
       <div class="resumo" data-campo="compras-resumo"></div>
       <dl class="numeros" id="compras-numeros"></dl>
       <div id="grafico-compras"></div>
-      <p class="como-ler">Como ler: cada ponto mostra quanto um salário mínimo comprava naquele mês. Quanto mais alto, mais ele comprava.</p>
+      <p class="como-ler">Como ler: cada ponto divide o salário mínimo daquele mês pelo preço daquele mesmo mês. Como os dois são da mesma época, a inflação não distorce a comparação: se os preços sobem mais que o salário, a linha cai. Quanto mais alto o ponto, mais o salário comprava.</p>
       <details class="glossario">
         <summary>De onde vêm esses preços?</summary>
         <p data-campo="compras-nota-fonte"></p>
@@ -331,6 +332,42 @@
       </details>
       <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
       <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
+    </section>
+
+    <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
+      <header>
+        <h2 id="contas-titulo">As contas do governo federal fecham?</h2>
+      </header>
+      <div class="resumo" data-campo="contas-resumo"></div>
+      <div class="controles controles-coluna">
+        <fieldset class="segmentos segmentos-quatro">
+          <legend>Mostrar</legend>
+          <label><input type="radio" name="contas-visao" value="primario" checked><span>Antes dos juros</span></label>
+          <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
+          <label><input type="radio" name="contas-visao" value="nominal"><span>Resultado final</span></label>
+          <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
+        </fieldset>
+        <fieldset class="segmentos" id="contas-medida-caixa">
+          <legend>Medida</legend>
+          <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte do PIB</span></label>
+          <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
+        </fieldset>
+      </div>
+      <p class="nota" data-campo="contas-explicacao"></p>
+      <div id="grafico-contas"></div>
+      <details class="glossario">
+        <summary>O que são esses resultados?</summary>
+        <p>"Antes dos juros" (resultado primário) é a diferença entre o que o governo arrecadou e o que gastou, sem contar os juros da dívida. "Resultado final" (resultado nominal) inclui os juros. Quando o resultado final é negativo, o governo precisa pegar dinheiro emprestado, e a dívida cresce. Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
+      </details>
+      <details class="glossario">
+        <summary>Por que comparar com o PIB?</summary>
+        <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
+      </details>
+      <h3>Comparação entre governos</h3>
+      <div class="tabela-rolagem"><table id="tabela-contas-governos"></table></div>
+      <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou.</p>
+      <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
+      <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
     </section>
 
     <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">

@@ -403,17 +403,24 @@ export function quantidadeComprada(salario, preco, tamanho = 1) {
 // tipo 'trimestral': média dos 4 trimestres (jan-mar, abr-jun, jul-set,
 //                    out-dez), para séries de trimestre móvel gravadas no
 //                    último mês de cada trimestre.
+// tipo 'soma':       soma dos 12 meses (fluxos, como gasto ou juros).
+// tipo 'fim':        valor do último mês do período (saldos, como a dívida,
+//                    e séries já acumuladas em 12 meses).
 // Um período só tem valor quando todos os meses (ou trimestres) têm dado.
 export function valoresAnuais(meses, valores, tipo) {
-  const pontos = (fim) => (tipo === 'trimestral'
-    ? [fim - 9, fim - 6, fim - 3, fim]
-    : Array.from({ length: 12 }, (_, k) => fim - 11 + k));
+  const pontos = (fim) => {
+    if (tipo === 'trimestral') return [fim - 9, fim - 6, fim - 3, fim];
+    if (tipo === 'fim') return [fim];
+    return Array.from({ length: 12 }, (_, k) => fim - 11 + k);
+  };
   const calcular = (fim) => {
     const idx = pontos(fim);
     if (idx[0] < 0) return null;
     const v = idx.map((i) => valores[i]);
     if (v.some((x) => x == null)) return null;
     if (tipo === 'acumulado') return (v.reduce((a, x) => a * (1 + x / 100), 1) - 1) * 100;
+    if (tipo === 'soma') return v.reduce((a, x) => a + x, 0);
+    if (tipo === 'fim') return v[v.length - 1];
     return v.reduce((a, x) => a + x, 0) / v.length;
   };
 
