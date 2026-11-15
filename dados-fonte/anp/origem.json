@@ -1,0 +1,16 @@
+{
+  "fonte": "ANP, Levantamento de Preços de Combustíveis, médias mensais Brasil",
+  "convertido_em": "2026-11-15T15:40:32Z",
+  "arquivos": [
+    {
+      "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/2001-2012/mensal-brasil-2001-a-2012.xlsx",
+      "bytes": 86611,
+      "sha256": "76648249f2d6235e741c6912b706f87e4d5e2d4e4b8e8db938f2ef5f97c5daab"
+    },
+    {
+      "url": "https://www.gov.br/anp/pt-br/assuntos/precos-e-defesa-da-concorrencia/precos/precos-revenda-e-de-distribuicao-combustiveis/shlp/mensal/mensal-brasil-desde-jan2013.xlsx",
+      "bytes": 113832,
+      "sha256": "27617b9cf9115781a834cf056ae0565b703a7ff0d4c77886e884025d7ac1ba19"
+    }
+  ]
+}
