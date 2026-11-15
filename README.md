@@ -45,22 +45,18 @@ site/                  site estático publicado na Cloudflare
 .github/workflows/     atualização diária dos dados
 ```
 
-## Publicar na Cloudflare (gratuito)
+## Publicação na Cloudflare (gratuito)
 
-Dá para fazer tudo pelo navegador do celular. Os nomes dos menus podem mudar um pouco.
+O site é publicado como Worker com arquivos estáticos (sem código no servidor), configurado em `wrangler.jsonc`. O Worker `arrecadometro-brasil` está ligado a este repositório pelo Workers Builds: cada push na branch de produção, inclusive os commits diários de dados do GitHub Actions, publica o site de novo.
 
-1. Crie uma conta gratuita em https://dash.cloudflare.com.
-2. Abra **Workers & Pages** e escolha **Create**. Na aba **Pages**, escolha **Import an existing Git repository** (ou **Connect to Git**).
-3. Autorize a Cloudflare no GitHub e selecione o repositório `Komido/transparencia`.
-4. Configure:
-   - **Project name:** `arrecadometro-brasil` (vira o endereço `arrecadometro-brasil.pages.dev`, se estiver livre)
-   - **Production branch:** `claude/tender-hopper-dbp169` (ou `main`, se ela for criada depois)
-   - **Framework preset:** None
-   - **Build command:** deixe vazio
-   - **Build output directory:** `site`
-5. Clique em **Save and Deploy**.
+Para recriar do zero:
 
-Depois disso, cada atualização de dados feita pelo GitHub Actions publica o site de novo automaticamente.
+1. No painel da Cloudflare, abra **Workers & Pages** → **Create application** e importe o repositório pelo GitHub, dando acesso só a ele.
+2. Nome do projeto: `arrecadometro-brasil` (o mesmo do `wrangler.jsonc`).
+3. Comando da build: vazio. Comando de implantação: `npx wrangler deploy`.
+4. Deixe **Proteger com Cloudflare Access** desligado, senão o site exige login.
+
+Para conferir a configuração sem publicar: `npx wrangler deploy --dry-run`.
 
 ## Rodar localmente
 
