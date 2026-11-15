@@ -61,7 +61,7 @@
       <h2 id="inflacao">Valores corrigidos pela inflação</h2>
       <p>Valores de épocas diferentes só são comparáveis depois de corrigidos pela inflação. O site usa:</p>
       <ul>
-        <li><strong>IPCA (IBGE)</strong> para arrecadação, dólar e tabela do Imposto de Renda. É o índice oficial de inflação do país.</li>
+        <li><strong>IPCA (IBGE)</strong> para arrecadação, combustíveis, dólar e tabela do Imposto de Renda. É o índice oficial de inflação do país.</li>
         <li><strong>INPC (IBGE)</strong> para o salário mínimo. É o índice usado nos reajustes do mínimo e mede a inflação das famílias de menor renda.</li>
       </ul>
       <p class="formula">valor real = valor do mês × índice do mês de referência ÷ índice do mês</p>
@@ -93,11 +93,35 @@
 
       <h2 id="salario">Salário mínimo</h2>
       <ul>
-        <li><strong>Poder de compra:</strong> salário corrigido pelo INPC até o mês de referência.</li>
+        <li><strong>Poder de compra (em dinheiro de hoje):</strong> salário corrigido pelo INPC até o mês de referência.</li>
         <li><strong>Em dólar:</strong> salário do mês dividido pela cotação média do dólar no mesmo mês (dólares da época).</li>
-        <li><strong>Frente ao necessário:</strong> salário dividido pelo salário mínimo necessário estimado pelo DIEESE, que calcula o valor capaz de cobrir as despesas básicas de uma família de quatro pessoas. É uma estimativa do DIEESE, com metodologia própria.</li>
+        <li><strong>Com o necessário:</strong> salário dividido pelo salário mínimo necessário estimado pelo DIEESE, que calcula o valor capaz de cobrir as despesas básicas de uma família de quatro pessoas. É uma estimativa do DIEESE, com metodologia própria.</li>
       </ul>
       <p>O ganho real médio por governo é a média, nos anos de cada mandato, da variação do salário médio do ano corrigido pelo INPC.</p>
+
+      <h2 id="precos">Preços do dia a dia</h2>
+      <h3>O que o salário mínimo compra</h3>
+      <p>Quantidade que um salário mínimo compra num mês:</p>
+      <p class="formula">quantidade = salário mínimo do mês ÷ preço do item no mesmo mês</p>
+      <p>Salário e preço são do mesmo mês e estão na mesma moeda, então a conta não precisa de correção pela inflação. A comparação usa sempre o mesmo mês do calendário (por exemplo, outubro contra outubro), para que variações de safra e de época do ano não distorçam o resultado. Os pacotes mostrados são múltiplos do preço por quilo publicado: arroz em pacote de 5 kg (5 × preço do kg) e café em pacote de 500 g (0,5 × preço do kg).</p>
+      <h3>Alimentos e cesta básica</h3>
+      <p><strong>Fonte:</strong> Pesquisa Nacional da Cesta Básica de Alimentos, do DIEESE, que publica todo mês o preço médio de cada alimento e o custo da cesta em cada capital pesquisada.</p>
+      <ul>
+        <li><strong>Média do país:</strong> média simples das <span data-campo="precos-capitais-qtd">15</span> capitais pesquisadas todo mês desde 1995 (<span data-campo="precos-capitais">n/d</span>). Usar sempre as mesmas capitais evita que a média mude só porque uma capital entrou ou saiu da pesquisa. Um mês só tem valor quando pelo menos <span data-campo="precos-minimo">12</span> dessas capitais têm preço publicado; caso contrário, fica sem dado.</li>
+        <li><strong>A média não é ponderada pela população.</strong> Ela descreve o preço típico nas capitais, não no interior.</li>
+        <li><strong>Unidades:</strong> a unidade de cada preço foi conferida dividindo o gasto mensal com o item pelo seu preço médio, o que devolve a quantidade da cesta definida em lei (por exemplo, 6 kg de carne e 7,5 litros de leite em São Paulo). O óleo de soja não aparece porque essa conta não confirmou a unidade com segurança.</li>
+        <li><strong>Cesta básica:</strong> a quantidade de cada alimento segue o Decreto-Lei 399/1938 e muda conforme a região, então a média do país mistura cestas regionais diferentes.</li>
+        <li><strong>Dezembro de 2015:</strong> o DIEESE publica esse mês duas vezes, uma delas marcada como recalculada. O site usa a versão recalculada.</li>
+      </ul>
+      <h3>Combustíveis e gás de cozinha</h3>
+      <p><strong>Fonte:</strong> Levantamento de Preços de Combustíveis da ANP, série histórica mensal do Brasil, preço médio de revenda (o que o consumidor paga no posto ou na revenda de gás). A série começa em julho de 2001.</p>
+      <ul>
+        <li>Produtos: gasolina comum, etanol hidratado, óleo diesel comum (a ANP publica o diesel S10 numa série separada e mais curta, que não entra aqui) e GLP em botijão de 13 kg.</li>
+        <li>A ANP publica planilhas Excel. Uma rotina automática baixa as planilhas todos os dias, converte para CSV e guarda no repositório a assinatura digital (SHA-256) de cada planilha original, para que qualquer pessoa possa conferir se o arquivo usado é o mesmo que a ANP publicou.</li>
+        <li>A ANP pesquisa uma amostra de postos, e o tamanho dela mudou bastante ao longo dos anos (na gasolina comum, de cerca de 14 mil a 58 mil postos pesquisados por mês).</li>
+        <li><strong>Em dinheiro de hoje:</strong> preço do mês corrigido pelo IPCA até o mês de referência, como nas outras séries.</li>
+        <li><strong>Tanque cheio:</strong> 50 litros vezes o preço médio do litro, dividido pelo salário mínimo do mesmo mês. O botijão é comparado ao salário mínimo da mesma forma.</li>
+      </ul>
 
       <h2 id="dolar">Dólar a preços de hoje</h2>
       <p>A cotação nominal de 1995 e a de hoje não são comparáveis diretamente, porque Brasil e Estados Unidos tiveram inflações diferentes. O site traz cada cotação para preços de hoje:</p>
@@ -121,6 +145,7 @@
         <li>No arquivo da Receita, a receita previdenciária e as receitas de outros órgãos de dezembro de 2025 repetem os valores de fevereiro de 2026 em todas as UFs. O total oficial de dezembro de 2025 divulgado pela Receita foi de R$ 292,7 bilhões; o arquivo soma R$ 261,7 bilhões. A série comparável não usa essas rubricas; o contador e a composição usam e ficam subestimados nesse mês. O site mostra um aviso enquanto a fonte não for corrigida.</li>
         <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
         <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
+        <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias nacionais da ANP. Na sua cidade os preços podem ser diferentes.</li>
         <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
       </ul>
 

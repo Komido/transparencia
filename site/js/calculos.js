@@ -380,6 +380,20 @@ export function irPorMandato(meses, mandatos, isencao, ipcaIndice) {
 }
 
 // ---------------------------------------------------------------------------
+// Poder de compra
+// ---------------------------------------------------------------------------
+
+// Quantas unidades do item o salário compra em cada mês.
+// tamanho: quantas unidades de preço formam uma unidade do item
+// (ex.: preço por kg e pacote de 5 kg => tamanho 5).
+export function quantidadeComprada(salario, preco, tamanho = 1) {
+  return salario.map((s, i) => {
+    const p = preco[i];
+    return s == null || p == null || p <= 0 ? null : s / (p * tamanho);
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Arrecadômetro (estimativa em tempo real)
 // ---------------------------------------------------------------------------
 

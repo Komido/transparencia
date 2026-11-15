@@ -28,7 +28,10 @@ export function validarPainel(d) {
   if (n < 12 || n > 2000) falhar('tamanho do período');
 
   for (const id of SERIES_OBRIGATORIAS) {
-    const s = m.series?.[id];
+    if (!Array.isArray(m.series?.[id])) falhar(`série ${id} ausente`);
+  }
+  // Toda série presente, obrigatória ou não, precisa ter o tamanho certo.
+  for (const [id, s] of Object.entries(m.series ?? {})) {
     if (!Array.isArray(s) || s.length !== n || !s.every(ehNumeroOuNulo)) falhar(`série ${id}`);
   }
   if (!Array.isArray(m.arrecadacao_grupos) || m.arrecadacao_grupos.length === 0) falhar('grupos de arrecadação');

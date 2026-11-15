@@ -322,6 +322,102 @@ main section[id] { scroll-margin-top: 76px; }
 }
 .opcao input { width: 20px; height: 20px; margin: 0; accent-color: var(--serie-1); }
 
+/* Linguagem simples ------------------------------------------------------ */
+
+.resumo {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--tinta);
+  margin: 0 0 16px;
+}
+
+.como-ler {
+  font-size: 0.875rem;
+  color: var(--tinta-2);
+  margin: 8px 0 0;
+}
+
+details.glossario { margin-top: 6px; }
+details.glossario > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--link);
+  list-style: none;
+}
+details.glossario > summary::-webkit-details-marker { display: none; }
+details.glossario > summary::before {
+  content: "?";
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+details.glossario[open] > summary { color: var(--tinta); }
+details.glossario > p {
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  background: var(--trilho);
+  border-radius: var(--raio);
+  color: var(--tinta);
+}
+
+.controles-coluna { flex-direction: column; align-items: stretch; }
+
+.escolhas { border: 0; margin: 0; padding: 0; min-width: 0; }
+.escolhas legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: var(--tinta-2);
+}
+.escolhas-lista { display: flex; flex-wrap: wrap; gap: 8px; }
+.escolha { position: relative; display: inline-flex; cursor: pointer; }
+.escolha input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.escolha span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--superficie);
+  color: var(--tinta);
+  white-space: nowrap;
+}
+.escolha input:checked + span {
+  background: var(--tinta);
+  border-color: var(--tinta);
+  color: var(--superficie);
+}
+.escolha input:focus-visible + span { outline: 2px solid var(--foco); outline-offset: 2px; }
+
+.seletor {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 0.9375rem;
+}
+.seletor select {
+  min-height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+
 /* Números em destaque ---------------------------------------------------- */
 
 .numeros {
@@ -452,7 +548,7 @@ tbody th { font-weight: 600; min-width: 7rem; }
 @media (max-width: 480px) {
   th, td { padding: 8px 8px; }
   table { font-size: 0.875rem; }
-  tbody th { min-width: 6rem; }
+  tbody th { min-width: 5rem; }
   thead th.num { min-width: 3.75rem; }
 }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -480,6 +576,8 @@ tbody th { font-weight: 600; min-width: 7rem; }
 .barras li { display: grid; gap: 4px; }
 .barras .barra-topo { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9375rem; }
 .barras .barra-valor { font-variant-numeric: tabular-nums; color: var(--tinta-2); white-space: nowrap; }
+.barras .barra-nome { min-width: 0; }
+.barras .barra-explica { display: block; font-size: 0.8125rem; color: var(--tinta-2); }
 .barra-trilho { height: 8px; background: var(--trilho); border-radius: 4px; overflow: hidden; }
 .barra { height: 100%; background: var(--serie-1); border-radius: 0 4px 4px 0; }
 

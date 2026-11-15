@@ -49,7 +49,15 @@ async function iniciar() {
     celula.replaceChildren(a);
   });
 
-  document.querySelectorAll('[data-campo="atualizado-em"]').forEach((e) => { e.textContent = f.dataDeTimestamp(d.gerado_em); });
+  const definir = (nome, texto) => document.querySelectorAll(`[data-campo="${nome}"]`).forEach((e) => { e.textContent = texto; });
+  const capitais = Array.isArray(d.precos?.capitais_media) ? d.precos.capitais_media.filter((c) => typeof c === 'string') : [];
+  if (capitais.length) {
+    definir('precos-capitais-qtd', String(capitais.length));
+    definir('precos-capitais', capitais.join(', '));
+  }
+  if (Number.isInteger(d.precos?.minimo_capitais)) definir('precos-minimo', String(d.precos.minimo_capitais));
+
+  definir('atualizado-em', f.dataDeTimestamp(d.gerado_em));
 }
 
 iniciar();

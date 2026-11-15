@@ -1,4 +1,6 @@
 // Formatação de números e datas em português do Brasil.
+// "R$" e o número ficam unidos por espaço não separável, para não quebrarem
+// em linhas diferentes.
 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESES_LONGOS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho',
@@ -20,21 +22,31 @@ export function numero(v, casas = 0) {
 
 export function moeda(v, casas = 2) {
   if (v == null || !Number.isFinite(v)) return 'n/d';
-  return `R$ ${nf(casas, casas).format(v)}`;
+  return `R$\u00A0${nf(casas, casas).format(v)}`;
 }
 
 export function dolar(v, casas = 2) {
   if (v == null || !Number.isFinite(v)) return 'n/d';
-  return `US$ ${nf(casas, casas).format(v)}`;
+  return `US$\u00A0${nf(casas, casas).format(v)}`;
 }
 
 // Valor em reais, abreviado: R$ 2,89 tri / R$ 222,1 bi / R$ 850 mi.
 export function reaisCompacto(v) {
   if (v == null || !Number.isFinite(v)) return 'n/d';
   const a = Math.abs(v);
-  if (a >= 1e12) return `R$ ${nf(2, 2).format(v / 1e12)} tri`;
-  if (a >= 1e9) return `R$ ${nf(1, 1).format(v / 1e9)} bi`;
-  if (a >= 1e6) return `R$ ${nf(0, 0).format(v / 1e6)} mi`;
+  if (a >= 1e12) return `R$\u00A0${nf(2, 2).format(v / 1e12)} tri`;
+  if (a >= 1e9) return `R$\u00A0${nf(1, 1).format(v / 1e9)} bi`;
+  if (a >= 1e6) return `R$\u00A0${nf(0, 0).format(v / 1e6)} mi`;
+  return moeda(v, 0);
+}
+
+// Valor em reais por extenso, para frases: R$ 2,15 trilhões / R$ 222,1 bilhões.
+export function reaisPorExtenso(v) {
+  if (v == null || !Number.isFinite(v)) return 'n/d';
+  const a = Math.abs(v);
+  if (a >= 1e12) return `R$\u00A0${nf(2, 2).format(v / 1e12)} trilhões`;
+  if (a >= 1e9) return `R$\u00A0${nf(1, 1).format(v / 1e9)} bilhões`;
+  if (a >= 1e6) return `R$\u00A0${nf(0, 0).format(v / 1e6)} milhões`;
   return moeda(v, 0);
 }
 
