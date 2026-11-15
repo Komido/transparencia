@@ -73,14 +73,19 @@ Abra http://localhost:8000. Os cabeçalhos de segurança de `site/_headers` só 
 ## Segurança
 
 - O site não usa cookies, login, rastreamento nem recursos de terceiros. A CSP só permite arquivos do próprio domínio.
-- O navegador nunca acessa o Supabase. A chave pública usada pelo GitHub Actions só consegue chamar `public.painel()`; os papéis `anon` e `authenticated` não têm acesso a nenhum esquema de dados, coleta ou auditoria (testado).
+- O navegador nunca acessa o Supabase. A chave pública que aparece no workflow é pública por definição: ela só consegue chamar `public.painel()`. Os papéis `anon` e `authenticated` não têm acesso a nenhum esquema de dados, coleta ou auditoria (testado).
+- Cadastros de usuário estão bloqueados por um gatilho em `auth.users`, porque o projeto não tem login. Testado pela API pública: a tentativa é recusada e o banco continua sem usuários.
 - Todo texto vindo dos dados entra na página com `textContent`, e links só são aceitos se forem `https`.
+- O repositório não contém senhas, tokens nem dados pessoais (varredura no histórico completo).
 
-### Ajustes pendentes (precisam de confirmação no painel do Supabase)
+### Pontos conhecidos
 
-- Desativar novos cadastros em Authentication, já que o projeto não usa login.
-- Revogar dos papéis `anon` e `authenticated` o acesso ao esquema `net` do pg_net. Ele não está exposto pela API, mas a revogação fecha a porta de vez.
-- Remover as funções antigas `etl.*_v1`, que ficaram renomeadas e sem uso para evitar comandos destrutivos durante a construção.
+- O esquema `net` (pg_net) é acessível aos papéis `anon` e `authenticated` por padrão da plataforma, e essas concessões pertencem ao papel interno `supabase_admin`, que o projeto não controla. Ele não está exposto pela API; não adicione `net` aos esquemas expostos nas configurações.
+- As funções antigas `etl.*_v1` ficaram renomeadas e sem uso para evitar comandos destrutivos durante a construção. Podem ser removidas numa limpeza pelo painel do Supabase.
+
+### Como apontar um erro
+
+Abra uma issue descrevendo o número, a fonte oficial e o período. Para falhas de segurança, use a opção de relato privado na aba Security do repositório, em vez de uma issue pública.
 
 ## Limitações conhecidas
 
