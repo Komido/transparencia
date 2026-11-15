@@ -1,0 +1,69 @@
+name: Atualizar dados do painel
+
+# Busca no Supabase o JSON já validado e grava em site/dados/painel.json.
+# O visitante do site nunca acessa o Supabase: só baixa arquivos estáticos.
+# O commit só acontece quando o conteúdo dos dados muda (campo "versao").
+
+on:
+  schedule:
+    - cron: "23 11 * * *" # 08:23 em Brasília, depois da coleta das 06:41
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-dados
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: https://dbqnudpnpcczbhcltvzp.supabase.co
+      # Chave pública (publishable). Ela só permite chamar a função de leitura
+      # public.painel(); todas as tabelas estão fechadas para esse papel.
+      SUPABASE_CHAVE_PUBLICA: sb_publishable_bUkEIYroCN50SLGpA33PLA_nIyv64BN
+      DESTINO: site/dados/painel.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Baixar o painel
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 60 --retry 3 --retry-delay 10 \
+            -H "apikey: ${SUPABASE_CHAVE_PUBLICA}" \
+            "${SUPABASE_URL}/rest/v1/rpc/painel" -o /tmp/painel.json
+
+      - name: Validar o conteúdo
+        run: |
+          set -euo pipefail
+          jq -e '
+            .esquema == 1
+            and (.versao | type == "string" and length == 64)
+            and (.mensal.series.ipca_var | length > 300)
+            and (.mensal.arrecadacao_grupos | length > 5)
+            and (.mandatos | length > 5)
+            and (.ir_tabela | length > 5)
+          ' /tmp/painel.json > /dev/null
+          tamanho=$(stat -c %s /tmp/painel.json)
+          echo "Tamanho: ${tamanho} bytes"
+          [ "$tamanho" -gt 30000 ] && [ "$tamanho" -lt 5000000 ]
+
+      - name: Gravar se os dados mudaram
+        run: |
+          set -euo pipefail
+          nova=$(jq -r .versao /tmp/painel.json)
+          atual=$(jq -r .versao "$DESTINO" 2>/dev/null || echo "")
+          if [ "$nova" = "$atual" ]; then
+            echo "Dados sem mudança (versão ${nova:0:12})."
+            exit 0
+          fi
+          mkdir -p "$(dirname "$DESTINO")"
+          jq -c . /tmp/painel.json > "$DESTINO"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DESTINO"
+          git commit -m "Atualiza dados do painel (versão ${nova:0:12})"
+          git push

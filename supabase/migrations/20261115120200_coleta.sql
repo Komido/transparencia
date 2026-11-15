@@ -6,11 +6,13 @@
 --    mantém os dados anteriores. Nada é apagado: só inserido ou atualizado.
 -- 3. painel.gerar() (outra migração) monta o JSON publicado.
 --
--- Não existe endpoint público que acione a coleta.
+-- Não existe endpoint público que acione a coleta. Os papéis anon e
+-- authenticated não têm USAGE no esquema etl (ver migração do esquema),
+-- então não conseguem executar nenhuma destas funções.
 
 -- Mês em português para número. Usa só as 3 primeiras letras, o que tolera
 -- acentos corrompidos ("Mar?o") e entidades HTML ("Mar&ccedil;o").
-create or replace function etl.mes_numero(p_nome text)
+create function etl.mes_numero(p_nome text)
 returns integer
 language sql
 immutable
@@ -27,7 +29,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Banco Central (SGS): [{"data":"01/10/2026","valor":"0.14"}, ...]
 -- ---------------------------------------------------------------------------
-create or replace function etl.carregar_sgs(p_carga bigint, p_serie text, p_conteudo text)
+create function etl.carregar_sgs(p_carga bigint, p_serie text, p_conteudo text)
 returns integer
 language plpgsql
 set search_path = ''
@@ -59,7 +61,9 @@ begin
     raise exception 'SGS: datas repetidas na resposta';
   end if;
 
-  select count(*) into v_existentes from dados.observacao where serie_id = p_serie and localidade_id = 'BR';
+  select count(*) into v_existentes
+    from dados.observacao
+   where serie_id = p_serie and localidade_id = 'BR';
   if v_total < v_existentes then
     raise exception 'SGS: a fonte devolveu % registros, menos que os % já gravados', v_total, v_existentes;
   end if;
@@ -79,7 +83,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- BLS (CPI-U): Results.series[0].data[] com year, period (M01..M12), value
 -- ---------------------------------------------------------------------------
-create or replace function etl.carregar_bls(p_carga bigint, p_serie text, p_conteudo text)
+create function etl.carregar_bls(p_carga bigint, p_serie text, p_conteudo text)
 returns integer
 language plpgsql
 set search_path = ''
@@ -126,7 +130,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Receita Federal: arrecadacao-estado.csv (separador ";", decimal ",")
 -- ---------------------------------------------------------------------------
-create or replace function etl.carregar_rfb(p_carga bigint, p_conteudo text)
+create function etl.carregar_rfb(p_carga bigint, p_conteudo text)
 returns integer
 language plpgsql
 set search_path = ''
@@ -156,11 +160,10 @@ begin
     end if;
   end loop;
 
-  drop table if exists pg_temp.tmp_rfb;
-  create temporary table tmp_rfb on commit drop as
-  select string_to_array(l, ';') as c
-    from unnest(v_linhas) with ordinality as t(l, ordem)
-   where ordem > 1 and btrim(l) <> '';
+  -- Só as linhas de dados, sem o cabeçalho e sem linhas vazias.
+  select array_agg(l) into v_linhas
+    from unnest(v_linhas[2:]) as l
+   where btrim(l) <> '';
 
   select count(*) filter (where array_length(c, 1) <> 45
                              or c[1] !~ '^[0-9]{4}$'
@@ -169,7 +172,7 @@ begin
          count(*),
          count(distinct (c[1], etl.mes_numero(c[2]), c[3]))
     into v_erros, v_registros, v_distintos
-    from tmp_rfb;
+    from (select string_to_array(l, ';') as c from unnest(v_linhas) as l) t;
 
   if v_erros > 0 then
     raise exception 'Receita: % linhas com ano, mês, UF ou número de colunas inválidos', v_erros;
@@ -179,7 +182,7 @@ begin
   end if;
 
   select count(*) into v_erros
-    from tmp_rfb t
+    from (select string_to_array(l, ';') as c from unnest(v_linhas) as l) t
    cross join ref.rubrica_receita r
    where coalesce(t.c[r.posicao], '') <> ''
      and t.c[r.posicao] !~ '^-?[0-9]+(,[0-9]+)?$';
@@ -187,7 +190,8 @@ begin
     raise exception 'Receita: % valores fora do formato numérico esperado', v_erros;
   end if;
 
-  select count(*) into v_existentes from (select distinct periodo, uf from dados.arrecadacao_federal) x;
+  select count(*) into v_existentes
+    from (select distinct periodo, uf from dados.arrecadacao_federal) x;
   if v_registros < v_existentes then
     raise exception 'Receita: o arquivo tem % linhas (mês e UF), menos que as % já gravadas', v_registros, v_existentes;
   end if;
@@ -198,7 +202,7 @@ begin
          r.posicao,
          replace(t.c[r.posicao], ',', '.')::numeric,
          p_carga
-    from tmp_rfb t
+    from (select string_to_array(l, ';') as c from unnest(v_linhas) as l) t
    cross join ref.rubrica_receita r
    where coalesce(t.c[r.posicao], '') <> ''
   on conflict (periodo, uf, posicao) do update
@@ -212,7 +216,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- DIEESE: tabela HTML "Salário mínimo nominal e necessário"
 -- ---------------------------------------------------------------------------
-create or replace function etl.carregar_dieese(p_carga bigint, p_serie text, p_conteudo text)
+create function etl.carregar_dieese(p_carga bigint, p_serie text, p_conteudo text)
 returns integer
 language plpgsql
 set search_path = ''
@@ -222,13 +226,12 @@ declare
   v_ano         integer;
   v_tds         text[];
   v_mes         integer;
-  v_valor       numeric;
-  v_total       integer := 0;
+  v_periodo     date;
+  v_periodos    date[] := '{}';
+  v_valores     numeric[] := '{}';
+  v_total       integer;
   v_existentes  integer;
 begin
-  drop table if exists pg_temp.tmp_dieese;
-  create temporary table tmp_dieese (periodo date primary key, valor numeric not null) on commit drop;
-
   -- O primeiro quantificador não guloso torna a expressão inteira não gulosa.
   for v_tr in select (regexp_matches(p_conteudo, '<tr[^>]*?>(.*?)</tr>', 'gi'))[1] loop
     if v_tr ~* 'name="[0-9]{4}"' then
@@ -245,23 +248,28 @@ begin
     -- Só valores em reais (a partir do Plano Real).
     continue when v_mes is null or v_tds[3] !~ '^R\$\s*[0-9.]+,[0-9]{2}$';
 
-    v_valor := replace(replace(regexp_replace(v_tds[3], '^R\$\s*', ''), '.', ''), ',', '.')::numeric;
-    insert into tmp_dieese values (make_date(v_ano, v_mes, 1), v_valor)
-      on conflict (periodo) do nothing;
-    v_total := v_total + 1;
+    v_periodo := make_date(v_ano, v_mes, 1);
+    continue when v_periodo = any (v_periodos);
+    v_periodos := v_periodos || v_periodo;
+    v_valores := v_valores
+      || replace(replace(regexp_replace(v_tds[3], '^R\$\s*', ''), '.', ''), ',', '.')::numeric;
   end loop;
 
+  v_total := coalesce(array_length(v_periodos, 1), 0);
   if v_total < 300 then
     raise exception 'DIEESE: só % meses reconhecidos; o layout da página pode ter mudado', v_total;
   end if;
 
-  select count(*) into v_existentes from dados.observacao where serie_id = p_serie and localidade_id = 'BR';
+  select count(*) into v_existentes
+    from dados.observacao
+   where serie_id = p_serie and localidade_id = 'BR';
   if v_total < v_existentes then
     raise exception 'DIEESE: a página trouxe % meses, menos que os % já gravados', v_total, v_existentes;
   end if;
 
   insert into dados.observacao (serie_id, periodo, valor, carga_id)
-  select p_serie, periodo, valor, p_carga from tmp_dieese
+  select p_serie, u.periodo, u.valor, p_carga
+    from unnest(v_periodos, v_valores) as u(periodo, valor)
   on conflict (serie_id, localidade_id, periodo) do update
      set valor = excluded.valor, carga_id = excluded.carga_id
    where dados.observacao.valor is distinct from excluded.valor;
@@ -273,7 +281,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Orquestração
 -- ---------------------------------------------------------------------------
-create or replace function etl.solicitar_coletas()
+create function etl.solicitar_coletas()
 returns integer
 language plpgsql
 set search_path = ''
@@ -296,7 +304,7 @@ begin
 end
 $$;
 
-create or replace function etl.processar_respostas()
+create function etl.processar_respostas()
 returns integer
 language plpgsql
 set search_path = ''
@@ -370,5 +378,3 @@ begin
   return v_n;
 end
 $$;
-
-revoke all on all functions in schema etl from public, anon, authenticated;
