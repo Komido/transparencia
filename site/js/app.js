@@ -895,10 +895,86 @@ const GRUPO_CURTO = {
   moradia: 'auxílio-moradia', outros: 'outros',
 };
 
+// Quem esteve no cargo o ano todo (no ano corrente, desde o começo do ano),
+// com quem não usou a cota valendo zero. É a base das médias e do ranking:
+// quem ficou só parte do ano gasta menos por isso. Nulo quando o arquivo não
+// diz quem ficou o ano todo.
+function cotaAnoTodo(casa) {
+  if (!casa.parlamentares.length || casa.parlamentares.some((p) => p.ano_todo == null)) return null;
+  const semGasto = (casa.sem_gasto ?? []).filter((p) => p.ano_todo === true).map((p) => ({ ...p, total: 0, meses: 0 }));
+  return [...casa.parlamentares.filter((p) => p.ano_todo), ...semGasto];
+}
+
+function mediasPorUf(lista) {
+  const porUf = new Map();
+  for (const p of lista) {
+    if (!p.uf) continue;
+    const x = porUf.get(p.uf) ?? { n: 0, total: 0 };
+    x.n += 1;
+    x.total += p.total;
+    porUf.set(p.uf, x);
+  }
+  for (const x of porUf.values()) x.media = x.total / x.n;
+  return porUf;
+}
+
+const milReais = (v) => (Math.abs(v) >= 1000 ? `R$\u00A0${f.numero(v / 1e3, 0)}\u00A0mil` : f.moeda(v, 0));
+
 const rotuloParlamentar = (p) => {
   const extra = [p.partido, p.uf].filter(Boolean).join('-');
   return extra ? `${p.nome} (${extra})` : p.nome;
 };
+
+// No ano corrente, "o ano todo" quer dizer desde o começo do ano.
+function frasesPeriodo(ano) {
+  const corrente = ano >= new Date().getFullYear();
+  return corrente
+    ? { ficaram: 'estão no cargo desde o começo do ano', ficou: 'está no cargo desde o começo do ano', naoFicou: 'não está no cargo desde o começo do ano' }
+    : { ficaram: 'ficaram o ano todo no cargo', ficou: 'ficou o ano todo no cargo', naoFicou: 'não ficou o ano todo no cargo' };
+}
+
+// Ranking do Brasil todo. Cada parlamentar é comparado com a média dos
+// colegas do mesmo estado (mesma base de quem ficou o ano todo), porque o
+// limite da cota muda de estado para estado: em reais, a lista dos que mais
+// gastam seria quase só de estados longe de Brasília.
+function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
+  const listaMais = $('#cota-ranking-mais');
+  const listaMenos = $('#cota-ranking-menos');
+  listaMais.replaceChildren();
+  listaMenos.replaceChildren();
+  const caixa = listaMais.closest('.rankings');
+  if (!base) {
+    caixa.hidden = true;
+    definirItens('cota-ranking-nota', [{ rotulo: null, texto: `Sem ranking ${nomes.daCasa} para esse ano: a lista oficial não informa quem ficou no cargo o ano todo, e comparar com quem ficou poucos meses seria injusto.` }]);
+    return;
+  }
+  const comparaveis = base.filter((p) => p.uf && medias.get(p.uf)?.media > 0 && medias.get(p.uf).n > 1)
+    .map((p) => ({ p, razao: p.total / medias.get(p.uf).media }));
+  const ordem = (a, b) => a.razao - b.razao || a.p.total - b.p.total || a.p.nome.localeCompare(b.p.nome, 'pt-BR');
+  const crescente = [...comparaveis].sort(ordem);
+  const n = Math.min(10, Math.floor(crescente.length / 2));
+  caixa.hidden = n === 0;
+  definirItens('cota-ranking-nota', [
+    { rotulo: null, texto: `No Brasil todo, entre os ${comparaveis.length} ${nomes.plural} que ${fr.ficaram}. Cada um é comparado com a média dos colegas do mesmo estado, que têm o mesmo limite de gasto. Por isso a ordem não segue só o valor em reais.` },
+  ]);
+  const item = (lista, { p, razao }) => {
+    const li = el('li', null, null, lista);
+    const topo = el('div', 'ranking-topo', null, li);
+    // Partido e estado não se separam na quebra de linha.
+    const nome = el('span', 'ranking-nome', `${p.nome} `, topo);
+    const sigla = [p.partido, p.uf].filter(Boolean).join('-');
+    if (sigla) el('span', 'ranking-sigla', `(${sigla})`, nome);
+    el('span', 'ranking-valor', p.total > 0 ? milReais(p.total) : 'R$\u00A00', topo);
+    const media = medias.get(p.uf).media;
+    const pct = (razao - 1) * 100;
+    const doUf = t.doEstado(p.uf, nomeUf(p.uf));
+    el('span', 'ranking-explica', p.total <= 0
+      ? `não usou a cota; média ${doUf}: ${milReais(media)}`
+      : `${Math.abs(pct) < 0.5 ? 'igual à' : `${f.porcentagem(Math.abs(pct), 0)} ${pct > 0 ? 'acima' : 'abaixo'} da`} média ${doUf} (${milReais(media)})`, li);
+  };
+  crescente.slice(-n).reverse().forEach((x) => item(listaMais, x));
+  crescente.slice(0, n).forEach((x) => item(listaMenos, x));
+}
 
 async function montarCota(ctx) {
   const secao = $('#cota');
@@ -949,11 +1025,17 @@ async function montarCota(ctx) {
       texto: `gastou ${f.reaisPorExtenso(p.total)} da cota em ${ano}, com despesas em ${p.meses === 1 ? '1 mês' : `${p.meses} meses`}`
         + (p.meses ? `, média de ${f.moeda(p.total / p.meses, 0)} por mês.` : '.'),
     }];
-    const mesmos = p.uf ? casa.parlamentares.filter((x) => x.uf === p.uf) : [];
-    if (mesmos.length > 1) {
-      const media = mesmos.reduce((a, x) => a + x.total, 0) / mesmos.length;
-      const v = t.variacao((p.total / media - 1) * 100, 0);
-      itens.push({ rotulo: null, texto: `A média dos ${nomes.plural} ${t.doEstado(p.uf, nomeUf(p.uf))} foi ${f.moeda(media, 0)}${v ? `; ${p.nome} gastou ${v === 'praticamente o mesmo valor' ? v : `${v} que a média`}` : ''}.` });
+    const base = cotaAnoTodo(casa);
+    const fr = frasesPeriodo(ano);
+    if (base && p.ano_todo === false) {
+      itens.push({ rotulo: null, texto: `${p.nome} ${fr.naoFicou}. Por isso fica fora da comparação com a média e do ranking.` });
+    } else {
+      const mesmos = p.uf ? (base ?? casa.parlamentares).filter((x) => x.uf === p.uf) : [];
+      if (mesmos.length > 1) {
+        const media = mesmos.reduce((a, x) => a + x.total, 0) / mesmos.length;
+        const v = t.variacao((p.total / media - 1) * 100, 0);
+        itens.push({ rotulo: null, texto: `A média dos ${nomes.plural} ${t.doEstado(p.uf, nomeUf(p.uf))}${base ? ` que ${fr.ficaram}` : ''} foi ${f.moeda(media, 0)}${v ? `; ${p.nome} gastou ${v === 'praticamente o mesmo valor' ? v : `${v} que a média`}` : ''}.` });
+      }
     }
     definirItens('cota-parlamentar-resumo', itens);
     barrasDeGrupos($('#cota-parlamentar-grupos'), d.grupos, p.grupos);
@@ -969,6 +1051,9 @@ async function montarCota(ctx) {
     const soma = (lista) => lista.reduce((a, p) => a + p.total, 0);
     const mediaCasa = todos.length ? soma(todos) / todos.length : null;
     const ateMes = d.ate_mes?.[casaId];
+    const base = cotaAnoTodo(casa);
+    const fr = frasesPeriodo(ano);
+    const medias = base ? mediasPorUf(base) : null;
 
     // Resumo.
     const itens = [];
@@ -977,9 +1062,19 @@ async function montarCota(ctx) {
     }
     if (recorte.length) {
       const total = soma(recorte);
-      itens.push(uf
-        ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${recorte.length === 1 ? `1 ${nomes.singular} do estado usou` : `${recorte.length} ${nomes.plural} do estado usaram`} a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(total / recorte.length, 0)} por ${nomes.singular}. A média ${nomes.daCasa} foi ${f.moeda(mediaCasa, 0)}.` }
-        : { rotulo: nomes.titulo, texto: `em ${ano}, ${todos.length} ${nomes.plural} usaram a cota e gastaram ${f.reaisPorExtenso(total)}, média de ${f.moeda(mediaCasa, 0)} por ${nomes.singular}.` });
+      const usaram = `${recorte.length === 1 ? `1 ${nomes.singular}${uf ? ' do estado' : ''} usou` : `${recorte.length} ${nomes.plural}${uf ? ' do estado' : ''} usaram`} a cota e ${recorte.length === 1 ? 'gastou' : 'gastaram'} ${f.reaisPorExtenso(total)}`;
+      if (base) {
+        // Médias só com quem ficou o ano todo, a mesma base do ranking e da tabela.
+        const mediaBase = soma(base) / base.length;
+        const doUf = uf ? medias.get(uf) : null;
+        itens.push(uf
+          ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${usaram}.${doUf ? ` Entre os que ${fr.ficaram}, a média foi ${f.moeda(doUf.media, 0)} por ${nomes.singular}; ${nomes.daCasa === 'da Câmara' ? 'na Câmara toda' : 'no Senado todo'}, ${f.moeda(mediaBase, 0)}.` : ''}` }
+          : { rotulo: nomes.titulo, texto: `em ${ano}, ${usaram}. Entre os ${base.length} que ${fr.ficaram}, a média foi ${f.moeda(mediaBase, 0)} por ${nomes.singular}.` });
+      } else {
+        itens.push(uf
+          ? { rotulo: nomeUf(uf), texto: `em ${ano}, ${usaram}, média de ${f.moeda(total / recorte.length, 0)} por ${nomes.singular}. A média ${nomes.daCasa} foi ${f.moeda(mediaCasa, 0)}.` }
+          : { rotulo: nomes.titulo, texto: `em ${ano}, ${usaram}, média de ${f.moeda(mediaCasa, 0)} por ${nomes.singular}.` });
+      }
       const porGrupo = d.grupos.map((g, k) => ({ nome: GRUPO_CURTO[g.id] ?? g.nome.toLowerCase(), v: recorte.reduce((a, p) => a + (p.grupos[k] ?? 0), 0) }))
         .filter((g) => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 3);
       if (porGrupo.length) itens.push({ rotulo: 'O que mais pesou', texto: `${listaDeAnos(porGrupo.map((g) => `${g.nome} (${f.porcentagem((g.v / total) * 100, 0)})`))}.` });
@@ -989,6 +1084,8 @@ async function montarCota(ctx) {
       $('#cota-grupos').replaceChildren();
     }
     definirItens('cota-resumo', itens);
+
+    desenharRanking(casa, nomes, base, medias, fr, nomeUf);
 
     // Parlamentar: lista do recorte, em ordem alfabética.
     definir('cota-rotulo-parlamentar', nomes.rotulo);
@@ -1008,7 +1105,19 @@ async function montarCota(ctx) {
     } else {
       const doRecorte = uf ? sem.filter((p) => p.uf === uf) : sem;
       const onde = uf ? ` ${t.doEstado(uf, nomeUf(uf))}` : '';
-      definirItens('cota-sem-gasto', doRecorte.length
+      const quantos = (n) => (n === 1 ? `1 ${nomes.singular}` : `${n} ${nomes.plural}`);
+      if (doRecorte.some((p) => p.ano_todo != null)) {
+        const todo = doRecorte.filter((p) => p.ano_todo);
+        const parte = doRecorte.filter((p) => !p.ano_todo);
+        const itensSem = [{ rotulo: null, texto: todo.length
+          ? `Em ${ano}, ${quantos(todo.length)}${onde} ${todo.length === 1 ? fr.ficou : fr.ficaram} e não ${todo.length === 1 ? 'teve' : 'tiveram'} nenhum gasto da cota: ${listaDeAnos(todo.map(rotuloParlamentar))}.`
+          : `Em ${ano}, todos os ${nomes.plural}${onde} que ${fr.ficaram} usaram a cota.` }];
+        if (parte.length) {
+          itensSem.push({ rotulo: null, texto: `${parte.length === 1 ? `1 ${nomes.singular}` : `Outros ${parte.length} ${nomes.plural}`} ${parte.length === 1 ? 'ficou' : 'ficaram'} só parte do ano no cargo, como suplentes ou quem saiu para ser ministro, e não ${parte.length === 1 ? 'teve' : 'tiveram'} gasto: ${listaDeAnos(parte.map(rotuloParlamentar))}.` });
+        }
+        itensSem.push({ rotulo: null, texto: 'Não ter gasto não prova que a pessoa recusou a cota de forma declarada.' });
+        definirItens('cota-sem-gasto', itensSem);
+      } else definirItens('cota-sem-gasto', doRecorte.length
         ? [
           { rotulo: null, texto: `Em ${ano}, ${doRecorte.length === 1 ? `1 ${nomes.singular}` : `${doRecorte.length} ${nomes.plural}`}${onde} em exercício não ${doRecorte.length === 1 ? 'teve' : 'tiveram'} nenhum gasto da cota: ${listaDeAnos(doRecorte.map(rotuloParlamentar))}.` },
           { rotulo: null, texto: 'A lista inclui quem ficou pouco tempo no cargo, como suplentes que assumiram por poucos dias. Não ter gasto também não prova que a pessoa recusou a cota de forma declarada.' },
@@ -1017,22 +1126,17 @@ async function montarCota(ctx) {
     }
 
     // Por estado, em ordem alfabética.
-    const porUf = new Map();
-    for (const p of todos) {
-      if (!p.uf) continue;
-      const x = porUf.get(p.uf) ?? { n: 0, total: 0 };
-      x.n += 1;
-      x.total += p.total;
-      porUf.set(p.uf, x);
-    }
+    const porUf = medias ?? mediasPorUf(todos);
     const linhas = [...porUf.entries()].sort((a, b) => nomeUf(a[0]).localeCompare(nomeUf(b[0]), 'pt-BR'))
-      .map(([sigla, x]) => [nomeUf(sigla), String(x.n), `R$\u00A0${f.numero(x.total / x.n / 1e3, 0)} mil`]);
+      .map(([sigla, x]) => [nomeUf(sigla), String(x.n), milReais(x.media)]);
     // O total do estado acompanha o número de parlamentares; a comparação
     // justa é a média. O total fica na planilha.
     preencherTabela($('#tabela-cota-estados'),
       ['Estado', casaId === 'camara' ? 'Deputados' : 'Senadores', `Média por ${nomes.singular}`],
       linhas,
-      `${nomes.titulo}, ${ano}: ${nomes.plural} com gasto e média por ${nomes.singular}. Cada estado tem um limite diferente, por causa da distância até Brasília.`);
+      base
+        ? `${nomes.titulo}, ${ano}: ${nomes.plural} que ${fr.ficaram}, incluindo quem não usou a cota, e média por ${nomes.singular}. Cada estado tem um limite diferente, por causa da distância até Brasília.`
+        : `${nomes.titulo}, ${ano}: ${nomes.plural} com gasto e média por ${nomes.singular}. Cada estado tem um limite diferente, por causa da distância até Brasília.`);
   };
 
   const desenhar = async () => {
@@ -1062,8 +1166,8 @@ async function montarCota(ctx) {
     if (!d) return { nome: 'cota-parlamentar.csv', cabecalhos: [], linhas: [] };
     return {
       nome: `cota-parlamentar-${casaId}-${ano}.csv`,
-      cabecalhos: ['nome', 'partido', 'UF', 'total reembolsado (R$)', 'meses com despesa', ...d.grupos.map((g) => `${g.nome} (R$)`)],
-      linhas: d[casaId].parlamentares.map((p) => [p.nome, p.partido ?? '', p.uf ?? '', p.total, p.meses, ...p.grupos]),
+      cabecalhos: ['nome', 'partido', 'UF', 'no cargo o ano todo', 'total reembolsado (R$)', 'meses com despesa', ...d.grupos.map((g) => `${g.nome} (R$)`)],
+      linhas: d[casaId].parlamentares.map((p) => [p.nome, p.partido ?? '', p.uf ?? '', p.ano_todo == null ? '' : (p.ano_todo ? 'sim' : 'não'), p.total, p.meses, ...p.grupos]),
     };
   });
 }

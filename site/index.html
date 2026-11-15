@@ -466,6 +466,19 @@
       <h3>Com o que o dinheiro foi gasto</h3>
       <ul class="barras" id="cota-grupos"></ul>
 
+      <h3>Quem mais e quem menos gastou</h3>
+      <div class="resumo" data-campo="cota-ranking-nota"></div>
+      <div class="rankings">
+        <div>
+          <p class="ranking-titulo">Gastaram mais</p>
+          <ol class="ranking" id="cota-ranking-mais"></ol>
+        </div>
+        <div>
+          <p class="ranking-titulo">Gastaram menos</p>
+          <ol class="ranking" id="cota-ranking-menos"></ol>
+        </div>
+      </div>
+
       <h3>Por parlamentar</h3>
       <div class="controles controles-coluna">
         <label class="seletor seletor-bloco seletor-largo"><span data-campo="cota-rotulo-parlamentar">Deputado</span>
@@ -482,7 +495,7 @@
       <div class="tabela-rolagem"><table id="tabela-cota-estados"></table></div>
       <details class="glossario">
         <summary>Como ler esses números?</summary>
-        <p>O valor é o que foi reembolsado, já descontadas as passagens devolvidas. A comparação justa é com a média dos parlamentares do mesmo estado, que têm o mesmo limite. Quem ficou só parte do ano no cargo, como um suplente, gasta menos por isso; o número de meses com despesa ajuda a ver esse caso.</p>
+        <p>O valor é o que foi reembolsado, já descontadas as passagens devolvidas. A comparação justa é com a média dos parlamentares do mesmo estado, que têm o mesmo limite. Quem ficou só parte do ano no cargo, como um suplente ou um deputado que virou ministro, gasta menos por isso. Essas pessoas ficam fora do ranking e das médias.</p>
         <p>Gasto alto não quer dizer irregularidade, e gasto baixo não quer dizer mais trabalho. Os números mostram quanto foi usado, não se o uso foi bom.</p>
       </details>
       <button type="button" class="botao" data-baixar="cota">Baixar planilha com os dados</button>

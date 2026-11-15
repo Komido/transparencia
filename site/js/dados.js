@@ -114,12 +114,14 @@ function validarCasa(casa, nGrupos, nome) {
   for (const p of casa.parlamentares) {
     if (!p || !ehTexto(p.id) || !ehTexto(p.nome) || !(p.uf === null || /^[A-Z]{2}$/.test(p.uf))
       || !ehNumeroOuNulo(p.total) || !Number.isInteger(p.meses)
-      || !Array.isArray(p.grupos) || p.grupos.length !== nGrupos || !p.grupos.every(ehNumeroOuNulo)) {
+      || !Array.isArray(p.grupos) || p.grupos.length !== nGrupos || !p.grupos.every(ehNumeroOuNulo)
+      || !(p.ano_todo == null || typeof p.ano_todo === 'boolean')) {
       falhar(`cota: parlamentar de ${nome}`);
     }
   }
   if (casa.sem_gasto != null) {
-    if (!Array.isArray(casa.sem_gasto) || !casa.sem_gasto.every((p) => p && ehTexto(p.nome))) falhar(`cota: sem gasto de ${nome}`);
+    if (!Array.isArray(casa.sem_gasto) || !casa.sem_gasto.every((p) => p && ehTexto(p.nome)
+      && (p.ano_todo == null || typeof p.ano_todo === 'boolean'))) falhar(`cota: sem gasto de ${nome}`);
   }
 }
 

@@ -652,6 +652,20 @@ td.num .detalhe { white-space: normal; }
 .barras .barra-valor { font-variant-numeric: tabular-nums; color: var(--tinta-2); white-space: nowrap; }
 .barras .barra-nome { min-width: 0; flex: 1 1 11rem; }
 .barras .barra-explica { display: block; font-size: 0.8125rem; color: var(--tinta-2); }
+
+.rankings { display: grid; gap: 16px; }
+.ranking-titulo { margin: 0 0 6px; font-weight: 600; }
+.ranking { margin: 0; padding-left: 1.75rem; display: grid; gap: 8px; }
+.ranking li { padding-left: 2px; }
+.ranking li::marker { color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.ranking .ranking-topo { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 8px; }
+.ranking .ranking-nome { min-width: 0; flex: 1 1 10rem; }
+.ranking .ranking-sigla { white-space: nowrap; }
+.ranking .ranking-valor { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ranking .ranking-explica { display: block; font-size: 0.8125rem; color: var(--tinta-2); }
+@media (min-width: 720px) {
+  .rankings { grid-template-columns: 1fr 1fr; column-gap: 24px; }
+}
 .barra-trilho { height: 8px; background: var(--trilho); border-radius: 4px; overflow: hidden; }
 .barra { height: 100%; background: var(--serie-1); border-radius: 0 4px 4px 0; }
 
