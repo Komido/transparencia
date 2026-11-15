@@ -1026,11 +1026,13 @@ async function montarCota(ctx) {
       porUf.set(p.uf, x);
     }
     const linhas = [...porUf.entries()].sort((a, b) => nomeUf(a[0]).localeCompare(nomeUf(b[0]), 'pt-BR'))
-      .map(([sigla, x]) => [nomeUf(sigla), String(x.n), f.reaisCompacto(x.total), f.moeda(x.total / x.n, 0)]);
+      .map(([sigla, x]) => [nomeUf(sigla), String(x.n), `R$\u00A0${f.numero(x.total / x.n / 1e3, 0)} mil`]);
+    // O total do estado acompanha o número de parlamentares; a comparação
+    // justa é a média. O total fica na planilha.
     preencherTabela($('#tabela-cota-estados'),
-      ['Estado', `${nomes.titulo === 'Câmara' ? 'Deputados' : 'Senadores'} com gasto`, 'Total', `Média por ${nomes.singular}`],
+      ['Estado', casaId === 'camara' ? 'Deputados' : 'Senadores', `Média por ${nomes.singular}`],
       linhas,
-      `${nomes.titulo}, ${ano}. Cada estado tem um limite diferente; compare a média do estado com a dos outros parlamentares dele.`);
+      `${nomes.titulo}, ${ano}: ${nomes.plural} com gasto e média por ${nomes.singular}. Cada estado tem um limite diferente, por causa da distância até Brasília.`);
   };
 
   const desenhar = async () => {
