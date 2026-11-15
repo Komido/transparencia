@@ -1,0 +1,57 @@
+name: Resumir a cota parlamentar (Câmara e Senado)
+
+# Câmara e Senado publicam as despesas da cota parlamentar em arquivos anuais
+# (zip com CSV na Câmara, CSV no Senado). Esta tarefa baixa os arquivos
+# oficiais, confere e resume por parlamentar, estado e tipo de despesa
+# (scripts/cota_para_json.py) e grava o resumo em site/dados/cota/, com o
+# SHA-256 de cada original em dados-fonte/cota/origem.json. O site lê só o
+# resumo; nada passa pelo banco.
+#
+# Todo dia: ano corrente e anterior. Aos domingos e quando rodada à mão: todos
+# os anos desde 2019, para pegar correções feitas depois.
+
+on:
+  schedule:
+    - cron: "37 8 * * 1-6" # 05:37 em Brasília
+    - cron: "37 8 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gravar-no-repositorio
+  cancel-in-progress: false
+
+jobs:
+  resumir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resumir
+        env:
+          AGENDA: ${{ github.event.schedule }}
+        run: |
+          set -euo pipefail
+          if [ "${AGENDA:-}" = "37 8 * * 1-6" ]; then
+            python3 scripts/cota_para_json.py --recentes
+          else
+            python3 scripts/cota_para_json.py
+          fi
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/cota dados-fonte/cota \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/cota dados-fonte/cota)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/cota dados-fonte/cota
+          git commit -m "Atualiza resumo da cota parlamentar"
+          git pull --rebase --quiet
+          git push
