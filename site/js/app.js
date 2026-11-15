@@ -275,29 +275,50 @@ function montarComposicao(ctx) {
   }
 }
 
-// Impostos dos estados nos 12 meses até o último mês que os 27 já
-// informaram, comparados com a arrecadação federal dos mesmos meses.
+// Impostos de estados (12 meses até o último mês que os 27 já informaram,
+// com a arrecadação federal dos mesmos meses) e de prefeituras e do país
+// (último ano da estimativa anual do Tesouro).
 function montarComposicaoEstados(ctx) {
+  const linhas = [];
   const rec = ctx.d.estados_receita;
   const ate = rec?.doze_meses_ate;
-  if (!ate || !Array.isArray(rec.estados) || rec.estados.length < 27) return;
-  if (rec.estados.some((x) => x.doze_meses?.icms == null || x.doze_meses?.ipva == null || x.doze_meses?.itcd == null)) return;
-  const soma = (chave) => rec.estados.reduce((total, x) => total + x.doze_meses[chave], 0);
-  const icms = soma('icms');
-  const ipva = soma('ipva');
-  const itcd = soma('itcd');
-  const estaduais = icms + ipva + itcd;
-  const linhas = [`Nos 12 meses até ${f.mesLongo(ate)}, os estados e o Distrito Federal arrecadaram ${f.reaisPorExtenso(icms)} de ICMS, `
-    + `${f.reaisPorExtenso(ipva)} de IPVA e ${f.reaisPorExtenso(itcd)} de ITCMD (herança e doação).`];
-  const k = ctx.meses.indexOf(ate);
-  const janela = k >= 11 ? ctx.total.slice(k - 11, k + 1) : [];
-  if (janela.length === 12 && janela.every((v) => v != null)) {
-    const federal = janela.reduce((a, v) => a + v, 0) * 1e6;
-    linhas.push(`No mesmo período, a arrecadação federal foi de ${f.reaisPorExtenso(federal)}. `
-      + `Para cada R$\u00A0100 que o governo federal arrecadou, os estados arrecadaram ${f.moeda((estaduais / federal) * 100, 0)} com esses três impostos.`);
-    linhas.push(`Somando os dois, foram ${f.reaisPorExtenso(federal + estaduais)}.`);
+  const estadosCompletos = ate && Array.isArray(rec.estados) && rec.estados.length >= 27
+    && rec.estados.every((x) => x.doze_meses?.icms != null && x.doze_meses?.ipva != null && x.doze_meses?.itcd != null);
+  if (estadosCompletos) {
+    const soma = (chave) => rec.estados.reduce((total, x) => total + x.doze_meses[chave], 0);
+    const icms = soma('icms');
+    const ipva = soma('ipva');
+    const itcd = soma('itcd');
+    linhas.push(`Estados: nos 12 meses até ${f.mesLongo(ate)}, os estados e o Distrito Federal arrecadaram ${f.reaisPorExtenso(icms)} de ICMS, `
+      + `${f.reaisPorExtenso(ipva)} de IPVA e ${f.reaisPorExtenso(itcd)} de ITCMD (herança e doação).`);
+    const k = ctx.meses.indexOf(ate);
+    const janela = k >= 11 ? ctx.total.slice(k - 11, k + 1) : [];
+    if (janela.length === 12 && janela.every((v) => v != null)) {
+      const federal = janela.reduce((a, v) => a + v, 0) * 1e6;
+      linhas.push(`No mesmo período, a arrecadação federal foi de ${f.reaisPorExtenso(federal)}: para cada R$ 100 federais, `
+        + `os estados arrecadaram ${f.moeda(((icms + ipva + itcd) / federal) * 100, 0)} com esses três impostos.`);
+    }
   }
-  linhas.push('Ainda faltam os impostos das prefeituras (ISS, IPTU e ITBI), que não estão nesta conta.');
+  const ctb = ctx.d.carga_tributaria;
+  const ultimo = ctb?.anos?.length ? ctb.anos.length - 1 : -1;
+  const item = (chave, campo = 'milhoes') => (ultimo >= 0 ? ctb.itens?.[chave]?.[campo]?.[ultimo] ?? null : null);
+  if (ultimo >= 0) {
+    const ano = ctb.anos[ultimo];
+    const iss = item('municipios_iss');
+    const iptu = item('municipios_iptu');
+    const itbi = item('municipios_itbi');
+    if (iss != null && iptu != null && itbi != null) {
+      linhas.push(`Prefeituras: em ${ano}, arrecadaram ${f.reaisPorExtenso((iss + iptu + itbi) * 1e6)} com ISS, IPTU e ITBI, `
+        + `pela estimativa anual do Tesouro Nacional (${f.reaisPorExtenso(iss * 1e6)} de ISS, ${f.reaisPorExtenso(iptu * 1e6)} de IPTU e ${f.reaisPorExtenso(itbi * 1e6)} de ITBI).`);
+    }
+    const total = item('governo_geral_total');
+    const pct = item('governo_geral_total', 'pct_pib');
+    if (total != null && pct != null) {
+      linhas.push(`Tudo junto: em ${ano}, União, estados e prefeituras cobraram ${f.reaisPorExtenso(total * 1e6)} em tributos, `
+        + `ou ${f.moeda(pct, 0)} de cada R$ 100 que o país produziu.`);
+    }
+  }
+  if (!linhas.length) return;
   definirTopicos('composicao-estados', linhas.join(' '));
   $('#composicao-estados-caixa').hidden = false;
 }
@@ -619,7 +640,14 @@ function montarEstados(ctx) {
   const rec = ctx.d.estados_receita;
   const temReceita = Array.isArray(rec?.anos) && rec.anos.length && Array.isArray(rec.estados) && rec.estados.length;
   const fatoresReceita = temReceita ? c.fatoresAnuais(ctx.meses, ctx.ipca, rec.anos) : [];
+  const cap = ctx.d.capitais_receita;
+  const temCapitais = Array.isArray(cap?.anos) && cap.anos.length && Array.isArray(cap.capitais) && cap.capitais.length;
+  const fatoresCapitais = temCapitais ? c.fatoresAnuais(ctx.meses, ctx.ipca, cap.anos) : [];
   const estadoAtual = () => estados.find((x) => x.sigla === selUf.value) ?? estados[0];
+  const capitalDe = (uf) => (temCapitais ? cap.capitais.find((x) => x.uf === uf.sigla) ?? null : null);
+  // Em Brasília, ISS, IPTU e ITBI são cobrados pelo governo do Distrito Federal.
+  const ehBrasilia = (capital) => capital?.codigo === '5300108';
+  const quemCobra = (capital) => (ehBrasilia(capital) ? 'o governo do Distrito Federal' : `a prefeitura de ${capital.nome}`);
 
   // Resumo: dívida, folha e impostos, uma frase curta cada -----------------
   const desenharResumo = () => {
@@ -658,6 +686,16 @@ function montarEstados(ctx) {
           + `O ICMS, imposto embutido no preço das mercadorias, respondeu por ${f.porcentagem((doze.icms / total) * 100, 0)} disso.`,
       });
     }
+    const capital = capitalDe(uf);
+    const dozeCap = capital?.doze_meses;
+    if (dozeCap?.iss != null && dozeCap.iptu != null && dozeCap.itbi != null && capital.ultimo_mes) {
+      const total = dozeCap.iss + dozeCap.iptu + dozeCap.itbi;
+      itens.push({
+        rotulo: ehBrasilia(capital) ? 'Impostos de Brasília' : `Prefeitura de ${capital.nome}`,
+        texto: `nos 12 meses até ${f.mesLongo(capital.ultimo_mes)}, ${quemCobra(capital)} arrecadou ${f.reaisPorExtenso(total)} com ISS, IPTU e ITBI. `
+          + `O ISS, imposto sobre serviços, respondeu por ${f.porcentagem((dozeCap.iss / total) * 100, 0)} disso.`,
+      });
+    }
     definirItens('estados-resumo', itens);
   };
 
@@ -691,43 +729,81 @@ function montarEstados(ctx) {
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-estados'), opcoes);
   };
 
-  // Impostos do estado, ano a ano ------------------------------------------
+  // Impostos do estado e da capital, ano a ano ----------------------------
+  const NOMES_TRIBUTO = { icms: 'ICMS', ipva: 'IPVA', itcd: 'ITCMD', iss: 'ISS', iptu: 'IPTU', itbi: 'ITBI' };
+  const MUNICIPAIS = ['iss', 'iptu', 'itbi'];
+  const selTributo = $('#estados-tributo');
+  // As opções da prefeitura levam o nome da capital do estado escolhido.
+  const montarOpcoesTributo = () => {
+    const anterior = selTributo.value || 'icms';
+    const capital = capitalDe(estadoAtual());
+    selTributo.replaceChildren();
+    if (temReceita) {
+      const g = el('optgroup', null, null, selTributo);
+      g.label = 'Do estado';
+      ['icms', 'ipva', 'itcd'].forEach((x) => { el('option', null, NOMES_TRIBUTO[x], g).value = x; });
+    }
+    if (capital) {
+      const g = el('optgroup', null, null, selTributo);
+      g.label = ehBrasilia(capital) ? 'De Brasília (cobrados pelo Distrito Federal)' : `Da prefeitura de ${capital.nome}`;
+      MUNICIPAIS.forEach((x) => { el('option', null, NOMES_TRIBUTO[x], g).value = x; });
+    }
+    selTributo.value = [...selTributo.options].some((o) => o.value === anterior) ? anterior : selTributo.options[0]?.value;
+  };
+
   let graficoReceita = null;
   const desenharReceita = () => {
-    if (!temReceita) return;
+    if (!temReceita && !temCapitais) return;
+    montarOpcoesTributo();
     const uf = estadoAtual();
-    const r = rec.estados.find((x) => x.sigla === uf.sigla);
-    const tributo = valorRadio('estados-tributo') ?? 'icms';
-    const nome = { icms: 'ICMS', ipva: 'IPVA', itcd: 'ITCMD' }[tributo];
-    const reais = (r?.anual?.[tributo] ?? []).map((v, k) => (v == null || fatoresReceita[k] == null ? null : v * fatoresReceita[k]));
+    const tributo = selTributo.value;
+    const municipal = MUNICIPAIS.includes(tributo);
+    const capital = capitalDe(uf);
+    const fonte = municipal ? capital : rec.estados.find((x) => x.sigla === uf.sigla);
+    const anosSerie = municipal ? cap.anos : rec.anos;
+    const fatores = municipal ? fatoresCapitais : fatoresReceita;
+    const nome = NOMES_TRIBUTO[tributo];
+    const reais = (fonte?.anual?.[tributo] ?? []).map((v, k) => (v == null || fatores[k] == null ? null : v * fatores[k]));
     const maior = Math.max(0, ...reais.filter((v) => v != null));
     const escala = maior >= 1e9 ? { div: 1e9, sufixo: 'bi', nome: 'bilhões' } : { div: 1e6, sufixo: 'mi', nome: 'milhões' };
     const valores = reais.map((v) => (v == null ? null : v / escala.div));
+    const quem = municipal ? quemCobra(capital) : `o governo ${t.doEstado(uf.sigla, uf.nome)}`;
+    const quemSemArtigo = quem.replace(/^(o|a) /, '');
     definir('estados-receita-explicacao',
-      `${nome} arrecadado pelo governo ${t.doEstado(uf.sigla, uf.nome)} em cada ano, em ${escala.nome} de reais de hoje. ${REPASSE_PREFEITURAS[tributo]}`.trim());
+      `${nome} arrecadado ${quem.startsWith('a ') ? 'pela' : 'pelo'} ${quemSemArtigo} em cada ano, em ${escala.nome} de reais de hoje. ${REPASSE_PREFEITURAS[tributo] ?? ''}`.trim());
     const opcoes = {
       tipo: 'colunas',
-      rotulos: rec.anos,
+      rotulos: anosSerie,
       series: [{ nome, classe: 'serie-1', valores, parciais: new Set() }],
       formatoY: (v, eixo) => (eixo ? f.numero(v, maior / escala.div < 10 ? 1 : 0)
         : (v == null ? 'n/d' : `R$ ${f.numero(v, 1)} ${escala.sufixo} em dinheiro de hoje`)),
       rotuloEixoX: (ano) => String(ano),
-      tituloTooltip: (i) => String(rec.anos[i]),
-      descricao: `${nome} arrecadado pelo governo ${t.doEstado(uf.sigla, uf.nome)} por ano, em ${escala.nome} de reais de hoje.`,
+      tituloTooltip: (i) => String(anosSerie[i]),
+      descricao: `${nome} arrecadado ${quem.startsWith('a ') ? 'pela' : 'pelo'} ${quemSemArtigo} por ano, em ${escala.nome} de reais de hoje.`,
       incluirZero: true,
     };
     if (graficoReceita) graficoReceita.atualizar(opcoes); else graficoReceita = criarGrafico($('#grafico-estados-receita'), opcoes);
   };
-  if (!temReceita) {
+  if (!temReceita && !temCapitais) {
     $('#estados-receita-caixa').hidden = true;
   } else {
-    document.querySelectorAll('input[name="estados-tributo"]').forEach((r) => r.addEventListener('change', desenharReceita));
-    registrarDownload('estados-receita', () => ({
-      nome: 'impostos-dos-estados-por-ano.csv',
-      cabecalhos: ['estado', 'sigla', 'ano', 'ICMS (R$)', 'IPVA (R$)', 'ITCMD (R$)', `fator para dinheiro de ${ctx.referencia}`],
-      linhas: rec.estados.flatMap((x) => rec.anos.map((ano, k) => [x.nome, x.sigla, ano, x.anual?.icms?.[k] ?? null,
-        x.anual?.ipva?.[k] ?? null, x.anual?.itcd?.[k] ?? null, arred(fatoresReceita[k], 6)])),
-    }));
+    selTributo.addEventListener('change', desenharReceita);
+    registrarDownload('estados-receita', () => {
+      const linhas = [];
+      if (temReceita) {
+        rec.estados.forEach((x) => rec.anos.forEach((ano, k) => linhas.push(['estado', x.nome, x.sigla, ano,
+          x.anual?.icms?.[k] ?? null, x.anual?.ipva?.[k] ?? null, x.anual?.itcd?.[k] ?? null, null, null, null, arred(fatoresReceita[k], 6)])));
+      }
+      if (temCapitais) {
+        cap.capitais.forEach((x) => cap.anos.forEach((ano, k) => linhas.push([ehBrasilia(x) ? 'capital (cobrados pelo DF)' : 'capital', x.nome, x.uf, ano,
+          null, null, null, x.anual?.iss?.[k] ?? null, x.anual?.iptu?.[k] ?? null, x.anual?.itbi?.[k] ?? null, arred(fatoresCapitais[k], 6)])));
+      }
+      return {
+        nome: 'impostos-de-estados-e-capitais-por-ano.csv',
+        cabecalhos: ['tipo', 'nome', 'UF', 'ano', 'ICMS (R$)', 'IPVA (R$)', 'ITCMD (R$)', 'ISS (R$)', 'IPTU (R$)', 'ITBI (R$)', `fator para dinheiro de ${ctx.referencia}`],
+        linhas,
+      };
+    });
   }
 
   const desenharTudo = () => { desenharResumo(); desenharGrafico(); desenharReceita(); };

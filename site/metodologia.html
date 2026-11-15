@@ -205,7 +205,16 @@
         <li><strong>Mês em mais de um relatório:</strong> cada relatório repete meses dos anteriores. Vale o valor do relatório mais recente, para pegar correções feitas pelo estado.</li>
         <li><strong>Ano:</strong> soma dos 12 meses de janeiro a dezembro. Em dinheiro de hoje, o ano é corrigido pela média do IPCA do ano, a mesma regra dos gastos federais.</li>
         <li><strong>Últimos 12 meses:</strong> terminam no último mês que todos os 27 já informaram, para que a soma do país e a comparação com a arrecadação federal usem os mesmos meses. Os estados entregam o relatório até 30 dias depois do fim de cada bimestre, então esse mês costuma ficar de um a três meses atrás do federal; um estado atrasado atrasa a soma do país.</li>
-        <li><strong>Comparação com a arrecadação federal:</strong> a arrecadação federal dos mesmos 12 meses, com todos os tributos e as receitas de outros órgãos (a mesma base de "De onde vem"). Os impostos das prefeituras (ISS, IPTU e ITBI) não estão no site.</li>
+        <li><strong>Comparação com a arrecadação federal:</strong> a arrecadação federal dos mesmos 12 meses, com todos os tributos e as receitas de outros órgãos (a mesma base de "De onde vem").</li>
+        <li><strong>Coleta com ritmo:</strong> a API do Tesouro recusa pedidos quando recebe muitos de uma vez (em 15/11/2026, 41 de um lote de 104 voltaram com HTTP 429 ou conexão cortada). Os pedidos ao Tesouro saem no máximo 12 a cada 5 minutos, e falhas passageiras são repetidas até 4 vezes em 24 horas.</li>
+      </ul>
+
+      <h2 id="impostos-municipais">Impostos das prefeituras</h2>
+      <ul>
+        <li><strong>Capitais, mês a mês:</strong> ISS, IPTU e ITBI de cada capital desde 2015, pelo mesmo anexo 3 do RREO usado para os estados, com as mesmas conferências e a mesma regra para meses repetidos. Cada capital mostra os próprios últimos 12 meses, porque elas não são somadas e uma prefeitura atrasada não deve atrasar as outras.</li>
+        <li><strong>Brasília:</strong> não tem prefeitura. Quem cobra ISS, IPTU e ITBI é o governo do Distrito Federal, e esses impostos vêm do relatório do próprio Distrito Federal. Os valores batem com os que o Tesouro põe no bloco dos estados (2025: ISS de R$ 3,86 bilhões no relatório e R$ 3,84 bilhões no boletim).</li>
+        <li><strong>Todos os municípios do país:</strong> a API do Siconfi responde uma prefeitura por vez, e são 5.570, muitas delas com dados incompletos. O total do país vem da Estimativa da Carga Tributária Bruta do Governo Geral, do Tesouro Nacional, que completa as prefeituras sem dados com técnicas de imputação. O boletim sai uma vez por ano, em PDF e sem planilha; os valores são copiados das Tabelas 1 e 3 e conferidos pela soma (edição de 25/03/2026, sha256 c7e51243ca43c7d54e94b40905fced20bb5e18bd479ae1a3b7aaa6b1110d4727). Por isso esse número é anual e só muda quando sai uma nova edição.</li>
+        <li><strong>Total de tributos do país:</strong> a carga tributária bruta do mesmo boletim, que soma União, estados e municípios. Não inclui o FGTS nem o Sistema S, que o Tesouro deixa de fora por não serem tributos.</li>
       </ul>
 
       <h2 id="cidades">Números por capital</h2>
@@ -241,7 +250,7 @@
         <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
         <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
         <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias da ANP no país ou no estado. Na sua cidade os preços podem ser diferentes.</li>
-        <li>O contador e a lista da composição da arrecadação mostram só tributos federais. Os impostos dos estados (ICMS, IPVA e ITCMD) aparecem à parte, com até três meses de atraso em relação aos federais. Os dos municípios (ISS, IPTU e ITBI) e o FGTS não estão no site.</li>
+        <li>O contador e a lista da composição da arrecadação mostram só tributos federais. Os impostos dos estados (ICMS, IPVA e ITCMD) aparecem à parte, com até três meses de atraso em relação aos federais. O total das prefeituras do país é anual e só muda quando o Tesouro publica um novo boletim, uma vez por ano. O FGTS não está no site.</li>
         <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
       </ul>
 

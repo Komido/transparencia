@@ -48,7 +48,7 @@
           <dd data-campo="estimado">n/d</dd>
         </div>
       </dl>
-      <p class="nota">Só impostos federais. Os de estados e municípios, como ICMS, IPVA, ISS e IPTU, não entram nesta conta. Os dos estados aparecem em <a href="#composicao">De onde vem</a>.</p>
+      <p class="nota">Só impostos federais. Os de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#composicao">De onde vem</a>.</p>
       <details class="glossario">
         <summary>Como esse número é calculado?</summary>
         <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS. Ainda não inclui os impostos de estados e municípios, como ICMS, IPVA e IPTU.</p>
@@ -294,13 +294,13 @@
       </header>
       <div class="resumo" data-campo="composicao-resumo"></div>
       <ul class="barras" id="lista-composicao"></ul>
-      <p class="nota">A lista acima tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. Os impostos dos estados estão logo abaixo. Ficam de fora os dos municípios (ISS, IPTU e ITBI) e o FGTS, que vai para a conta do trabalhador.</p>
+      <p class="nota">A lista acima tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. Os impostos de estados e prefeituras estão logo abaixo. O FGTS fica de fora: vai para a conta do trabalhador e não conta como imposto.</p>
       <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">n/d</span>.</p>
       <div id="composicao-estados-caixa" hidden>
-        <h3>E os impostos dos estados?</h3>
+        <h3>E os impostos de estados e prefeituras?</h3>
         <div class="resumo" data-campo="composicao-estados"></div>
-        <p class="nota"><a href="#estados">Veja quanto o seu estado arrecada</a>.</p>
-        <p class="fonte">Fonte: Tesouro Nacional, Siconfi, Relatório Resumido da Execução Orçamentária de cada estado (anexo 3). Valores antes dos repasses às prefeituras.</p>
+        <p class="nota"><a href="#estados">Veja quanto o seu estado e a sua capital arrecadam</a>.</p>
+        <p class="fonte">Fontes: Tesouro Nacional. Estados: Relatório Resumido da Execução Orçamentária de cada estado (anexo 3, no Siconfi), valores antes dos repasses às prefeituras. Prefeituras e total do país: Estimativa da Carga Tributária Bruta do Governo Geral, publicada uma vez por ano.</p>
       </div>
     </section>
 
@@ -413,23 +413,21 @@
       </details>
 
       <div id="estados-receita-caixa">
-        <h3>Impostos do estado, ano a ano</h3>
-        <div class="controles">
-          <fieldset class="segmentos">
-            <legend>Imposto</legend>
-            <label><input type="radio" name="estados-tributo" value="icms" checked><span>ICMS</span></label>
-            <label><input type="radio" name="estados-tributo" value="ipva"><span>IPVA</span></label>
-            <label><input type="radio" name="estados-tributo" value="itcd"><span>ITCMD</span></label>
-          </fieldset>
+        <h3>Impostos do estado e da capital, ano a ano</h3>
+        <div class="controles controles-coluna">
+          <label class="seletor seletor-bloco seletor-largo">Imposto
+            <select id="estados-tributo"></select>
+          </label>
         </div>
         <p class="nota" data-campo="estados-receita-explicacao"></p>
         <div id="grafico-estados-receita"></div>
         <details class="glossario">
-          <summary>O que são ICMS, IPVA e ITCMD?</summary>
-          <p>ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet. Vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
-          <p>Os valores mostrados são o total que o estado arrecadou. Depois, um quarto do ICMS e metade do IPVA vão para as prefeituras. Com a reforma tributária, o ICMS vai ser substituído aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
+          <summary>O que é cada imposto?</summary>
+          <p>Do estado: ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet, e vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
+          <p>Da prefeitura: ISS é o imposto sobre serviços, do salão de beleza ao hospital e ao banco, e também vem embutido no preço. IPTU é o imposto anual sobre casas, apartamentos e terrenos na cidade. ITBI é o imposto pago na compra de um imóvel. Em Brasília, quem cobra esses três é o governo do Distrito Federal.</p>
+          <p>Os valores são o total arrecadado. Um quarto do ICMS e metade do IPVA do estado vão depois para as prefeituras. Com a reforma tributária, ICMS e ISS vão ser substituídos aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
         </details>
-        <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos dos estados</button>
+        <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos de estados e capitais</button>
       </div>
 
       <h3>Todos os estados</h3>
