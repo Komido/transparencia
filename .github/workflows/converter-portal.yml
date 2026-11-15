@@ -20,6 +20,12 @@ on:
     - cron: "23 9 * * 1" # 06:23 em Brasília
     - cron: "41 9 2 * *"
   workflow_dispatch:
+    inputs:
+      periodo:
+        description: "Anos a refazer"
+        type: choice
+        options: [tudo, recentes]
+        default: tudo
 
 permissions:
   contents: write
@@ -46,11 +52,12 @@ jobs:
       - name: Resumir
         env:
           AGENDA: ${{ github.event.schedule }}
+          PERIODO: ${{ github.event.inputs.periodo }}
           BASE: ${{ matrix.base }}
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
-          if [ "${AGENDA:-}" = "23 9 * * 1" ]; then
+          if [ "${AGENDA:-}" = "23 9 * * 1" ] || [ "${PERIODO:-}" = "recentes" ]; then
             python3 scripts/portal_para_json.py --recentes --so "$BASE"
           else
             python3 scripts/portal_para_json.py --so "$BASE"

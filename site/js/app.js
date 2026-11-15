@@ -206,6 +206,7 @@ function montarArrecadacao(ctx) {
         f.porcentagem(r.medias.carga, 2),
         r.anosComDado.variacaoReal ? f.porcentagem(r.medias.variacaoReal, 1, true) : 'sem dado',
       ]));
+    avisarCrises($('#tabela-arrecadacao-governos'), resumo);
   };
   desenharGovernos();
   document.querySelectorAll('input[name="arrec-agrupar"]').forEach((r) => r.addEventListener('change', desenharGovernos));
@@ -590,6 +591,7 @@ function montarContas(ctx) {
       ];
     }),
     'Positivo: sobrou dinheiro. Negativo: faltou.');
+  avisarCrises($('#tabela-contas-governos'), resumo);
 
   registrarDownload('contas', () => ({
     nome: 'contas-publicas-por-ano.csv',
@@ -965,6 +967,30 @@ function periodoDoAno(d, ano) {
 }
 
 // Tabela "por governo": média por ano, só anos fechados.
+// Aviso de crise nas tabelas por governo, com a mesma regra fixa da
+// abertura: os anos de cada linha que cruzam uma crise com data oficial.
+function avisarCrises(tabela, resumo) {
+  const caixa = tabela.closest('.tabela-rolagem') ?? tabela;
+  let aviso = caixa.nextElementSibling?.classList.contains('aviso-crise') ? caixa.nextElementSibling : null;
+  const grupos = new Map();
+  for (const r of resumo) {
+    const crises = CRISES.filter((x) => (r.anos ?? []).some((a) => `${a}-01` <= x.ate && `${a}-12` >= x.de));
+    if (!crises.length) continue;
+    const chave = crises.map((x) => x.nome).join('|');
+    if (!grupos.has(chave)) grupos.set(chave, { rotulos: [], crises });
+    grupos.get(chave).rotulos.push(r.rotulo);
+  }
+  if (!grupos.size) { if (aviso) aviso.hidden = true; return; }
+  if (!aviso) {
+    aviso = el('p', 'aviso-crise');
+    aviso.setAttribute('role', 'note');
+    caixa.after(aviso);
+  }
+  aviso.hidden = false;
+  const partes = [...grupos.values()].map((g) => `${listaDeAnos(g.rotulos)}, ${listaDeAnos(g.crises.map((x) => x.nome))}`);
+  aviso.textContent = `Atenção, crises com data oficial nos anos da tabela: ${partes.join('; ')}. Crises mexem com quase todos os números; o aviso não muda as contas.`;
+}
+
 function tabelaPorGoverno(ctx, tabela, linhas, colunas) {
   const resumo = c.resumoPorGoverno(linhas, ctx.mandatos, colunas.map((x) => x.chave)).filter((r) => r.anos.length);
   preencherTabela(tabela, ['Mandato', ...colunas.map((x) => x.titulo)],
@@ -972,6 +998,7 @@ function tabelaPorGoverno(ctx, tabela, linhas, colunas) {
       { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
       ...colunas.map((x) => (r.anosComDado[x.chave] ? x.formato(r.medias[x.chave], r) : 'sem dado')),
     ]));
+  avisarCrises(tabela, resumo);
 }
 
 async function montarMinisterios(ctx) {
@@ -1024,14 +1051,12 @@ async function montarMinisterios(ctx) {
     const ano = Number(selAno.value);
     const itens = itensDoAno(ano);
     const total = itens.reduce((a, x) => a + x.valor, 0);
-    const fator = fatorParaHoje(ctx, ano) ?? 1;
-    const div = d.divida[String(ano)] ?? { juros: 0, amortizacao: 0 };
-    const top = [...itens].sort((a, b) => b.valor - a.valor).slice(0, 3);
-    const pct = (v) => f.porcentagem((v / total) * 100, 0);
     definirItens('ministerios-resumo', [
       { rotulo: null, texto: `${periodoDoAno(d, ano)}, os ministérios e demais órgãos do governo federal gastaram ${f.reaisPorExtenso(total)}, sem contar a dívida pública (em dinheiro de hoje).` },
-      { rotulo: null, texto: `Os que mais gastaram foram ${listaDeAnos(top.map((x) => `${x.nome} (${pct(x.valor)})`))}.` },
-      { rotulo: null, texto: `A dívida pública, paga pelo Ministério da Fazenda, somou mais ${f.reaisPorExtenso(div.juros * fator)} em juros e ${f.reaisPorExtenso(div.amortizacao * fator)} em pagamento e troca de dívida. Esses valores ficam fora da lista.` },
+      // Quem mais gastou está nas barras logo abaixo. Os valores da dívida
+      // ficam na planilha: aqui, um terceiro número de juros (o pago em
+      // dinheiro pelo Tesouro) confundiria com os das outras seções.
+      { rotulo: null, texto: 'Os pagamentos da dívida pública (juros e troca de dívida que venceu), feitos pelo Ministério da Fazenda, ficam fora da lista. O peso dos juros nas contas do governo aparece em "As contas fecham?".' },
     ]);
     barrasDeOrgaos($('#ministerios-lista'), itens, total, {
       explicar: (g) => (g.repasse / g.valor >= 0.1 ? `${f.porcentagem((g.repasse / g.valor) * 100, 0)} repassado a estados e prefeituras` : null),
@@ -1049,7 +1074,12 @@ async function montarMinisterios(ctx) {
   registrarDownload('ministerios', () => ({
     nome: 'gastos-por-ministerio.csv',
     cabecalhos: ['ano', 'meses', 'codigo do orgao', 'orgao', 'liquidado sem divida (R$ da epoca)', 'repassado a estados e municipios (R$ da epoca)', 'fator para dinheiro de hoje'],
-    linhas: d.anos.flatMap((a) => d.orgaos.filter((o) => o.valores[String(a)]).map((o) => [a, d.ate_mes[String(a)], o.codigo, nomeDoOrgao(o, a), ...o.valores[String(a)], arred(fatorParaHoje(ctx, a), 6)])),
+    // A dívida pública (fora da lista do site) vai junto, em linhas próprias.
+    linhas: d.anos.flatMap((a) => [
+      ...d.orgaos.filter((o) => o.valores[String(a)]).map((o) => [a, d.ate_mes[String(a)], o.codigo, nomeDoOrgao(o, a), ...o.valores[String(a)], arred(fatorParaHoje(ctx, a), 6)]),
+      [a, d.ate_mes[String(a)], 'divida-juros', 'Dívida pública: juros', d.divida[String(a)]?.juros ?? null, 0, arred(fatorParaHoje(ctx, a), 6)],
+      [a, d.ate_mes[String(a)], 'divida-amortizacao', 'Dívida pública: pagamento e troca de dívida que venceu', d.divida[String(a)]?.amortizacao ?? null, 0, arred(fatorParaHoje(ctx, a), 6)],
+    ]),
   }));
 }
 
@@ -1171,7 +1201,7 @@ async function montarViagens(ctx) {
     const ne = d.natureza_especial[String(ano)] ?? [];
     const totalNe = ne.reduce((a, y) => a + y.valor, 0) * fator;
     definirItens('viagens-ministros-nota', ne.length
-      ? [{ rotulo: null, texto: `${periodoDoAno(d, ano)}, ${ne.length === 1 ? '1 pessoa viajou' : `${ne.length} pessoas viajaram`} ocupando cargo de natureza especial (ministros de Estado e cargos do mesmo nível), com gasto total de ${f.reaisPorExtenso(totalNe)}. Abaixo, quem mais gastou.` }]
+      ? [{ rotulo: null, texto: `${periodoDoAno(d, ano)}, ${ne.length === 1 ? '1 pessoa viajou' : `${ne.length} pessoas viajaram`} ocupando cargo de natureza especial (ministros de Estado e cargos do mesmo nível), com gasto total de ${f.reaisPorExtenso(totalNe)}. Abaixo, quem mais gastou. O valor depende muito do destino: viagens para fora do país e para estados distantes custam mais, e alguns cargos viajam mais por função.` }]
       : [{ rotulo: null, texto: 'Sem viagens de cargos de natureza especial nesse ano.' }]);
     ne.slice(0, 15).forEach((y) => {
       const li = el('li', null, null, lista);
@@ -1675,6 +1705,7 @@ function montarSalario(ctx) {
       f.porcentagem(r.medias.frenteNecessario, 1),
     ]),
     'Médias dos anos de cada mandato.');
+  avisarCrises($('#tabela-salario-governos'), resumo);
 
   registrarDownload('salario', () => ({
     nome: 'salario-minimo-mensal.csv',

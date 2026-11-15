@@ -275,7 +275,15 @@ def ano_ministerios(ano, ate_mes, origem, orgaos):
                 divida[GRUPOS_DIVIDA[grupo]] += v
                 continue
             codigo = l["Código Órgão Superior"].strip()
-            orgaos.ver(ano, codigo, l["Nome Órgão Superior"])
+            if not codigo:
+                # Linhas sem órgão: as vistas até hoje têm valor zero. Com
+                # valor, entram num grupo próprio para o total não mudar.
+                if v == 0:
+                    continue
+                codigo = "sem-orgao"
+                orgaos.ver(ano, codigo, "Sem órgão informado")
+            else:
+                orgaos.ver(ano, codigo, l["Nome Órgão Superior"])
             x = por.setdefault(codigo, {"liquidado": 0.0, "transferencias": 0.0})
             x["liquidado"] += v
             if l["Modalidade da Despesa"].strip().startswith(("Transferências a Estados", "Transferências a Municípios")):
@@ -292,7 +300,9 @@ def ano_ministerios(ano, ate_mes, origem, orgaos):
 # Viagens a serviço
 # ---------------------------------------------------------------------------
 
-def ano_viagens(ano, origem, orgaos):
+def ano_viagens(ano, origem, orgaos, corte=12):
+    """corte: último mês que entra. No ano corrente é o mês passado: o
+    arquivo já traz viagens do mês em curso e viagens marcadas para depois."""
     url = f"{BASE}/viagens/{ano}"
     bruto = baixar(url, origem)
     if bruto is None:
@@ -307,6 +317,10 @@ def ano_viagens(ano, origem, orgaos):
     ultimo_mes = 0
     for k, l in enumerate(leitor, start=2):
         onde = f"{url}, linha {k}"
+        inicio = l["Período - Data de início"].strip()
+        m = re.match(r"(\d{2})/(\d{2})/(\d{4})", inicio)
+        if m and int(m.group(3)) == ano and int(m.group(2)) > corte:
+            continue
         d = numero(l["Valor diárias"], onde)
         p = numero(l["Valor passagens"], onde)
         o = numero(l["Valor outros gastos"], onde)
@@ -317,8 +331,6 @@ def ano_viagens(ano, origem, orgaos):
         total["outros"] += o
         total["devolucao"] += dev
         total["n"] += 1
-        inicio = l["Período - Data de início"].strip()
-        m = re.match(r"(\d{2})/(\d{2})/(\d{4})", inicio)
         if m and int(m.group(3)) == ano:
             ultimo_mes = max(ultimo_mes, int(m.group(2)))
         secreto = sigiloso(l["Nome"], l["Cargo"], l["Nome do órgão superior"])
@@ -342,11 +354,8 @@ def ano_viagens(ano, origem, orgaos):
             y["valor"] += v
     if total["n"] < MINIMO_LINHAS_ANO["viagens"]:
         falhar(f"{url}: só {total['n']} viagens no ano")
-    # O arquivo é do ano inteiro; no ano corrente, vale até o último mês com
-    # viagem começada.
-    # O arquivo do ano corrente já traz viagens marcadas para os próximos meses.
-    hoje = dt.date.today()
-    ultimo_mes = 12 if ano < hoje.year else min(ultimo_mes, hoje.month)
+    # Ano fechado: os 12 meses. Ano corrente: até o corte (mês passado).
+    ultimo_mes = 12 if corte == 12 else min(ultimo_mes, corte)
     return {"ano": ano, "ate_mes": ultimo_mes,
             "total": {k: round(v, 2) if isinstance(v, float) else v for k, v in total.items()},
             "orgaos": {c: {"valor": round(x["valor"], 2), "n": x["n"]} for c, x in por.items()},
@@ -384,7 +393,12 @@ def gravar_json(caminho, dados, indentar=False):
 def montar_saida(base, anos_dados, orgaos):
     anos = sorted(anos_dados)
     saida = {"anos": anos, "ate_mes": {str(a): anos_dados[a]["ate_mes"] for a in anos}}
-    codigos = sorted({c for d in anos_dados.values() for c in d["orgaos"]})
+    # Código vazio (de arquivos gravados antes da regra de ano_ministerios) fica
+    # de fora; só aparece com valor zero.
+    vazios = [d["orgaos"][""] for d in anos_dados.values() if "" in d["orgaos"]]
+    if any(abs(v) > 0 for x in vazios for v in x.values() if isinstance(v, (int, float))):
+        falhar(f"{base}: órgão sem código com valor")
+    codigos = sorted({c for d in anos_dados.values() for c in d["orgaos"] if c})
     lista = []
     for c in codigos:
         item = {"codigo": c, "nomes": {}, "valores": {}}
@@ -417,6 +431,8 @@ def montar_saida(base, anos_dados, orgaos):
 def main():
     args = sys.argv[1:]
     recentes = "--recentes" in args
+    # --montar: só remonta os arquivos do site a partir de dados-fonte, sem baixar.
+    so_montar = "--montar" in args
     so = args[args.index("--so") + 1] if "--so" in args else None
     hoje = dt.date.today()
     origem = {}
@@ -431,20 +447,24 @@ def main():
 
     novos = {}
     for base in ("viagens", "cartao", "ministerios"):
-        if so and base != so:
+        if so_montar or (so and base != so):
             continue
         anos = list(range(PRIMEIRO_ANO[base], hoje.year + 1))
         if recentes:
             anos = [a for a in anos if a >= hoje.year - 1]
         for ano in anos:
             print(f"== {base} {ano}", flush=True)
-            ate = 12 if ano < hoje.year else hoje.month
+            # Só meses completos: no ano corrente, até o mês passado.
+            ate = 12 if ano < hoje.year else hoje.month - 1
+            if ate == 0:
+                print(f"  {base} {ano}: nenhum mês completo ainda", flush=True)
+                continue
             if base == "cartao":
                 dados = ano_cartao(ano, ate, origem, orgaos)
             elif base == "ministerios":
                 dados = ano_ministerios(ano, ate, origem, orgaos)
             else:
-                dados = ano_viagens(ano, origem, orgaos)
+                dados = ano_viagens(ano, origem, orgaos, corte=ate)
             if dados is None or (dados["ate_mes"] == 0 and base != "viagens"):
                 print(f"  {base} {ano}: nada publicado ainda", flush=True)
                 continue

@@ -49,6 +49,7 @@ export function reaisCompacto(v) {
   if (a >= 1e12) return `${s}R$\u00A0${nf(2, 2).format(a / 1e12)} tri`;
   if (a >= 1e9) return `${s}R$\u00A0${nf(1, 1).format(a / 1e9)} bi`;
   if (a >= 1e6) return `${s}R$\u00A0${nf(0, 0).format(a / 1e6)} mi`;
+  if (a >= 1e3) return `${s}R$\u00A0${nf(0, 0).format(a / 1e3)} mil`;
   return moeda(v, 0);
 }
 
