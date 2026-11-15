@@ -2,11 +2,23 @@ import * as c from './calculos.js';
 import * as f from './formato.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
 const definir = (nome, texto) => campo(nome).forEach((e) => { e.textContent = texto; });
+
+// Resumos em tópicos: uma frase por item, mais fácil de achar cada número.
+// A frase termina em ". " seguido de maiúscula; "R$ 1.621" não quebra.
+function definirTopicos(nome, texto) {
+  const partes = texto.trim().split(/\.\s+(?=[A-ZÀ-Ý])/);
+  const frases = partes.map((fr, i) => (i < partes.length - 1 ? `${fr}.` : fr)).filter((fr) => fr.trim());
+  campo(nome).forEach((e) => {
+    const lista = document.createElement('ul');
+    frases.forEach((fr) => el('li', null, fr, lista));
+    e.replaceChildren(lista);
+  });
+}
 
 function el(tag, classe, texto, pai) {
   const e = document.createElement(tag);
@@ -109,7 +121,7 @@ function montarArrecadacao(ctx) {
     if (ultimoParcial && ultimoParcial.variacaoReal != null) {
       resumo += ` Em ${ultimoParcial.ano}, nos ${ultimoParcial.meses} meses já publicados, a arrecadação foi ${t.variacao(ultimoParcial.variacaoReal)} que nos mesmos meses de ${ultimoParcial.ano - 1}.`;
     }
-    definir('arrec-resumo', resumo);
+    definirTopicos('arrec-resumo', resumo);
   }
 
   const configurar = (medida) => {
@@ -241,7 +253,7 @@ function montarComposicao(ctx) {
     const fatia = ((somas[0].soma + somas[1].soma) / total) * 100;
     const pct = (g) => f.porcentagem((g.soma / total) * 100, 0);
     const abertura = fatia > 50 ? 'Mais da metade veio de duas fontes' : `Duas fontes somaram ${f.porcentagem(fatia, 0)}`;
-    definir('composicao-resumo',
+    definirTopicos('composicao-resumo',
       `De ${f.mesLongo(ctx.meses[inicio])} a ${f.mesLongo(ctx.meses[iUlt])}, o governo federal arrecadou ${f.reaisPorExtenso(total)}. `
       + `${abertura}: ${t.nomeDoTributo(somas[0].grupo)} (${pct(somas[0])}) e ${t.nomeDoTributo(somas[1].grupo)} (${pct(somas[1])}).`);
   }
@@ -303,7 +315,7 @@ function montarGastos(ctx) {
     const pequenas = doAno.filter((a) => a.valor / totalAno < 0.01);
 
     const cinco = grandes.slice(0, 5).map((a) => `${porCem((a.valor / totalAno) * 100)} para ${a.nome.toLowerCase().replace('inss', 'INSS')}`);
-    definir('gastos-resumo',
+    definirTopicos('gastos-resumo',
       `Em ${anos[k]}, o governo federal gastou ${f.reaisPorExtenso(totalAno)}, sem contar a rolagem da dívida. `
       + `De cada R$ 100, foram ${listaDeAnos(cinco)}. `
       + `A rolagem, quando o governo paga dívida que venceu com dívida nova, somou mais ${f.reaisPorExtenso(rolagem[k] * 1e6)} e fica fora dessa conta.`);
@@ -358,11 +370,11 @@ function montarGastos(ctx) {
     const kUlt = c.ultimoIndice(sa);
     const kIni = sa.findIndex((v) => v != null);
     if (medida === 'parte') {
-      definir('gastos-comparacao',
+      definirTopicos('gastos-comparacao',
         `Em ${anos[kUlt]}, ${a.nome.toLowerCase()} ficou com ${porCem(sa[kUlt])} de cada R$ 100 gastos pelo governo federal. Em ${anos[kIni]}, eram ${porCem(sa[kIni])}.`);
     } else {
       const v = t.variacao((sa[kUlt] / sa[kIni] - 1) * 100, 0);
-      definir('gastos-comparacao',
+      definirTopicos('gastos-comparacao',
         `Em ${anos[kUlt]}, o governo federal gastou ${f.reaisPorExtenso(sa[kUlt] * 1e9)} com ${a.nome.toLowerCase()}, em dinheiro de hoje. `
         + `Em ${anos[kIni]}, foram ${f.reaisPorExtenso(sa[kIni] * 1e9)}${v ? `: ${v}, descontada a inflação` : ''}.`);
     }
@@ -413,29 +425,31 @@ function montarSalario(ctx) {
   const iDolar = c.ultimoIndice(sm.emDolar);
   const iNec = c.ultimoIndice(sm.frenteNecessario);
 
-  const iPrimeiro = sm.real.findIndex((v) => v != null);
-  const razaoReal = sm.real[iUlt] / sm.real[iPrimeiro];
-  const ganho = razaoReal >= 1.5
-    ? `compra ${f.numero(razaoReal, 1)} vezes o que comprava em ${f.mesLongo(meses[iPrimeiro])}`
-    : `compra ${t.variacao((razaoReal - 1) * 100, 0)} do que em ${f.mesLongo(meses[iPrimeiro])}`;
-  let resumoSm = `Em ${f.mesLongo(meses[iUlt])}, o salário mínimo é de ${f.moeda(s.salario_minimo[iUlt], 0)}. Descontada a inflação, ele ${ganho}.`;
-  if (s.smn_dieese[iNec] != null) {
-    resumoSm += ` Pelas contas do DIEESE, uma família de quatro pessoas precisaria de ${f.moeda(s.smn_dieese[iNec], 0)} por mês para viver com o básico. `
-      + `Isso dá ${f.numero(s.smn_dieese[iNec] / s.salario_minimo[iNec], 1)} salários mínimos.`;
-  }
-  definir('sm-resumo', resumoSm);
+  // Resumo e números do topo acompanham o ano escolhido em "Comparar com".
+  const atualizarTopo = (iBase) => {
+    const razaoReal = sm.real[iUlt] / sm.real[iBase];
+    const ganho = razaoReal >= 1.5
+      ? `compra ${f.numero(razaoReal, 1)} vezes o que comprava em ${f.mesLongo(meses[iBase])}`
+      : `compra ${t.variacao((razaoReal - 1) * 100, 0)} do que em ${f.mesLongo(meses[iBase])}`;
+    let resumoSm = `Em ${f.mesLongo(meses[iUlt])}, o salário mínimo é de ${f.moeda(s.salario_minimo[iUlt], 0)}. Descontada a inflação, ele ${ganho}.`;
+    if (s.smn_dieese[iNec] != null) {
+      resumoSm += ` Pelas contas do DIEESE, uma família de quatro pessoas precisaria de ${f.moeda(s.smn_dieese[iNec], 0)} por mês para viver com o básico, `
+        + `o equivalente a ${f.numero(s.smn_dieese[iNec] / s.salario_minimo[iNec], 1)} salários mínimos.`;
+    }
+    definirTopicos('sm-resumo', resumoSm);
 
-  const numeros = $('#numeros-salario');
-  numeros.replaceChildren();
-  const item = (rotulo, valor) => {
-    const div = el('div', null, null, numeros);
-    el('dt', null, rotulo, div);
-    el('dd', null, valor, div);
+    const numeros = $('#numeros-salario');
+    numeros.replaceChildren();
+    const item = (rotulo, valor) => {
+      const div = el('div', null, null, numeros);
+      el('dt', null, rotulo, div);
+      el('dd', null, valor, div);
+    };
+    item(`Salário mínimo em ${f.mesCurto(meses[iUlt])}`, f.moeda(s.salario_minimo[iUlt], 0));
+    item(`Salário de ${f.mesCurto(meses[iBase])} em dinheiro de hoje`, f.moeda(sm.real[iBase], 0));
+    item(`Em dólar (${f.mesCurto(meses[iDolar])})`, f.dolar(sm.emDolar[iDolar], 0));
+    item(`Parte do salário necessário, segundo o DIEESE (${f.mesCurto(meses[iNec])})`, f.porcentagem(sm.frenteNecessario[iNec], 0));
   };
-  item(`Salário mínimo em ${f.mesCurto(meses[iUlt])}`, f.moeda(s.salario_minimo[iUlt], 0));
-  item('Salário de jan/1995 em dinheiro de hoje', f.moeda(sm.real[0], 0));
-  item(`Em dólar (${f.mesCurto(meses[iDolar])})`, f.dolar(sm.emDolar[iDolar], 0));
-  item(`Parte do salário necessário, segundo o DIEESE (${f.mesCurto(meses[iNec])})`, f.porcentagem(sm.frenteNecessario[iNec], 0));
 
   // Poder de compra: o salário de um mês-base, corrigido só pela inflação
   // (INPC) dali em diante, ao lado do salário de verdade. A distância entre as
@@ -449,6 +463,7 @@ function montarSalario(ctx) {
     real: () => {
       const iB = indiceDoAno(meses, basesPossiveis, anoBase);
       preencherAnos(selBase, meses, basesPossiveis, iB);
+      atualizarTopo(iB);
       const corrigido = meses.map((m, i) => (i < iB || inpc[i] == null ? null : (s.salario_minimo[iB] * inpc[i]) / inpc[iB]));
       const iFim = c.ultimoIndice(corrigido);
       const nomeBase = f.mesCurto(meses[iB]);
@@ -572,9 +587,9 @@ function montarDolar(ctx) {
     ? `o dólar está ${comparado} do que a média desde 1995.`
     : 'o dólar está praticamente igual à média desde 1995.';
   let efeito = '';
-  if (desvio >= 0.5) efeito = ' Isso encarece produtos importados e viagens ao exterior.';
-  else if (desvio <= -0.5) efeito = ' Isso barateia produtos importados e viagens ao exterior.';
-  definir('dolar-resumo',
+  if (desvio >= 0.5) efeito = ' Dólar mais caro encarece produtos importados e viagens ao exterior.';
+  else if (desvio <= -0.5) efeito = ' Dólar mais barato barateia produtos importados e viagens ao exterior.';
+  definirTopicos('dolar-resumo',
     `Em ${f.mesLongo(meses[iUlt])}, um dólar custou em média ${f.moeda(s.dolar_ptax[iUlt], 2)}. `
     + `Descontada a inflação do Brasil e a dos Estados Unidos, ${posicao}${efeito}`);
 
@@ -640,7 +655,7 @@ function montarIR(ctx) {
     : acima > 0.5
       ? ` O limite atual está ${f.porcentagem(acima, 0)} acima do que seria só repondo a inflação desde 1996.`
       : ' O limite atual acompanha a inflação acumulada desde 1996.';
-  definir('ir-resumo', resumoIr);
+  definirTopicos('ir-resumo', resumoIr);
 
   const recorte = (arr) => arr.slice(iIni);
   const mesesIR = meses.slice(iIni);
@@ -722,7 +737,8 @@ function indiceDoAno(meses, candidatos, ano) {
 
 function preencherAnos(select, meses, candidatos, escolhido) {
   select.replaceChildren();
-  candidatos.forEach((i) => {
+  // Mais recente no topo: é o que a pessoa procura primeiro.
+  [...candidatos].reverse().forEach((i) => {
     const op = el('option', null, String(c.anoDe(meses[i])), select);
     op.value = String(i);
     if (i === escolhido) op.selected = true;
@@ -763,8 +779,17 @@ function montarCompras(ctx) {
   let item = itens[0];
   let anoEscolhido = null;
 
+  // Com cidade escolhida, os alimentos usam o preço do DIEESE na cidade;
+  // gasolina e gás continuam com a média nacional da ANP.
+  const precoDe = (it) => {
+    const local = cidade.dados?.series?.[it.serie];
+    return it.fonte === 'dieese' && local ? local : s[it.serie];
+  };
+  const naCidade = (it) => Boolean(it.fonte === 'dieese' && cidade.dados?.series?.[it.serie]);
+
   const desenhar = () => {
-    const q = c.quantidadeComprada(s.salario_minimo, s[item.serie], item.tamanho);
+    const precos = precoDe(item);
+    const q = c.quantidadeComprada(s.salario_minimo, precos, item.tamanho);
     const { iUlt, candidatos } = mesesParaComparar(meses, q);
     if (iUlt < 0 || !candidatos.length) return;
     const iA = indiceDoAno(meses, candidatos, anoEscolhido);
@@ -777,23 +802,30 @@ function montarCompras(ctx) {
     let fecho = '';
     if (comp === 'a mesma quantidade') fecho = ` Hoje ele compra a mesma quantidade que em ${anoA}.`;
     else if (comp) fecho = ` Hoje ele compra ${comp} do que em ${anoA}.`;
-    definir('compras-resumo',
-      `Com um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}. `
+    const onde = naCidade(item) ? `Em ${cidade.dados.nome}, com` : 'Com';
+    definirTopicos('compras-resumo',
+      `${onde} um salário mínimo (${f.moeda(s.salario_minimo[iUlt], 0)}), em ${f.mesLongo(meses[iUlt])} dá para comprar ${t.quantidadeCom(qB, item.unidade, item.plural)}. `
       + `Em ${f.mesLongo(meses[iA])}, com o salário da época (${f.moeda(s.salario_minimo[iA], 0)}), dava para comprar ${t.quantidade(qA)}.${fecho}`);
 
     const numeros = $('#compras-numeros');
     numeros.replaceChildren();
-    const precoItem = (i) => s[item.serie][i] * item.tamanho;
-    const parte = (i) => (precoItem(i) / s.salario_minimo[i]) * 100;
+    const precoItem = (i) => precos[i] * item.tamanho;
     itemNumero(numeros, `Em ${f.mesCurto(meses[iA])}`, t.quantidade(qA), item.plural);
     itemNumero(numeros, `Em ${f.mesCurto(meses[iUlt])}`, t.quantidade(qB), item.plural);
     const equivalente = (precoItem(iA) * s.salario_minimo[iUlt]) / s.salario_minimo[iA];
     itemNumero(numeros, `${maiuscula(item.singular)} custa hoje`, f.moeda(precoItem(iUlt), 2),
       `Em ${anoA} custava ${f.moeda(precoItem(iA), 2)}, o equivalente a ${f.moeda(equivalente, 2)} no salário de hoje.`);
 
-    definir('compras-nota-fonte', item.fonte === 'dieese'
-      ? `Os preços são a média de ${capitais.length} capitais que o DIEESE pesquisa todo mês desde 1995 (${capitais.join(', ')}). Na sua cidade o preço pode ser diferente. A cesta básica é o conjunto de 13 alimentos que, pela lei, sustenta uma pessoa adulta por um mês.`
-      : 'O preço é a média dos postos pesquisados pela ANP em todo o Brasil. Na sua cidade o preço pode ser diferente.');
+    const cesta = 'A cesta básica é o conjunto de 13 alimentos que, pela lei, sustenta uma pessoa adulta por um mês.';
+    let nota;
+    if (naCidade(item)) {
+      nota = `Os preços são os que o DIEESE pesquisa todo mês em ${cidade.dados.nome}. Meses sem pesquisa na cidade ficam em branco. ${cesta}`;
+    } else if (item.fonte === 'dieese') {
+      nota = `Os preços são a média de ${capitais.length} capitais que o DIEESE pesquisa todo mês desde 1995 (${capitais.join(', ')}). Na sua cidade o preço pode ser diferente. ${cesta}`;
+    } else {
+      nota = `O preço é a média dos postos pesquisados pela ANP em todo o Brasil${cidade.dados ? '; o preço por cidade ainda não está no site' : ''}. Na sua cidade o preço pode ser diferente.`;
+    }
+    definir('compras-nota-fonte', nota);
 
     // O gráfico começa no primeiro mês com preço publicado.
     const iIni = q.findIndex((v) => v != null);
@@ -813,16 +845,73 @@ function montarCompras(ctx) {
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-compras'), opcoes);
 
     registrarDownload('compras', () => ({
-      nome: `salario-minimo-compra-${item.id}.csv`,
+      nome: `salario-minimo-compra-${item.id}${naCidade(item) ? `-${cidade.codigo}` : ''}.csv`,
       cabecalhos: ['mes', 'salario minimo (R$)', `preco de ${item.singular} (R$)`, `quantidade (${item.plural})`],
-      linhas: meses.map((m, i) => [m, s.salario_minimo[i], s[item.serie][i] == null ? null : arred(precoItem(i), 2), arred(q[i], 2)])
+      linhas: meses.map((m, i) => [m, s.salario_minimo[i], precos[i] == null ? null : arred(precoItem(i), 2), arred(q[i], 2)])
         .filter((l) => l[2] != null),
     }));
   };
 
   montarEscolhas($('#compras-itens'), 'compras-item', itens, (novo) => { item = novo; desenhar(); });
   $('#compras-ano').addEventListener('change', (ev) => { anoEscolhido = c.anoDe(meses[Number(ev.target.value)]); desenhar(); });
+  aoMudarCidade(desenhar);
   desenhar();
+}
+
+// ---------------------------------------------------------------------------
+// Cidade escolhida
+// ---------------------------------------------------------------------------
+
+// null = média do país. As seções com números por capital (orçamento e
+// compras) têm cada uma um seletor; os seletores ficam sincronizados e a
+// escolha fica guardada no navegador do visitante.
+const CHAVE_CIDADE = 'arrecadometro-cidade';
+const cidade = { indice: [], codigo: null, dados: null, cache: new Map(), ouvintes: [], n: 0 };
+
+const aoMudarCidade = (fn) => { cidade.ouvintes.push(fn); };
+
+function lerCidadeGuardada() {
+  try { return localStorage.getItem(CHAVE_CIDADE); } catch { return null; }
+}
+
+function guardarCidade(codigo) {
+  try {
+    if (codigo) localStorage.setItem(CHAVE_CIDADE, codigo); else localStorage.removeItem(CHAVE_CIDADE);
+  } catch { /* navegador sem armazenamento: a escolha vale só nesta visita */ }
+}
+
+async function escolherCidade(codigo) {
+  const valido = codigo && cidade.indice.some((x) => x.codigo === codigo) ? codigo : null;
+  let dados = null;
+  if (valido) {
+    try {
+      if (!cidade.cache.has(valido)) cidade.cache.set(valido, await carregarCidade(valido, cidade.n));
+      dados = cidade.cache.get(valido);
+    } catch (erro) {
+      console.error(erro);
+      document.querySelectorAll('select[data-cidade]').forEach((sel) => { sel.value = ''; });
+      return escolherCidade(null);
+    }
+  }
+  cidade.codigo = dados ? valido : null;
+  cidade.dados = dados;
+  guardarCidade(cidade.codigo);
+  document.querySelectorAll('select[data-cidade]').forEach((sel) => { sel.value = cidade.codigo ?? ''; });
+  cidade.ouvintes.forEach((fn) => {
+    try { fn(); } catch (erro) { console.error(erro); }
+  });
+  return cidade.codigo;
+}
+
+function montarSeletoresDeCidade() {
+  document.querySelectorAll('select[data-cidade]').forEach((sel) => {
+    const caixa = sel.closest('label');
+    if (!cidade.indice.length) { if (caixa) caixa.hidden = true; return; }
+    sel.replaceChildren();
+    el('option', null, 'Média do país', sel).value = '';
+    cidade.indice.forEach((x) => { el('option', null, `${x.nome} (${x.uf})`, sel).value = x.codigo; });
+    sel.addEventListener('change', () => { escolherCidade(sel.value || null); });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -838,6 +927,7 @@ const AREA_EXEMPLO_M2 = 40;
 // do próprio item (IPCA por subitem, desde janeiro de 2018).
 function valorDaPof(ctx, familia, chave, serieIpca) {
   const pof = ctx.d.orcamento?.pof;
+  // Com cidade escolhida, a faixa de renda vem da POF do estado da cidade.
   const valor2018 = familia.faixa?.itens?.[chave];
   const f2 = pof && c.fatorDesde(ctx.meses, ctx.s[serieIpca], pof.mes_referencia);
   return valor2018 == null || !f2 ? null : { valor: valor2018 * f2.fator, ate: f2.ate };
@@ -847,7 +937,7 @@ function gastoDaPof(ctx, familia, chave, serieIpca, nomeDaInflacao) {
   const v = valorDaPof(ctx, familia, chave, serieIpca);
   return v && {
     valor: v.valor,
-    nota: `Gasto médio das famílias da mesma faixa de renda (POF 2017-2018, IBGE), corrigido pela inflação ${nomeDaInflacao} até ${f.mesCurto(v.ate)}`,
+    nota: `Gasto médio das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE), corrigido pela inflação ${nomeDaInflacao} até ${f.mesCurto(v.ate)}`,
   };
 }
 
@@ -855,13 +945,15 @@ const ITENS_ORCAMENTO = [
   {
     id: 'comida', nome: 'Comida',
     padrao: ({ meses, s }, familia) => {
-      const u = c.ultimoValor(meses, s.cesta_total);
+      const local = familia.local?.series?.cesta_total;
+      const u = c.ultimoValor(meses, local ?? s.cesta_total);
       if (!u) return null;
       const cestas = familia.unidades;
       const textoCestas = cestas === 1 ? 'Uma cesta básica' : `${f.numero(cestas, cestas % 1 ? 1 : 0)} cestas básicas`;
+      const onde = local ? `em ${familia.local.nome}` : 'média de capitais';
       return {
         valor: u.valor * cestas,
-        nota: `${textoCestas} do DIEESE, média de capitais em ${f.mesCurto(u.mes)}${familia.criancas ? ' (cada criança conta como meia cesta, como no cálculo do DIEESE)' : ''}`,
+        nota: `${textoCestas} do DIEESE, ${onde}, em ${f.mesCurto(u.mes)}${familia.criancas ? ' (cada criança conta como meia cesta, como no cálculo do DIEESE)' : ''}`,
       };
     },
   },
@@ -877,13 +969,15 @@ const ITENS_ORCAMENTO = [
         const v = valorDaPof(ctx, familia, 'aluguel', 'ipca_aluguel_var');
         return v && {
           valor: v.valor,
-          nota: `Valor médio de aluguel das moradias das famílias da mesma faixa de renda (POF 2017-2018, IBGE; para quem tem casa própria, o IBGE usa o aluguel estimado), corrigido pela inflação do aluguel até ${f.mesCurto(v.ate)}`,
+          nota: `Valor médio de aluguel das moradias das famílias da mesma faixa de renda${familia.local ? ` no estado (${familia.local.uf})` : ''} (POF 2017-2018, IBGE; para quem tem casa própria, o IBGE usa o aluguel estimado), corrigido pela inflação do aluguel até ${f.mesCurto(v.ate)}`,
         };
       }
-      const u = c.ultimoValor(meses, s.aluguel_m2);
+      const local = familia.local?.series?.aluguel_m2;
+      const u = c.ultimoValor(meses, local ?? s.aluguel_m2);
+      const onde = local ? `em ${familia.local.nome}` : 'nas cidades do Índice FipeZAP';
       return u && {
         valor: u.valor * AREA_EXEMPLO_M2,
-        nota: `Apartamento de ${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} por m², preço médio pedido em anúncios nas cidades do Índice FipeZAP em ${f.mesCurto(u.mes)}. Em bairros mais simples costuma ser menor`,
+        nota: `Apartamento de ${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} por m², preço médio pedido em anúncios ${onde} em ${f.mesCurto(u.mes)}. Em bairros mais simples costuma ser menor`,
       };
     },
   },
@@ -977,12 +1071,26 @@ function montarOrcamento(ctx) {
     const criancas = Number(selCriancas.value) || 0;
     caixaOutra.hidden = selRenda.value !== 'outro';
     const r = renda();
+    const local = cidade.dados;
+    const classes = local?.pof?.length ? local.pof : pof?.classes;
     const familia = {
       adultos,
       criancas,
+      local,
       unidades: c.unidadesDeConsumo(adultos, criancas),
-      faixa: pof?.classes?.length ? c.faixaDaPof(pof.classes, r / sm.valor, pof.salario_minimo_referencia) : null,
+      faixa: classes?.length && pof ? c.faixaDaPof(classes, r / sm.valor, pof.salario_minimo_referencia) : null,
     };
+    // Sem aluguel do FipeZAP para a cidade, fica só a referência do IBGE.
+    const selRef = $('#orc-aluguel-ref');
+    const semAnuncio = Boolean(local) && !local.series?.aluguel_m2;
+    const opAnuncio = selRef?.querySelector('option[value="anuncio"]');
+    if (opAnuncio) {
+      opAnuncio.disabled = semAnuncio;
+      opAnuncio.textContent = semAnuncio
+        ? 'Apartamento anunciado (sem dado do FipeZAP para esta cidade)'
+        : `Apartamento anunciado de ${AREA_EXEMPLO_M2} m² (FipeZAP)`;
+      if (semAnuncio && selRef.value === 'anuncio') { selRef.value = 'pof'; opcoesEscolhidas.set('aluguel', 'pof'); }
+    }
     const despesas = ITENS_ORCAMENTO.map((item) => {
       const p = item.padrao(ctx, familia, opcoesEscolhidas.get(item.id) ?? item.opcoes?.[0]?.id);
       const valor = digitados.has(item.id) ? digitados.get(item.id) : (p ? Math.round(p.valor) : null);
@@ -1000,7 +1108,7 @@ function montarOrcamento(ctx) {
 
     const semValor = res.itens.filter((d) => d.valor == null).map((d) => d.nome.toLowerCase());
     const pessoasTexto = `${adultos === 1 ? '1 adulto' : `${adultos} adultos`}${criancas ? ` e ${criancas === 1 ? '1 criança' : `${criancas} crianças`}` : ''}`;
-    const pessoas = adultos === 1 && !criancas ? 'Uma pessoa que mora sozinha' : `Uma casa com ${pessoasTexto}`;
+    const pessoas = `${adultos === 1 && !criancas ? 'Uma pessoa que mora sozinha' : `Uma casa com ${pessoasTexto}`}${local ? ` em ${local.nome}` : ''}`;
     const rendaTexto = selRenda.value === 'outro'
       ? `renda de ${f.moeda(r, 0)}`
       : `renda de ${selRenda.selectedOptions[0].textContent.replace(/ \(.*\)$/, '')} (${f.moeda(r, 0)})`;
@@ -1013,7 +1121,7 @@ function montarOrcamento(ctx) {
         : `Faltam ${f.moeda(-res.sobra, 0)} só para o básico.`;
     }
     if (semValor.length) resumo += ` A conta ainda não inclui ${listaDeAnos(semValor)}: digite esses valores abaixo para completar.`;
-    definir('orc-resumo', resumo);
+    definirTopicos('orc-resumo', resumo);
     definir('orc-total', f.moeda(res.total, 0));
     definir('orc-sobra-rotulo', res.sobra >= 0 ? 'Sobra' : 'Falta');
     definir('orc-sobra', f.moeda(Math.abs(res.sobra), 0));
@@ -1030,7 +1138,7 @@ function montarOrcamento(ctx) {
         texto += `Pelo mesmo método, para ${pessoasTexto}, o valor seria ${f.moeda(necFamilia, 0)} (${f.numero(necFamilia / smNec.valor, 1)} salários mínimos). `;
       }
       if (r > 0) texto += `A renda escolhida cobre ${f.porcentagem((r / necFamilia) * 100, 0)} desse valor.`;
-      definir('orc-digno', texto);
+      definirTopicos('orc-digno', texto);
     }
 
     registrarDownload('orcamento', () => ({
@@ -1045,6 +1153,7 @@ function montarOrcamento(ctx) {
   campoOutra.addEventListener('input', () => calcular(false));
   selAdultos.addEventListener('change', () => calcular(false));
   selCriancas.addEventListener('change', () => calcular(false));
+  aoMudarCidade(() => calcular(false));
   $('#orc-restaurar').addEventListener('click', () => { digitados.clear(); calcular(true); });
   calcular(true);
 }
@@ -1127,10 +1236,9 @@ function montarAnos(ctx) {
   });
 
   const melhores = [...new Set(itens.map((it) => it.ranking[0].ano))].sort((a, b) => a - b);
-  definir('anos-resumo', melhores.length === 1
+  definirTopicos('anos-resumo', melhores.length === 1
     ? `Em todos os itens abaixo, o ano mais favorável foi ${melhores[0]}.`
-    : `Nenhum ano foi o melhor em tudo. Cada item teve seu ano mais favorável: ${listaDeAnos(melhores)}. `
-      + 'Escolha um ano para comparar com hoje.');
+    : `Nenhum ano foi o melhor em tudo. Cada item teve seu ano mais favorável: ${listaDeAnos(melhores)}.`);
   definir('anos-nota-padrao', comTudo.length
     ? `A comparação começa em ${padrao}, primeiro ano com todos os itens. Alguns itens começam depois de 1995 porque a pesquisa de origem começou depois.`
     : '');
@@ -1220,15 +1328,15 @@ function montarCombustiveis(ctx) {
     const casas = item.litro ? 0 : 1;
 
     const conclusao = comparado
-      ? `Ou seja, para quem ganha um salário mínimo, ${item.sujeito} está ${comparado} do que em ${anoA}.`
-      : `Ou seja, para quem ganha um salário mínimo, ${item.sujeito} pesa praticamente o mesmo que em ${anoA}.`;
+      ? `Para quem ganha um salário mínimo, ${item.sujeito} está ${comparado} do que em ${anoA}.`
+      : `Para quem ganha um salário mínimo, ${item.sujeito} pesa praticamente o mesmo que em ${anoA}.`;
     const textoCusto = item.litro
       ? `Encher um tanque de ${TANQUE_LITROS} litros custa ${f.moeda(custo(iUlt), 0)}, ou ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 0)}).`
       : `Um botijão custa ${t.parteDoSalario(parte(iUlt))} (em ${anoA}, ${f.porcentagem(parte(iA), 1)}).`;
-    definir('combustiveis-resumo',
+    definirTopicos('combustiveis-resumo',
       `Em ${f.mesLongo(meses[iUlt])}, ${item.descricao} custa em média ${f.moeda(nominal[iUlt], 2)} no país, com o salário mínimo em ${f.moeda(s.salario_minimo[iUlt], 0)}. `
-      + `Em ${f.mesLongo(meses[iA])}, custava ${f.moeda(nominal[iA], 2)}, quando o salário mínimo era ${f.moeda(s.salario_minimo[iA], 0)}. `
-      + `Com o salário de hoje, aquele preço equivaleria a ${f.moeda(equivalente[iA], 2)}. ${conclusao} ${textoCusto}`);
+      + `Em ${f.mesLongo(meses[iA])}, custava ${f.moeda(nominal[iA], 2)}, quando o salário mínimo era ${f.moeda(s.salario_minimo[iA], 0)}; com o salário de hoje, aquele preço equivaleria a ${f.moeda(equivalente[iA], 2)}. `
+      + `${conclusao} ${textoCusto}`);
 
     const numeros = $('#combustiveis-numeros');
     numeros.replaceChildren();
@@ -1447,6 +1555,14 @@ async function iniciar() {
   try {
     const dados = await carregarPainel();
     const ctx = preparar(dados);
+    cidade.n = ctx.meses.length;
+    try {
+      cidade.indice = await carregarIndiceCidades();
+    } catch (erro) {
+      console.error(erro);
+      cidade.indice = [];
+    }
+    montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarGastos, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
@@ -1456,6 +1572,8 @@ async function iniciar() {
         console.error(`Falha em ${etapa.name}:`, erro);
       }
     }
+    const guardada = lerCidadeGuardada();
+    if (guardada) await escolherCidade(guardada);
   } catch (erro) {
     console.error(erro);
     const caixa = $('#erro-carga');

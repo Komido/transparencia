@@ -73,8 +73,11 @@
       <header>
         <h2 id="orcamento-titulo">O salário dá para viver?</h2>
       </header>
-      <p class="resumo" data-campo="orc-resumo"></p>
+      <div class="resumo" data-campo="orc-resumo"></div>
       <div class="controles controles-coluna">
+        <label class="seletor seletor-bloco">Cidade
+          <select id="orc-cidade" data-cidade></select>
+        </label>
         <label class="seletor seletor-bloco">Renda da casa
           <select id="orc-renda"></select>
         </label>
@@ -108,7 +111,7 @@
       </dl>
       <button type="button" class="botao" id="orc-restaurar">Voltar aos valores médios</button>
       <h3>Quanto seria preciso para viver com o básico?</h3>
-      <p data-campo="orc-digno"></p>
+      <div class="resumo" data-campo="orc-digno"></div>
       <details class="glossario">
         <summary>O que fica de fora desta conta?</summary>
         <p>A conta mostra só o básico da casa: comida, aluguel, luz, água e gás. Ficam de fora transporte, remédios, roupas, escola, internet, telefone e lazer, que o DIEESE inclui no salário necessário. Os valores são médias do país; na sua cidade podem ser bem diferentes, por isso cada campo pode ser trocado pelo valor da sua casa.</p>
@@ -129,7 +132,7 @@
       <header>
         <h2 id="anos-titulo">Como era a vida em outros anos?</h2>
       </header>
-      <p class="resumo" data-campo="anos-resumo"></p>
+      <div class="resumo" data-campo="anos-resumo"></div>
       <div class="controles controles-coluna">
         <label class="seletor">Comparar hoje com
           <select id="anos-ano"></select>
@@ -154,6 +157,9 @@
         <h2 id="compras-titulo">Com um salário mínimo, quanto dá para comprar?</h2>
       </header>
       <div class="controles controles-coluna">
+        <label class="seletor">Cidade
+          <select id="compras-cidade" data-cidade></select>
+        </label>
         <fieldset class="escolhas">
           <legend>Escolha o que comparar</legend>
           <div class="escolhas-lista" id="compras-itens"></div>
@@ -162,7 +168,7 @@
           <select id="compras-ano"></select>
         </label>
       </div>
-      <p class="resumo" data-campo="compras-resumo"></p>
+      <div class="resumo" data-campo="compras-resumo"></div>
       <dl class="numeros" id="compras-numeros"></dl>
       <div id="grafico-compras"></div>
       <p class="como-ler">Como ler: cada ponto mostra quanto um salário mínimo comprava naquele mês. Quanto mais alto, mais ele comprava.</p>
@@ -187,7 +193,7 @@
           <select id="combustiveis-ano"></select>
         </label>
       </div>
-      <p class="resumo" data-campo="combustiveis-resumo"></p>
+      <div class="resumo" data-campo="combustiveis-resumo"></div>
       <dl class="numeros" id="combustiveis-numeros"></dl>
       <div id="grafico-combustiveis"></div>
       <p class="como-ler">Como ler: a linha azul é o preço que se pagava em cada mês. A laranja é quanto aquele preço custaria se pesasse no salário mínimo de hoje o mesmo que pesava no salário da época. Quando a laranja está acima do preço de hoje, ficou mais fácil pagar.</p>
@@ -203,7 +209,7 @@
       <header>
         <h2 id="salario-titulo">O salário mínimo vale mais ou menos do que antes?</h2>
       </header>
-      <p class="resumo" data-campo="sm-resumo"></p>
+      <div class="resumo" data-campo="sm-resumo"></div>
       <dl class="numeros" id="numeros-salario"></dl>
       <div class="controles">
         <fieldset class="segmentos">
@@ -237,7 +243,7 @@
       <header>
         <h2 id="arrecadacao-titulo">Quanto o governo federal arrecada por ano?</h2>
       </header>
-      <p class="resumo" data-campo="arrec-resumo"></p>
+      <div class="resumo" data-campo="arrec-resumo"></div>
       <div class="controles">
         <fieldset class="segmentos">
           <legend>Mostrar</legend>
@@ -279,7 +285,7 @@
       <header>
         <h2 id="composicao-titulo">De onde vem o dinheiro dos impostos federais?</h2>
       </header>
-      <p class="resumo" data-campo="composicao-resumo"></p>
+      <div class="resumo" data-campo="composicao-resumo"></div>
       <ul class="barras" id="lista-composicao"></ul>
       <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">n/d</span>.</p>
     </section>
@@ -288,7 +294,7 @@
       <header>
         <h2 id="gastos-titulo">Para onde vai o dinheiro do governo federal?</h2>
       </header>
-      <p class="resumo" data-campo="gastos-resumo"></p>
+      <div class="resumo" data-campo="gastos-resumo"></div>
       <div class="controles controles-coluna">
         <label class="seletor">Ano
           <select id="gastos-ano"></select>
@@ -313,7 +319,7 @@
           <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
         </fieldset>
       </div>
-      <p class="resumo" data-campo="gastos-comparacao"></p>
+      <div class="resumo" data-campo="gastos-comparacao"></div>
       <div id="grafico-gastos"></div>
       <p class="como-ler">Como ler: cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
       <details class="glossario">
@@ -328,7 +334,7 @@
       <header>
         <h2 id="dolar-titulo">O dólar está caro ou barato?</h2>
       </header>
-      <p class="resumo" data-campo="dolar-resumo"></p>
+      <div class="resumo" data-campo="dolar-resumo"></div>
       <dl class="numeros" id="numeros-dolar"></dl>
       <div id="grafico-dolar"></div>
       <p class="como-ler">Como ler: a linha azul é a cotação de cada mês. A laranja é a mesma cotação em dinheiro de hoje, descontada a inflação do Brasil e a dos Estados Unidos. É ela que mostra se o real está mais forte ou mais fraco do que no passado.</p>
@@ -340,7 +346,7 @@
       <header>
         <h2 id="ir-titulo">Quem paga Imposto de Renda?</h2>
       </header>
-      <p class="resumo" data-campo="ir-resumo"></p>
+      <div class="resumo" data-campo="ir-resumo"></div>
       <dl class="numeros" id="numeros-ir"></dl>
       <div id="grafico-ir"></div>
       <p class="como-ler">Como ler: a linha azul é o maior salário sem imposto em cada época. A laranja é quanto esse limite valeria se tivesse acompanhado a inflação desde 1996. Quando a laranja fica acima da azul, mais gente passa a pagar o imposto sem ter tido aumento real.</p>

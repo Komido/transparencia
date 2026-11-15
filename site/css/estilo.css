@@ -726,3 +726,9 @@ tbody th { font-weight: 600; min-width: 7rem; }
 .orc-referencia select { width: 100%; min-width: 0; min-height: 40px; font-size: 16px; }
 .seletor-bloco select { max-width: 100%; }
 [hidden] { display: none !important; }
+
+/* Resumos em tópicos ---------------------------------------------------------- */
+
+.resumo ul { margin: 0; padding-left: 1.15em; display: grid; gap: 6px; }
+.resumo li { padding-left: 2px; }
+.resumo li::marker { color: var(--tinta-2); }
