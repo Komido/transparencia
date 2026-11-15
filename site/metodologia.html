@@ -215,6 +215,17 @@
         <li><strong>Total de tributos do país:</strong> a carga tributária bruta do mesmo boletim, que soma União, estados e municípios. Não inclui o FGTS nem o Sistema S, que o Tesouro deixa de fora por não serem tributos.</li>
       </ul>
 
+      <h2 id="portal">Ministérios, cartão corporativo e viagens</h2>
+      <ul>
+        <li><strong>Fonte:</strong> Portal da Transparência, da Controladoria-Geral da União, pelos arquivos públicos de download: execução da despesa (um arquivo por mês, desde 2014), cartão de pagamento do governo federal (um por mês, desde 2013) e viagens a serviço (um por ano, desde 2015). Uma tarefa semanal baixa o ano corrente e o anterior; uma vez por mês, todos os anos, para pegar correções. Ela confere colunas, meses e totais e grava só somas por ano e órgão superior; o SHA-256 de cada original fica registrado. Se algo não bater, nada é gravado e o site continua com a versão anterior.</li>
+        <li><strong>Ministérios:</strong> valor liquidado no mês, somado no ano, por órgão superior. Os grupos "Juros e Encargos da Dívida" e "Amortização/Refinanciamento da Dívida" ficam fora da conta por órgão e aparecem à parte. A parte "repassada a estados e prefeituras" soma as modalidades de transferência a estados, Distrito Federal e municípios. Ministérios mudam de nome e de estrutura; a série de cada um segue o código do órgão superior, e o nome mostrado é o do próprio ano.</li>
+        <li><strong>Cartão corporativo:</strong> soma do valor de cada lançamento, pelo mês do extrato. Os lançamentos que o Portal marca como "informações protegidas por sigilo" entram no total e são somados à parte; saques em dinheiro também.</li>
+        <li><strong>Viagens:</strong> diárias, passagens e outros gastos, menos o valor devolvido, de todas as viagens do arquivo do ano, realizadas ou não. Viagens com dados sob sigilo entram no total e são contadas à parte; quando o órgão também está sob sigilo, elas aparecem como "órgão sob sigilo".</li>
+        <li><strong>Ministros:</strong> o Portal não tem um campo "ministro de Estado". A lista usa quem viajou ocupando cargo de natureza especial (função "Cargo de Natureza Especial"), que inclui os ministros e outros cargos do mesmo nível. É o único caso em que o site mostra nomes de servidores: nome, órgão, número de viagens e valor, como o Portal publica. Viagens sob sigilo não entram nessa lista.</li>
+        <li><strong>Dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo IPCA de hoje dividido pela média do IPCA dos meses daquele ano. Na comparação entre governos, cada ano conta para quem governou a maior parte dele, e o ano em curso fica de fora.</li>
+        <li><strong>Nomes cortados:</strong> nos arquivos do cartão e da despesa, o nome do órgão vem cortado em cerca de 45 letras. O site usa o nome completo do mesmo código, que aparece no arquivo de viagens.</li>
+      </ul>
+
       <h2 id="cota">Cota parlamentar</h2>
       <ul>
         <li><strong>Fontes:</strong> Câmara dos Deputados, arquivo anual da Cota para o Exercício da Atividade Parlamentar (camara.leg.br/cotas/Ano-AAAA.csv.zip), e Senado Federal, arquivo anual da cota dos senadores (senado.leg.br/transparencia/LAI/verba/despesa_ceaps_AAAA.csv), desde 2019. Uma tarefa diária baixa os arquivos do ano corrente e do anterior, e aos domingos todos os anos, para pegar correções. Ela confere colunas, valores e totais e grava só as somas; o SHA-256 de cada original fica registrado. Se algo não bater, nada é gravado e o site continua com a versão anterior.</li>

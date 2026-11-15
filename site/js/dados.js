@@ -135,3 +135,18 @@ export async function carregarCotaAno(ano) {
   validarCasa(d.senado, d.grupos.length, 'Senado');
   return d;
 }
+
+// Portal da Transparência: cartão, despesa por ministério e viagens, resumidos
+// por scripts/portal_para_json.py.
+export async function carregarPortal(nome) {
+  if (!['cartao', 'ministerios', 'viagens'].includes(nome)) falhar('base do Portal da Transparência');
+  const resposta = await fetch(`dados/portal/${nome}.json`, { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar ${nome} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2000 && a <= 2100)) falhar(`${nome}: anos`);
+  if (!Array.isArray(d.orgaos) || !d.orgaos.every((o) => o && ehTexto(o.codigo) && o.nomes && o.valores
+    && Object.values(o.valores).every((v) => Array.isArray(v) && v.every(ehNumeroOuNulo)))) falhar(`${nome}: órgãos`);
+  if (nome === 'viagens' && (!d.total || !d.natureza_especial)) falhar('viagens: totais');
+  if (nome === 'ministerios' && !d.divida) falhar('ministérios: dívida');
+  return d;
+}

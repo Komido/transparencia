@@ -2,7 +2,7 @@ import * as c from './calculos.js';
 import * as f from './formato.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -893,6 +893,314 @@ function montarEstados(ctx) {
     linhas: estados.flatMap((uf) => anos.map((ano, k) => [uf.nome, uf.sigla, ano, ind(uf, 'rcl', k), ind(uf, 'dcl', k), ind(uf, 'dcl_rcl_pct', k),
       limiteDivida, ind(uf, 'pessoal', k), ind(uf, 'pessoal_rcl_pct', k), ind(uf, 'pessoal_limite_pct', k),
       ind(uf, 'pessoal_prudencial_pct', k), ind(uf, 'pessoal_alerta_pct', k)])),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Portal da Transparência: ministérios, cartão corporativo e viagens
+// ---------------------------------------------------------------------------
+
+// Fator para trazer valores de um ano a dinheiro de hoje: IPCA de hoje sobre
+// a média do IPCA dos meses daquele ano já publicados.
+function fatorParaHoje(ctx, ano) {
+  const { meses, ipca } = ctx;
+  const ref = ipca[c.ultimoIndice(ipca)];
+  const doAno = meses.map((m, i) => (c.anoDe(m) === ano ? ipca[i] : null)).filter((v) => v != null);
+  return doAno.length && ref ? ref / (doAno.reduce((a, v) => a + v, 0) / doAno.length) : null;
+}
+
+const anoFechado = (d, ano) => (d.ate_mes[String(ano)] ?? 0) >= 12 && ano < new Date().getFullYear();
+
+// Seletor de ano: o mais recente primeiro; começa no último ano fechado.
+function preencherAnosPortal(sel, d) {
+  sel.replaceChildren();
+  [...d.anos].reverse().forEach((ano) => {
+    const ate = d.ate_mes[String(ano)];
+    const texto = anoFechado(d, ano) || !ate ? String(ano) : `${ano} (até ${f.mesCurto(`${ano}-${String(ate).padStart(2, '0')}`).split('/')[0]})`;
+    el('option', null, texto, sel).value = String(ano);
+  });
+  sel.value = String([...d.anos].reverse().find((a) => anoFechado(d, a)) ?? d.anos[d.anos.length - 1]);
+}
+
+const nomeDoOrgao = (o, ano) => o.nomes[String(ano)] ?? Object.values(o.nomes).pop() ?? o.codigo;
+
+// Lista de barras por órgão: os maiores e o resto somado em "outros".
+function barrasDeOrgaos(lista, itens, total, { explicar, maximo = 10 } = {}) {
+  lista.replaceChildren();
+  const ordenados = [...itens].sort((a, b) => b.valor - a.valor);
+  const grandes = ordenados.slice(0, maximo);
+  const resto = ordenados.slice(maximo);
+  if (resto.length) {
+    grandes.push({ nome: `Outros ${resto.length} órgãos`, valor: resto.reduce((a, x) => a + x.valor, 0), outros: true });
+  }
+  for (const g of grandes) {
+    const li = el('li', null, null, lista);
+    const topo = el('div', 'barra-topo', null, li);
+    const nome = el('span', 'barra-nome', g.nome, topo);
+    const explica = g.outros ? null : explicar?.(g);
+    if (explica) el('span', 'barra-explica', explica, nome);
+    const pct = total > 0 ? (g.valor / total) * 100 : 0;
+    el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.valor)}`, topo);
+    const trilho = el('div', 'barra-trilho', null, li);
+    trilho.setAttribute('aria-hidden', 'true');
+    el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+  }
+}
+
+function periodoDoAno(d, ano) {
+  const ate = d.ate_mes[String(ano)];
+  return anoFechado(d, ano) || !ate ? `Em ${ano}` : `Em ${ano}, até ${f.mesLongo(`${ano}-${String(ate).padStart(2, '0')}`).replace(/ de \d{4}$/, '')}`;
+}
+
+// Tabela "por governo": média por ano, só anos fechados.
+function tabelaPorGoverno(ctx, tabela, linhas, colunas) {
+  const resumo = c.resumoPorGoverno(linhas, ctx.mandatos, colunas.map((x) => x.chave)).filter((r) => r.anos.length);
+  preencherTabela(tabela, ['Mandato', ...colunas.map((x) => x.titulo)],
+    resumo.map((r) => [
+      { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
+      ...colunas.map((x) => (r.anosComDado[x.chave] ? x.formato(r.medias[x.chave], r) : 'sem dado')),
+    ]));
+}
+
+async function montarMinisterios(ctx) {
+  const secao = $('#ministerios');
+  let d;
+  try {
+    d = await carregarPortal('ministerios');
+  } catch (erro) {
+    console.error(erro);
+    secao.hidden = true;
+    return;
+  }
+  definir('ministerios-atualizado', f.dataCurta(d.atualizado_em));
+  const selAno = $('#ministerios-ano');
+  const selOrgao = $('#ministerios-orgao');
+  preencherAnosPortal(selAno, d);
+  let grafico = null;
+
+  const itensDoAno = (ano) => {
+    const fator = fatorParaHoje(ctx, ano) ?? 1;
+    return d.orgaos.filter((o) => o.valores[String(ano)]).map((o) => {
+      const [liquidado, repasse] = o.valores[String(ano)];
+      return { o, nome: nomeDoOrgao(o, ano), valor: liquidado * fator, repasse: repasse * fator };
+    }).filter((x) => x.valor > 0);
+  };
+
+  const desenharOrgao = () => {
+    const o = d.orgaos.find((x) => x.codigo === selOrgao.value);
+    if (!o) return;
+    const anos = d.anos;
+    const valores = anos.map((a) => (o.valores[String(a)] ? o.valores[String(a)][0] * (fatorParaHoje(ctx, a) ?? 1) / 1e9 : null));
+    const parciais = new Set(anos.map((a, i) => (anoFechado(d, a) ? -1 : i)).filter((i) => i >= 0));
+    const nomes = [...new Set(anos.map((a) => o.nomes[String(a)]).filter(Boolean))];
+    definir('ministerios-explicacao', `Gasto por ano, em bilhões de reais de hoje, sem a dívida pública.${nomes.length > 1 ? ` O órgão teve mais de um nome: ${listaDeAnos(nomes)}.` : ''}`);
+    const opcoes = {
+      tipo: 'colunas',
+      rotulos: anos,
+      faixas: c.faixasAnuais(ctx.mandatos, anos),
+      series: [{ nome: nomeDoOrgao(o, anos[anos.length - 1]), classe: 'serie-1', valores, parciais, notaParcial: (i) => `até ${f.mesCurto(`${anos[i]}-${String(d.ate_mes[String(anos[i])]).padStart(2, '0')}`)}` }],
+      formatoY: (v, eixo) => (eixo ? f.numero(v, v < 10 ? 1 : 0) : `R$ ${f.numero(v, 1)} bi`),
+      unidade: 'bilhões de reais de hoje',
+      rotuloEixoX: (ano) => String(ano),
+      tituloTooltip: (i) => `${anos[i]}: ${o.nomes[String(anos[i])] ?? 'sem dado'}`,
+      descricao: `Gasto anual de ${nomeDoOrgao(o, anos[anos.length - 1])}, em bilhões de reais de hoje.`,
+    };
+    if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-ministerios'), opcoes);
+  };
+
+  const desenhar = () => {
+    const ano = Number(selAno.value);
+    const itens = itensDoAno(ano);
+    const total = itens.reduce((a, x) => a + x.valor, 0);
+    const fator = fatorParaHoje(ctx, ano) ?? 1;
+    const div = d.divida[String(ano)] ?? { juros: 0, amortizacao: 0 };
+    const top = [...itens].sort((a, b) => b.valor - a.valor).slice(0, 3);
+    const pct = (v) => f.porcentagem((v / total) * 100, 0);
+    definirItens('ministerios-resumo', [
+      { rotulo: null, texto: `${periodoDoAno(d, ano)}, os ministérios e demais órgãos do governo federal gastaram ${f.reaisPorExtenso(total)}, sem contar a dívida pública (em dinheiro de hoje).` },
+      { rotulo: null, texto: `Os que mais gastaram foram ${listaDeAnos(top.map((x) => `${x.nome} (${pct(x.valor)})`))}.` },
+      { rotulo: null, texto: `A dívida pública, paga pelo Ministério da Fazenda, somou mais ${f.reaisPorExtenso(div.juros * fator)} em juros e ${f.reaisPorExtenso(div.amortizacao * fator)} em pagamento e troca de dívida. Esses valores ficam fora da lista.` },
+    ]);
+    barrasDeOrgaos($('#ministerios-lista'), itens, total, {
+      explicar: (g) => (g.repasse / g.valor >= 0.1 ? `${f.porcentagem((g.repasse / g.valor) * 100, 0)} repassado a estados e prefeituras` : null),
+    });
+    const anterior = selOrgao.value;
+    selOrgao.replaceChildren();
+    [...itens].sort((a, b) => b.valor - a.valor).forEach((x) => { el('option', null, x.nome, selOrgao).value = x.o.codigo; });
+    selOrgao.value = itens.some((x) => x.o.codigo === anterior) ? anterior : selOrgao.options[0]?.value ?? '';
+    desenharOrgao();
+  };
+  selAno.addEventListener('change', desenhar);
+  selOrgao.addEventListener('change', desenharOrgao);
+  desenhar();
+
+  registrarDownload('ministerios', () => ({
+    nome: 'gastos-por-ministerio.csv',
+    cabecalhos: ['ano', 'meses', 'codigo do orgao', 'orgao', 'liquidado sem divida (R$ da epoca)', 'repassado a estados e municipios (R$ da epoca)', 'fator para dinheiro de hoje'],
+    linhas: d.anos.flatMap((a) => d.orgaos.filter((o) => o.valores[String(a)]).map((o) => [a, d.ate_mes[String(a)], o.codigo, nomeDoOrgao(o, a), ...o.valores[String(a)], arred(fatorParaHoje(ctx, a), 6)])),
+  }));
+}
+
+async function montarCartao(ctx) {
+  const secao = $('#cartao');
+  let d;
+  try {
+    d = await carregarPortal('cartao');
+  } catch (erro) {
+    console.error(erro);
+    secao.hidden = true;
+    return;
+  }
+  definir('cartao-atualizado', f.dataCurta(d.atualizado_em));
+  const selAno = $('#cartao-ano');
+  preencherAnosPortal(selAno, d);
+  // total, sigilo, saque, lançamentos
+  const somaDoAno = (ano) => d.orgaos.reduce((acc, o) => {
+    const v = o.valores[String(ano)];
+    if (v) v.forEach((x, k) => { acc[k] += x; });
+    return acc;
+  }, [0, 0, 0, 0]);
+
+  const desenhar = () => {
+    const ano = Number(selAno.value);
+    const fator = fatorParaHoje(ctx, ano) ?? 1;
+    const [total, sigilo, saque, n] = somaDoAno(ano);
+    const itens = d.orgaos.filter((o) => o.valores[String(ano)]).map((o) => {
+      const [v, sg, sq] = o.valores[String(ano)];
+      return { nome: nomeDoOrgao(o, ano), valor: v * fator, sigilo: sg * fator, saque: sq * fator };
+    }).filter((x) => x.valor > 0);
+    const maisSigilo = [...itens].filter((x) => x.sigilo > 0).sort((a, b) => b.sigilo - a.sigilo).slice(0, 2);
+    const resumo = [
+      { rotulo: null, texto: `${periodoDoAno(d, ano)}, o governo federal gastou ${f.reaisPorExtenso(total * fator)} no cartão corporativo, em ${f.numero(n, 0)} lançamentos (em dinheiro de hoje).` },
+    ];
+    if (sigilo > 0) {
+      resumo.push({ rotulo: 'Sob sigilo', texto: `${f.reaisPorExtenso(sigilo * fator)}, ou ${f.porcentagem((sigilo / total) * 100, 0)} do total, sem detalhe do que foi comprado${maisSigilo.length ? `; a maior parte em ${listaDeAnos(maisSigilo.map((x) => x.nome))}` : ''}.` });
+    }
+    if (saque > 0) resumo.push({ rotulo: 'Saques em dinheiro', texto: `${f.reaisPorExtenso(saque * fator)}.` });
+    definirItens('cartao-resumo', resumo);
+    barrasDeOrgaos($('#cartao-lista'), itens, total * fator, {
+      explicar: (g) => [g.sigilo > 0 ? `${f.reaisCompacto(g.sigilo)} sob sigilo` : null, g.saque > 0 ? `${f.reaisCompacto(g.saque)} em saques` : null].filter(Boolean).join(' · ') || null,
+    });
+  };
+  selAno.addEventListener('change', desenhar);
+  desenhar();
+
+  const fechados = d.anos.filter((a) => anoFechado(d, a));
+  const linhas = fechados.map((a) => {
+    const fator = fatorParaHoje(ctx, a) ?? 1;
+    const [total, sigilo, saque] = somaDoAno(a);
+    return { ano: a, total: total * fator, sigilo: sigilo * fator, saque: saque * fator, parteSigilo: total > 0 ? (sigilo / total) * 100 : null };
+  });
+  criarGrafico($('#grafico-cartao'), {
+    tipo: 'linhas',
+    rotulos: fechados,
+    faixas: c.faixasAnuais(ctx.mandatos, fechados),
+    series: [
+      { nome: 'Total', classe: 'serie-1', valores: linhas.map((l) => l.total / 1e6) },
+      { nome: 'Sob sigilo', classe: 'serie-2', valores: linhas.map((l) => l.sigilo / 1e6) },
+    ],
+    formatoY: (v, eixo) => (eixo ? f.numero(v, 0) : `R$ ${f.numero(v, 1)} mi`),
+    unidade: 'milhões de reais de hoje',
+    rotuloEixoX: (ano) => String(ano),
+    tituloTooltip: (i) => String(fechados[i]),
+    descricao: 'Gasto anual no cartão corporativo do governo federal e a parte sob sigilo, em milhões de reais de hoje.',
+  });
+  tabelaPorGoverno(ctx, $('#tabela-cartao-governos'), linhas, [
+    { chave: 'total', titulo: 'Gasto por ano', formato: (v) => f.reaisCompacto(v) },
+    { chave: 'sigilo', titulo: 'Sob sigilo, por ano', formato: (v) => f.reaisCompacto(v) },
+    { chave: 'parteSigilo', titulo: 'Parte sob sigilo', formato: (v) => f.porcentagem(v, 0) },
+  ]);
+
+  registrarDownload('cartao', () => ({
+    nome: 'cartao-corporativo-por-orgao.csv',
+    cabecalhos: ['ano', 'meses', 'codigo do orgao', 'orgao', 'total (R$ da epoca)', 'sob sigilo (R$ da epoca)', 'saques (R$ da epoca)', 'lancamentos', 'fator para dinheiro de hoje'],
+    linhas: d.anos.flatMap((a) => d.orgaos.filter((o) => o.valores[String(a)]).map((o) => [a, d.ate_mes[String(a)], o.codigo, nomeDoOrgao(o, a), ...o.valores[String(a)], arred(fatorParaHoje(ctx, a), 6)])),
+  }));
+}
+
+const quantasViagens = (n) => (n === 1 ? '1 viagem' : `${f.numero(n, 0)} viagens`);
+
+async function montarViagens(ctx) {
+  const secao = $('#viagens');
+  let d;
+  try {
+    d = await carregarPortal('viagens');
+  } catch (erro) {
+    console.error(erro);
+    secao.hidden = true;
+    return;
+  }
+  definir('viagens-atualizado', f.dataCurta(d.atualizado_em));
+  const selAno = $('#viagens-ano');
+  preencherAnosPortal(selAno, d);
+  const liquido = (t) => t.diarias + t.passagens + t.outros - t.devolucao;
+
+  const desenhar = () => {
+    const ano = Number(selAno.value);
+    const fator = fatorParaHoje(ctx, ano) ?? 1;
+    const t = d.total[String(ano)];
+    const total = liquido(t) * fator;
+    definirItens('viagens-resumo', [
+      { rotulo: null, texto: `${periodoDoAno(d, ano)}, o governo federal gastou ${f.reaisPorExtenso(total)} em ${f.numero(t.n, 0)} viagens a serviço (em dinheiro de hoje).` },
+      { rotulo: null, texto: `Diárias somaram ${f.reaisPorExtenso(t.diarias * fator)} e passagens, ${f.reaisPorExtenso(t.passagens * fator)}.` },
+      ...(t.sigilo > 0 ? [{ rotulo: 'Sob sigilo', texto: `${quantasViagens(t.n_sigilo)}, com ${f.reaisPorExtenso(t.sigilo * fator)}, sem informar quem viajou nem para onde.` }] : []),
+    ]);
+    const itens = d.orgaos.filter((o) => o.valores[String(ano)]).map((o) => ({
+      nome: o.codigo === 'sigiloso' ? 'Órgão sob sigilo' : nomeDoOrgao(o, ano),
+      valor: o.valores[String(ano)][0] * fator,
+      n: o.valores[String(ano)][1],
+    })).filter((x) => x.valor > 0);
+    barrasDeOrgaos($('#viagens-lista'), itens, itens.reduce((a, x) => a + x.valor, 0), {
+      explicar: (g) => quantasViagens(g.n),
+    });
+
+    const lista = $('#viagens-ministros');
+    lista.replaceChildren();
+    const ne = d.natureza_especial[String(ano)] ?? [];
+    const totalNe = ne.reduce((a, y) => a + y.valor, 0) * fator;
+    definirItens('viagens-ministros-nota', ne.length
+      ? [{ rotulo: null, texto: `${periodoDoAno(d, ano)}, ${ne.length === 1 ? '1 pessoa viajou' : `${ne.length} pessoas viajaram`} ocupando cargo de natureza especial (ministros de Estado e cargos do mesmo nível), com gasto total de ${f.reaisPorExtenso(totalNe)}. Abaixo, quem mais gastou.` }]
+      : [{ rotulo: null, texto: 'Sem viagens de cargos de natureza especial nesse ano.' }]);
+    ne.slice(0, 15).forEach((y) => {
+      const li = el('li', null, null, lista);
+      const topo = el('div', 'ranking-topo', null, li);
+      el('span', 'ranking-nome', y.nome, topo);
+      el('span', 'ranking-valor', milReais(y.valor * fator), topo);
+      el('span', 'ranking-explica', `${y.orgao} · ${quantasViagens(y.viagens)}`, li);
+    });
+  };
+  selAno.addEventListener('change', desenhar);
+  desenhar();
+
+  const fechados = d.anos.filter((a) => anoFechado(d, a));
+  const linhas = fechados.map((a) => {
+    const fator = fatorParaHoje(ctx, a) ?? 1;
+    const t = d.total[String(a)];
+    return { ano: a, total: liquido(t) * fator, sigilo: t.sigilo * fator, viagens: t.n };
+  });
+  criarGrafico($('#grafico-viagens'), {
+    tipo: 'colunas',
+    rotulos: fechados,
+    faixas: c.faixasAnuais(ctx.mandatos, fechados),
+    series: [{ nome: 'Gasto com viagens', classe: 'serie-1', valores: linhas.map((l) => l.total / 1e9), parciais: new Set() }],
+    formatoY: (v, eixo) => (eixo ? f.numero(v, 1) : `R$ ${f.numero(v, 2)} bi`),
+    unidade: 'bilhões de reais de hoje',
+    rotuloEixoX: (ano) => String(ano),
+    tituloTooltip: (i) => `${fechados[i]}: ${f.numero(linhas[i].viagens, 0)} viagens`,
+    descricao: 'Gasto anual do governo federal com viagens a serviço, em bilhões de reais de hoje.',
+  });
+  tabelaPorGoverno(ctx, $('#tabela-viagens-governos'), linhas, [
+    { chave: 'total', titulo: 'Gasto por ano', formato: (v) => f.reaisCompacto(v) },
+    { chave: 'viagens', titulo: 'Viagens por ano', formato: (v) => f.numero(v, 0) },
+  ]);
+
+  registrarDownload('viagens', () => ({
+    nome: 'viagens-a-servico.csv',
+    cabecalhos: ['ano', 'tipo', 'orgao', 'nome', 'viagens', 'valor (R$ da epoca)', 'fator para dinheiro de hoje'],
+    linhas: d.anos.flatMap((a) => [
+      ...d.orgaos.filter((o) => o.valores[String(a)]).map((o) => [a, 'orgao', o.codigo === 'sigiloso' ? 'sob sigilo' : nomeDoOrgao(o, a), '', o.valores[String(a)][1], o.valores[String(a)][0], arred(fatorParaHoje(ctx, a), 6)]),
+      ...(d.natureza_especial[String(a)] ?? []).map((y) => [a, 'cargo de natureza especial', y.orgao, y.nome, y.viagens, y.valor, arred(fatorParaHoje(ctx, a), 6)]),
+    ]),
   }));
 }
 
@@ -2525,7 +2833,8 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarComposicaoEstados, montarGastos, montarContas, montarEstados, montarCota, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarCota,
+      montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

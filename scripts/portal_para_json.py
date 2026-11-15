@@ -323,6 +323,10 @@ def ano_viagens(ano, origem, orgaos):
             y["valor"] += v
     if total["n"] < MINIMO_LINHAS_ANO["viagens"]:
         falhar(f"{url}: só {total['n']} viagens no ano")
+    # O arquivo é do ano inteiro; no ano corrente, vale até o último mês com
+    # viagem começada.
+    if ano < dt.date.today().year:
+        ultimo_mes = 12
     return {"ano": ano, "ate_mes": ultimo_mes,
             "total": {k: round(v, 2) if isinstance(v, float) else v for k, v in total.items()},
             "orgaos": {c: {"valor": round(x["valor"], 2), "n": x["n"]} for c, x in por.items()},

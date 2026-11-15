@@ -51,6 +51,9 @@
               <p class="secoes-titulo">Contas do governo</p>
               <ul>
                 <li><a href="#gastos">Para onde vai o dinheiro</a></li>
+                <li><a href="#ministerios">Quanto cada ministério gasta</a></li>
+                <li><a href="#cartao">Cartão corporativo</a></li>
+                <li><a href="#viagens">Viagens a serviço e de ministros</a></li>
                 <li><a href="#contas">As contas fecham?</a></li>
                 <li><a href="#estados">Contas do seu estado</a></li>
               </ul>
@@ -125,7 +128,7 @@
           <ul>
             <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR e dólar</span></a></li>
             <li><a href="#arrecadacao"><strong>Impostos</strong><span>quanto o governo arrecada e de onde vem</span></a></li>
-            <li><a href="#gastos"><strong>Contas do governo</strong><span>gastos, déficit, dívida e estados</span></a></li>
+            <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida e estados</span></a></li>
             <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
           </ul>
         </nav>
@@ -450,6 +453,112 @@
         </div>
       </details>
       <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
+    </section>
+
+    <section id="ministerios" class="bloco bloco-dados" aria-labelledby="ministerios-titulo">
+      <p class="tema">Contas do governo</p>
+      <h2 id="ministerios-titulo">Quanto cada ministério gasta?</h2>
+      <div class="resumo" data-campo="ministerios-resumo"></div>
+      <div class="filtros">
+        <label class="campo"><span>Ano</span>
+          <select id="ministerios-ano"></select>
+        </label>
+      </div>
+      <ul class="barras" id="ministerios-lista"></ul>
+      <h3>Um ministério ao longo dos anos</h3>
+      <div class="filtros">
+        <label class="campo largo"><span>Ministério</span>
+          <select id="ministerios-orgao"></select>
+        </label>
+      </div>
+      <p class="nota" data-campo="ministerios-explicacao"></p>
+      <div id="grafico-ministerios"></div>
+      <details class="entenda">
+        <summary>Entenda e baixe os dados</summary>
+        <div class="entenda-corpo">
+          <h3>Que gasto é esse?</h3>
+          <p>É o valor liquidado: o serviço ou a compra foi entregue e o pagamento passou a ser devido. É a mesma etapa usada em "Para onde vai o dinheiro", que mostra o gasto por área; aqui ele aparece por ministério, como o governo se organiza.</p>
+          <h3>Por que a dívida fica de fora?</h3>
+          <p>Juros e pagamento da dívida pública são feitos pelo Ministério da Fazenda e somam centenas de bilhões por mês, a maior parte trocando dívida velha por nova. Se entrassem, a Fazenda pareceria o ministério que mais gasta com serviços. Por isso aparecem à parte.</p>
+          <h3>Por que alguns ministérios têm valores tão grandes?</h3>
+          <p>A Previdência paga as aposentadorias e pensões do INSS. Saúde e Educação repassam boa parte do dinheiro a estados e prefeituras, que atendem a população. A Fazenda faz os repasses de impostos que a Constituição manda dividir com estados e municípios. A lista mostra quanto de cada ministério foi repassado.</p>
+          <h3>Ministérios mudam de nome</h3>
+          <p>Ministérios são criados, juntados e separados de um governo para outro. O gráfico segue o código do órgão no sistema do governo, e a dica de cada ano mostra o nome que ele tinha naquele ano.</p>
+          <button type="button" class="botao" data-baixar="ministerios">Baixar planilha com os dados</button>
+        </div>
+      </details>
+      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), execução da despesa, arquivos mensais desde 2014. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="ministerios-atualizado">sem dado</span>.</p>
+    </section>
+
+    <section id="cartao" class="bloco bloco-dados" aria-labelledby="cartao-titulo">
+      <p class="tema">Contas do governo</p>
+      <h2 id="cartao-titulo">Quanto o governo federal gasta no cartão corporativo?</h2>
+      <p class="intro">O cartão de pagamento do governo federal é usado para despesas pequenas ou que não podem esperar o processo normal de compra. Cada lançamento fica registrado no Portal da Transparência.</p>
+      <div class="resumo" data-campo="cartao-resumo"></div>
+      <div class="filtros">
+        <label class="campo"><span>Ano</span>
+          <select id="cartao-ano"></select>
+        </label>
+      </div>
+      <h3>Quem mais usou</h3>
+      <ul class="barras" id="cartao-lista"></ul>
+      <h3>Ano a ano</h3>
+      <div id="grafico-cartao"></div>
+      <p class="como-ler">A linha cheia é o total gasto no ano; a tracejada, a parte sob sigilo. Em dinheiro de hoje.</p>
+      <details class="tabela-dados">
+        <summary>Comparação entre governos</summary>
+        <div class="tabela-rolagem"><table id="tabela-cartao-governos"></table></div>
+        <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
+      </details>
+      <details class="entenda">
+        <summary>Entenda e baixe os dados</summary>
+        <div class="entenda-corpo">
+          <h3>O que é o gasto "sob sigilo"?</h3>
+          <p>São lançamentos que o Portal da Transparência mostra só com o valor, marcados como "informações protegidas por sigilo", sem dizer o que foi comprado nem onde. O site soma esses valores no total e mostra quanto eles representam em cada órgão.</p>
+          <h3>Por que há saques em dinheiro?</h3>
+          <p>O cartão permite saque em dinheiro, com regras próprias. Os saques aparecem separados porque o registro mostra só o saque, não com o que o dinheiro foi gasto.</p>
+          <h3>Gasto alto é sinal de problema?</h3>
+          <p>Não necessariamente. O valor depende do tamanho de cada órgão e do tipo de trabalho que ele faz. Os números mostram quanto foi gasto, não se o gasto foi correto.</p>
+          <button type="button" class="botao" data-baixar="cartao">Baixar planilha com os dados</button>
+        </div>
+      </details>
+      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), cartão de pagamento do governo federal, arquivos mensais desde 2013. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="cartao-atualizado">sem dado</span>.</p>
+    </section>
+
+    <section id="viagens" class="bloco bloco-dados" aria-labelledby="viagens-titulo">
+      <p class="tema">Contas do governo</p>
+      <h2 id="viagens-titulo">Quanto o governo federal gasta com viagens a serviço?</h2>
+      <div class="resumo" data-campo="viagens-resumo"></div>
+      <div class="filtros">
+        <label class="campo"><span>Ano</span>
+          <select id="viagens-ano"></select>
+        </label>
+      </div>
+      <h3>Por ministério</h3>
+      <ul class="barras" id="viagens-lista"></ul>
+      <h3>Viagens de ministros</h3>
+      <div class="resumo resumo-menor" data-campo="viagens-ministros-nota"></div>
+      <ol class="ranking" id="viagens-ministros"></ol>
+      <h3>Ano a ano</h3>
+      <div id="grafico-viagens"></div>
+      <details class="tabela-dados">
+        <summary>Comparação entre governos</summary>
+        <div class="tabela-rolagem"><table id="tabela-viagens-governos"></table></div>
+        <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
+      </details>
+      <details class="entenda">
+        <summary>Entenda e baixe os dados</summary>
+        <div class="entenda-corpo">
+          <h3>O que entra na conta?</h3>
+          <p>Diárias (o dinheiro para hospedagem e alimentação durante a viagem), passagens e outros gastos da viagem, menos o que o servidor devolveu. Entram todas as viagens de servidores e convidados do governo federal registradas no Portal da Transparência no ano.</p>
+          <h3>Quem são os "ministros" da lista?</h3>
+          <p>As pessoas que viajaram ocupando cargo de natureza especial: os ministros de Estado e outros cargos do mesmo nível. O Portal não traz o cargo "ministro de Estado" em um campo próprio; por isso a lista usa esse critério, igual para todos os anos. Viagens sob sigilo não entram na lista.</p>
+          <h3>O que é a parte sob sigilo?</h3>
+          <p>Viagens em que o Portal esconde quem viajou e para onde, como as ligadas a investigações e à segurança. O valor entra no total.</p>
+          <button type="button" class="botao" data-baixar="viagens">Baixar planilha com os dados</button>
+        </div>
+      </details>
+      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), viagens a serviço, um arquivo por ano desde 2015. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="viagens-atualizado">sem dado</span>.</p>
     </section>
 
     <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
