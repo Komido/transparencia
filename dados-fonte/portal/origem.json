@@ -1,0 +1,1329 @@
+{
+ "atualizado_em": "2026-11-15",
+ "arquivos": {
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2015": {
+   "bytes": 131767703,
+   "sha256": "0d003d5b5ae93df9c9815ec0cc6a30d5a219f0a9bb82d2f5aa982b7f8870a69c"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2016": {
+   "bytes": 131244125,
+   "sha256": "e1bbd2591b652ce5c766eee6c746147604993603340eae2da8cfc57771638111"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2017": {
+   "bytes": 142109995,
+   "sha256": "d8e03cc19a1ada8f20014fcee5ee230680f880fae3d818acdedc6b292964df23"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2018": {
+   "bytes": 151882472,
+   "sha256": "72ae213ec47cda86927de982ed9a01ee1fca7973e45bef01df0b5c21c0d65656"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2019": {
+   "bytes": 131220220,
+   "sha256": "26519d15262abb563b1ce61b0438252eed5b245c2adde3208572d00ea089c48a"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2020": {
+   "bytes": 47959399,
+   "sha256": "890bff92ad23415239ca2f268015ab4636a57f7cf849d6688318f44d4f34d76f"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2021": {
+   "bytes": 65692906,
+   "sha256": "91d68ec62fa5eb6c735b358aa40e4149b184e7eb62d9aa6296353c54e5794164"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2022": {
+   "bytes": 116096658,
+   "sha256": "245eb736c7e7853adc7287687a2ced74a2853976a04d6f7571e67f633642e427"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2023": {
+   "bytes": 152127515,
+   "sha256": "3cc068791881bfa989da60f1a3687c543c89847fc3b0577bf59fdc0aa94e1fe7"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2024": {
+   "bytes": 148348820,
+   "sha256": "d58bbbd4c267b1bed9e540171b57716e70548d11a402586d3cb53328c80d4fea"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2025": {
+   "bytes": 156736979,
+   "sha256": "cf1a9778154ff49c300b7580d8d562acea63370bff7659dac56c940b7a9e2654"
+  },
+  "https://portaldatransparencia.gov.br/download-de-dados/viagens/2026": {
+   "bytes": 125875312,
+   "sha256": "fbbb47480f1182a05b060acd8ffbe31a80ab9bc9cd338a7d5cbc7f04ea6485ab"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201301_CPGF.zip": {
+   "bytes": 391543,
+   "sha256": "065cf4fbe6c9d4ad45096653f0cff7b8b18bb1e016f4da5e61eeaa14caf603f3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201302_CPGF.zip": {
+   "bytes": 83436,
+   "sha256": "8827347cbdaae703b949a1fd61806f6fafca9ba4c562f843af4c4666fcd46d05"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201303_CPGF.zip": {
+   "bytes": 230899,
+   "sha256": "78bee341caf74acc0920a8cdc0b5f30a501135fb7871ced3b91aca26f07f971d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201304_CPGF.zip": {
+   "bytes": 381463,
+   "sha256": "a470389387269974744698448a312b8575fd0f037d0b6731915f3306e47acc3c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201305_CPGF.zip": {
+   "bytes": 453374,
+   "sha256": "1933067416da9619f9ac1c262804e9e3d604e8ca1f01e625963d52ae8bfa6312"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201306_CPGF.zip": {
+   "bytes": 347176,
+   "sha256": "0bc94e7d706220ebee90ce9b76187aa71bfb2be565a6c0b3761403f3bf3c7cfc"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201307_CPGF.zip": {
+   "bytes": 439382,
+   "sha256": "d8949bc8ee40a13a8eda602f3d431133f352315759586841ceafd922d0d86a09"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201308_CPGF.zip": {
+   "bytes": 437483,
+   "sha256": "ba016bfcf4f1db08a10bddf293aa5da3c686e24d6df4cb432bf9ee25b0a15f63"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201309_CPGF.zip": {
+   "bytes": 417268,
+   "sha256": "1fa73b0ac3fa7796a0c59681534922f19e2594ea8ad1f8bb5a2aba8e317e1245"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201310_CPGF.zip": {
+   "bytes": 426084,
+   "sha256": "bb2e6c2b12d58665b393a1a86d3105a7e0660e5cfb24173a2557cec0aed69fdf"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201311_CPGF.zip": {
+   "bytes": 434901,
+   "sha256": "66f0265e8e4e0d12dc38bf857301307cd2eded00585008f5068b558f1d5ef61c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201312_CPGF.zip": {
+   "bytes": 432297,
+   "sha256": "b548a96155f29c8a002d81adb69cfc3ec88959a9bab2b2358d4ac2dc5e6e6409"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201401_CPGF.zip": {
+   "bytes": 312832,
+   "sha256": "64a341b7b4b45f5f0cb0e938ed1d1a479c007e862e55d95aced5a9e1ed6cb131"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201402_CPGF.zip": {
+   "bytes": 70246,
+   "sha256": "0103a9711da3121967c7451afed0dde221aa4fad745ca3548e955d68d3aaa1aa"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201403_CPGF.zip": {
+   "bytes": 246761,
+   "sha256": "419be92d7a5d3780e6b21bc507b6e919bb9b8a5ecdda6026817e85de2a796f2d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201404_CPGF.zip": {
+   "bytes": 325148,
+   "sha256": "2b21fb1fb91cd90ba16d12169c1e3319e2478c4e1b1b3b93eb2a67449d9a576c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201405_CPGF.zip": {
+   "bytes": 354443,
+   "sha256": "592280da1e4cea3a744a56ee21cdc811ea1f9dd9e37c5ff5c58444cb51aebd71"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201406_CPGF.zip": {
+   "bytes": 376127,
+   "sha256": "d7fe85c37cdcaae1c6887a96eb65182ebb06153b4541f821a979fb4edafaa250"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201407_CPGF.zip": {
+   "bytes": 362792,
+   "sha256": "40f8e5794093d0f27225b0654ed840818906beee3dab3f27f1aefdf8404a06a3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201408_CPGF.zip": {
+   "bytes": 336705,
+   "sha256": "35bea8f24a63c0047033394bee8e0f0a7f97ba65e4612ce31bc52f5d9268cb8d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201409_CPGF.zip": {
+   "bytes": 399930,
+   "sha256": "24a876d35de41491a5abae960a97ec3ba7c204a924490886ef685d491da3e364"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201410_CPGF.zip": {
+   "bytes": 391376,
+   "sha256": "525d0adb452d1221cea9981057330fb7990293c217ccfb19248b4de69fd7ccf6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201411_CPGF.zip": {
+   "bytes": 424810,
+   "sha256": "3857275860cf0e858bde0ffd026c705ff169f2d0fbf94b0debccee9284dcc007"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201412_CPGF.zip": {
+   "bytes": 438180,
+   "sha256": "3e6f52b3595f6276800d6499f069e3fba6f6a559c654e29cac13361ecc9876eb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201501_CPGF.zip": {
+   "bytes": 304732,
+   "sha256": "79866a101ec7bb2afcf220c4ce5626b1bd0111b816b3f924091a252073ca3a38"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201502_CPGF.zip": {
+   "bytes": 41955,
+   "sha256": "e7c95ffd711c67315a0399b7733c3fa5e382d5f3ce80a0d0871cdecf5c610230"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201503_CPGF.zip": {
+   "bytes": 173540,
+   "sha256": "1c674d89f62c3193c207a132c3b877f1781239dd4082a248563e3794f724c4e7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201504_CPGF.zip": {
+   "bytes": 300352,
+   "sha256": "608fcbdec7dd6369eea9fb71b8e5e6c8a652aeb3ad92dc52fdc523ed9ce1bdb1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201505_CPGF.zip": {
+   "bytes": 283308,
+   "sha256": "3497919dd0311bc1fb91cf78e0aef59247f78d6c14feae44c7d7a323279c2806"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201506_CPGF.zip": {
+   "bytes": 328467,
+   "sha256": "918801b82c253ad0cade912eb82b1fda456bd11338f22d01501e8959ee250995"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201507_CPGF.zip": {
+   "bytes": 324754,
+   "sha256": "8d4414f238bbb177df1b4eff3f962961854cef8ab04ddef0725cbcc0b1137ff2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201508_CPGF.zip": {
+   "bytes": 304142,
+   "sha256": "185da653162e9bbb112865b119b9f730e5bfaf528bee84248f8fa443b75d566e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201509_CPGF.zip": {
+   "bytes": 312606,
+   "sha256": "730ff71188a04763b9a3dc1968fc2ea9becdd11fc85223bc161a51068a320955"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201510_CPGF.zip": {
+   "bytes": 311083,
+   "sha256": "1a53ef99443bea805d4db49093794ea6cf3dcedab09b32ae9201c00c296e7f04"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201511_CPGF.zip": {
+   "bytes": 332243,
+   "sha256": "909276178b6e8ad44129baba884b8c8f00cea6bd23146d781d992d9b65bece9d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201512_CPGF.zip": {
+   "bytes": 355415,
+   "sha256": "b38c8553874b8308fc299e4e50f42b1a5c2e8a4e401e404e01aa31364f68ab55"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201601_CPGF.zip": {
+   "bytes": 256021,
+   "sha256": "979d15707bd7efcd41c8373d1e2c23cf474837e906d6873f4473d54ae1cfb477"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201602_CPGF.zip": {
+   "bytes": 37635,
+   "sha256": "eaf0daba6dd58a0ace042b97c0b0b80ab994a5a4b77a062d866beae7821f6a4c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201603_CPGF.zip": {
+   "bytes": 163223,
+   "sha256": "430f3de15e27d86a5cb0a634e4b537b0371ee39d5e7faf23a4896e1c9d4d4e70"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201604_CPGF.zip": {
+   "bytes": 294768,
+   "sha256": "305c8e087f9dbdd07e0401ccc61ed245fa5bc4e10d83124355626e40081eaed2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201605_CPGF.zip": {
+   "bytes": 277301,
+   "sha256": "e8e5fdb66e695a993a89a4f61c4c0b2de8fc450e98ea214d1b1fc1ccaa8c2915"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201606_CPGF.zip": {
+   "bytes": 305209,
+   "sha256": "2427c13cae3454a77d734dc5e1706557ba154e963ea131564696fe394d33000c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201607_CPGF.zip": {
+   "bytes": 289819,
+   "sha256": "b8b76b69359b6cf785d1b123c7e1a6dd8ede2e0b69a1742984b78b098ccd773a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201608_CPGF.zip": {
+   "bytes": 290088,
+   "sha256": "8eac3f86b04ebde002e3f11145793ed885cabd4e2908c53b90f12c205346f663"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201609_CPGF.zip": {
+   "bytes": 315308,
+   "sha256": "75d15bc4507528ae8d15699359a75d120147ad17d44bf29897a21e1073469f3f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201610_CPGF.zip": {
+   "bytes": 292210,
+   "sha256": "75c10bb457a9316b4c66282f53a2b32397e101924f9c679d6ec151efd9ed6751"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201611_CPGF.zip": {
+   "bytes": 294263,
+   "sha256": "e95c8cbbe2c0ff221c89e21655f27c94cd137aad926b7d46c6d494c9ce676db3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201612_CPGF.zip": {
+   "bytes": 308092,
+   "sha256": "93779dabb9dffd0a2bf239bbb631b6759460d0b0b5a79cbbeb1dda5c0113b85f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201701_CPGF.zip": {
+   "bytes": 230121,
+   "sha256": "726272f08c37864013230b3978d91ebe1bcc63b61fdbe3d8cc13062b205f7111"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201702_CPGF.zip": {
+   "bytes": 39982,
+   "sha256": "7e151f3e28ce6a4151269aa455137af80bd259f43042ed3799b10888ceaf9d47"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201703_CPGF.zip": {
+   "bytes": 181674,
+   "sha256": "89473f8df5bc32a630bb984fba8d64ee8a28b3d80164485294b9091f8cf754c1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201704_CPGF.zip": {
+   "bytes": 265677,
+   "sha256": "a8c8a60d473ff232279f150ad2cb3e4f9a91e2c843ad82e2d85cb480a9974748"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201705_CPGF.zip": {
+   "bytes": 246025,
+   "sha256": "8c53b840a65cc358d94e4f6479234f0f2dc3205603eb32be2b360cf36cbe430a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201706_CPGF.zip": {
+   "bytes": 293168,
+   "sha256": "18532f4363686a8f8d2f2a86e1ed2452f9add65a32ec41d9e1e3becb7900cd9c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201707_CPGF.zip": {
+   "bytes": 285614,
+   "sha256": "cede93871ff6e15f037f91d52f0a726c18538408b8479f73a3fefb4a90e22e48"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201708_CPGF.zip": {
+   "bytes": 263496,
+   "sha256": "fc5ead7468cc7052ed40d4c53777b392490f08a7a0a13ee7605c35a11c72bd69"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201709_CPGF.zip": {
+   "bytes": 300120,
+   "sha256": "17fd1049f5d5e522acff0e373313e879f69ba0748613d01413b8688565d9b392"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201710_CPGF.zip": {
+   "bytes": 298899,
+   "sha256": "83e1b757bd227ade73d246bd3e25107529ea466898cfc516cc14c9d13c0aacce"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201711_CPGF.zip": {
+   "bytes": 357597,
+   "sha256": "9ebd44f35f155dd9e7902e95585cf3efd78a22fe66628b4785738fb3acd9b5dc"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201712_CPGF.zip": {
+   "bytes": 379100,
+   "sha256": "de1aefe5109c0bf3c315d7a201abb93e113af9b47cb7f97d4d1efb0611cb749f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201801_CPGF.zip": {
+   "bytes": 275001,
+   "sha256": "aec8aec5fbf7137f89ba4529eab1933ad0f58ebb4f5586bd3fef8dc32155a8fe"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201802_CPGF.zip": {
+   "bytes": 112161,
+   "sha256": "f0a4c63cf54b149f5ad571583f32dc4fda75ce60a67ca92b16209caca5128312"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201803_CPGF.zip": {
+   "bytes": 181187,
+   "sha256": "6285565fd965e828bc2a0f08ba02304e771bfea847bbbbf3ea456f5814b69c76"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201804_CPGF.zip": {
+   "bytes": 297158,
+   "sha256": "24c9d6b723e6ab7f9b29405e2cd038150e55a231d1a673bd5fbe8f39acd657e5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201805_CPGF.zip": {
+   "bytes": 318368,
+   "sha256": "c93b20057871b4953382c0f54078d11e380a78a94e5ba000259f5a5fa5f72427"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201806_CPGF.zip": {
+   "bytes": 295780,
+   "sha256": "ba16b09d08cd643b2fa67f9f158cb34fbfbffd215a330fd40b209d058dac1350"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201807_CPGF.zip": {
+   "bytes": 251899,
+   "sha256": "f4a58bc4da2a9ace65d6b75053a14e988157b5c6d3a2ff915bfc897971246ff6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201808_CPGF.zip": {
+   "bytes": 238382,
+   "sha256": "f7513adbdbf093cb9d1280eae30071baa3005b522fd4be7cfa3bb547ae81d28a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201809_CPGF.zip": {
+   "bytes": 265731,
+   "sha256": "06b85a9528f39b0dfd878cc33743af31166c9b46f86232d00132b1af9315cffe"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201810_CPGF.zip": {
+   "bytes": 257061,
+   "sha256": "6a1beda0793e1dd61194cfbd6f49fed945f00867464da1c5e41f4757a0dca286"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201811_CPGF.zip": {
+   "bytes": 292147,
+   "sha256": "f7b43289e72c2156ca6fe2a11a3814f0af2b29fc948878830c30759e23004eb2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201812_CPGF.zip": {
+   "bytes": 292112,
+   "sha256": "da2b10127da93d68d7fd1cd81830441dd0b4006ece58eb0b328177787de86873"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201901_CPGF.zip": {
+   "bytes": 192863,
+   "sha256": "65e291524336eacfe42abe39d494996b8af2d6150cf18b8286a93ffecae25c31"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201902_CPGF.zip": {
+   "bytes": 45089,
+   "sha256": "996619691829f9e337d95e3d2085b76de0896c22e2f206f9c5221f218170a8a4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201903_CPGF.zip": {
+   "bytes": 159506,
+   "sha256": "7501a15bccf25cb0c3ca6d0a97e8adbe37545a179c6d0d5a3ba8042690b014e1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201904_CPGF.zip": {
+   "bytes": 183610,
+   "sha256": "4c7b4c6cff48e5950c66011b6c4123bae6b94ac490ff163630b5659322871de4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201905_CPGF.zip": {
+   "bytes": 238553,
+   "sha256": "8236ac5fe93f1a640010d40fc5113ebbddb185af99554a296b8237ba2ff72aa9"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201906_CPGF.zip": {
+   "bytes": 247032,
+   "sha256": "1b50fdc39a470563cbe28cdbee757a007d9c8ee5782a7f6c808c37d2bdce701a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201907_CPGF.zip": {
+   "bytes": 214849,
+   "sha256": "0812cd4b5c218f145e9540f4832a6b1208e7c450742fa41211aa313b92cf8a7f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201908_CPGF.zip": {
+   "bytes": 231062,
+   "sha256": "2856c7460bb92feca04acee944ec22a34b72b68b8453bb478fcf60149b45b012"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201909_CPGF.zip": {
+   "bytes": 223232,
+   "sha256": "acef8c9ac3f88a338e998a25216ad80ab03af25eb41684e1e87fb84b00779557"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201910_CPGF.zip": {
+   "bytes": 230823,
+   "sha256": "483fc6dfa0ac7c37822c262959d4c586cf905255f4c3f24a740fca09dbb35e5d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201911_CPGF.zip": {
+   "bytes": 255068,
+   "sha256": "fcde72138eca078cbdc9b035c35b174f6385bba8c56466ff0f716cd3e34f942f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/201912_CPGF.zip": {
+   "bytes": 260734,
+   "sha256": "2c86746ba617d9f4e7a3e342449e5397be01399a7ae3dac95c83733c7b20e657"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202001_CPGF.zip": {
+   "bytes": 169391,
+   "sha256": "461d206b61735c9d358c7e10f568acd0381e531d28a0eaee6e397951854993f6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202002_CPGF.zip": {
+   "bytes": 37545,
+   "sha256": "5fcee296cbbda8136ccd3f93b72ff3eefc8f4c5f07411b01c317adb4842d3a5f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202003_CPGF.zip": {
+   "bytes": 125819,
+   "sha256": "13b242361794e926ad8283e1c80b6e619c87c77b7b4521106209f446e443a15d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202004_CPGF.zip": {
+   "bytes": 174049,
+   "sha256": "925f6f7b4528a3b1c19832645066afc53f4a814c0cbb4c5fbd1b20dee710de3a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202005_CPGF.zip": {
+   "bytes": 93270,
+   "sha256": "cec0147740b8fced71182a74f7659963e1dcc762aa1621719f3ce0f83009d8b0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202006_CPGF.zip": {
+   "bytes": 127410,
+   "sha256": "559333bd61368df839375b7d72467f92448892b76e96a4ed7042ed25d9e3cf9d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202007_CPGF.zip": {
+   "bytes": 122847,
+   "sha256": "f8662f6e45c2fa9ea9589da0aeb4a6503ac8594f59d7bab6a5d6fb375443adb7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202008_CPGF.zip": {
+   "bytes": 122609,
+   "sha256": "c73b5453218d2b8d33d024244b930eb660514390f6139e8080f8bfb523894d59"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202009_CPGF.zip": {
+   "bytes": 144216,
+   "sha256": "67036a24e331a2ad2265e6b73a0c38e23ef8e3536ffbc6a2f09c8df7cec93e28"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202010_CPGF.zip": {
+   "bytes": 162248,
+   "sha256": "5e3b4fc25ca8d210bef1acc1af5f17cce944746dab4294ca2a95c3fae5d4a256"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202011_CPGF.zip": {
+   "bytes": 181583,
+   "sha256": "58e89e68e959ddd6cfe9886ba66ab7f8a1a85834d0b2a5ddd92c5ec6ce8a5e63"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202012_CPGF.zip": {
+   "bytes": 212877,
+   "sha256": "af8581dbfd7f81b7e81ed4f16cf157f6cff8bb434e5fcbf142a86c8ee64c2a34"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202101_CPGF.zip": {
+   "bytes": 148543,
+   "sha256": "5371806000a10ea3356efb12c0bd3ac6fd0b74d8e2bba92e2643fe57ff870375"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202102_CPGF.zip": {
+   "bytes": 23048,
+   "sha256": "f59080be2ec0c26585c5c0a206a612fd2be0bc7299af7fab31a04d1ae9da3794"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202103_CPGF.zip": {
+   "bytes": 71737,
+   "sha256": "3d76cb6cc4b1c0b2b956bd42ee53e0c1c409a6c64af7d3dbd4cd41e3f0911981"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202104_CPGF.zip": {
+   "bytes": 121418,
+   "sha256": "f78600c5505e1d99f78b979471b1a769fdaa06afeced9a11bd1cd2fa6e47647c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202105_CPGF.zip": {
+   "bytes": 117814,
+   "sha256": "9882665982276ff66a4f663154c4bc3cf11e61ba2c7ff00cd8f953efec3a7efa"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202106_CPGF.zip": {
+   "bytes": 139276,
+   "sha256": "e95ec0615f1e8ef70c9c0d2e130194392590c78d9fb83e031eba629136f8b3f6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202107_CPGF.zip": {
+   "bytes": 151074,
+   "sha256": "bfc7407cb0f1ea96709f54b63a3ea468161b553f1369946fd8f3f3ce07b82b9b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202108_CPGF.zip": {
+   "bytes": 153246,
+   "sha256": "1a069f178c784715e589546bdfac4c33defdd2afcabce233955a3b44336843ca"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202109_CPGF.zip": {
+   "bytes": 185320,
+   "sha256": "3dd5016457a4ab580f0d1181a0d046545834d99bb3c2f16a29378471fdb7f1ab"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202110_CPGF.zip": {
+   "bytes": 185697,
+   "sha256": "af39cb22f3455e14df66e775be9f55939478f04ba1b963b4d40f536705d3e6c5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202111_CPGF.zip": {
+   "bytes": 201035,
+   "sha256": "5d6be8deb847dfe7e39de9b1436641776309e36f2db6265208af393b60bf859a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202112_CPGF.zip": {
+   "bytes": 236514,
+   "sha256": "002c58cb4c975b67013e942796f2caa435cdfa9d0bcc0125cc967f8bdb6e80a5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202201_CPGF.zip": {
+   "bytes": 177020,
+   "sha256": "26f463c32ed7786646872f2faad2b7552e1d224180c02f6e76c91b462afc777c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202202_CPGF.zip": {
+   "bytes": 37308,
+   "sha256": "6eb5e3716d205cde5dc39ac8693aebf7e22aa8282ecb89bc743a20ae4017bfc7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202203_CPGF.zip": {
+   "bytes": 125932,
+   "sha256": "238f2d509b962a4cb827a189ac173eb52715524c6bd513cef3de9d53258087f4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202204_CPGF.zip": {
+   "bytes": 203512,
+   "sha256": "0e00c5699ef72c66147f9b7d56b18ee9edeeadbcc690a11ac5f15150cba37dd8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202205_CPGF.zip": {
+   "bytes": 198895,
+   "sha256": "1567635e2d93d20f4b973be88f384bd66c22afc8a6a65a714dbf9d598e59584b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202206_CPGF.zip": {
+   "bytes": 252398,
+   "sha256": "98dd99dcd0598223d1d3111e8f9ab7e16a47bb2781a37794f019eff80f6ae5be"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202207_CPGF.zip": {
+   "bytes": 277841,
+   "sha256": "dac8cbc976031b2057e0f97a409e154eca3b75eedeea175b7f195313e7a706a4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202208_CPGF.zip": {
+   "bytes": 327116,
+   "sha256": "5881a46f03f2b0f12753d90063e45e6766ce51d7120a507ba7d1cc8d1d44c0ee"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202209_CPGF.zip": {
+   "bytes": 348459,
+   "sha256": "3be937ce103e6dc84075b36d1a6b8ddbae6f061dde06b1246799abed22af2d38"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202210_CPGF.zip": {
+   "bytes": 309390,
+   "sha256": "5a7b75a4a32fefd769c3eed967fb6fd57e57385896e039c2372581db062b6823"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202211_CPGF.zip": {
+   "bytes": 307878,
+   "sha256": "5c18026b0834d52592c5e842e93329ee8830fd2515ae1208e41fdb8b2fc67ac2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202212_CPGF.zip": {
+   "bytes": 309394,
+   "sha256": "7c03ad999e4514db5ca0fa7acf3bd29d69221141bf062a9133de14f9c3fe3b3e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202301_CPGF.zip": {
+   "bytes": 196082,
+   "sha256": "45ec906fa4ff7dbb5d8b4d93a8264dcc208ac0994f641108bfb719158f4c3ed7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202302_CPGF.zip": {
+   "bytes": 42411,
+   "sha256": "a144717a1231bb4ab90092d9c910aab4b59f5c911a3b39b227785d1c10931b70"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202303_CPGF.zip": {
+   "bytes": 140749,
+   "sha256": "2a7777ff5c6c2173ecac7b3cfee364085bdbba1a2884fb7fce1317bfa2159099"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202304_CPGF.zip": {
+   "bytes": 234593,
+   "sha256": "0ea00ef91cc597c4ebbd8e308ed8d803d56a6924688c9d5123836c1e956e861f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202305_CPGF.zip": {
+   "bytes": 219557,
+   "sha256": "cdc615be42eeed8e412d06dce66c83e09e26888d245097fb492808a6ff101796"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202306_CPGF.zip": {
+   "bytes": 285564,
+   "sha256": "23de594377e71589c5b6a328932bea3f4b21fcd18220d54a02259e3b6cca6bbb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202307_CPGF.zip": {
+   "bytes": 252989,
+   "sha256": "86992dedf2eff6eed9a639f030968f9f73506bc86fd01bd3584a2a3b2d827f07"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202308_CPGF.zip": {
+   "bytes": 258463,
+   "sha256": "f42106d2f00e4d90e78d2281757673af85510f00f7c9349e470bad572f13c7fd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202309_CPGF.zip": {
+   "bytes": 280265,
+   "sha256": "1fda218dc12094a0d78404e76d6e6892bf121e76157633b36b8ad097943f47dc"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202310_CPGF.zip": {
+   "bytes": 249386,
+   "sha256": "dcb3fc54eed3a6d13ad12f1f0701cd476d7d718182a143ce277ef63e1d8a09c7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202311_CPGF.zip": {
+   "bytes": 299154,
+   "sha256": "844f78375dca2be0a5bd648c4094d7b0e146a8bd54d29849f91d32f39aa1c2c0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202312_CPGF.zip": {
+   "bytes": 320908,
+   "sha256": "a2e33181b9bafef4bff4506cef4fef8ea77655a947b2bca7cd9857d91a4b0ca4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202401_CPGF.zip": {
+   "bytes": 186599,
+   "sha256": "520fe06b0026233c884bfbf2225d4bdee1d838c1788b4af387c0c33446216a84"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202402_CPGF.zip": {
+   "bytes": 52508,
+   "sha256": "230da3feb3b2e4d62888026b37fc21fe4c03b2a43576ab4e642237d078d9fd75"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202403_CPGF.zip": {
+   "bytes": 155824,
+   "sha256": "65ed241d94e0fd6b9c6e4434bef89fb0c739807b92066696e55c1abd85a0b52d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202404_CPGF.zip": {
+   "bytes": 250307,
+   "sha256": "d82e162579e35d6cbb2ffd07ab36c68fd423656e32fd4d27912a6600506631b2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202405_CPGF.zip": {
+   "bytes": 256156,
+   "sha256": "c3753f8607a1b0395e1241a46a5f589b29be6124056e01e4fb6be857640416ee"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202406_CPGF.zip": {
+   "bytes": 253723,
+   "sha256": "232a1657782d9c1547e789986c68bfb0714ee0865bfcd7c79becb2651242d328"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202407_CPGF.zip": {
+   "bytes": 267162,
+   "sha256": "43ae0941fdab29439182006140d8bc3157cacd8d80f7c6fa08d48787b99126b5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202408_CPGF.zip": {
+   "bytes": 286471,
+   "sha256": "6856cef4d10bf218d234775d00e325ebe14c0bfaa374a288f657ae9ce3c840c8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202409_CPGF.zip": {
+   "bytes": 280221,
+   "sha256": "d4dc1c8d58822a191e5fbeb7f1763ed77f2f20f39d188cd67eb383099a9b9c48"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202410_CPGF.zip": {
+   "bytes": 290601,
+   "sha256": "0c2e959195d3b8397bd8f0e240eee65457c2b78bbbdc651aea7289933e1eec4a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202411_CPGF.zip": {
+   "bytes": 340161,
+   "sha256": "00221c7eb5687f15ed2e31e1bf2400b0a7fb193e2a8ec3081fe4b1a280f05842"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202412_CPGF.zip": {
+   "bytes": 327682,
+   "sha256": "6d633cf972841abbfddd8f09e28fe63a9ab71eb3f7c44221c9ace331d3732918"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202501_CPGF.zip": {
+   "bytes": 219365,
+   "sha256": "38bdfbdefd31d35b8a6d3301cfcf5a2d60ed2f1e6a3d3da6b6559a8f3473d3eb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202502_CPGF.zip": {
+   "bytes": 54415,
+   "sha256": "3216ab011c3091edc946ac32fae3a02e0716cea220252b0d22345e29530cf4d7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202503_CPGF.zip": {
+   "bytes": 202446,
+   "sha256": "1aba969507234fb8d1d28ac8cc324c9a0cbfaa3d6469ef6013eee6ca7f3778f7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202504_CPGF.zip": {
+   "bytes": 251778,
+   "sha256": "1ec5b0a15c7865cc55273ff49baaa1eae0da001c8ab2a699ae7783c15a478b91"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202505_CPGF.zip": {
+   "bytes": 270787,
+   "sha256": "95fcedaf629088d1ad525e1b82733bdfea64130b2180f63dbe23a4c0b048524e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202506_CPGF.zip": {
+   "bytes": 289311,
+   "sha256": "a31f984d44f9b9d9b85bca6a1d7f23a58ac724feb26f84f06ff88cd368ade2be"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202507_CPGF.zip": {
+   "bytes": 281127,
+   "sha256": "22103d09fe51f62aff4537fa4f0339f39a978d36c4adccb5d4d2f52548307540"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202508_CPGF.zip": {
+   "bytes": 316155,
+   "sha256": "485f7a7068318f83c39ddfc36b9743286c49050be4ae6d52660130b1ea8a62dd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202509_CPGF.zip": {
+   "bytes": 317810,
+   "sha256": "c3bf030f360c18435881bbe092b487ba4a96b7f544d2df89b9aa7ac4e567ddb5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202510_CPGF.zip": {
+   "bytes": 355176,
+   "sha256": "cd670130cf7902b678b50ec51c8bd856df65ca7e57a7ed3c96f2c81a636c4d1e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202511_CPGF.zip": {
+   "bytes": 359852,
+   "sha256": "4306e75ae8693f625d6a2590218fa42e49c9706f4b2f9b0781bc06795efa5ca4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202512_CPGF.zip": {
+   "bytes": 431495,
+   "sha256": "35d11505077d5c8af078f7a1e708c233c0228e3db321e210e9979cc02ccdc696"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202601_CPGF.zip": {
+   "bytes": 178163,
+   "sha256": "95da8de76711cc0df647279ec38ba7fc4f2c71ef700e9cf4650144f1fb5d278b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202602_CPGF.zip": {
+   "bytes": 59650,
+   "sha256": "4bec1287c713bb9ce45db6a1d8007b905afb32dec3d879d0a25e5daf474fd2b0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202603_CPGF.zip": {
+   "bytes": 168076,
+   "sha256": "2387136e648dee8ef35a99770b8f95bb500b1a3dff877ec5080acf4089520579"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202604_CPGF.zip": {
+   "bytes": 301389,
+   "sha256": "8be0df1591d76583382ff707fb36bae79268d5a952557f0239514ff29c381966"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202605_CPGF.zip": {
+   "bytes": 272476,
+   "sha256": "dbfb2fdc05514be7b313c7005093c8496513d253d1688b6d0592ca47423442e1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202606_CPGF.zip": {
+   "bytes": 377223,
+   "sha256": "b28f2eecaa8187c5e5ab84453874860d98efd4f51cd0c43fa2eebf845fdcd77e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202607_CPGF.zip": {
+   "bytes": 314738,
+   "sha256": "851b4e2c72e94be22a99e800293464b3e3d8c8c4fee7db3753b0c274d7599206"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202608_CPGF.zip": {
+   "bytes": 312226,
+   "sha256": "6e163e9cd05441b23d20589ae65540aaf682c6ad25f5f6c1dca970ae255efd8b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201401_Despesas.zip": {
+   "bytes": 5567293,
+   "sha256": "01f43530669d991d8de6f8e31291d69628a610aa9071c05738b7394ab328ba55"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201402_Despesas.zip": {
+   "bytes": 6429990,
+   "sha256": "958dacff433c67ede496ff012402b4e6168d2d9972cf4d895ce61f3aa044ea9d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201403_Despesas.zip": {
+   "bytes": 6763013,
+   "sha256": "6dad9f6d4cfad30e427e5f274dce8ac6d31fdbe02b242d28a30c3496357f228f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201404_Despesas.zip": {
+   "bytes": 7382759,
+   "sha256": "931b4cc4b36a3245c7db4679f0d7c2cddd6b99d6dbc195caea326292c27b3c7c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201405_Despesas.zip": {
+   "bytes": 8094782,
+   "sha256": "ea4b0557ab9f5383b9f7b472265918dac7af398dda6fdb4455caf40273215882"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201406_Despesas.zip": {
+   "bytes": 7563053,
+   "sha256": "d3e5207d989fb95847bc3871b3c245a6ebd9623ee37a6fe8b1b66762049ae52c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201407_Despesas.zip": {
+   "bytes": 8276558,
+   "sha256": "823c4e6c93fd383adaefb63430aa7bc5fd503e5989411ea40d30006d6e8ac890"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201408_Despesas.zip": {
+   "bytes": 8090543,
+   "sha256": "db38bc0b3879c2d5804cff0b7676c641c22cbd0d79c22814db315d2ab476bcdb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201409_Despesas.zip": {
+   "bytes": 8287676,
+   "sha256": "4b7222c997dc1e0c5f35059c1603436304b2a2134aa0c501bf10b72ed9bc2ec8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201410_Despesas.zip": {
+   "bytes": 8628063,
+   "sha256": "24744fba0059c534a6bb0115ca4ca28ff0f2b2cfee007f6cac0b7a3a4eab5353"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201411_Despesas.zip": {
+   "bytes": 9066047,
+   "sha256": "c8e9153ed182ef189a9412a6fc45091145113702e075c7241bb50d4cd75edf81"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201412_Despesas.zip": {
+   "bytes": 10502913,
+   "sha256": "f941ec0fe6f8d2cf5e5d35cadeee23fff88902d797c3895751695fad6bfdb7ac"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201501_Despesas.zip": {
+   "bytes": 5125438,
+   "sha256": "6c1c75b265ee62e7cc2eed0b9ca0b169e2d484f4eed93601606998c4aa909377"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201502_Despesas.zip": {
+   "bytes": 5952815,
+   "sha256": "af322164568d4fa8d6570357a5302838a8476ceb1a8d0a2349955956ed968bfe"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201503_Despesas.zip": {
+   "bytes": 6736285,
+   "sha256": "2c04dd051350ef03eac1dbd51624a8ef5682e8435cdd7e2f282ed065fe65ce46"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201504_Despesas.zip": {
+   "bytes": 6897048,
+   "sha256": "34a71eb80e67ef2b71272ed28fd206afdfc7298b9e1274103c307cf469a087c8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201505_Despesas.zip": {
+   "bytes": 6934147,
+   "sha256": "af620854ad4b4f4768890b2a5e88b752dcf69f13b8072bbbd4e4a2878854866c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201506_Despesas.zip": {
+   "bytes": 7524764,
+   "sha256": "d1f1599aea41806c77ee0fa47ec1f40555c5d67ae5487c35fdf1caa042da335a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201507_Despesas.zip": {
+   "bytes": 7587997,
+   "sha256": "9a4517e84944bb788d1139b492273a6922078b1e225c4163f050b1f4f59de059"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201508_Despesas.zip": {
+   "bytes": 7095769,
+   "sha256": "125ba1146fd70ed642b542c43636a57ae4409d842655668e2a23a205cc09eb7a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201509_Despesas.zip": {
+   "bytes": 7517704,
+   "sha256": "42f79f776675d9df08f7ad51edf520b93b916655b1d225455b60a44461c393d3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201510_Despesas.zip": {
+   "bytes": 8290263,
+   "sha256": "5c26caf0c4214609892c0aca1970f511ca70a199c2da05abdcde82cd03f56f62"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201511_Despesas.zip": {
+   "bytes": 8749485,
+   "sha256": "2034ba40ca2d558e6908384b1841d829c20d1fc3a3df76e28e7de36ca903fe3d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201512_Despesas.zip": {
+   "bytes": 10025132,
+   "sha256": "f752208fb4b2943e8f7505e5a274fe7f0901f44c86d40efe7fd58565a9584ef7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201601_Despesas.zip": {
+   "bytes": 5458373,
+   "sha256": "347bf86a71901189bed015f9953bde782991e4b60da5a7e7d242087d8204a938"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201602_Despesas.zip": {
+   "bytes": 7196535,
+   "sha256": "f927a92f62b958b9773c5c1152f501fdc28a1b683fd6d6ad3f9e2302df8e1d0b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201603_Despesas.zip": {
+   "bytes": 6863195,
+   "sha256": "ef52d6ae7b81c896a4cd335573dd0f94ac3cdd561afddeffe84e9cc6712cb26e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201604_Despesas.zip": {
+   "bytes": 7046197,
+   "sha256": "23361d238a256fa002659b8cf8b519808ad4fa4458275f1ccefef3593e553512"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201605_Despesas.zip": {
+   "bytes": 7408338,
+   "sha256": "b649e5b4ec5e8eefd899a1bc316b6620a6b500578971cd5d3fe72f5925ae6736"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201606_Despesas.zip": {
+   "bytes": 7682748,
+   "sha256": "77afbf32cfc119573d883d937aeb7f72317545bc850fcdec278a7fbb194ec5f4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201607_Despesas.zip": {
+   "bytes": 7365415,
+   "sha256": "0ec9b28f835e89f30172f598964b2151de8cd57683ef7f395779f99f4ca84b86"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201608_Despesas.zip": {
+   "bytes": 7507139,
+   "sha256": "7da9309e31b2f1ce77b14d213877de8c4e988724d579d5a330d3c563d8869bb3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201609_Despesas.zip": {
+   "bytes": 7550347,
+   "sha256": "25520b200ac5e856c0de8e5b0c75098b39ce39c9bdccb913cf001ed75eb4b31e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201610_Despesas.zip": {
+   "bytes": 7579484,
+   "sha256": "d14d72bbd9357f1b1374fff7f37fe014420bbf875fed5c4ed41bc8995c9c1254"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201611_Despesas.zip": {
+   "bytes": 9337098,
+   "sha256": "958700c880422b5399ae4942aa2f9d8178be73f99ef103eb1ebceeb5dc5ac309"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201612_Despesas.zip": {
+   "bytes": 11044539,
+   "sha256": "1c6794484df8de47c3b4e2b1db84c77448275e2830a289ac9cbf4a414d0f708a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201701_Despesas.zip": {
+   "bytes": 4699987,
+   "sha256": "63b3239ded47d1c68a679c0e5808db7ab414e99765b3d1fd82aba9214fa8bac1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201702_Despesas.zip": {
+   "bytes": 5347029,
+   "sha256": "4271ecbe6441fd9d8a09a21e0bae1f1a3f6e2673070b87dbbbd1d2672261e3cd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201703_Despesas.zip": {
+   "bytes": 6314935,
+   "sha256": "894e1914fbbc9bfad0c6ee0f1fa443f75cd2b3d77f1c13f500fb61bc9971f8f6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201704_Despesas.zip": {
+   "bytes": 5744468,
+   "sha256": "14e048a0a580f78c645829b1e292e416f375e445ce0c6fea7e3f1f91ba1de425"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201705_Despesas.zip": {
+   "bytes": 6543157,
+   "sha256": "fdb95bf41ecb9e3a66cce28adab75a9c010ea504c56c2ea0c5dbcc6d3414c77f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201706_Despesas.zip": {
+   "bytes": 7246593,
+   "sha256": "0ad776bc882697b55f068fa353fedb45cdf4e72387c1fd738205e7059d1227f0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201707_Despesas.zip": {
+   "bytes": 6692263,
+   "sha256": "8312dd57449316ed8ed785ff434736167a60558689666360bb585a82b4204918"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201708_Despesas.zip": {
+   "bytes": 7172776,
+   "sha256": "0996d4b0a0e17fe66f25a2ab9b8b46850940f6bd9c4953d550bbfc63b4300ff2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201709_Despesas.zip": {
+   "bytes": 7103820,
+   "sha256": "19f59922a14bd83d251f57aa29ee01d5d20b444713b85aef904b2422b0bf5014"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201710_Despesas.zip": {
+   "bytes": 7313236,
+   "sha256": "c24a9176eb7991ce3404e42c584cdd877692656f732d2bd12803af1b30929b43"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201711_Despesas.zip": {
+   "bytes": 8368692,
+   "sha256": "07e853defb983f399185edb406cdf4b1269d3216b667814426a8b39a058d2a97"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201712_Despesas.zip": {
+   "bytes": 10268353,
+   "sha256": "fedeca207e7483e0fc0eeda5412d87e01aa59709a29b1e4def7deb4c3de984c2"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201801_Despesas.zip": {
+   "bytes": 4394081,
+   "sha256": "bba9b508c5286446973bcf4dcc8af47f83bd6a39c3db5cfdc333541174d39143"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201802_Despesas.zip": {
+   "bytes": 5340838,
+   "sha256": "7c8cde3d52cddefec7fe541dfb67aeec119fe921e36871eba702e866a862ef1e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201803_Despesas.zip": {
+   "bytes": 6821686,
+   "sha256": "e88bc9b25f0477fe59ed0637515f66f5f7b8e150c0a387ab6b8a2093d5163c2d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201804_Despesas.zip": {
+   "bytes": 6809885,
+   "sha256": "23f097400b0b954a7d208e8c7642c6a3c0ed664313848a9865504cf5c563bcb8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201805_Despesas.zip": {
+   "bytes": 7090759,
+   "sha256": "b088ff1e15be4760a80223a7cfcf955d474b4b1ccfbf79593d1cc2893ed400bd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201806_Despesas.zip": {
+   "bytes": 7401448,
+   "sha256": "574907db5bced0b993f6ab2aed39d5500ca7cab6170a770a36d5c8c65c95014b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201807_Despesas.zip": {
+   "bytes": 7291732,
+   "sha256": "cb4ad6ce8c4fcc6d26c0de3213a01ef0ab137a39ad5a653cb85e3cb51083465c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201808_Despesas.zip": {
+   "bytes": 7368273,
+   "sha256": "c3583e2ada638ad37c98467bd0f0ddc8b25ae10d4b7ecbae178fff8f1810d90f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201809_Despesas.zip": {
+   "bytes": 7239198,
+   "sha256": "0bb0746d9bc4e24e9d76961ae7a40591fe1a8e9f53ba545093ed87d10fed376a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201810_Despesas.zip": {
+   "bytes": 7886022,
+   "sha256": "e486e4d6da96ec963c171214783b4e347d0f195b2a61eb89c9116fb258c123e0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201811_Despesas.zip": {
+   "bytes": 8407149,
+   "sha256": "1904b58ee215a98fcc964acf1602a40fe83512fc77eba07fb64c46e5d4914481"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201812_Despesas.zip": {
+   "bytes": 9935392,
+   "sha256": "e91140c14615c94b8458a367e73a883ff5a9a11a734e7b4a6ecad4073e271ec8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201901_Despesas.zip": {
+   "bytes": 4772481,
+   "sha256": "9c96ffc65a659e6e9a5d4857c4483b9ff2f18fd180dd6fbe7d9185768f9da56d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201902_Despesas.zip": {
+   "bytes": 6475774,
+   "sha256": "8575ec00b915d815d10d120554d1eb4b5bf493c7265f10685182f9cf6e3fe7ae"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201903_Despesas.zip": {
+   "bytes": 6311827,
+   "sha256": "e162153ab28ef17d8bd52f6fb3954bfab8356df20e73bba69a7fe95683e923f7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201904_Despesas.zip": {
+   "bytes": 6674298,
+   "sha256": "be7b6ff86d2600439be330aa4a71eac971b097b972dc17ae565a2b5b0cda2fb4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201905_Despesas.zip": {
+   "bytes": 7297721,
+   "sha256": "626d1a6b331607831309642c7d85ac95fee04ad155977313d281d963e7a0bbea"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201906_Despesas.zip": {
+   "bytes": 6987045,
+   "sha256": "3d52b2c489e21920ba261a60587833aab5f35be23b4fbdc66b11914abb638277"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201907_Despesas.zip": {
+   "bytes": 7467875,
+   "sha256": "ca7f693191f2e95e0b14be1177ae07df9718187e3c2783bc4dd9a39f804c1ca7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201908_Despesas.zip": {
+   "bytes": 7314954,
+   "sha256": "61a480ea2da92e5b5420b5daca904eeff9fff37aed836b62ee4ef61fbf32be40"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201909_Despesas.zip": {
+   "bytes": 7194765,
+   "sha256": "64a5742c8c653af1fdbcc5d079336e3f60544a801c25858c64bc71f10541b7c8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201910_Despesas.zip": {
+   "bytes": 7724085,
+   "sha256": "bf03001f0fbece960fc9f24fb392a66831dc2d478b8c86c13fc6a526caecb231"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201911_Despesas.zip": {
+   "bytes": 8513433,
+   "sha256": "58ad0a14e3f6612b34432adc3a512e2573e5798f16631bbc68901c7c3226115f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/201912_Despesas.zip": {
+   "bytes": 11041935,
+   "sha256": "6585b8163890a1f2f9b7c5de288062607a4d2803385c61b9f32149283432b65d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202001_Despesas.zip": {
+   "bytes": 5435578,
+   "sha256": "5de83dfbe758add25920f460aae7b2f9c2e40a193f76a65999c0220eea99b4de"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202002_Despesas.zip": {
+   "bytes": 6046408,
+   "sha256": "55e176ce5db3d18662b50578ba98365229614a07329fd4d791662cda8664b79c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202003_Despesas.zip": {
+   "bytes": 6921393,
+   "sha256": "d1197958cafcf51871df8ba97360a308fd98e456743ac379763b53eb1f9ec0d7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202004_Despesas.zip": {
+   "bytes": 6549907,
+   "sha256": "86e6c52ac42b6e25e027710cb7cc2acb76acf2b362926aa2c4690ff8cd3403cf"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202005_Despesas.zip": {
+   "bytes": 6404655,
+   "sha256": "406eb68be5e25bb4c0245fb14c8c1d8bf8e7238d1ee599c7b43db94372546c6d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202006_Despesas.zip": {
+   "bytes": 7115822,
+   "sha256": "b8f9ee2b2dae21f0df62b8973cabe49c0cd3024c4bd4d937dd16cdd31e0c8bd4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202007_Despesas.zip": {
+   "bytes": 7088763,
+   "sha256": "4506481e7b89c499cb432439c746bd59e8e5a97670b8c7eaec180f3d37894c12"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202008_Despesas.zip": {
+   "bytes": 7075511,
+   "sha256": "2ff73049cbd0eb4f6faea5e2d0fe9626594f44668cb661411dc1ea8610157d42"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202009_Despesas.zip": {
+   "bytes": 7299378,
+   "sha256": "8d86433d0423b6ed47f4b43efcc750fa4a0a8dde5287c0e4b81ec02186cce8f6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202010_Despesas.zip": {
+   "bytes": 7471635,
+   "sha256": "c0a5f573155599316afcde2ea2416052ad334aa6340e81f985ca8753d4cafdc5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202011_Despesas.zip": {
+   "bytes": 8125687,
+   "sha256": "3cf7513599ad0304960feaa1c3cf16fb05f4530f1e41edf7e55d128c5e09aff8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202012_Despesas.zip": {
+   "bytes": 11760871,
+   "sha256": "d2aa317afc70e2140567737bf2f178c1ae9224784eb7fa51d61e8e46c1f90664"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202101_Despesas.zip": {
+   "bytes": 4052173,
+   "sha256": "50abe177eaebad76ba6d35ca9eb4b9cd80e7bf89208a3aed77a370207ea46cc6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202102_Despesas.zip": {
+   "bytes": 4715367,
+   "sha256": "f5178e136cf7d617849b8117ad87923d478284419084d7600cce173f01e2301a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202103_Despesas.zip": {
+   "bytes": 5298067,
+   "sha256": "a2f2173cebcca272d8a191c1fa5fab98cf0df7824b5e7532cfee8831d3268f92"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202104_Despesas.zip": {
+   "bytes": 5622567,
+   "sha256": "89e0785e8026097be7f4ad716dd88acdfb70268a86aade4294f4eb95f371779e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202105_Despesas.zip": {
+   "bytes": 5997285,
+   "sha256": "b5be01286e9538d06052cb9a3f732bc562984640f58c3bf8413bab5c1e2f3450"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202106_Despesas.zip": {
+   "bytes": 6988871,
+   "sha256": "1551ad7dad11e7b9302ccc803207a1ec6312b1cd8292186cbe750d7f6df2305a"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202107_Despesas.zip": {
+   "bytes": 6503985,
+   "sha256": "df39f203d5d80fbd4e04eb49001cabbf0a7ba12c7acf90ad3f96608b9af4088d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202108_Despesas.zip": {
+   "bytes": 6762885,
+   "sha256": "bff125c24d4f163bd7665e07b3a00fd01697fa9d0862b90068c198db111969eb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202109_Despesas.zip": {
+   "bytes": 6647263,
+   "sha256": "ca25a4f15133cccf2876fde22defca4c305a4dba9ea8e22a2a87ead8949dcc7f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202110_Despesas.zip": {
+   "bytes": 6935823,
+   "sha256": "41e83e89040069478c721c25862f08f116c1b0dfc334a61b94ee7124c224da7d"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202111_Despesas.zip": {
+   "bytes": 7252981,
+   "sha256": "ec9eb844406b4b6405126ea38e0ca5b59a60b31b3ea43b9a866ba1dca7cc78d8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202112_Despesas.zip": {
+   "bytes": 9916757,
+   "sha256": "471bdfadf7347c470d601b69f07e26385f5a9ab0ed039b158678ea5d41fcd6df"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202201_Despesas.zip": {
+   "bytes": 3782572,
+   "sha256": "0bf06c66f7f56b5380f27b2cbed262d24b9ca5934b1ea7845fe57a4adb504539"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202202_Despesas.zip": {
+   "bytes": 5155926,
+   "sha256": "58c5f08690c11929a14d0496cd62237d67546772c660e32c4c865aac5da0c817"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202203_Despesas.zip": {
+   "bytes": 5987588,
+   "sha256": "1bf46948f97d6bc90ed32cdfaa123629fac1476b79da57411ff61be895bd801f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202204_Despesas.zip": {
+   "bytes": 6206504,
+   "sha256": "d0c81983e705658bf68284b0e00019e83194e15be3bfaeb4dddb623f0658f3bd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202205_Despesas.zip": {
+   "bytes": 6612031,
+   "sha256": "6748ebc69deed916a4fd5f6cdabd78869894d8be19c01e375675d11b25c75d41"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202206_Despesas.zip": {
+   "bytes": 6996211,
+   "sha256": "fefaca515eded0c26225fd69a4e280b790fd6315529eb6dbcab9a39945278458"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202207_Despesas.zip": {
+   "bytes": 6411678,
+   "sha256": "c70bf4610c269ee5f1fd79d19cdf09ecf83707dbf9a009d2de30c9e62115b999"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202208_Despesas.zip": {
+   "bytes": 6389978,
+   "sha256": "e6d69b77c6bb3c13fa556f2f7041a060960baa8bea3b378e1c3b55800df8be84"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202209_Despesas.zip": {
+   "bytes": 6565350,
+   "sha256": "1d96b369b16567079971c18b796f44c1fb38629707ed7d1d6003cfd913ac2708"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202210_Despesas.zip": {
+   "bytes": 6392561,
+   "sha256": "1b0eb4dd40e3fe1f5f04ab38f029eeb165b1e213ec62d055c77e9dfd0299cca4"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202211_Despesas.zip": {
+   "bytes": 6831981,
+   "sha256": "8039844de782788342cc4aa8ea1f8cc14494644f8a86832ad20bc417e92c8473"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202212_Despesas.zip": {
+   "bytes": 9184738,
+   "sha256": "6f334a921d0e286e119b903fc7b55315e8e070513855ba5604450bf21c9f750c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202301_Despesas.zip": {
+   "bytes": 4193586,
+   "sha256": "b14315dce7310af125f32845f902b4f2335c6d92b0ab226c35a21ccef70d1834"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202302_Despesas.zip": {
+   "bytes": 5091017,
+   "sha256": "92fe81462821950bd11b9faa20d89cbf3222e4606d54dae32469e71dd6eccf0b"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202303_Despesas.zip": {
+   "bytes": 6158626,
+   "sha256": "d5a8ad800fc61e93784b8cc1ec8175ed09364aadfd062cc738267a31bbdc7222"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202304_Despesas.zip": {
+   "bytes": 5878571,
+   "sha256": "085c2cecd8f1c7ff59bc1b79aafd73c09029e946fda199cd60ed37c953168294"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202305_Despesas.zip": {
+   "bytes": 6428361,
+   "sha256": "ed573f0121914d80548a9056647d185bf9ae406d240b44a4525ce306535fa462"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202306_Despesas.zip": {
+   "bytes": 6508127,
+   "sha256": "7af3e0fa52c5bcf9436523ef7523610a8a3a29d7aa819d4ec8878ec405b864a6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202307_Despesas.zip": {
+   "bytes": 6621177,
+   "sha256": "d401b58084e5e90cab8df0705d6d8332ada95d8a5144ebf26f085019513afba7"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202308_Despesas.zip": {
+   "bytes": 7077380,
+   "sha256": "3e4891e4b20c2871107553f92cbc8d177ced62e1bbe9ad35b693311581a1640e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202309_Despesas.zip": {
+   "bytes": 7038599,
+   "sha256": "0f058b370799b5f700b32b4dcec42c8a17bd15104a75c2691a8e7437ae13a9ed"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202310_Despesas.zip": {
+   "bytes": 7279850,
+   "sha256": "0b63f6268eb23ecf9408e2df256bb7eae14a38e6b801a12ef9a00630b9bb99bc"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202311_Despesas.zip": {
+   "bytes": 7808992,
+   "sha256": "d5614178f5418c3b8dad30258eeadda2ffd1246b2dd3effc46ffb8f4c593d6cd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202312_Despesas.zip": {
+   "bytes": 9348224,
+   "sha256": "d118dd65b536533495a943d4cb1660d2e48e9913920c79aa18715832068e2bbc"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202401_Despesas.zip": {
+   "bytes": 4908188,
+   "sha256": "a8ac202af296b5527d296afe1ae4c3bf7ad3604955eac23848b72797e11306c1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202402_Despesas.zip": {
+   "bytes": 5935503,
+   "sha256": "217b801c15735f554a6d22a708ea3f029a791dc61d67476c2bf0e52d2e1e8aeb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202403_Despesas.zip": {
+   "bytes": 6977433,
+   "sha256": "7e76c3b6ee448574f3d648f905d4a792be99dc073d598a1ca426faa4193c9452"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202404_Despesas.zip": {
+   "bytes": 7352937,
+   "sha256": "cb7f5e9f74fa3821883dbc4c54164083a81da9e8a0d613e56082062ff08c2905"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202405_Despesas.zip": {
+   "bytes": 7556959,
+   "sha256": "3ab6bcb33498dc780de19d684b570d8e5f3e5af6dad83948e4a1b5edb858b699"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202406_Despesas.zip": {
+   "bytes": 7650164,
+   "sha256": "21a0f19c38e8d4fa1201284b0c5c45670a2a5462646768866d8079b29fedb16c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202407_Despesas.zip": {
+   "bytes": 7886509,
+   "sha256": "d0bdd4d89c3bc6eb3c57109564aba5325fdbe7e1f3f1d23f7424e3d2afc63ad3"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202408_Despesas.zip": {
+   "bytes": 7240944,
+   "sha256": "986851bb1e2a6e08010b7611eb49f3657b327178a678703635f447cad41c5266"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202409_Despesas.zip": {
+   "bytes": 7193208,
+   "sha256": "1cc6d3cbf2ff0c257e315d366add72640f502f1dc2c00e6f14c71fb6bf79da00"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202410_Despesas.zip": {
+   "bytes": 7703223,
+   "sha256": "b1b3059d8f6a0bfce4542e61ddfec25bcf1353f955f75358eaafecc0a876839f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202411_Despesas.zip": {
+   "bytes": 7772544,
+   "sha256": "0829bb1e4964ec154a2e721ee4d530329c91209df930d1b7526c5b1f2c41e52f"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202412_Despesas.zip": {
+   "bytes": 11121768,
+   "sha256": "85f45e7f14682468b14dff682a1354601595d10ca9d660fa32764abcfa74a7c1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202501_Despesas.zip": {
+   "bytes": 5171682,
+   "sha256": "6899a04f4400e3a0923296259f275dd0fdc367e5218870ebaefed7f91b9181fd"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202502_Despesas.zip": {
+   "bytes": 5933338,
+   "sha256": "bcdd158a40972e9aa5e9a1b601c1f4d6c53d949befaca2bad9a70860d4dbb0c5"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202503_Despesas.zip": {
+   "bytes": 6119027,
+   "sha256": "1cb333cb70b84560b157396e3c04bf56d1ef4b2b248a21dde4cb519575c92bc8"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202504_Despesas.zip": {
+   "bytes": 6361682,
+   "sha256": "5af18b567f2d380ef95898c69c75ab66998a952d1baf74151a2b757f1a19c85c"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202505_Despesas.zip": {
+   "bytes": 6631491,
+   "sha256": "70bfdd19cf9f7e695b8b5244b7283cbaf1f2f081d86ffcbd7e5984ecaf891b86"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202506_Despesas.zip": {
+   "bytes": 6899890,
+   "sha256": "19381a26ca0c16d5e244b10cd8552243986df52df411a3bc7e7ed8daa3ddb7af"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202507_Despesas.zip": {
+   "bytes": 7247715,
+   "sha256": "21f979cd272410f7f2e6d814c1aa2a6e96050890dc664dd87c6a71745ba80ecb"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202508_Despesas.zip": {
+   "bytes": 7230039,
+   "sha256": "77e6c6ce638ca327328e8938fe0402772c41892bc6d4a3154d0fa2701edc2ea1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202509_Despesas.zip": {
+   "bytes": 7620766,
+   "sha256": "517e048e3f5547ca5d8b2df67875e825ccb9142340f323bb8b10a0d6ab6d3a98"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202510_Despesas.zip": {
+   "bytes": 7838033,
+   "sha256": "c1b1de1b1be594dc99e4ffed680e80780d6d3464010f54f4ab7757bc3e5253de"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202511_Despesas.zip": {
+   "bytes": 8133552,
+   "sha256": "fcc7bf32fd4eed1a8ff0cb033e02f8f8173c07b1fe9745057436a9b215cf37aa"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202512_Despesas.zip": {
+   "bytes": 10513329,
+   "sha256": "ad1b92d1c425a285eed0f4c6da122bab0a9ddbd2d06954f75e766539536f9a74"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202601_Despesas.zip": {
+   "bytes": 5185650,
+   "sha256": "67b6889a213eff3c733dacda454aae104e38358c058ab871469e12e9b342b8af"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202602_Despesas.zip": {
+   "bytes": 5864685,
+   "sha256": "acfa0d410398aab3fecc5fa7bf5d85bc45c244df5f8a37a7c5ffd483c2320ea1"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202603_Despesas.zip": {
+   "bytes": 6746989,
+   "sha256": "f5e7f4c39cc105fe6eca681bd5e162799bb91ce16936f751e852aba996a5abb9"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202604_Despesas.zip": {
+   "bytes": 6932116,
+   "sha256": "e2b96c4435f0432fdca123f6277d07b8d72a230fd90037eaefb5630950036356"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202605_Despesas.zip": {
+   "bytes": 7328048,
+   "sha256": "7f056dba16c6d4625056adf98df77153992a37d60aa4b0f8ac9ded9be59342f6"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202606_Despesas.zip": {
+   "bytes": 7190637,
+   "sha256": "8dc362f0faeb02e408d6b7297497761a72a03f520dae8d6b45c4524434cd30ee"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202607_Despesas.zip": {
+   "bytes": 7099186,
+   "sha256": "df90f945215e3080d54f8c5bfa18c75d3ab6ea2ca5f7239e11a0a26bd5806e0e"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202608_Despesas.zip": {
+   "bytes": 7182272,
+   "sha256": "2229bd249a0abc333c63b65e679df9a315d992e2c941e2daca5a60c49ff328fa"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202609_Despesas.zip": {
+   "bytes": 6657847,
+   "sha256": "20e2939f624f2efaaf56337c338bd1002b02f611f8b34da7c06e277bc6811c29"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202610_Despesas.zip": {
+   "bytes": 7039179,
+   "sha256": "3b76a04403cd3b9b9a28537862f634657b7ef4d459151ec099e06db6aae7e9a0"
+  },
+  "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202611_Despesas.zip": {
+   "bytes": 5699971,
+   "sha256": "9e8d8e53e28a1ad2459bb0ccc1347a5466c84d71d547a83f3845bcd8447efbc2"
+  }
+ }
+}
