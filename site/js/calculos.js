@@ -458,6 +458,15 @@ export function orcamento(renda, despesas) {
   return { itens, total, parteTotal: parte(total), sobra: renda - total };
 }
 
+// Preço de cada mês trazido para o salário de hoje: quanto ele custaria se
+// pesasse no salário mínimo de hoje o mesmo que pesava no salário da época.
+// preco × salário do mês de referência ÷ salário do mês.
+export function noSalarioDeHoje(precos, salario, iReferencia) {
+  const base = salario[iReferencia];
+  return precos.map((p, i) => (p == null || salario[i] == null || salario[i] <= 0 || base == null
+    ? null : (p * base) / salario[i]));
+}
+
 // Último valor publicado de uma série mensal, com o mês.
 export function ultimoValor(meses, valores) {
   const i = ultimoIndice(valores ?? []);
