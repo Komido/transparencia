@@ -1,0 +1,74 @@
+name: Inspecionar fontes em PDF e Excel
+
+# Tarefa manual, só de leitura: baixa arquivos que o banco não consegue ler
+# (PDF e Excel) e mostra no registro da execução os trechos necessários para
+# conferir regras e formatos antes de usar a fonte. Não grava nada no
+# repositório.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspecionar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar ferramentas
+        run: |
+          sudo apt-get install -y -qq poppler-utils > /dev/null
+          python3 -m pip install --quiet openpyxl==3.1.5
+
+      - name: DIEESE, metodologia da cesta e do salário necessário
+        continue-on-error: true
+        run: |
+          set -u
+          for url in \
+            https://www.dieese.org.br/metodologia/metodologiaCestaBasica2016.pdf \
+            https://www.dieese.org.br/metodologia/metodologiaCestaBasica.pdf; do
+            echo "=== $url"
+            curl -sSfL --max-time 60 -A "ArrecadometroBrasil/1.0" "$url" -o /tmp/doc.pdf || { echo "falhou"; continue; }
+            pdftotext -layout /tmp/doc.pdf /tmp/doc.txt
+            grep -n -i -E -C 3 "adulto|criança|crianca|unidade.{0,20}consumo|necess[aá]rio|propor[cç][aã]o|35,|famil" /tmp/doc.txt | head -120
+          done
+
+      - name: IBGE, POF 2017-2018 (data de referência dos valores)
+        continue-on-error: true
+        run: |
+          set -u
+          for url in \
+            https://biblioteca.ibge.gov.br/visualizacao/livros/liv101670.pdf; do
+            echo "=== $url"
+            curl -sSfL --max-time 120 -A "ArrecadometroBrasil/1.0" "$url" -o /tmp/pof.pdf || { echo "falhou"; continue; }
+            pdftotext -layout /tmp/pof.pdf /tmp/pof.txt
+            head -c 600 /tmp/pof.txt
+            echo
+            grep -n -i -E -C 2 "pre[cç]os de|deflacion|data de refer|15 de janeiro" /tmp/pof.txt | head -80
+          done
+
+      - name: FipeZAP, estrutura da planilha
+        continue-on-error: true
+        run: |
+          set -u
+          curl -sSfL --max-time 120 -A "ArrecadometroBrasil/1.0" \
+            https://downloads.fipe.org.br/indices/fipezap/fipezap-serieshistoricas.xlsx -o /tmp/fipezap.xlsx
+          sha256sum /tmp/fipezap.xlsx
+          python3 - <<'PY'
+          from openpyxl import load_workbook
+          wb = load_workbook("/tmp/fipezap.xlsx", read_only=True, data_only=True)
+          print("planilhas:", wb.sheetnames)
+          for nome in wb.sheetnames[:3] + [n for n in wb.sheetnames if "BRASIL" in n.upper() or "INDICE" in n.upper()][:2]:
+              ws = wb[nome]
+              print(f"\n--- {nome} ({ws.max_row} linhas x {ws.max_column} colunas)")
+              for i, linha in enumerate(ws.iter_rows(values_only=True)):
+                  if i >= 14:
+                      break
+                  print(i + 1, [c for c in linha[:40]])
+              ultimas = list(ws.iter_rows(min_row=max(1, ws.max_row - 2), values_only=True))
+              for linha in ultimas:
+                  print("fim", [c for c in linha[:40]])
+          PY
