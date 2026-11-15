@@ -1,0 +1,12 @@
+// Publicação na Cloudflare (Workers com arquivos estáticos).
+// O site é só a pasta site/: não há código rodando no servidor, então cada
+// acesso é atendido direto da rede da Cloudflare, sem custo por requisição.
+// Os cabeçalhos de segurança ficam em site/_headers.
+{
+  "name": "arrecadometro-brasil",
+  "compatibility_date": "2026-11-13",
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "none"
+  }
+}
