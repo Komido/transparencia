@@ -183,6 +183,17 @@
         <li><strong>Por governo:</strong> média simples dos anos atribuídos a cada mandato (mesma regra das outras tabelas) e a dívida em dezembro do último ano do mandato. O ano em curso só entra quando dezembro é publicado.</li>
       </ul>
 
+      <h2 id="estados">Contas dos estados</h2>
+      <p><strong>Fonte:</strong> Relatório de Gestão Fiscal (RGF) do Poder Executivo de cada estado e do Distrito Federal, 3º quadrimestre, obtido na API do Siconfi (Tesouro Nacional) desde 2015. Anexo 1 (despesa com pessoal) e anexo 2 (dívida consolidada líquida). O último ano fechado é conferido todo dia; os anteriores, uma vez por mês, para pegar relatórios corrigidos pelos estados.</p>
+      <ul>
+        <li><strong>Dívida:</strong> dívida consolidada líquida (dívida menos o dinheiro em caixa e outros haveres) em % da receita corrente líquida, como o estado informa no anexo 2. De 2020 em diante, o relatório usa a receita corrente líquida ajustada para o cálculo dos limites de endividamento; até 2019, a receita corrente líquida sem ajuste. Quando a linha da dívida líquida vem em branco, o site usa a fórmula do próprio relatório, dívida consolidada menos deduções (aconteceu no Amapá em 2017).</li>
+        <li><strong>Limite da dívida:</strong> duas vezes a receita corrente líquida, ou 200% (Resolução do Senado Federal nº 40/2001, art. 3º, I), com alerta em 180%, 90% do limite (LRF, art. 59, § 1º, III). É o mesmo para todos os estados. O site não usa o limite que cada estado informa porque, em 21 dos 297 relatórios de 2015 a 2025, o valor informado não corresponde à lei (zero em 9 relatórios de Ceará e Distrito Federal, cerca de 90% em 11 de Roraima e 169,9% em 1 de São Paulo).</li>
+        <li><strong>Gasto com pessoal:</strong> despesa total com pessoal do Poder Executivo em % da receita corrente líquida, como o estado informa no anexo 1. Quando o percentual não vem no relatório, é calculado com o valor em reais e a receita do próprio relatório (Paraná em 2017 e Bahia em 2015). O resultado confere com os percentuais publicados.</li>
+        <li><strong>Limites de pessoal:</strong> vêm do relatório de cada estado. Para o Executivo, 49% da receita corrente líquida, ou 48,6% nos estados que têm tribunal de contas dos municípios (LRF, art. 20, II, c, e § 4º); limite prudencial em 95% do limite e alerta em 90%. Os 297 relatórios conferem com essa regra.</li>
+        <li><strong>Comparação entre estados e entre anos:</strong> o tribunal de contas de cada estado define detalhes do que entra no gasto com pessoal, e essas regras mudaram com o tempo. Saltos grandes de um ano para o outro podem vir de mudança na forma de contar. O site mostra os números como foram informados, sem ajuste.</li>
+        <li><strong>Fora do site:</strong> o resultado primário dos estados (RREO, anexo 6) não é mostrado porque a forma de cálculo mudou em 2018 e depois, e a série não é comparável entre anos.</li>
+      </ul>
+
       <h2 id="cidades">Números por capital</h2>
       <p>No orçamento da família e na seção "O que o salário compra", a pessoa pode escolher uma das 27 capitais. A escolha fica guardada só no navegador dela.</p>
       <ul>
@@ -215,7 +226,8 @@
         <li>No arquivo da Receita, a receita previdenciária e as receitas de outros órgãos de dezembro de 2025 repetem os valores de fevereiro de 2026 em todas as UFs. O total oficial de dezembro de 2025 divulgado pela Receita foi de R$ 292,7 bilhões; o arquivo soma R$ 261,7 bilhões. A série comparável não usa essas rubricas; o contador e a composição usam e ficam subestimados nesse mês. O site mostra um aviso enquanto a fonte não for corrigida.</li>
         <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
         <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
-        <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias nacionais da ANP. Na sua cidade os preços podem ser diferentes.</li>
+        <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias da ANP no país ou no estado. Na sua cidade os preços podem ser diferentes.</li>
+        <li>O contador e a composição da arrecadação mostram só tributos federais. Ficam de fora os impostos dos estados (ICMS, IPVA e ITCMD), os dos municípios (ISS, IPTU e ITBI) e o FGTS.</li>
         <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
       </ul>
 

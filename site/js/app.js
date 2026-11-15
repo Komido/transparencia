@@ -534,6 +534,177 @@ function montarContas(ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// Contas dos estados (Relatório de Gestão Fiscal do Poder Executivo)
+// ---------------------------------------------------------------------------
+
+// Situação diante dos limites da lei. Os limites de pessoal vêm do relatório
+// de cada estado (49% ou 48,6%); o da dívida é o da lei, igual para todos.
+function situacaoDivida(pct, limite, alerta) {
+  if (pct == null) return null;
+  if (pct > limite) return 'acima do limite';
+  if (pct > alerta) return 'acima do alerta';
+  return null;
+}
+
+function situacaoPessoal(pct, limite, prudencial, alerta) {
+  if (pct == null) return null;
+  if (limite != null && pct > limite) return 'acima do limite';
+  if (prudencial != null && pct > prudencial) return 'acima do limite prudencial';
+  if (alerta != null && pct > alerta) return 'acima do alerta';
+  return null;
+}
+
+// Rótulos curtos para a tabela, que precisa caber na tela do celular.
+const ROTULO_SITUACAO = {
+  'acima do limite': 'acima do limite',
+  'acima do limite prudencial': 'acima do prudencial',
+  'acima do alerta': 'acima do alerta',
+};
+
+function montarEstados(ctx) {
+  const bloco = ctx.d.estados_fiscal;
+  if (!bloco?.anos?.length || !Array.isArray(bloco.estados) || !bloco.estados.length) { $('#estados').hidden = true; return; }
+  const { anos, estados } = bloco;
+  const limiteDivida = bloco.limite_divida_pct ?? 200;
+  const alertaDivida = bloco.alerta_divida_pct ?? 180;
+  const ind = (uf, chave, k) => uf.indicadores?.[chave]?.[k] ?? null;
+  // Dívida com 0 casas, salvo perto dos limites ou abaixo de 10%; pessoal
+  // sempre com 1 casa, porque os limites (49%, 46,55%) ficam muito próximos.
+  const pctDivida = (v) => f.porcentagem(v, v != null && (Math.abs(v) < 10 || Math.abs(v - limiteDivida) < 1 || Math.abs(v - alertaDivida) < 1) ? 1 : 0);
+  const pctPessoal = (v) => f.porcentagem(v, 1);
+  const limiteTexto = (v) => f.porcentagem(v, Number.isInteger(v) ? 0 : (Number.isInteger(v * 10) ? 1 : 2));
+
+  // Seletor de estado: em ordem alfabética; começa no estado da cidade
+  // escolhida, se houver.
+  const selUf = $('#estados-uf');
+  selUf.replaceChildren();
+  estados.forEach((uf) => { el('option', null, uf.nome, selUf).value = uf.sigla; });
+  let escolhidoPelaPessoa = false;
+  const ufDaCidade = () => (cidade.dados?.uf && estados.some((x) => x.sigla === cidade.dados.uf) ? cidade.dados.uf : null);
+  selUf.value = ufDaCidade() ?? estados[0].sigla;
+
+  let grafico = null;
+  const desenharEstado = () => {
+    const uf = estados.find((x) => x.sigla === selUf.value) ?? estados[0];
+    const de = t.doEstado(uf.sigla, uf.nome);
+    const kDiv = c.ultimoIndice(uf.indicadores?.dcl_rcl_pct ?? []);
+    const kPes = c.ultimoIndice(uf.indicadores?.pessoal_rcl_pct ?? []);
+    const linhas = [];
+
+    if (kDiv >= 0) {
+      const pct = ind(uf, 'dcl_rcl_pct', kDiv);
+      const valor = ind(uf, 'dcl', kDiv);
+      if (pct < 0) {
+        linhas.push(`Em ${anos[kDiv]}, o governo ${de} tinha ${f.reaisPorExtenso(-valor)} a mais em caixa do que devia.`);
+      } else {
+        linhas.push(`Em ${anos[kDiv]}, o governo ${de} devia ${f.reaisPorExtenso(valor)}, já descontado o dinheiro em caixa. `
+          + `Isso é ${pctDivida(pct)} da receita do ano: para cada R$ 100 que entram, deve ${f.moeda(pct, 0)}.`);
+      }
+      const sit = situacaoDivida(pct, limiteDivida, alertaDivida);
+      linhas.push(`O limite da lei para a dívida é ${limiteTexto(limiteDivida)} da receita${sit === 'acima do limite' ? ', e o estado está acima dele'
+        : sit === 'acima do alerta' ? `, e o estado passou do nível de alerta (${limiteTexto(alertaDivida)})` : ''}.`);
+    }
+    if (kPes >= 0) {
+      const pct = ind(uf, 'pessoal_rcl_pct', kPes);
+      const limite = ind(uf, 'pessoal_limite_pct', kPes);
+      const prud = ind(uf, 'pessoal_prudencial_pct', kPes);
+      const alerta = ind(uf, 'pessoal_alerta_pct', kPes);
+      linhas.push(`Com pessoal (salários, encargos e parte das aposentadorias), o governo gastou ${pctPessoal(pct)} da receita em ${anos[kPes]}.`);
+      const sit = situacaoPessoal(pct, limite, prud, alerta);
+      const fim = {
+        'acima do limite': ', e o estado está acima dele',
+        'acima do limite prudencial': `. O estado passou do limite prudencial (${limiteTexto(prud)}), a partir do qual a lei proíbe dar aumentos e contratar, com exceções`,
+        'acima do alerta': `. O estado passou do nível de alerta (${limiteTexto(alerta)})`,
+      }[sit] ?? '';
+      if (limite != null) linhas.push(`O limite da lei para esse gasto é ${limiteTexto(limite)}${fim}.`);
+    }
+    const k0 = 0;
+    const div0 = ind(uf, 'dcl_rcl_pct', k0);
+    const pes0 = ind(uf, 'pessoal_rcl_pct', k0);
+    if (div0 != null && pes0 != null && (kDiv > k0 || kPes > k0)) {
+      linhas.push(`Em ${anos[k0]}, a dívida era ${pctDivida(div0)} da receita e o gasto com pessoal, ${pctPessoal(pes0)}.`);
+    }
+    definirTopicos('estados-resumo', linhas.join(' '));
+
+    const visao = valorRadio('estados-visao') ?? 'divida';
+    const valores = (uf.indicadores?.[visao === 'divida' ? 'dcl_rcl_pct' : 'pessoal_rcl_pct'] ?? []).map((v) => (v == null ? null : Number(v)));
+    const limites = visao === 'divida'
+      ? anos.map(() => limiteDivida)
+      : anos.map((_, k) => ind(uf, 'pessoal_limite_pct', k));
+    const limiteAtual = limites[c.ultimoIndice(limites)];
+    definir('estados-explicacao', visao === 'divida'
+      ? `Dívida do governo ${de}, descontado o dinheiro em caixa, comparada com a receita de cada ano. A linha tracejada é o limite da lei: a dívida não pode passar de ${limiteTexto(limiteDivida)} da receita, ou duas vezes o que entra em um ano. Abaixo de zero, o estado tem mais dinheiro em caixa do que dívida.`
+      : `Gasto do governo ${de} com pessoal, comparado com a receita de cada ano. A linha tracejada é o limite da lei para o Poder Executivo deste estado: ${limiteTexto(limiteAtual)} da receita.`);
+    const opcoes = {
+      tipo: 'linhas',
+      rotulos: anos,
+      series: [
+        { nome: uf.nome, classe: 'serie-1', valores },
+        { nome: 'Limite da lei', classe: 'serie-limite', valores: limites, degrau: true },
+      ],
+      formatoY: (v, eixo) => (eixo ? `${f.numero(v, 0)}%` : (v == null ? 'n/d' : `${(visao === 'divida' ? pctDivida : pctPessoal)(v)} da receita`)),
+      rotuloEixoX: (ano) => (anos.length > 8 && ano % 2 ? null : String(ano)),
+      tituloTooltip: (i) => String(anos[i]),
+      descricao: visao === 'divida'
+        ? `Dívida do governo ${de} em porcentagem da receita, por ano, e o limite da lei.`
+        : `Gasto com pessoal do governo ${de} em porcentagem da receita, por ano, e o limite da lei.`,
+      incluirZero: true,
+    };
+    if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-estados'), opcoes);
+  };
+  selUf.addEventListener('change', () => { escolhidoPelaPessoa = true; desenharEstado(); });
+  document.querySelectorAll('input[name="estados-visao"]').forEach((r) => r.addEventListener('change', desenharEstado));
+  aoMudarCidade(() => {
+    const sigla = ufDaCidade();
+    if (sigla && !escolhidoPelaPessoa && sigla !== selUf.value) { selUf.value = sigla; desenharEstado(); }
+  });
+  desenharEstado();
+
+  // Tabela com todos os estados -------------------------------------------
+  const selAno = $('#estados-ano');
+  selAno.replaceChildren();
+  [...anos].reverse().forEach((ano) => { el('option', null, String(ano), selAno).value = String(ano); });
+  const desenharTabela = () => {
+    const k = anos.indexOf(Number(selAno.value));
+    const acimaDivida = [];
+    const acimaPessoal = [];
+    const linhas = estados.map((uf) => {
+      const div = ind(uf, 'dcl_rcl_pct', k);
+      const pes = ind(uf, 'pessoal_rcl_pct', k);
+      const sitDiv = situacaoDivida(div, limiteDivida, alertaDivida);
+      const sitPes = situacaoPessoal(pes, ind(uf, 'pessoal_limite_pct', k), ind(uf, 'pessoal_prudencial_pct', k), ind(uf, 'pessoal_alerta_pct', k));
+      if (sitDiv === 'acima do limite') acimaDivida.push(uf.nome);
+      if (sitPes === 'acima do limite') acimaPessoal.push(uf.nome);
+      return [
+        uf.nome,
+        div == null ? 'n/d' : { texto: pctDivida(div), detalhe: ROTULO_SITUACAO[sitDiv] ?? null },
+        pes == null ? 'n/d' : { texto: pctPessoal(pes), detalhe: ROTULO_SITUACAO[sitPes] ?? null },
+      ];
+    });
+    const frase = (lista, oque) => (lista.length
+      ? `Em ${anos[k]}, ${lista.length === 1 ? '1 estado estava' : `${lista.length} estados estavam`} acima do limite ${oque}: ${listaDeAnos(lista)}.`
+      : `Em ${anos[k]}, nenhum estado estava acima do limite ${oque}.`);
+    definirTopicos('estados-todos', `${frase(acimaDivida, 'da dívida')} ${frase(acimaPessoal, 'de gasto com pessoal')}`);
+    preencherTabela($('#tabela-estados'),
+      ['Estado', 'Dívida (% da receita)', 'Gasto com pessoal (% da receita)'],
+      linhas,
+      `Limite da dívida: ${limiteTexto(limiteDivida)} da receita. Limite de gasto com pessoal: 49% (48,6% em estados com tribunal de contas dos municípios). "Alerta" é 90% do limite; "prudencial", 95%.`);
+  };
+  selAno.addEventListener('change', desenharTabela);
+  desenharTabela();
+
+  registrarDownload('estados', () => ({
+    nome: 'contas-dos-estados.csv',
+    cabecalhos: ['estado', 'sigla', 'ano', 'receita corrente liquida (R$)', 'divida consolidada liquida (R$)', 'divida (% da RCL)',
+      'limite da divida (% da RCL)', 'despesa com pessoal (R$)', 'pessoal (% da RCL)', 'limite de pessoal (% da RCL)',
+      'limite prudencial (% da RCL)', 'limite de alerta de pessoal (% da RCL)'],
+    linhas: estados.flatMap((uf) => anos.map((ano, k) => [uf.nome, uf.sigla, ano, ind(uf, 'rcl', k), ind(uf, 'dcl', k), ind(uf, 'dcl_rcl_pct', k),
+      limiteDivida, ind(uf, 'pessoal', k), ind(uf, 'pessoal_rcl_pct', k), ind(uf, 'pessoal_limite_pct', k),
+      ind(uf, 'pessoal_prudencial_pct', k), ind(uf, 'pessoal_alerta_pct', k)])),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Salário mínimo
 // ---------------------------------------------------------------------------
 
@@ -1689,7 +1860,7 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarGastos, montarContas, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarGastos, montarContas, montarEstados, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

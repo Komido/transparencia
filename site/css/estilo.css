@@ -500,6 +500,9 @@ details.glossario > p {
 .linha { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .linha.serie-1 { stroke: var(--serie-1); }
 .linha.serie-2 { stroke: var(--serie-2); }
+.linha.serie-limite { stroke: var(--tinta-2); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.ponto.serie-limite { fill: var(--tinta-2); }
+.legenda-chave.serie-limite { background: none; border-top: 2px dashed var(--tinta-2); height: 0; }
 .serie-1 .coluna { fill: var(--serie-1); }
 .serie-2 .coluna { fill: var(--serie-2); }
 .coluna.parcial { fill-opacity: 0.4; }
@@ -585,6 +588,7 @@ tbody th { font-weight: 600; min-width: 7rem; }
 }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .detalhe { display: block; font-weight: 400; font-size: 0.8125rem; color: var(--tinta-2); }
+td.num .detalhe { white-space: normal; }
 .partido { color: var(--tinta-2); font-weight: 400; }
 
 .botao {

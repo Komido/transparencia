@@ -48,6 +48,7 @@
           <dd data-campo="estimado">n/d</dd>
         </div>
       </dl>
+      <p class="nota">Só impostos federais. Os de estados e municípios, como ICMS, IPVA, ISS e IPTU, não entram nesta conta.</p>
       <details class="glossario">
         <summary>Como esse número é calculado?</summary>
         <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS. Ainda não inclui os impostos de estados e municípios, como ICMS, IPVA e IPTU.</p>
@@ -65,6 +66,7 @@
       <a href="#composicao">De onde vem</a>
       <a href="#gastos">Para onde vai</a>
       <a href="#contas">Contas públicas</a>
+      <a href="#estados">Estados</a>
       <a href="#dolar">Dólar</a>
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
@@ -291,6 +293,7 @@
       </header>
       <div class="resumo" data-campo="composicao-resumo"></div>
       <ul class="barras" id="lista-composicao"></ul>
+      <p class="nota">Aqui entram só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. Ficam de fora os impostos dos estados (ICMS, IPVA e ITCMD), os dos municípios (ISS, IPTU e ITBI) e o FGTS, que vai para a conta do trabalhador.</p>
       <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">n/d</span>.</p>
     </section>
 
@@ -368,6 +371,47 @@
       <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou.</p>
       <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
       <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
+    </section>
+
+    <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
+      <header>
+        <h2 id="estados-titulo">Como estão as contas do seu estado?</h2>
+      </header>
+      <div class="controles controles-coluna">
+        <label class="seletor">Estado
+          <select id="estados-uf"></select>
+        </label>
+      </div>
+      <div class="resumo" data-campo="estados-resumo"></div>
+      <div class="controles">
+        <fieldset class="segmentos">
+          <legend>Mostrar</legend>
+          <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
+          <label><input type="radio" name="estados-visao" value="pessoal"><span>Gasto com pessoal</span></label>
+        </fieldset>
+      </div>
+      <p class="nota" data-campo="estados-explicacao"></p>
+      <div id="grafico-estados"></div>
+      <details class="glossario">
+        <summary>Que receita é essa?</summary>
+        <p>É a receita corrente líquida: o que o estado arrecada no ano com impostos, repasses da União e outras receitas do dia a dia, menos o que ele é obrigado a repassar às prefeituras e outras deduções previstas em lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para limitar a dívida e o gasto com pessoal.</p>
+      </details>
+      <details class="glossario">
+        <summary>O que acontece quando o estado passa do limite?</summary>
+        <p>Gasto com pessoal: acima de 95% do limite (o "limite prudencial"), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem dois quadrimestres para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima do limite tem até 2032 para voltar a ele aos poucos (Lei Complementar 178).</p>
+        <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem três quadrimestres para voltar a ele. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
+      </details>
+      <h3>Todos os estados</h3>
+      <div class="controles">
+        <label class="seletor">Ano
+          <select id="estados-ano"></select>
+        </label>
+      </div>
+      <div class="resumo" data-campo="estados-todos"></div>
+      <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
+      <p class="nota">Os números são os que cada estado informa ao Tesouro Nacional no relatório do fim do ano e cobrem só o Poder Executivo, sem Assembleia, Judiciário, Ministério Público e Tribunal de Contas. O tribunal de contas de cada estado define detalhes do que entra no gasto com pessoal, e essas regras mudaram com o tempo. Por isso, saltos grandes de um ano para o outro podem vir de mudança na forma de contar, e não só no gasto. O limite da dívida é o da lei, igual para todos; em alguns relatórios o estado informou outro valor.</p>
+      <button type="button" class="botao" data-baixar="estados">Baixar planilha com os dados</button>
+      <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Relatório de Gestão Fiscal do Poder Executivo de cada estado, 3º quadrimestre (anexo 1, despesa com pessoal; anexo 2, dívida consolidada líquida). O relatório do fim do ano sai no começo do ano seguinte; o site confere o último ano todo dia e os anteriores uma vez por mês, para pegar correções.</p>
     </section>
 
     <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
