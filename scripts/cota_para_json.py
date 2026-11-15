@@ -174,8 +174,10 @@ def deputados_em_exercicio(ano, hoje):
             break
         pagina += 1
         time.sleep(0.3)
-    # 513 cadeiras; com suplentes que assumem no ano, um pouco mais.
-    if not 513 <= len(lista) <= 800:
+    # 513 cadeiras; com suplentes que assumem no ano, um pouco mais. Nos anos
+    # de troca de legislatura (2019, 2023, 2027), quem saiu em janeiro e quem
+    # entrou em fevereiro contam no mesmo ano.
+    if not 513 <= len(lista) <= 1100:
         falhar(f"API da Câmara: {len(lista)} deputados em exercício em {ano}, fora do esperado")
     return lista
 
@@ -351,14 +353,14 @@ def main():
     for ano in anos:
         deputados, outros_camara, fora, linhas_c, mes_c = ler_camara(ano, origem)
         total_c = sum(d["total"] for d in deputados.values())
-        conferir("Câmara", ano, deputados, total_c, mes_c, 5_000_000, (300, 800))
+        conferir("Câmara", ano, deputados, total_c, mes_c, 5_000_000, (300, 1100))
         exercicio = deputados_em_exercicio(ano, hoje)
         sem_gasto_c = sorted((v for k, v in exercicio.items() if k not in deputados),
                              key=lambda x: sem_acento(x["nome"]).lower())
 
         senadores, outros_senado, linhas_s, mes_s = ler_senado(ano, origem, conhecidos)
         total_s = sum(s["total"] for s in senadores.values())
-        conferir("Senado", ano, senadores, total_s, mes_s, 500_000, (60, 120))
+        conferir("Senado", ano, senadores, total_s, mes_s, 500_000, (60, 160))
         # Sem a data de exercício de cada senador, quem não usou a cota só é
         # listado no ano corrente, entre os senadores atuais.
         sem_gasto_s = None
