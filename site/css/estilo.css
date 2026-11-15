@@ -414,18 +414,34 @@ details.glossario > p {
   font-size: 0.9375rem;
 }
 .seletor { max-width: 100%; min-width: 0; }
-.seletor select {
+/* Selects iguais em todos os navegadores. Sem "appearance: none", o Safari
+   desenha o controle do sistema e ignora borda e fundo. A seta são dois
+   triângulos em CSS, sem imagem (a política de segurança só aceita arquivos
+   do próprio site). */
+select {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 0;
   max-width: 100%;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 36px 0 12px;
   font: inherit;
   font-size: 16px;
+  line-height: 1.25;
   color: var(--tinta);
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  background-color: var(--superficie);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--tinta-2) 50%),
+    linear-gradient(135deg, var(--tinta-2) 50%, transparent 50%);
+  background-position: calc(100% - 19px) 55%, calc(100% - 14px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--eixo);
   border-radius: var(--raio);
+  cursor: pointer;
 }
+select:hover { border-color: var(--tinta-3); }
+select:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
 
 /* Números em destaque ---------------------------------------------------- */
 
@@ -749,7 +765,7 @@ td.num .detalhe { white-space: normal; }
 .seletor-bloco { display: grid; gap: 6px; justify-items: start; }
 .orc-pessoas { display: flex; gap: 16px; }
 .orc-referencia { display: grid; gap: 4px; font-size: 0.8125rem; min-width: 0; }
-.orc-referencia select { width: 100%; min-width: 0; min-height: 40px; font-size: 16px; }
+.orc-referencia select { width: 100%; }
 .seletor-bloco select { max-width: 100%; }
 .seletor-largo, .seletor-largo select { width: 100%; max-width: 28rem; }
 [hidden] { display: none !important; }
