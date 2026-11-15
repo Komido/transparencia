@@ -434,6 +434,35 @@ details.glossario > p {
 .numeros dt { font-size: 0.8125rem; color: var(--tinta-2); }
 .numeros dd { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; }
 
+/* Comparar anos ----------------------------------------------------------- */
+
+.anos-lista {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+.ano-item {
+  padding: 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.ano-nome { margin: 0; font-size: 1rem; line-height: 1.35; }
+.ano-explica { margin: 2px 0 8px; font-size: 0.8125rem; color: var(--tinta-2); }
+.ano-valores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+.ano-valores div { display: flex; flex-direction: column; justify-content: space-between; }
+.ano-valores dt { font-size: 0.8125rem; color: var(--tinta-2); }
+.ano-valores dd { margin: 2px 0 0; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ano-veredito { margin: 8px 0 4px; font-weight: 600; }
+.ano-ranking { margin: 0; font-size: 0.875rem; color: var(--tinta-2); }
+
 /* Gráficos --------------------------------------------------------------- */
 
 .grafico { position: relative; margin: 8px 0 4px; }

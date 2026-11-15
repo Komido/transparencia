@@ -302,10 +302,13 @@ function montarSalario(ctx) {
 
   const reguas = {
     real: {
-      nome: 'Salário mínimo em dinheiro de hoje',
-      valores: sm.real,
+      nome: 'Salário mínimo: valor na época e em dinheiro de hoje',
+      series: [
+        { nome: 'Valor na época', classe: 'serie-1', valores: s.salario_minimo },
+        { nome: 'Em dinheiro de hoje', classe: 'serie-2', valores: sm.real },
+      ],
       formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
-      explicacao: `Quanto o salário de cada época valeria hoje, corrigido pela inflação até ${f.mesLongo(sm.referencia)}. Quanto mais alto, mais ele comprava.`,
+      explicacao: `A linha azul é o salário que se recebia em cada época. A laranja é quanto esse salário valeria hoje, corrigido pela inflação até ${f.mesLongo(sm.referencia)}. A distância entre as duas é a inflação acumulada desde então. Para saber se o salário compra mais ou menos, olhe a laranja: quanto mais alta, mais ele comprava.`,
     },
     dolar: {
       nome: 'Salário mínimo em dólares',
@@ -327,7 +330,7 @@ function montarSalario(ctx) {
       tipo: 'linhas',
       rotulos: meses,
       faixas,
-      series: [{ nome: r.nome, classe: 'serie-1', valores: r.valores }],
+      series: r.series ?? [{ nome: r.nome, classe: 'serie-1', valores: r.valores }],
       formatoY: r.formato,
       rotuloEixoX: rotuloMesNoEixo(5),
       tituloTooltip: (i) => f.mesCurto(meses[i]),
@@ -642,6 +645,138 @@ function montarCompras(ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// Como era a vida em outros anos
+// ---------------------------------------------------------------------------
+
+// Cada item é comparado separadamente. Não existe nota única: juntar os itens
+// exigiria decidir quanto vale cada um, e essa decisão é uma opinião.
+function indicadoresDoAno(ctx) {
+  const { meses, s } = ctx;
+  const sm = c.salarioMinimo(meses, s);
+  const parteDoSalario = (serie, multiplicador) => s.salario_minimo.map((v, i) =>
+    (v == null || serie?.[i] == null ? null : ((serie[i] * multiplicador) / v) * 100));
+  const lista = [
+    {
+      id: 'cestas', nome: 'Cestas básicas que um salário mínimo compra', explica: 'média do ano',
+      valores: s.cesta_total ? c.quantidadeComprada(s.salario_minimo, s.cesta_total) : null,
+      tipo: 'media', maiorMelhor: true, formato: (v) => f.numero(v, 2),
+    },
+    {
+      id: 'salario', nome: 'Salário mínimo em dinheiro de hoje', explica: 'média do ano, corrigida pela inflação (INPC)',
+      valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
+    },
+    {
+      id: 'renda', nome: 'Renda média de quem trabalha, em dinheiro de hoje', explica: 'todos os trabalhos, com ou sem carteira',
+      valores: s.renda_trabalho, tipo: 'trimestral', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
+    },
+    {
+      id: 'desemprego', nome: 'Desemprego', explica: 'de cada 100 pessoas que trabalham ou procuram trabalho, quantas não encontram',
+      valores: s.desocupacao, tipo: 'trimestral', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
+    },
+    {
+      id: 'inflacao', nome: 'Inflação no ano', explica: 'quanto os preços subiram em 12 meses (IPCA)',
+      valores: s.ipca_var, tipo: 'acumulado', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
+    },
+    {
+      id: 'tanque', nome: 'Tanque de 50 litros de gasolina', explica: 'parte do salário mínimo',
+      valores: s.comb_gasolina ? parteDoSalario(s.comb_gasolina, TANQUE_LITROS) : null,
+      tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 0),
+    },
+    {
+      id: 'botijao', nome: 'Botijão de gás', explica: 'parte do salário mínimo',
+      valores: s.comb_glp ? parteDoSalario(s.comb_glp, 1) : null,
+      tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
+    },
+  ];
+  return lista
+    .filter((it) => Array.isArray(it.valores))
+    .map((it) => ({ ...it, ...c.valoresAnuais(meses, it.valores, it.tipo) }))
+    .filter((it) => it.anos.size >= 3 && it.hoje)
+    .map((it) => ({ ...it, ranking: c.rankingDeAnos(it.anos, it.maiorMelhor) }));
+}
+
+function frasePosicao(vencidos, total, desde) {
+  if (vencidos === total) return `Hoje está melhor do que em todos os ${total} anos desde ${desde}.`;
+  if (vencidos === 0) return `Hoje não está melhor do que em nenhum dos ${total} anos desde ${desde}.`;
+  return `Hoje está melhor do que em ${vencidos} dos ${total} anos desde ${desde}.`;
+}
+
+const listaDeAnos = (anos) => (anos.length <= 1 ? anos.join('')
+  : `${anos.slice(0, -1).join(', ')} e ${anos[anos.length - 1]}`);
+
+function montarAnos(ctx) {
+  const itens = indicadoresDoAno(ctx);
+  if (!itens.length) { $('#anos').hidden = true; return; }
+
+  // Anos que aparecem em todos os itens têm a comparação mais completa.
+  const todosOsAnos = [...new Set(itens.flatMap((it) => [...it.anos.keys()]))].sort((a, b) => b - a);
+  const comTudo = todosOsAnos.filter((ano) => itens.every((it) => it.anos.has(ano)));
+  const padrao = comTudo.length ? Math.min(...comTudo) : todosOsAnos[todosOsAnos.length - 1];
+
+  const select = $('#anos-ano');
+  select.replaceChildren();
+  todosOsAnos.forEach((ano) => {
+    const op = el('option', null, String(ano), select);
+    op.value = String(ano);
+    if (ano === padrao) op.selected = true;
+  });
+
+  const melhores = [...new Set(itens.map((it) => it.ranking[0].ano))].sort((a, b) => a - b);
+  definir('anos-resumo', melhores.length === 1
+    ? `Em todos os itens abaixo, o ano mais favorável foi ${melhores[0]}.`
+    : `Nenhum ano foi o melhor em tudo. Cada item teve seu ano mais favorável: ${listaDeAnos(melhores)}. `
+      + 'Escolha um ano para comparar com hoje.');
+  definir('anos-nota-padrao', comTudo.length
+    ? `A comparação começa em ${padrao}, primeiro ano com todos os itens. Alguns itens começam depois de 1995 porque a pesquisa de origem começou depois.`
+    : '');
+
+  const desenhar = () => {
+    const ano = Number(select.value);
+    const lista = $('#anos-lista');
+    lista.replaceChildren();
+    for (const it of itens) {
+      const li = el('li', 'ano-item', null, lista);
+      el('h3', 'ano-nome', it.nome, li);
+      el('p', 'ano-explica', it.explica, li);
+
+      const valores = el('dl', 'ano-valores', null, li);
+      const vAno = it.anos.get(ano);
+      const caixa = (rotulo, texto) => {
+        const div = el('div', null, null, valores);
+        el('dt', null, rotulo, div);
+        el('dd', null, texto, div);
+      };
+      caixa(String(ano), vAno == null ? 'sem dado' : it.formato(vAno));
+      caixa(`Hoje (${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)})`, it.formato(it.hoje.valor));
+
+      const primeiroAno = Math.min(...it.anos.keys());
+      let veredito;
+      if (vAno == null) veredito = `Sem dado para ${ano}: a série começa em ${primeiroAno}.`;
+      else {
+        const r = c.comparar(it.hoje.valor, vAno, it.maiorMelhor);
+        veredito = r === 1 ? 'Melhor hoje.' : r === -1 ? `Era melhor em ${ano}.` : 'Praticamente igual.';
+      }
+      el('p', 'ano-veredito', veredito, li);
+
+      const melhoresAnos = it.ranking.slice(0, 3).map((x) => `${x.ano} (${it.formato(x.valor)})`);
+      const pior = it.ranking[it.ranking.length - 1];
+      const vencidos = it.ranking.filter((x) => c.comparar(it.hoje.valor, x.valor, it.maiorMelhor) === 1).length;
+      el('p', 'ano-ranking',
+        `Anos mais favoráveis: ${listaDeAnos(melhoresAnos)}. Menos favorável: ${pior.ano} (${it.formato(pior.valor)}). `
+        + frasePosicao(vencidos, it.ranking.length, primeiroAno), li);
+    }
+  };
+  select.addEventListener('change', desenhar);
+  desenhar();
+
+  registrarDownload('anos', () => ({
+    nome: 'comparar-anos.csv',
+    cabecalhos: ['ano', ...itens.map((it) => it.nome)],
+    linhas: [...todosOsAnos].sort((a, b) => a - b).map((ano) => [ano, ...itens.map((it) => arred(it.anos.get(ano) ?? null, 2))]),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Combustíveis
 // ---------------------------------------------------------------------------
 
@@ -914,7 +1049,7 @@ async function iniciar() {
   try {
     const dados = await carregarPainel();
     const ctx = preparar(dados);
-    const etapas = [iniciarContador, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
+    const etapas = [iniciarContador, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {

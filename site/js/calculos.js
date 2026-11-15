@@ -394,6 +394,58 @@ export function quantidadeComprada(salario, preco, tamanho = 1) {
 }
 
 // ---------------------------------------------------------------------------
+// Comparar anos
+// ---------------------------------------------------------------------------
+
+// Valor de cada ano completo e dos últimos 12 meses com dado.
+// tipo 'media':      média dos 12 meses.
+// tipo 'acumulado':  variação acumulada a partir das variações mensais (%).
+// tipo 'trimestral': média dos 4 trimestres (jan-mar, abr-jun, jul-set,
+//                    out-dez), para séries de trimestre móvel gravadas no
+//                    último mês de cada trimestre.
+// Um período só tem valor quando todos os meses (ou trimestres) têm dado.
+export function valoresAnuais(meses, valores, tipo) {
+  const pontos = (fim) => (tipo === 'trimestral'
+    ? [fim - 9, fim - 6, fim - 3, fim]
+    : Array.from({ length: 12 }, (_, k) => fim - 11 + k));
+  const calcular = (fim) => {
+    const idx = pontos(fim);
+    if (idx[0] < 0) return null;
+    const v = idx.map((i) => valores[i]);
+    if (v.some((x) => x == null)) return null;
+    if (tipo === 'acumulado') return (v.reduce((a, x) => a * (1 + x / 100), 1) - 1) * 100;
+    return v.reduce((a, x) => a + x, 0) / v.length;
+  };
+
+  const anos = new Map();
+  meses.forEach((mes, i) => {
+    if (mesDoAno(mes) !== 12) return;
+    const valor = calcular(i);
+    if (valor != null) anos.set(anoDe(mes), valor);
+  });
+  const ultimo = ultimoIndice(valores);
+  const valorHoje = ultimo < 0 ? null : calcular(ultimo);
+  const hoje = valorHoje == null ? null : { valor: valorHoje, de: meses[ultimo - 11], ate: meses[ultimo] };
+  return { anos, hoje };
+}
+
+// Compara dois valores. 1: o primeiro é mais favorável; -1: menos favorável;
+// 0: diferença menor que 1% do segundo (praticamente igual).
+export function comparar(a, b, maiorMelhor) {
+  if (a == null || b == null) return null;
+  const base = Math.abs(b) > 0 ? Math.abs(b) : 1;
+  if (Math.abs(a - b) / base < 0.01) return 0;
+  return (a > b) === maiorMelhor ? 1 : -1;
+}
+
+// Anos do mais para o menos favorável. Empate no valor: o ano mais antigo antes.
+export function rankingDeAnos(anos, maiorMelhor) {
+  return [...anos.entries()]
+    .map(([ano, valor]) => ({ ano, valor }))
+    .sort((a, b) => (maiorMelhor ? b.valor - a.valor : a.valor - b.valor) || a.ano - b.ano);
+}
+
+// ---------------------------------------------------------------------------
 // Arrecadômetro (estimativa em tempo real)
 // ---------------------------------------------------------------------------
 
