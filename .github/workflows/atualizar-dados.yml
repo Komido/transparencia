@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: atualizar-dados
+  group: gravar-no-repositorio
   cancel-in-progress: false
 
 jobs:
@@ -66,4 +66,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$DESTINO"
           git commit -m "Atualiza dados do painel (versão ${nova:0:12})"
+          git pull --rebase --quiet
           git push

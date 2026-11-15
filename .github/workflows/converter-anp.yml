@@ -1,0 +1,45 @@
+name: Converter preços de combustíveis da ANP
+
+# A ANP publica as médias mensais de preços só em Excel. Esta tarefa baixa os
+# arquivos oficiais, converte para CSV (scripts/anp_para_csv.py) e grava em
+# dados-fonte/anp/, com o SHA-256 de cada original. O banco coleta esse CSV
+# depois, com as mesmas validações das outras fontes.
+
+on:
+  schedule:
+    - cron: "53 8 * * *" # 05:53 em Brasília, antes da coleta das 06:41
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gravar-no-repositorio
+  cancel-in-progress: false
+
+jobs:
+  converter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar leitor de Excel
+        run: python3 -m pip install --quiet openpyxl==3.1.5
+
+      - name: Converter
+        run: python3 scripts/anp_para_csv.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- dados-fonte/anp && [ -z "$(git ls-files --others --exclude-standard dados-fonte/anp)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dados-fonte/anp
+          git commit -m "Atualiza preços de combustíveis da ANP"
+          git pull --rebase --quiet
+          git push
