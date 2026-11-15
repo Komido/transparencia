@@ -214,16 +214,28 @@ main { padding-bottom: 32px; }
 
 /* Atalhos ---------------------------------------------------------------- */
 
+/* A barra de atalhos fica presa no topo durante a rolagem, para que as
+   seções nunca fiquem longe dela. */
 .atalhos {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 16px 0 0;
+  margin: 16px -16px 0;
+  padding: 10px 16px;
+  background: var(--pagina);
+  border-bottom: 1px solid transparent;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
+.atalhos::-webkit-scrollbar { display: none; }
+.atalhos.presa { border-bottom-color: var(--borda); }
 .atalhos a {
   display: inline-flex;
   align-items: center;
+  flex: none;
   min-height: 44px;
   padding: 0 14px;
   border: 1px solid var(--borda);
@@ -232,6 +244,18 @@ main { padding-bottom: 32px; }
   color: var(--tinta);
   text-decoration: none;
   white-space: nowrap;
+}
+.atalhos a[aria-current="true"] {
+  background: var(--tinta);
+  border-color: var(--tinta);
+  color: var(--superficie);
+}
+
+/* Espaço para a barra fixa ao saltar para uma seção. */
+main section[id] { scroll-margin-top: 76px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
 }
 
 /* Controles -------------------------------------------------------------- */

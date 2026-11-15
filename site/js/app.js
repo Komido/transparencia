@@ -551,6 +551,62 @@ document.addEventListener('click', (ev) => {
 });
 
 // ---------------------------------------------------------------------------
+// Navegação: barra de atalhos fixa, atalho da seção visível em destaque e
+// correção do salto para #seção quando a página abre antes dos dados.
+// ---------------------------------------------------------------------------
+
+let usuarioRolou = false;
+['wheel', 'touchmove', 'keydown'].forEach((evento) => {
+  window.addEventListener(evento, () => { usuarioRolou = true; }, { passive: true });
+});
+window.addEventListener('hashchange', () => { usuarioRolou = false; });
+
+function reposicionarNaSecao() {
+  if (usuarioRolou) return;
+  const id = decodeURIComponent(window.location.hash.slice(1));
+  const alvo = id ? document.getElementById(id) : null;
+  if (alvo) alvo.scrollIntoView({ block: 'start' });
+}
+
+function iniciarNavegacao() {
+  const barra = $('.atalhos');
+  if (!barra) return;
+  const links = [...barra.querySelectorAll('a[href^="#"]')];
+  const secoes = links.map((a) => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+
+  // Linha divisória só quando a barra está presa no topo.
+  const sentinela = document.createElement('div');
+  sentinela.setAttribute('aria-hidden', 'true');
+  barra.before(sentinela);
+  new IntersectionObserver(([e]) => barra.classList.toggle('presa', !e.isIntersecting)).observe(sentinela);
+
+  const marcar = (id) => {
+    links.forEach((a) => {
+      const ativo = a.getAttribute('href') === `#${id}`;
+      if (ativo) {
+        a.setAttribute('aria-current', 'true');
+        // Mantém o atalho ativo visível na barra, sem mexer na rolagem vertical.
+        const esquerda = a.offsetLeft - barra.offsetLeft;
+        if (esquerda < barra.scrollLeft || esquerda + a.offsetWidth > barra.scrollLeft + barra.clientWidth) {
+          barra.scrollLeft = esquerda - 16;
+        }
+      } else {
+        a.removeAttribute('aria-current');
+      }
+    });
+  };
+
+  // A seção ativa é a que ocupa a faixa logo abaixo da barra.
+  const visiveis = new Set();
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => (e.isIntersecting ? visiveis.add(e.target.id) : visiveis.delete(e.target.id)));
+    const atual = secoes.find((s) => visiveis.has(s.id));
+    marcar(atual ? atual.id : null);
+  }, { rootMargin: '-80px 0px -55% 0px' });
+  secoes.forEach((s) => observador.observe(s));
+}
+
+// ---------------------------------------------------------------------------
 
 async function iniciar() {
   const main = $('#conteudo');
@@ -572,7 +628,10 @@ async function iniciar() {
     caixa.hidden = false;
   } finally {
     main.classList.remove('carregando');
+    // Depois que tudo foi desenhado, refaz o salto para #seção, se houver.
+    requestAnimationFrame(reposicionarNaSecao);
   }
 }
 
+iniciarNavegacao();
 iniciar();
