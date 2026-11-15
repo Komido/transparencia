@@ -645,6 +645,155 @@ function montarCompras(ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// O salário dá para viver? (orçamento da família)
+// ---------------------------------------------------------------------------
+
+// Despesas do básico da casa. padrao() devolve o valor médio do país, com a
+// explicação de onde ele vem, ou null quando ainda não há fonte automática.
+// A pessoa pode trocar qualquer valor pelo da sua casa.
+const ITENS_ORCAMENTO = [
+  {
+    id: 'comida', nome: 'Comida',
+    padrao: ({ meses, s }, adultos) => {
+      const u = c.ultimoValor(meses, s.cesta_total);
+      return u && {
+        valor: u.valor * adultos,
+        nota: `${adultos === 1 ? 'Uma cesta básica' : `${adultos} cestas básicas`} do DIEESE, média de capitais em ${f.mesCurto(u.mes)}`,
+      };
+    },
+  },
+  { id: 'aluguel', nome: 'Aluguel', padrao: () => null },
+  { id: 'luz', nome: 'Luz', padrao: () => null },
+  { id: 'agua', nome: 'Água', padrao: () => null },
+  {
+    id: 'gas', nome: 'Gás de cozinha',
+    padrao: ({ meses, s }) => {
+      const u = c.ultimoValor(meses, s.comb_glp);
+      return u && { valor: u.valor, nota: `Um botijão de 13 kg por mês, preço médio da ANP em ${f.mesCurto(u.mes)}` };
+    },
+  },
+];
+
+const RENDAS_EM_SALARIOS = [1, 1.5, 2, 3, 4, 5];
+
+function montarOrcamento(ctx) {
+  const { meses, s } = ctx;
+  const sm = c.ultimoValor(meses, s.salario_minimo);
+  if (!sm) { $('#orcamento').hidden = true; return; }
+
+  const selRenda = $('#orc-renda');
+  const campoOutra = $('#orc-renda-outra');
+  const caixaOutra = $('#orc-renda-outra-caixa');
+  const selAdultos = $('#orc-adultos');
+  selRenda.replaceChildren();
+  for (const n of RENDAS_EM_SALARIOS) {
+    const nome = n === 1 ? '1 salário mínimo' : `${f.numero(n, n % 1 ? 1 : 0)} salários mínimos`;
+    const op = el('option', null, `${nome} (${f.moeda(sm.valor * n, 0)})`, selRenda);
+    op.value = String(n);
+    if (n === 2) op.selected = true;
+  }
+  el('option', null, 'Outro valor', selRenda).value = 'outro';
+
+  // Valores digitados pela pessoa valem até ela pedir os valores médios de novo.
+  const digitados = new Map();
+  const lista = $('#orc-lista');
+  const linhas = new Map();
+  for (const item of ITENS_ORCAMENTO) {
+    const li = el('li', 'orc-item', null, lista);
+    const topo = el('div', 'orc-topo', null, li);
+    const rotulo = el('label', 'orc-nome', item.nome, topo);
+    rotulo.htmlFor = `orc-${item.id}`;
+    const campo = el('div', 'orc-campo', null, topo);
+    el('span', null, 'R$', campo);
+    const input = el('input', null, null, campo);
+    input.id = `orc-${item.id}`;
+    input.type = 'number';
+    input.inputMode = 'numeric';
+    input.min = '0';
+    input.max = '1000000';
+    input.step = '1';
+    const nota = el('p', 'orc-nota', null, li);
+    const trilho = el('div', 'barra-trilho', null, li);
+    trilho.setAttribute('aria-hidden', 'true');
+    const barra = el('div', 'barra', null, trilho);
+    const parte = el('p', 'orc-parte', null, li);
+    input.addEventListener('input', () => {
+      const v = Number(input.value);
+      if (input.value === '' || !Number.isFinite(v) || v < 0) digitados.delete(item.id);
+      else digitados.set(item.id, Math.min(v, 1000000));
+      calcular(false);
+    });
+    linhas.set(item.id, { input, nota, barra, parte });
+  }
+
+  const renda = () => {
+    if (selRenda.value !== 'outro') return sm.valor * Number(selRenda.value);
+    const v = Number(campoOutra.value);
+    return Number.isFinite(v) && v > 0 ? Math.min(v, 10000000) : 0;
+  };
+
+  const calcular = (reescreverCampos = true) => {
+    const adultos = Number(selAdultos.value) || 2;
+    caixaOutra.hidden = selRenda.value !== 'outro';
+    const r = renda();
+    const despesas = ITENS_ORCAMENTO.map((item) => {
+      const p = item.padrao(ctx, adultos);
+      const valor = digitados.has(item.id) ? digitados.get(item.id) : (p ? Math.round(p.valor) : null);
+      return { id: item.id, nome: item.nome, valor, nota: digitados.has(item.id) ? 'Valor digitado por você' : (p?.nota ?? 'Ainda sem fonte automática para este item. Digite o valor da sua casa.') };
+    });
+    const res = c.orcamento(r, despesas);
+
+    for (const d of res.itens) {
+      const linha = linhas.get(d.id);
+      if (reescreverCampos || !digitados.has(d.id)) linha.input.value = d.valor == null ? '' : String(d.valor);
+      linha.nota.textContent = d.nota;
+      linha.barra.style.width = `${Math.max(0, Math.min(100, d.parte ?? 0))}%`;
+      linha.parte.textContent = d.parte == null ? '' : `${f.porcentagem(d.parte, 0)} da renda`;
+    }
+
+    const semValor = res.itens.filter((d) => d.valor == null).map((d) => d.nome.toLowerCase());
+    const pessoas = adultos === 1 ? 'Uma pessoa que mora sozinha' : 'Um casal';
+    const rendaTexto = selRenda.value === 'outro'
+      ? `renda de ${f.moeda(r, 0)}`
+      : `renda de ${selRenda.selectedOptions[0].textContent.replace(/ \(.*\)$/, '')} (${f.moeda(r, 0)})`;
+    let resumo = r > 0
+      ? `${pessoas} com ${rendaTexto} gasta cerca de ${f.moeda(res.total, 0)} por mês com o básico da casa: ${f.porcentagem(res.parteTotal, 0)} da renda. `
+      : 'Informe a renda da casa. ';
+    if (r > 0) {
+      resumo += res.sobra >= 0
+        ? `Sobram ${f.moeda(res.sobra, 0)} para transporte, saúde, roupas, escola e todo o resto.`
+        : `Faltam ${f.moeda(-res.sobra, 0)} só para o básico.`;
+    }
+    if (semValor.length) resumo += ` A conta ainda não inclui ${listaDeAnos(semValor)}: digite esses valores abaixo para completar.`;
+    definir('orc-resumo', resumo);
+    definir('orc-total', f.moeda(res.total, 0));
+    definir('orc-sobra-rotulo', res.sobra >= 0 ? 'Sobra' : 'Falta');
+    definir('orc-sobra', f.moeda(Math.abs(res.sobra), 0));
+
+    const nec = c.ultimoValor(meses, s.smn_dieese);
+    if (nec) {
+      const smNec = c.ultimoValor(meses, s.salario_minimo.map((v, i) => (s.smn_dieese[i] == null ? null : v)));
+      definir('orc-digno', `Para o DIEESE, uma família de quatro pessoas (dois adultos e duas crianças) precisaria de ${f.moeda(nec.valor, 0)} por mês, em ${f.mesLongo(nec.mes)}, para pagar comida, moradia, saúde, educação, roupas, higiene, transporte, lazer e previdência. `
+        + `Isso equivale a ${f.numero(nec.valor / smNec.valor, 1)} salários mínimos. `
+        + (r > 0 ? `A renda escolhida acima cobre ${f.porcentagem((r / nec.valor) * 100, 0)} desse valor.` : ''));
+    }
+
+    registrarDownload('orcamento', () => ({
+      nome: 'orcamento-da-familia.csv',
+      cabecalhos: ['item', 'valor (R$)', 'parte da renda (%)', 'origem do valor'],
+      linhas: [['renda', arred(r, 2), 100, selRenda.value === 'outro' ? 'digitado' : `${selRenda.value} salário(s) mínimo(s)`],
+        ...res.itens.map((d) => [d.nome, d.valor, arred(d.parte, 1), d.nota])],
+    }));
+  };
+
+  selRenda.addEventListener('change', () => calcular(false));
+  campoOutra.addEventListener('input', () => calcular(false));
+  selAdultos.addEventListener('change', () => calcular(false));
+  $('#orc-restaurar').addEventListener('click', () => { digitados.clear(); calcular(true); });
+  calcular(true);
+}
+
+// ---------------------------------------------------------------------------
 // Como era a vida em outros anos
 // ---------------------------------------------------------------------------
 
@@ -1049,7 +1198,7 @@ async function iniciar() {
   try {
     const dados = await carregarPainel();
     const ctx = preparar(dados);
-    const etapas = [iniciarContador, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
+    const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {

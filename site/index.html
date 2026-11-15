@@ -56,6 +56,7 @@
     </section>
 
     <nav class="atalhos" aria-label="Seções">
+      <a href="#orcamento">Orçamento da família</a>
       <a href="#anos">Comparar anos</a>
       <a href="#compras">O que o salário compra</a>
       <a href="#combustiveis">Combustíveis</a>
@@ -66,6 +67,41 @@
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
     </nav>
+
+    <section id="orcamento" class="bloco bloco-dados" aria-labelledby="orcamento-titulo">
+      <header>
+        <h2 id="orcamento-titulo">O salário dá para viver?</h2>
+      </header>
+      <p class="resumo" data-campo="orc-resumo"></p>
+      <div class="controles controles-coluna">
+        <label class="seletor seletor-bloco">Renda da casa
+          <select id="orc-renda"></select>
+        </label>
+        <label class="seletor seletor-bloco" id="orc-renda-outra-caixa" hidden>Renda em reais
+          <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
+        </label>
+        <label class="seletor seletor-bloco">Quem mora
+          <select id="orc-adultos">
+            <option value="2" selected>2 adultos</option>
+            <option value="1">1 adulto</option>
+          </select>
+        </label>
+      </div>
+      <ul class="orc-lista" id="orc-lista"></ul>
+      <dl class="numeros orc-totais">
+        <div><dt>Total do básico</dt><dd data-campo="orc-total">n/d</dd></div>
+        <div><dt data-campo="orc-sobra-rotulo">Sobra</dt><dd data-campo="orc-sobra">n/d</dd></div>
+      </dl>
+      <button type="button" class="botao" id="orc-restaurar">Voltar aos valores médios</button>
+      <h3>Quanto seria preciso para viver com o básico?</h3>
+      <p data-campo="orc-digno"></p>
+      <details class="glossario">
+        <summary>O que fica de fora desta conta?</summary>
+        <p>A conta mostra só o básico da casa: comida, aluguel, luz, água e gás. Ficam de fora transporte, remédios, roupas, escola, internet, telefone e lazer, que o DIEESE inclui no salário necessário. Os valores são médias do país; na sua cidade podem ser bem diferentes, por isso cada campo pode ser trocado pelo valor da sua casa.</p>
+      </details>
+      <button type="button" class="botao" data-baixar="orcamento">Baixar planilha com os dados</button>
+      <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
+    </section>
 
     <section id="anos" class="bloco bloco-dados" aria-labelledby="anos-titulo">
       <header>

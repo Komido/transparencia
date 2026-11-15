@@ -692,3 +692,31 @@ tbody th { font-weight: 600; min-width: 7rem; }
   .atalhos, .controles, .botao, .navegacao { display: none; }
   .bloco { break-inside: avoid; border-color: #ccc; }
 }
+
+/* Orçamento da família ------------------------------------------------------ */
+
+.orc-lista { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 14px; }
+.orc-item { display: grid; gap: 4px; }
+.orc-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.orc-nome { font-weight: 600; }
+.orc-campo { display: flex; align-items: center; gap: 6px; color: var(--tinta-2); }
+.orc-campo input, .seletor input {
+  width: 7.5rem;
+  min-height: 44px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 16px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.orc-nota { margin: 0; font-size: 0.8125rem; color: var(--tinta-2); }
+.orc-parte { margin: 0; font-size: 0.8125rem; color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.orc-totais { margin-top: 4px; }
+#orc-restaurar { margin-bottom: 20px; }
+.seletor-bloco { display: grid; gap: 6px; justify-items: start; }
+.seletor-bloco select { max-width: 100%; }
+[hidden] { display: none !important; }

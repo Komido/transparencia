@@ -446,6 +446,25 @@ export function rankingDeAnos(anos, maiorMelhor) {
 }
 
 // ---------------------------------------------------------------------------
+// Orçamento da família
+// ---------------------------------------------------------------------------
+
+// Soma as despesas e calcula a parte da renda de cada uma e o que sobra.
+// Despesa sem valor (null) não entra na soma.
+export function orcamento(renda, despesas) {
+  const parte = (v) => (renda > 0 && v != null ? (v / renda) * 100 : null);
+  const itens = despesas.map((d) => ({ ...d, parte: parte(d.valor) }));
+  const total = itens.reduce((a, d) => a + (d.valor ?? 0), 0);
+  return { itens, total, parteTotal: parte(total), sobra: renda - total };
+}
+
+// Último valor publicado de uma série mensal, com o mês.
+export function ultimoValor(meses, valores) {
+  const i = ultimoIndice(valores ?? []);
+  return i < 0 ? null : { valor: valores[i], mes: meses[i] };
+}
+
+// ---------------------------------------------------------------------------
 // Arrecadômetro (estimativa em tempo real)
 // ---------------------------------------------------------------------------
 
