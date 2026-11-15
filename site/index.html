@@ -63,6 +63,7 @@
       <a href="#salario">Salário mínimo</a>
       <a href="#arrecadacao">Impostos</a>
       <a href="#composicao">De onde vem</a>
+      <a href="#gastos">Para onde vai</a>
       <a href="#dolar">Dólar</a>
       <a href="#ir">Imposto de Renda</a>
       <a href="#avisos">Avisos</a>
@@ -283,6 +284,46 @@
       <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">n/d</span>.</p>
     </section>
 
+    <section id="gastos" class="bloco bloco-dados" aria-labelledby="gastos-titulo">
+      <header>
+        <h2 id="gastos-titulo">Para onde vai o dinheiro do governo federal?</h2>
+      </header>
+      <p class="resumo" data-campo="gastos-resumo"></p>
+      <div class="controles controles-coluna">
+        <label class="seletor">Ano
+          <select id="gastos-ano"></select>
+        </label>
+      </div>
+      <ul class="barras" id="lista-gastos"></ul>
+      <details class="glossario">
+        <summary>O que é a "rolagem da dívida"?</summary>
+        <p>Quando uma parte da dívida pública vence, o governo pode pagar com dinheiro do orçamento ou emitir dívida nova para pagar a velha. Essa segunda forma é a rolagem. Ela aparece no orçamento como gasto, mas não é dinheiro que vai para serviços ou para as pessoas: troca uma dívida por outra. Por isso fica fora da conta "de cada R$ 100".</p>
+      </details>
+      <h3>Comparar áreas ao longo dos anos</h3>
+      <div class="controles controles-coluna">
+        <label class="seletor seletor-bloco">Área
+          <select id="gastos-area-a"></select>
+        </label>
+        <label class="seletor seletor-bloco">Comparar com
+          <select id="gastos-area-b"></select>
+        </label>
+        <fieldset class="segmentos">
+          <legend>Mostrar</legend>
+          <label><input type="radio" name="gastos-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
+          <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
+        </fieldset>
+      </div>
+      <p class="resumo" data-campo="gastos-comparacao"></p>
+      <div id="grafico-gastos"></div>
+      <p class="como-ler">Como ler: cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
+      <details class="glossario">
+        <summary>Que gasto é esse?</summary>
+        <p>Todo gasto público passa por três etapas: empenho (o governo reserva o dinheiro), liquidação (o serviço foi entregue e o valor passa a ser devido) e pagamento. O site usa a liquidação, que mostra o que foi de fato executado no ano. Os números são da União; estados e municípios gastam com saúde e educação também, com dinheiro próprio e com os repasses federais.</p>
+      </details>
+      <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
+      <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
+    </section>
+
     <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
       <header>
         <h2 id="dolar-titulo">O dólar está caro ou barato?</h2>
@@ -320,7 +361,7 @@
 
     <section id="proximas" class="bloco" aria-labelledby="proximas-titulo">
       <h2 id="proximas-titulo">Em breve</h2>
-      <p>Gastos do governo por área, e os mesmos números para cada estado e cidade, inclusive o orçamento da família com os preços de cada cidade, sempre com a data do dado e a fonte oficial.</p>
+      <p>Os mesmos números para cada estado e cidade, inclusive os gastos de cada governo e o orçamento da família com os preços de cada cidade, sempre com a data do dado e a fonte oficial.</p>
     </section>
 
     <section id="fontes" class="bloco" aria-labelledby="fontes-titulo">

@@ -81,3 +81,42 @@ export const TRIBUTOS = {
 };
 
 export const nomeDoTributo = (grupo) => TRIBUTOS[grupo]?.nome ?? grupo;
+
+// Áreas de gasto do governo federal em palavras do dia a dia. Cada área junta
+// uma ou mais contas da declaração anual (função "10", subfunção "28.843"...).
+// A rolagem da dívida (28.841 e 28.842) fica fora: é dívida velha paga com
+// dívida nova, não dinheiro que sai para serviços ou pessoas.
+export const ROLAGEM = ['28.841', '28.842'];
+export const AREAS_DE_GASTO = [
+  { id: '09', contas: ['09'], nome: 'Aposentadorias e pensões', explica: 'INSS e aposentadorias dos servidores federais' },
+  { id: 'divida', contas: ['28.843', '28.844'], nome: 'Juros e pagamento da dívida', explica: 'juros da dívida pública e parte do valor que venceu' },
+  { id: 'transferencias', contas: ['28.845'], nome: 'Repasses a estados, municípios e outras transferências', explica: 'inclui a parte dos impostos federais que a Constituição manda repassar' },
+  { id: 'outros_encargos', contas: ['28.846', '28.999', 'FU28'], nome: 'Outros encargos', explica: 'despesas que o orçamento não liga a uma área específica' },
+  { id: '08', contas: ['08'], nome: 'Assistência social', explica: 'assistência a idosos e a pessoas com deficiência e programas de renda' },
+  { id: '10', contas: ['10'], nome: 'Saúde', explica: null },
+  { id: '12', contas: ['12'], nome: 'Educação', explica: 'inclui universidades e institutos federais' },
+  { id: 'educacao_basica', contas: ['28.847'], nome: 'Repasses para a educação básica', explica: 'dinheiro da União para as redes de ensino de estados e municípios' },
+  { id: '11', contas: ['11'], nome: 'Trabalho', explica: 'proteção e benefícios ao trabalhador' },
+  { id: '05', contas: ['05'], nome: 'Defesa', explica: 'Forças Armadas' },
+  { id: '02', contas: ['02'], nome: 'Poder Judiciário', explica: null },
+  { id: '20', contas: ['20'], nome: 'Agricultura', explica: null },
+  { id: '04', contas: ['04'], nome: 'Administração do governo', explica: null },
+  { id: '18', contas: ['18'], nome: 'Meio ambiente', explica: null },
+  { id: '19', contas: ['19'], nome: 'Ciência e tecnologia', explica: null },
+  { id: '06', contas: ['06'], nome: 'Segurança pública', explica: 'policiamento e defesa civil' },
+  { id: '26', contas: ['26'], nome: 'Transporte', explica: null },
+  { id: '01', contas: ['01'], nome: 'Poder Legislativo', explica: 'Câmara, Senado e Tribunal de Contas da União' },
+  { id: '03', contas: ['03'], nome: 'Ministério Público, Defensoria e Advocacia da União', explica: null },
+  { id: '07', contas: ['07'], nome: 'Relações exteriores', explica: null },
+  { id: '13', contas: ['13'], nome: 'Cultura', explica: null },
+  { id: '14', contas: ['14'], nome: 'Direitos da cidadania', explica: null },
+  { id: '15', contas: ['15'], nome: 'Urbanismo', explica: null },
+  { id: '16', contas: ['16'], nome: 'Habitação', explica: null },
+  { id: '17', contas: ['17'], nome: 'Saneamento', explica: null },
+  { id: '21', contas: ['21'], nome: 'Reforma agrária', explica: null },
+  { id: '22', contas: ['22'], nome: 'Indústria', explica: null },
+  { id: '23', contas: ['23'], nome: 'Comércio e serviços', explica: null },
+  { id: '24', contas: ['24'], nome: 'Comunicações', explica: null },
+  { id: '25', contas: ['25'], nome: 'Energia', explica: null },
+  { id: '27', contas: ['27'], nome: 'Esporte e lazer', explica: null },
+];

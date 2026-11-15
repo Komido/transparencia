@@ -264,6 +264,144 @@ function montarComposicao(ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// Para onde vai o dinheiro do governo federal
+// ---------------------------------------------------------------------------
+
+// Base de comparação: despesa total sem a rolagem da dívida (dívida velha paga
+// com dívida nova). "De cada R$ 100" usa essa base.
+function prepararGastos(ctx) {
+  const g = ctx.d.gastos_federais;
+  if (!g?.anos?.length || !Array.isArray(g.contas)) return null;
+  const n = g.anos.length;
+  const total = c.somarContas(g.contas, ['total'], n);
+  const rolagem = c.somarContas(g.contas, t.ROLAGEM, n);
+  const base = total.map((v, k) => (v == null ? null : v - (rolagem[k] ?? 0)));
+  const areas = t.AREAS_DE_GASTO.map((a) => ({ ...a, valores: c.somarContas(g.contas, a.contas, n) }))
+    .filter((a) => a.valores.some((v) => v != null));
+  const fatores = c.fatoresAnuais(ctx.meses, ctx.ipca, g.anos);
+  return { anos: g.anos, total, rolagem, base, areas, fatores };
+}
+
+const porCem = (v) => f.moeda(v, v < 1 ? 1 : 0);
+
+function montarGastos(ctx) {
+  const dados = prepararGastos(ctx);
+  if (!dados) { $('#gastos').hidden = true; return; }
+  const { anos, rolagem, base, areas, fatores } = dados;
+
+  // Lista do ano escolhido -------------------------------------------------
+  const selAno = $('#gastos-ano');
+  selAno.replaceChildren();
+  [...anos].reverse().forEach((ano) => { el('option', null, String(ano), selAno).value = String(ano); });
+
+  const desenharAno = () => {
+    const k = anos.indexOf(Number(selAno.value));
+    const totalAno = base[k] * 1e6;
+    const doAno = areas.map((a) => ({ ...a, valor: (a.valores[k] ?? 0) * 1e6 }))
+      .filter((a) => a.valor > 0).sort((x, y) => y.valor - x.valor);
+    const grandes = doAno.filter((a) => a.valor / totalAno >= 0.01);
+    const pequenas = doAno.filter((a) => a.valor / totalAno < 0.01);
+
+    const cinco = grandes.slice(0, 5).map((a) => `${porCem((a.valor / totalAno) * 100)} para ${a.nome.toLowerCase().replace('inss', 'INSS')}`);
+    definir('gastos-resumo',
+      `Em ${anos[k]}, o governo federal gastou ${f.reaisPorExtenso(totalAno)}, sem contar a rolagem da dívida. `
+      + `De cada R$ 100, foram ${listaDeAnos(cinco)}. `
+      + `A rolagem, quando o governo paga dívida que venceu com dívida nova, somou mais ${f.reaisPorExtenso(rolagem[k] * 1e6)} e fica fora dessa conta.`);
+
+    const lista = $('#lista-gastos');
+    lista.replaceChildren();
+    const maior = grandes[0]?.valor ?? 1;
+    const linha = (nome, explica, valor) => {
+      const li = el('li', null, null, lista);
+      const topo = el('div', 'barra-topo', null, li);
+      const rotulo = el('span', 'barra-nome', nome, topo);
+      if (explica) el('span', 'barra-explica', explica, rotulo);
+      el('span', 'barra-valor', `${porCem((valor / totalAno) * 100)} de cada R$ 100 · ${f.reaisCompacto(valor)}`, topo);
+      const trilho = el('div', 'barra-trilho', null, li);
+      trilho.setAttribute('aria-hidden', 'true');
+      el('div', 'barra', null, trilho).style.width = `${Math.max(1, (valor / maior) * 100)}%`;
+    };
+    grandes.forEach((a) => linha(a.nome, a.explica, a.valor));
+    if (pequenas.length) {
+      linha(`Outras ${pequenas.length} áreas`, pequenas.map((a) => a.nome).join(', '),
+        pequenas.reduce((soma, a) => soma + a.valor, 0));
+    }
+  };
+  selAno.addEventListener('change', desenharAno);
+  desenharAno();
+
+  // Comparação ao longo dos anos -----------------------------------------
+  const selA = $('#gastos-area-a');
+  const selB = $('#gastos-area-b');
+  const opcoes = [...areas].sort((x, y) => x.nome.localeCompare(y.nome, 'pt-BR'));
+  for (const sel of [selA, selB]) {
+    sel.replaceChildren();
+    if (sel === selB) el('option', null, 'Nenhuma', sel).value = '';
+    opcoes.forEach((a) => { el('option', null, a.nome, sel).value = a.id; });
+  }
+  selA.value = '10';
+  selB.value = '12';
+  const faixas = c.faixasAnuais(ctx.mandatos, anos);
+  let grafico = null;
+
+  const serieDe = (area, medida) => area.valores.map((v, k) => {
+    if (v == null) return null;
+    if (medida === 'parte') return base[k] ? (v / base[k]) * 100 : null;
+    return fatores[k] == null ? null : (v * fatores[k]) / 1e3;
+  });
+
+  const desenharComparacao = () => {
+    const medida = valorRadio('gastos-medida') ?? 'real';
+    const a = areas.find((x) => x.id === selA.value) ?? areas[0];
+    const b = areas.find((x) => x.id === selB.value && x.id !== a.id);
+    const sa = serieDe(a, medida);
+    const kUlt = c.ultimoIndice(sa);
+    const kIni = sa.findIndex((v) => v != null);
+    if (medida === 'parte') {
+      definir('gastos-comparacao',
+        `Em ${anos[kUlt]}, ${a.nome.toLowerCase()} ficou com ${porCem(sa[kUlt])} de cada R$ 100 gastos pelo governo federal. Em ${anos[kIni]}, eram ${porCem(sa[kIni])}.`);
+    } else {
+      const v = t.variacao((sa[kUlt] / sa[kIni] - 1) * 100, 0);
+      definir('gastos-comparacao',
+        `Em ${anos[kUlt]}, o governo federal gastou ${f.reaisPorExtenso(sa[kUlt] * 1e9)} com ${a.nome.toLowerCase()}, em dinheiro de hoje. `
+        + `Em ${anos[kIni]}, foram ${f.reaisPorExtenso(sa[kIni] * 1e9)}${v ? `: ${v}, descontada a inflação` : ''}.`);
+    }
+    const series = [{ nome: a.nome, classe: 'serie-1', valores: sa }];
+    if (b) series.push({ nome: b.nome, classe: 'serie-2', valores: serieDe(b, medida) });
+    const opcoesGrafico = {
+      tipo: 'linhas',
+      rotulos: anos,
+      faixas,
+      series,
+      formatoY: medida === 'parte'
+        ? (v, eixo) => (eixo ? f.numero(v, v < 10 ? 1 : 0) : `${porCem(v)} de cada R$ 100`)
+        : (v, eixo) => (eixo ? f.numero(v, 0) : `R$\u00A0${f.numero(v, 1)} bi`),
+      rotuloEixoX: (ano) => (ano % 2 === 0 ? String(ano) : null),
+      tituloTooltip: (i) => String(anos[i]),
+      extraTooltip: (i) => {
+        const gov = c.governoDoAno(ctx.mandatos, anos[i]);
+        return gov ? `Governo: ${gov.rotulo} (${gov.partido})` : null;
+      },
+      descricao: medida === 'parte'
+        ? 'Parte de cada área no gasto federal, sem a rolagem da dívida, por ano.'
+        : 'Gasto federal por área, por ano, em bilhões de reais de hoje.',
+      incluirZero: true,
+    };
+    if (grafico) grafico.atualizar(opcoesGrafico); else grafico = criarGrafico($('#grafico-gastos'), opcoesGrafico);
+  };
+  selA.addEventListener('change', desenharComparacao);
+  selB.addEventListener('change', desenharComparacao);
+  document.querySelectorAll('input[name="gastos-medida"]').forEach((r) => r.addEventListener('change', desenharComparacao));
+  desenharComparacao();
+
+  registrarDownload('gastos', () => ({
+    nome: 'gastos-federais-por-area.csv',
+    cabecalhos: ['ano', 'total sem rolagem (R$ milhões)', 'rolagem da divida (R$ milhões)', ...areas.map((a) => `${a.nome} (R$ milhões)`), `fator para dinheiro de ${ctx.referencia}`],
+    linhas: anos.map((ano, k) => [ano, arred(base[k], 3), arred(rolagem[k], 3), ...areas.map((a) => arred(a.valores[k], 3)), arred(fatores[k], 6)]),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Salário mínimo
 // ---------------------------------------------------------------------------
 
@@ -1310,7 +1448,7 @@ async function iniciar() {
     const dados = await carregarPainel();
     const ctx = preparar(dados);
     const etapas = [iniciarContador, montarOrcamento, montarAnos, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarDolar, montarIR, montarAvisos, montarFontes];
+      montarComposicao, montarGastos, montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
         etapa(ctx);

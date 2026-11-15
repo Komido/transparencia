@@ -407,7 +407,10 @@ details.glossario > p {
   color: var(--tinta-2);
   font-size: 0.9375rem;
 }
+.seletor { max-width: 100%; min-width: 0; }
 .seletor select {
+  min-width: 0;
+  max-width: 100%;
   min-height: 44px;
   padding: 0 12px;
   font: inherit;
@@ -603,9 +606,9 @@ tbody th { font-weight: 600; min-width: 7rem; }
 
 .barras { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .barras li { display: grid; gap: 4px; }
-.barras .barra-topo { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9375rem; }
+.barras .barra-topo { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: 8px; row-gap: 2px; font-size: 0.9375rem; }
 .barras .barra-valor { font-variant-numeric: tabular-nums; color: var(--tinta-2); white-space: nowrap; }
-.barras .barra-nome { min-width: 0; }
+.barras .barra-nome { min-width: 0; flex: 1 1 11rem; }
 .barras .barra-explica { display: block; font-size: 0.8125rem; color: var(--tinta-2); }
 .barra-trilho { height: 8px; background: var(--trilho); border-radius: 4px; overflow: hidden; }
 .barra { height: 100%; background: var(--serie-1); border-radius: 0 4px 4px 0; }

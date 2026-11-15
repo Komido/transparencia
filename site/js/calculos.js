@@ -494,6 +494,27 @@ export function faixaDaPof(classes, salariosMinimos, salarioMinimoReferencia) {
     ?? classes[classes.length - 1];
 }
 
+// Fator para trazer valores anuais para dinheiro de hoje: índice do último mês
+// com inflação ÷ média do índice nos 12 meses do ano. Ano sem os 12 meses
+// fica sem fator (null).
+export function fatoresAnuais(meses, indice, anos) {
+  const ref = indice[ultimoIndice(indice)];
+  return anos.map((ano) => {
+    const valores = meses.map((m, i) => (anoDe(m) === ano ? indice[i] : null)).filter((v) => v != null);
+    return valores.length === 12 ? ref / (valores.reduce((a, v) => a + v, 0) / 12) : null;
+  });
+}
+
+// Soma, ano a ano, as contas de um grupo. Conta sem valor num ano conta como
+// zero só se alguma outra conta do grupo tiver valor naquele ano.
+export function somarContas(contas, codigos, nAnos) {
+  const escolhidas = contas.filter((c) => codigos.includes(c.conta));
+  return Array.from({ length: nAnos }, (_, k) => {
+    const valores = escolhidas.map((c) => c.valores[k]).filter((v) => v != null);
+    return valores.length ? valores.reduce((a, v) => a + v, 0) : null;
+  });
+}
+
 // Último valor publicado de uma série mensal, com o mês.
 export function ultimoValor(meses, valores) {
   const i = ultimoIndice(valores ?? []);

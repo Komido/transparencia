@@ -161,6 +161,17 @@
         <li><strong>Fora da conta:</strong> transporte, remédios, roupas, escola, internet, telefone e lazer.</li>
       </ul>
 
+      <h2 id="gastos">Gastos do governo federal por área</h2>
+      <p><strong>Fonte:</strong> Declaração de Contas Anuais (DCA) da União, Anexo I-E, publicada pelo Tesouro Nacional no SICONFI e consultada pela API oficial. O anexo traz a despesa por função de governo (saúde, educação...) e por subfunção, desde 2014. O site usa a <strong>despesa liquidada</strong>, sem as despesas intraorçamentárias (pagamentos entre órgãos do próprio governo federal).</p>
+      <ul>
+        <li><strong>Conferência:</strong> a carga de cada ano é recusada se a soma das funções não bater com o total declarado.</li>
+        <li><strong>Rolagem da dívida:</strong> as subfunções 841 e 842 da função Encargos Especiais (refinanciamento da dívida interna e externa) são dívida que venceu paga com dívida nova. Ficam fora da base "de cada R$ 100" e aparecem à parte no texto.</li>
+        <li><strong>Encargos especiais separados:</strong> serviço da dívida (subfunções 843 e 844) aparece como "Juros e pagamento da dívida"; outras transferências (845), como "Repasses a estados, municípios e outras transferências"; transferências para a educação básica (847), como "Repasses para a educação básica"; outros encargos especiais (846) e demais subfunções, como "Outros encargos".</li>
+        <li><strong>Demais áreas:</strong> cada função de governo aparece com um nome do dia a dia. Áreas com menos de 1% do total no ano são somadas em "Outras áreas", com a lista de quais são.</li>
+        <li><strong>Em dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo índice do IPCA do último mês publicado dividido pela média do índice nos 12 meses daquele ano.</li>
+        <li><strong>Limites:</strong> os números são só da União. Saúde e educação também são pagas por estados e municípios, com dinheiro próprio e com os repasses federais, que aparecem aqui como repasses e não como saúde ou educação. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</li>
+      </ul>
+
       <h2 id="dolar">Dólar a preços de hoje</h2>
       <p>A cotação nominal de 1995 e a de hoje não são comparáveis diretamente, porque Brasil e Estados Unidos tiveram inflações diferentes. O site traz cada cotação para preços de hoje:</p>
       <p class="formula">dólar a preços de hoje = cotação do mês × (IPCA de hoje ÷ IPCA do mês) × (CPI dos EUA no mês ÷ CPI dos EUA hoje)</p>

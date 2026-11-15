@@ -44,9 +44,11 @@ export function reaisCompacto(v) {
 export function reaisPorExtenso(v) {
   if (v == null || !Number.isFinite(v)) return 'n/d';
   const a = Math.abs(v);
-  if (a >= 1e12) return `R$\u00A0${nf(2, 2).format(v / 1e12)} trilhões`;
-  if (a >= 1e9) return `R$\u00A0${nf(1, 1).format(v / 1e9)} bilhões`;
-  if (a >= 1e6) return `R$\u00A0${nf(0, 0).format(v / 1e6)} milhões`;
+  // Singular abaixo de 2: "R$ 1,4 trilhão", "R$ 1,9 bilhão".
+  const nome = (n, singular, plural) => (Math.abs(n) < 2 ? singular : plural);
+  if (a >= 1e12) return `R$\u00A0${nf(a < 2e12 ? 1 : 2, a < 2e12 ? 1 : 2).format(v / 1e12)} ${nome(v / 1e12, 'trilhão', 'trilhões')}`;
+  if (a >= 1e9) return `R$\u00A0${nf(1, 1).format(v / 1e9)} ${nome(v / 1e9, 'bilhão', 'bilhões')}`;
+  if (a >= 1e6) return `R$\u00A0${nf(0, 0).format(v / 1e6)} ${nome(v / 1e6, 'milhão', 'milhões')}`;
   return moeda(v, 0);
 }
 
