@@ -283,27 +283,59 @@ main { padding-bottom: var(--e-6); }
 .hoje ul { list-style: none; margin: 0; padding: 0; }
 .hoje li { border-top: 1px solid var(--borda); }
 .hoje li:first-child { border-top: 0; }
-.hoje li > a {
+.hoje-linha {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto 1rem;
   align-items: center;
-  gap: var(--e-3);
+  column-gap: var(--e-3);
   min-height: 52px;
   padding: var(--e-2) 0;
   color: var(--tinta);
   text-decoration: none;
+  cursor: pointer;
 }
-.hoje li > a:hover .hoje-nome { text-decoration: underline; }
+summary.hoje-linha { list-style: none; }
+summary.hoje-linha::-webkit-details-marker { display: none; }
+/* Seta que gira ao abrir; nas linhas que são link, a seta aponta para o lado. */
+.hoje-linha::after {
+  content: "";
+  grid-column: 4;
+  grid-row: 1;
+  justify-self: end;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--tinta-3);
+  border-bottom: 2px solid var(--tinta-3);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.15s;
+}
+details[open] > .hoje-linha::after { transform: rotate(-135deg) translateY(-2px); }
+a.hoje-linha::after { transform: rotate(-45deg); }
+.hoje-linha:hover .hoje-nome { text-decoration: underline; }
+.hoje-detalhe { padding: 0 0 var(--e-3); }
+.hoje-detalhe .comparacao { margin-top: var(--e-1); }
+.hoje-modo { margin: 0 0 var(--e-2); font-size: var(--fs-1); color: var(--tinta-2); }
+.aviso-crise {
+  margin: 0 0 var(--e-2);
+  padding: var(--e-2) var(--e-3);
+  font-size: var(--fs-2);
+  background: var(--aviso-fundo);
+  border-left: 4px solid var(--aviso);
+  border-radius: var(--raio);
+}
+.hoje .entenda { margin-top: var(--e-3); }
 .hoje-nome { line-height: 1.3; }
 .hoje-nome small { display: block; font-size: var(--fs-1); color: var(--tinta-2); }
 .hoje-valor { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .rodape-cartao { margin: var(--e-2) 0 0; }
 .rodape-cartao a { display: inline-flex; align-items: center; min-height: var(--toque); font-weight: 600; }
-@media (max-width: 359px) {
-  .hoje li > a { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
+/* No celular, valor em cima do selo: sobra largura para o nome. */
+@media (max-width: 479px) {
+  .hoje-linha { grid-template-columns: minmax(0, 1fr) auto 1rem; row-gap: 2px; }
   .hoje-nome { grid-row: 1 / span 2; }
   .hoje-valor { grid-row: 1; grid-column: 2; }
   .hoje .selo { grid-column: 2; justify-self: end; }
+  .hoje-linha::after { grid-column: 3; }
 }
 
 /* Selo bom, na média e ruim: cor e forma, para não depender só da cor. */
@@ -1046,8 +1078,9 @@ td.num .detalhe { white-space: normal; }
 .veredito-neutro::before { content: "\2195"; font-size: 0.9em; }
 .bloco .grupo-titulo { margin-top: var(--e-5); }
 .comparacao.sem-barras .comp-trilho { display: none; }
+.comparacao.sem-barras .comp-valor { font-size: var(--fs-3); white-space: nowrap; }
 /* Linha de comparação com o período escolhido, embaixo de cada item. */
-.hoje li > a .hoje-compara { grid-column: 1 / -1; margin-top: -2px; font-size: var(--fs-1); color: var(--tinta-2); }
+.hoje-linha .hoje-compara { grid-column: 1 / -1; margin-top: -2px; font-size: var(--fs-1); color: var(--tinta-2); }
 .compara-melhor { color: var(--bom); }
 .compara-pior { color: var(--ruim); }
 .compara-neutro { color: var(--tinta-2); }

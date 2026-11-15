@@ -454,8 +454,21 @@ export function razaoDozeMeses(a, b) {
   });
 }
 
-// Compara dois valores. 1: o primeiro é mais favorável; -1: menos favorável;
-// 0: diferença menor que 1% do segundo (praticamente igual).
+// Soma de `a` dividida pela soma de `b` nos mesmos meses, em %. Para fluxos
+// de um período inteiro (déficit, juros, impostos) sobre o que o país
+// produziu nele. Exige todos os meses.
+export function razaoNoPeriodo(a, b, indices) {
+  if (!indices.length) return null;
+  let sa = 0;
+  let sb = 0;
+  for (const i of indices) {
+    if (a[i] == null || b[i] == null) return null;
+    sa += a[i];
+    sb += b[i];
+  }
+  return sb > 0 ? (sa / sb) * 100 : null;
+}
+
 // Índices dos meses de um mandato (o mês é de quem governava no dia 15).
 export function mesesDoMandato(mandatos, meses, id) {
   return meses.map((mes, i) => (governoDoMes(mandatos, mes)?.id === id ? i : -1)).filter((i) => i >= 0);
@@ -492,6 +505,17 @@ export function posicaoNaHistoria(hoje, anos, maiorMelhor) {
   return { vencidos, total: lista.length, nivel: fracao >= 2 / 3 ? 'bom' : fracao <= 1 / 3 ? 'ruim' : 'medio' };
 }
 
+// Mesmo período em dois governos: do primeiro mês do atual até o índice
+// `ate`, e os mesmos meses de mandato do anterior (o 1º com o 1º, o 2º com o
+// 2º...). Null se o anterior não tiver tantos meses.
+export function mesmoPeriodo(mandatos, meses, atual, anterior, ate) {
+  const a = mesesDoMandato(mandatos, meses, atual).filter((i) => i <= ate);
+  const b = mesesDoMandato(mandatos, meses, anterior).slice(0, a.length);
+  return a.length && b.length === a.length ? { atual: a, anterior: b } : null;
+}
+
+// Compara dois valores. 1: o primeiro é mais favorável; -1: menos favorável;
+// 0: diferença menor que 1% do segundo (praticamente igual).
 export function comparar(a, b, maiorMelhor) {
   if (a == null || b == null) return null;
   const base = Math.abs(b) > 0 ? Math.abs(b) : 1;

@@ -2346,6 +2346,8 @@ function indicadoresDoAno(ctx) {
       explica: 'tudo o que União, estados e municípios devem, em % de tudo o que o país produz em um ano (o PIB). 83% quer dizer que a dívida equivale a 83 de cada 100 reais produzidos no país em um ano',
       valores: s.divida_bruta_pib, tipo: 'fim', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
       formatoCurto: (v) => f.porcentagem(v, 0),
+      // Comparação de governos: quanto a dívida mudou no período, em pontos.
+      formatoVariacao: (v) => `${v >= 0 ? 'subiu' : 'caiu'} ${f.numero(Math.abs(v), 1)} ${Math.abs(v) < 2 ? 'ponto' : 'pontos'}`,
       deficit: Array.isArray(s.nfsp_nominal) ? c.deflacionar(s.nfsp_nominal, ipca) : null,
     },
     // Séries do Banco Central já somadas em 12 meses, em % do PIB. Positivo é
@@ -2355,6 +2357,7 @@ function indicadoresDoAno(ctx) {
       explica: 'quanto faltou ou sobrou de dinheiro ao governo federal em 12 meses, contando os juros da dívida. Quando o governo gasta mais do que arrecada, falta dinheiro (é o déficit) e ele precisa pegar emprestado, o que aumenta a dívida; quando arrecada mais do que gasta, sobra (superávit). O valor está em % de tudo o que o país produz em um ano (o PIB)',
       dica: 'em 12 meses, em % do que o país produz',
       valores: s.nfsp_nominal_pib, tipo: 'doze', maiorMelhor: false,
+      fluxo: { num: s.nfsp_nominal, den: s.pib_mensal },
       formato: (v) => (v >= 0 ? `faltou ${f.porcentagem(v, 1)}` : `sobrou ${f.porcentagem(-v, 1)}`),
       formatoCurto: (v) => (v >= 0 ? `faltou ${f.porcentagem(v, 1)}` : `sobrou ${f.porcentagem(-v, 1)}`),
     },
@@ -2365,6 +2368,7 @@ function indicadoresDoAno(ctx) {
       // Invertido: positivo é sobra, negativo é falta.
       valores: Array.isArray(s.nfsp_primario_pib) ? s.nfsp_primario_pib.map((v) => (v == null ? null : -v)) : null,
       tipo: 'doze', maiorMelhor: true,
+      fluxo: { num: Array.isArray(s.nfsp_primario) ? s.nfsp_primario.map((v) => (v == null ? null : -v)) : null, den: s.pib_mensal },
       formato: (v) => (v < 0 ? `faltou ${f.porcentagem(-v, 1)}` : `sobrou ${f.porcentagem(v, 1)}`),
       formatoCurto: (v) => (v < 0 ? `faltou ${f.porcentagem(-v, 1)}` : `sobrou ${f.porcentagem(v, 1)}`),
     },
@@ -2373,6 +2377,7 @@ function indicadoresDoAno(ctx) {
       explica: 'quanto o governo federal pagou de juros sobre o que deve, em 12 meses, em % de tudo o que o país produz em um ano (o PIB). Quanto maior a dívida e os juros do país, maior essa conta',
       dica: 'pagos em 12 meses, em % do que o país produz',
       valores: s.nfsp_juros_pib, tipo: 'doze', maiorMelhor: false,
+      fluxo: { num: s.nfsp_juros, den: s.pib_mensal },
       formato: (v) => f.porcentagem(v, 1), formatoCurto: (v) => f.porcentagem(v, 1),
     },
     // Sem nota: mais imposto pode significar mais serviços ou mais peso no
@@ -2382,11 +2387,13 @@ function indicadoresDoAno(ctx) {
       explica: 'quanto o governo federal arrecadou em impostos e contribuições em 12 meses, em % de tudo o que o país produz em um ano (o PIB); sem a contribuição ao INSS, para comparar anos de forma justa',
       dica: 'em 12 meses, em % do que o país produz',
       valores: c.razaoDozeMeses(ctx.comparavel, s.pib_mensal), tipo: 'doze', maiorMelhor: true,
+      fluxo: { num: ctx.comparavel, den: s.pib_mensal },
       formato: (v) => f.porcentagem(v, 1), formatoCurto: (v) => f.porcentagem(v, 1),
     },
   ];
   return lista
     .filter((it) => Array.isArray(it.valores))
+    .map((it) => (it.fluxo && !(Array.isArray(it.fluxo.num) && Array.isArray(it.fluxo.den)) ? { ...it, fluxo: null } : it))
     .map((it) => ({ ...it, ...c.valoresAnuais(meses, it.valores, it.tipo) }))
     .filter((it) => it.anos.size >= 3 && it.hoje)
     .map((it) => ({ ...it, ranking: c.rankingDeAnos(it.anos, it.maiorMelhor) }));
@@ -2485,148 +2492,154 @@ function caixaComparacao(caixa, { titulo, hoje, antes, itens, principal, maiorMe
 const comMaiuscula = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1);
 const anoDe = (mes) => c.anoDe(mes);
 
+// Crises com data oficial. Recessões: cronologia do CODACE (Comitê de
+// Datação de Ciclos Econômicos da FGV), em trimestres, do trimestre seguinte
+// ao pico até o vale. Pandemia: Emergência em Saúde Pública de Importância
+// Nacional, declarada pela Portaria GM/MS 188 (3/2/2020) e encerrada pela
+// Portaria GM/MS 913 (22/4/2022), que entrou em vigor 30 dias depois. A
+// regra é a mesma para todos os governos; o aviso não mexe nos números.
+const CRISES = [
+  { de: '1995-04', ate: '1995-09', nome: 'a recessão de 1995' },
+  { de: '1998-01', ate: '1999-03', nome: 'a recessão de 1998 e 1999' },
+  { de: '2001-04', ate: '2001-12', nome: 'a recessão de 2001' },
+  { de: '2003-01', ate: '2003-06', nome: 'a recessão de 2003' },
+  { de: '2008-10', ate: '2009-03', nome: 'a recessão da crise mundial de 2008 e 2009' },
+  { de: '2014-04', ate: '2016-12', nome: 'a recessão de 2014 a 2016' },
+  { de: '2020-01', ate: '2020-06', nome: 'a recessão de 2020' },
+  { de: '2020-02', ate: '2022-05', nome: 'a pandemia de covid-19 (fev/2020 a mai/2022)' },
+];
+
+const crisesNoPeriodo = (de, ate) => CRISES.filter((x) => x.de <= ate && x.ate >= de);
+
 function montarResumo(ctx) {
-  const { meses, mandatos } = ctx;
+  const { meses, mandatos, s } = ctx;
   const itens = indicadoresDoAno(ctx);
-  if (!itens.length) { $('#resumo').hidden = true; return; }
+  if (!itens.length) { $('#hoje').hidden = true; return; }
   itens.forEach((it) => { it.situacao = nivelDeHoje(it); });
 
-
-  // Opções de comparação: governos que já terminaram (o mais recente primeiro,
-  // que é o padrão) e anos completos.
+  // Opções de comparação. Padrão: este governo até agora contra o anterior
+  // nos mesmos meses de mandato. Depois, o último ano de cada governo que já
+  // terminou e cada ano completo, contra os últimos 12 meses.
+  const atual = mandatos.find((m) => !m.fim);
   const anteriores = [...mandatos].filter((m) => m.fim).sort((a, b) => b.inicio.localeCompare(a.inicio));
   const periodos = new Map();
+  if (atual && anteriores.length) {
+    const ant = anteriores[0];
+    periodos.set('m:mesmo', { mesmo: true, atual, anterior: ant, rotulo: `${atual.rotulo} × ${ant.rotulo}, mesmo período` });
+  }
   // Cada governo é representado pelo último ano atribuído a ele (o ano é de
-  // quem governou a maior parte dele): como o governo entregou o país. A
-  // média do mandato misturaria crises do meio do caminho, como a pandemia.
+  // quem governou a maior parte dele): como o governo entregou o país.
   const todosOsAnosDoCalendario = [...new Set(meses.map((mes) => c.anoDe(mes)))];
+  const indicesDoAno = (ano) => meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
   anteriores.forEach((m) => {
     const anosDoGoverno = todosOsAnosDoCalendario.filter((a) => c.governoDoAno(mandatos, a)?.id === m.id);
     if (!anosDoGoverno.length) return;
     const ano = Math.max(...anosDoGoverno);
-    const indices = meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
     periodos.set(`g:${m.id}`, {
-      indices, ano, governo: true, rotulo: `Governo ${m.rotulo}`, curto: `${m.rotulo} (${ano})`,
-      quando: `no último ano do governo ${m.rotulo} (${ano})`, de: ano, ate: ano, partido: m.partido,
+      indices: indicesDoAno(ano), ano, governo: true, rotulo: `Governo ${m.rotulo}, último ano (${ano})`,
+      curto: `${m.rotulo} (${ano})`, barra: `Governo ${m.rotulo}`,
+      modo: `os últimos 12 meses contra o último ano do governo ${m.rotulo} (${ano})`,
     });
   });
   const todosOsAnos = [...new Set(itens.flatMap((it) => [...it.anos.keys()]))].sort((a, b) => b - a);
   todosOsAnos.forEach((ano) => {
-    const indices = meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
-    periodos.set(`a:${ano}`, { indices, rotulo: String(ano), curto: `Em ${ano}`, quando: `em ${ano}`, de: ano, ate: ano, ano });
+    periodos.set(`a:${ano}`, {
+      indices: indicesDoAno(ano), ano, rotulo: String(ano), curto: `Em ${ano}`, barra: String(ano),
+      modo: `os últimos 12 meses contra ${ano}`,
+    });
   });
 
-  // O mesmo período vale na abertura e nos cartões: os dois seletores andam
-  // juntos.
-  const seletores = [$('#resumo-comparar'), $('#hoje-comparar')].filter(Boolean);
-  for (const sel of seletores) {
-    sel.replaceChildren();
-    const grupoGov = el('optgroup', null, null, sel);
-    grupoGov.label = 'Governos anteriores';
-    const grupoAno = el('optgroup', null, null, sel);
-    grupoAno.label = 'Anos';
-    for (const [chave, p] of periodos) {
-      const texto = p.governo ? `${p.rotulo}, último ano (${p.ano})` : p.rotulo;
-      el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
-    }
-    sel.value = periodos.keys().next().value;
-  }
-  const select = seletores[0];
+  const select = $('#hoje-comparar');
+  select.replaceChildren();
+  const grupos = [
+    ['m', 'Este governo × o anterior'],
+    ['g', 'Hoje × último ano de cada governo'],
+    ['a', 'Hoje × um ano'],
+  ].map(([tipo, rotulo]) => {
+    const g = el('optgroup', null, null, select);
+    g.label = rotulo;
+    return [tipo, g];
+  });
+  const grupoDe = Object.fromEntries(grupos);
+  for (const [chave, p] of periodos) el('option', null, p.rotulo, grupoDe[chave[0]]).value = chave;
+  grupos.forEach(([, g]) => { if (!g.children.length) g.remove(); });
+  select.value = periodos.keys().next().value;
 
-  const descricaoPeriodo = (it, p) => {
-    if (p.ano) return { media: `média de ${p.ano}`, trimestral: `média de ${p.ano}`, acumulado: `em ${p.ano}`, fim: `dez/${p.ano}`, doze: `em ${p.ano}` }[it.tipo];
-    const intervalo = `${p.de} a ${p.ate}`;
-    return { media: `média de ${intervalo}`, trimestral: `média de ${intervalo}`, acumulado: `média por ano, ${intervalo}`,
-      fim: `no fim, ${f.mesCurto(meses[p.indices[p.indices.length - 1]])}`, doze: `média por ano, ${intervalo}` }[it.tipo];
+  // Mesmo período: do início do governo atual até o último mês com dado do
+  // item, e os mesmos meses de mandato do anterior.
+  const ultimoMesDoItem = (it) => (it.fluxo
+    ? Math.min(c.ultimoIndice(it.fluxo.num), c.ultimoIndice(it.fluxo.den))
+    : c.ultimoIndice(it.valores));
+  const mesmo = (it, p) => {
+    const par = c.mesmoPeriodo(mandatos, meses, p.atual.id, p.anterior.id, ultimoMesDoItem(it));
+    if (!par) return null;
+    const valor = (indices) => {
+      // Dívida: quanto mudou do mês anterior ao início até o último mês.
+      if (it.tipo === 'fim') {
+        const a = it.valores[indices[0] - 1];
+        const b = it.valores[indices[indices.length - 1]];
+        return a == null || b == null ? null : b - a;
+      }
+      // Fluxos (déficit, juros, impostos): soma do período sobre o PIB do período.
+      if (it.fluxo) return c.razaoNoPeriodo(it.fluxo.num, it.fluxo.den, indices);
+      return c.valorDoPeriodo(meses, it.valores, it.tipo, indices, 0.9);
+    };
+    return { ...par, vAtual: valor(par.atual), vAnterior: valor(par.anterior) };
   };
-  const descricaoHoje = (it) => (it.tipo === 'fim' ? f.mesCurto(it.hoje.ate) : `${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)}`);
+  const intervalo = (indices) => `${f.mesCurto(meses[indices[0]])} a ${f.mesCurto(meses[indices[indices.length - 1]])}`;
+  const comoCalcula = (it, indices) => {
+    if (it.tipo === 'fim') return `de ${f.mesCurto(meses[indices[0] - 1])} a ${f.mesCurto(meses[indices[indices.length - 1]])}`;
+    if (it.fluxo) return `${intervalo(indices)}, todos os meses somados`;
+    if (it.tipo === 'acumulado') return `média por ano, ${intervalo(indices)}`;
+    return `média de ${intervalo(indices)}`;
+  };
+  const formatoMesmo = (it) => (it.tipo === 'fim' ? it.formatoVariacao : it.formato);
+  const formatoMesmoCurto = (it) => (it.tipo === 'fim' ? it.formatoVariacao : (it.formatoCurto ?? it.formato));
+
   // Governos: aceita até 10% dos meses sem dado (a ANP, por exemplo, não
   // publicou setembro de 2020). Anos continuam exigindo os 12 meses.
   const valorNoPeriodo = (it, p) => (p.ano ? it.anos.get(p.ano) ?? null : c.valorDoPeriodo(meses, it.valores, it.tipo, p.indices, 0.9));
+  const descricaoPeriodo = (it, p) => ({ media: `média de ${p.ano}`, trimestral: `média de ${p.ano}`, acumulado: `em ${p.ano}`, fim: `dez/${p.ano}`, doze: `em ${p.ano}` }[it.tipo]);
+  const descricaoHoje = (it) => (it.tipo === 'fim' ? f.mesCurto(it.hoje.ate) : `${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)}`);
   const primeiroMesComDado = (it) => meses[it.valores.findIndex((v) => v != null)];
 
-  // Abertura: como está cada número hoje, comparado com a própria história,
-  // em grupos: o bolso das pessoas, as contas do país e, com uma cidade
-  // escolhida, as contas do estado. Só o bolso daria uma ideia incompleta.
-  // Em cada grupo, primeiro o que está bom, depois na média e ruim; cada
-  // linha leva à seção.
-  const caixaHoje = $('#hoje-lista');
-  const ordem = { bom: 0, medio: 1, ruim: 2 };
-  const linhaHoje = (lista, { href, nome, dica, valor, selo, comparacao }) => {
-    const li = el('li', null, null, lista);
-    const a = el('a', null, null, li);
-    a.href = href;
-    const span = el('span', 'hoje-nome', nome, a);
-    if (dica) el('small', null, dica, span);
-    el('span', 'hoje-valor', valor, a);
-    if (selo) el('span', `selo selo-${selo.nivel}`, selo.texto, a);
-    if (comparacao) {
-      const linha = el('span', 'hoje-compara', `${comparacao.texto} · `, a);
-      el('strong', `compara-${comparacao.classe}`, comparacao.palavra, linha);
+  // Comparação de um item com a opção escolhida: valores, rótulos e veredito.
+  const comparacao = (it, p) => {
+    if (p.mesmo) {
+      const m = mesmo(it, p);
+      if (!m) return null;
+      return {
+        r: c.comparar(m.vAtual, m.vAnterior, it.neutro ? true : it.maiorMelhor),
+        texto: m.vAtual == null || m.vAnterior == null ? `${p.anterior.rotulo}, mesmo período: sem dado`
+          : `${p.atual.rotulo}: ${formatoMesmoCurto(it)(m.vAtual)} × ${p.anterior.rotulo}: ${formatoMesmoCurto(it)(m.vAnterior)}`,
+        sufixo: 'neste governo',
+        linhas: [
+          { classe: 'comp-antes', rotulo: `Governo ${p.anterior.rotulo}, mesmo período`, quando: comoCalcula(it, m.anterior), valor: m.vAnterior },
+          { classe: 'comp-hoje', rotulo: `Governo ${p.atual.rotulo}, até agora`, quando: comoCalcula(it, m.atual), valor: m.vAtual },
+        ],
+        formato: formatoMesmo(it),
+        m,
+      };
     }
-  };
-  // Comparação com o período escolhido, em palavras (sem seta: no
-  // desemprego, cair é melhorar).
-  const comparacaoHoje = (it) => {
-    const p = periodos.get(seletores[seletores.length - 1]?.value ?? select.value);
-    if (!p) return null;
     const v = valorNoPeriodo(it, p);
-    if (v == null) return { texto: `${p.curto}: sem dado`, palavra: 'sem comparação', classe: 'neutro' };
-    const r = c.comparar(it.hoje.valor, v, it.neutro ? true : it.maiorMelhor);
-    const [palavra, classe] = it.neutro
-      ? (r === 1 ? ['maior hoje', 'neutro'] : r === -1 ? ['menor hoje', 'neutro'] : ['quase igual', 'neutro'])
-      : (r === 1 ? ['melhor hoje', 'melhor'] : r === -1 ? ['pior hoje', 'pior'] : ['quase igual', 'neutro']);
-    return { texto: `${p.curto}: ${(it.formatoCurto ?? it.formato)(v)}`, palavra, classe };
+    return {
+      r: v == null ? null : c.comparar(it.hoje.valor, v, it.neutro ? true : it.maiorMelhor),
+      texto: v == null ? `${p.curto}: sem dado` : `${p.curto}: ${(it.formatoCurto ?? it.formato)(v)}`,
+      sufixo: 'hoje',
+      linhas: [
+        { classe: 'comp-antes', rotulo: p.barra, quando: v == null ? null : descricaoPeriodo(it, p), valor: v },
+        { classe: 'comp-hoje', rotulo: 'Hoje', quando: descricaoHoje(it), valor: it.hoje.valor },
+      ],
+      formato: it.formato,
+      v,
+    };
   };
-  const desenharHoje = () => {
-    if (!caixaHoje) return;
-    caixaHoje.replaceChildren();
-    for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
-      const doGrupo = itens.filter((it) => it.grupo === grupo);
-      if (!doGrupo.length) continue;
-      el('p', 'hoje-grupo', titulo, caixaHoje);
-      const lista = el('ul', null, null, caixaHoje);
-      [...doGrupo].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => linhaHoje(lista, {
-        href: it.secao ?? '#resumo',
-        nome: it.nomeCurto ?? it.nome,
-        dica: it.dica,
-        valor: (it.formatoCurto ?? it.formato)(it.hoje.valor),
-        selo: it.situacao ? { nivel: it.situacao.nivel, texto: NOME_NIVEL[it.situacao.nivel] } : (it.neutro ? { nivel: 'neutro', texto: 'Sem nota' } : null),
-        comparacao: comparacaoHoje(it),
-      }));
-    }
-    // Contas do estado da cidade escolhida: dívida e folha frente ao limite
-    // da lei, no último ano publicado.
-    const bloco = ctx.d.estados_fiscal;
-    const uf = cidade.dados?.uf ? bloco?.estados?.find((e) => e.sigla === cidade.dados.uf) : null;
-    if (uf && bloco.anos?.length) {
-      const k = bloco.anos.length - 1;
-      const ano = bloco.anos[k];
-      const ind = (chave) => uf.indicadores?.[chave]?.[k] ?? null;
-      const nivelLimite = { 'dentro do limite': ['bom', 'Dentro do limite'], 'perto do limite': ['medio', 'Perto do limite'], 'acima do limite': ['ruim', 'Acima do limite'] };
-      const selo = (sit) => (sit ? { nivel: nivelLimite[sit][0], texto: nivelLimite[sit][1] } : null);
-      el('p', 'hoje-grupo', `Nas contas do estado (${uf.nome})`, caixaHoje);
-      const lista = el('ul', null, null, caixaHoje);
-      const div = ind('dcl_rcl_pct');
-      const limDiv = bloco.limite_divida_pct ?? 200;
-      if (div != null) {
-        linhaHoje(lista, { href: '#estados', nome: 'Dívida do estado', dica: `para cada R$ 100 que entram no ano (${ano}); a lei permite ${f.moeda(limDiv, 0)}`,
-          valor: f.moeda(div, 0), selo: selo(situacao(div, limDiv, bloco.alerta_divida_pct ?? 180)) });
-      }
-      const fol = ind('pessoal_rcl_pct');
-      if (fol != null) {
-        linhaHoje(lista, { href: '#estados', nome: 'Folha de pagamento', dica: `de cada R$ 100 que entram (${ano}); a lei permite ${f.moeda(ind('pessoal_limite_pct'), 2)}`,
-          valor: f.moeda(fol, 0), selo: selo(situacao(fol, ind('pessoal_limite_pct'), ind('pessoal_alerta_pct'))) });
-      }
-    } else {
-      const p = el('p', 'hoje-estado', 'Para ver também as contas do seu estado, ', caixaHoje);
-      const a = el('a', null, 'escolha o estado', p);
-      a.href = '#estados';
-      p.append('.');
-    }
+  const palavraDe = (r, neutro, sufixo) => {
+    if (r == null) return ['sem comparação', 'neutro'];
+    if (r === 0) return ['quase igual', 'neutro'];
+    if (neutro) return [`${r === 1 ? 'maior' : 'menor'} ${sufixo}`, 'neutro'];
+    return r === 1 ? [`melhor ${sufixo}`, 'melhor'] : [`pior ${sufixo}`, 'pior'];
   };
-  desenharHoje();
-  aoMudarCidade(desenharHoje);
 
   // "Por quê": variação das séries de origem entre o período e hoje.
   const variacaoDaCausa = (serie, p) => {
@@ -2659,68 +2672,158 @@ function montarResumo(ctx) {
     }
     return null;
   };
+  // Dívida no mesmo período: de quanto a quanto, nos dois governos.
+  const fraseDivida = (it, p, m) => {
+    const de = (ind) => `de ${it.formato(it.valores[ind[0] - 1])} (${f.mesCurto(meses[ind[0] - 1])}) para ${it.formato(it.valores[ind[ind.length - 1]])} (${f.mesCurto(meses[ind[ind.length - 1]])})`;
+    return `Com ${p.atual.rotulo}, a dívida foi ${de(m.atual)}. No mesmo período de ${p.anterior.rotulo}, ${de(m.anterior)}. Um ponto equivale a 1 real a mais (ou a menos) de dívida para cada 100 produzidos no país em um ano.`;
+  };
 
-  const desenhar = () => {
-    const p = periodos.get(select.value);
-    const caixaLista = $('#resumo-lista');
-    caixaLista.replaceChildren();
-    const listas = {};
-    for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
-      if (!itens.some((it) => it.grupo === grupo)) continue;
-      el('h3', 'grupo-titulo', titulo, caixaLista);
-      listas[grupo] = el('ul', 'anos-lista', null, caixaLista);
+  // Detalhe que abre ao tocar no item: barras na mesma escala, o porquê, a
+  // posição na história e o caminho para a seção.
+  const detalhe = (pai, it, p, comp) => {
+    const corpo = el('div', 'hoje-detalhe', null, pai);
+    el('p', 'ano-explica', comMaiuscula(it.explica) + '.', corpo);
+    barrasAntesHoje(corpo, comp.linhas, comp.formato);
+    if (p.mesmo) {
+      if (it.tipo === 'fim' && comp.m?.vAtual != null && comp.m?.vAnterior != null) el('p', 'ano-porque', fraseDivida(it, p, comp.m), corpo);
+    } else if (comp.v == null) {
+      const inicio = primeiroMesComDado(it);
+      el('p', 'ano-porque', meses[p.indices[0]] < inicio
+        ? `Sem dado para esse período: a pesquisa começa em ${c.anoDe(inicio)}.`
+        : 'Faltam dados da pesquisa nesse período.', corpo);
+    } else {
+      const porque = fraseCausas(it, p);
+      if (porque) el('p', 'ano-porque', porque, corpo);
     }
-    for (const it of itens) {
-      const li = el('li', 'ano-item', null, listas[it.grupo]);
-      const vSel = valorNoPeriodo(it, p);
-      const r = vSel == null ? null : c.comparar(it.hoje.valor, vSel, it.neutro ? true : it.maiorMelhor);
-
-      // Topo: nome do item e um selo curto com o veredito. O selo (bom, na
-      // média, ruim) da abertura compara com a história; este compara só com
-      // o período escolhido.
-      const topo = el('div', 'ano-topo', null, li);
-      el('h3', 'ano-nome', it.nome, topo);
-      seloVeredito(topo, r, it.neutro);
-      el('p', 'ano-explica', it.explica, li);
-
-      // Duas barras na mesma escala, começando do zero: o período escolhido e hoje.
-      barrasAntesHoje(li, [
-        { classe: 'comp-antes', rotulo: p.rotulo, quando: vSel == null ? null : descricaoPeriodo(it, p), valor: vSel },
-        { classe: 'comp-hoje', rotulo: 'Hoje', quando: descricaoHoje(it), valor: it.hoje.valor },
-      ], it.formato);
-
-      if (vSel == null) {
-        const inicio = primeiroMesComDado(it);
-        el('p', 'ano-porque', meses[p.indices[0]] < inicio
-          ? `Sem dado para esse período: a pesquisa começa em ${c.anoDe(inicio)}.`
-          : 'Faltam dados da pesquisa nesse período.', li);
-      }
-      const porque = vSel == null ? null : fraseCausas(it, p);
-      if (porque) el('p', 'ano-porque', porque, li);
-      if (it.situacao) el('p', 'ano-ranking', it.situacao.frase, li);
-      if (it.neutro) el('p', 'ano-ranking', 'Sem nota: mais imposto pode significar mais serviços ou mais peso no bolso, e decidir isso é opinião.', li);
-      if (it.secao) {
-        const a = el('a', 'ano-link', 'Ver detalhes', li);
-        a.href = it.secao;
-      }
+    if (it.situacao) el('p', 'ano-ranking', it.situacao.frase, corpo);
+    if (it.neutro) el('p', 'ano-ranking', 'Sem nota: mais imposto pode significar mais serviços ou mais peso no bolso, e decidir isso é opinião.', corpo);
+    if (it.secao) {
+      const a = el('a', 'ano-link', 'Ver a seção completa', corpo);
+      a.href = it.secao;
     }
   };
-  seletores.forEach((sel) => sel.addEventListener('change', () => {
-    seletores.forEach((outro) => { outro.value = sel.value; });
-    desenharHoje();
-    desenhar();
-  }));
-  desenhar();
 
-  registrarDownload('resumo', () => ({
-    nome: 'resumo-por-ano-e-governo.csv',
-    cabecalhos: ['período', ...itens.map((it) => it.nome)],
-    linhas: [
-      ['hoje (últimos 12 meses)', ...itens.map((it) => arred(it.hoje.valor, 2))],
-      ...[...periodos.values()].map((p) => [p.governo ? `${p.rotulo}, último ano (${p.ano})` : String(p.ano),
-        ...itens.map((it) => arred(valorNoPeriodo(it, p), 2))]),
-    ],
-  }));
+  // Abertura: como está cada número hoje, comparado com a própria história,
+  // em grupos: o bolso das pessoas, as contas do país e, com uma cidade
+  // escolhida, as contas do estado. Só o bolso daria uma ideia incompleta.
+  // Em cada grupo, primeiro o que está bom, depois na média e ruim.
+  const caixaHoje = $('#hoje-lista');
+  const ordem = { bom: 0, medio: 1, ruim: 2 };
+  const conteudoLinha = (linha, { nome, dica, valor, selo, comparacao: cmp }) => {
+    const span = el('span', 'hoje-nome', nome, linha);
+    if (dica) el('small', null, dica, span);
+    el('span', 'hoje-valor', valor, linha);
+    if (selo) el('span', `selo selo-${selo.nivel}`, selo.texto, linha);
+    if (cmp) {
+      const texto = el('span', 'hoje-compara', `${cmp.texto} · `, linha);
+      el('strong', `compara-${cmp.classe}`, cmp.palavra, texto);
+    }
+  };
+  const desenharHoje = () => {
+    const p = periodos.get(select.value);
+    caixaHoje.replaceChildren();
+    for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
+      const doGrupo = itens.filter((it) => it.grupo === grupo);
+      if (!doGrupo.length) continue;
+      el('p', 'hoje-grupo', titulo, caixaHoje);
+      const lista = el('ul', null, null, caixaHoje);
+      [...doGrupo].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => {
+        const comp = comparacao(it, p);
+        const [palavra, classe] = palavraDe(comp?.r ?? null, it.neutro, comp?.sufixo);
+        const li = el('li', 'hoje-item', null, lista);
+        const det = el('details', null, null, li);
+        const resumo = el('summary', 'hoje-linha', null, det);
+        conteudoLinha(resumo, {
+          nome: it.nomeCurto ?? it.nome,
+          dica: it.dica,
+          valor: (it.formatoCurto ?? it.formato)(it.hoje.valor),
+          selo: it.situacao ? { nivel: it.situacao.nivel, texto: NOME_NIVEL[it.situacao.nivel] } : (it.neutro ? { nivel: 'neutro', texto: 'Sem nota' } : null),
+          comparacao: comp ? { texto: comp.texto, palavra, classe } : null,
+        });
+        if (comp) detalhe(det, it, p, comp);
+      });
+    }
+    // Contas do estado da cidade escolhida: dívida e folha frente ao limite
+    // da lei, no último ano publicado.
+    const bloco = ctx.d.estados_fiscal;
+    const uf = cidade.dados?.uf ? bloco?.estados?.find((e) => e.sigla === cidade.dados.uf) : null;
+    if (uf && bloco.anos?.length) {
+      const k = bloco.anos.length - 1;
+      const ano = bloco.anos[k];
+      const ind = (chave) => uf.indicadores?.[chave]?.[k] ?? null;
+      const nivelLimite = { 'dentro do limite': ['bom', 'Dentro do limite'], 'perto do limite': ['medio', 'Perto do limite'], 'acima do limite': ['ruim', 'Acima do limite'] };
+      const selo = (sit) => (sit ? { nivel: nivelLimite[sit][0], texto: nivelLimite[sit][1] } : null);
+      el('p', 'hoje-grupo', `Nas contas do estado (${uf.nome})`, caixaHoje);
+      const lista = el('ul', null, null, caixaHoje);
+      const linhaEstado = (dados) => {
+        const a = el('a', 'hoje-linha', null, el('li', 'hoje-item', null, lista));
+        a.href = '#estados';
+        conteudoLinha(a, dados);
+      };
+      const div = ind('dcl_rcl_pct');
+      const limDiv = bloco.limite_divida_pct ?? 200;
+      if (div != null) {
+        linhaEstado({ nome: 'Dívida do estado', dica: `para cada R$ 100 que entram no ano (${ano}); a lei permite ${f.moeda(limDiv, 0)}`,
+          valor: f.moeda(div, 0), selo: selo(situacao(div, limDiv, bloco.alerta_divida_pct ?? 180)) });
+      }
+      const fol = ind('pessoal_rcl_pct');
+      if (fol != null) {
+        linhaEstado({ nome: 'Folha de pagamento', dica: `de cada R$ 100 que entram (${ano}); a lei permite ${f.moeda(ind('pessoal_limite_pct'), 2)}`,
+          valor: f.moeda(fol, 0), selo: selo(situacao(fol, ind('pessoal_limite_pct'), ind('pessoal_alerta_pct'))) });
+      }
+    } else {
+      const pe = el('p', 'hoje-estado', 'Para ver também as contas do seu estado, ', caixaHoje);
+      const a = el('a', null, 'escolha o estado', pe);
+      a.href = '#estados';
+      pe.append('.');
+    }
+  };
+
+  // O que está sendo comparado, em uma frase, e o aviso de crise quando um
+  // dos dois períodos cruza uma crise com data oficial.
+  const ultimoMesGeral = Math.max(...itens.map((it) => ultimoMesDoItem(it)));
+  const desenharModo = () => {
+    const p = periodos.get(select.value);
+    const caixaModo = $('#hoje-modo');
+    const caixaAviso = $('#hoje-aviso');
+    let trechos;
+    if (p.mesmo) {
+      const par = c.mesmoPeriodo(mandatos, meses, p.atual.id, p.anterior.id, ultimoMesGeral);
+      caixaModo.textContent = `Embaixo de cada número: ${p.atual.rotulo}, do primeiro mês até o último publicado, × ${p.anterior.rotulo} nos mesmos meses de mandato (${intervalo(par.anterior)}).`;
+      trechos = [[`o período de ${p.anterior.rotulo} inclui`, par.anterior], [`o período de ${p.atual.rotulo} inclui`, par.atual]];
+    } else {
+      caixaModo.textContent = `Embaixo de cada número: ${p.modo}.`;
+      const hoje = meses.map((_, i) => i).filter((i) => i > ultimoMesGeral - 12 && i <= ultimoMesGeral);
+      trechos = [[p.governo ? `o último ano do governo ${p.curto} inclui` : `o ano de ${p.ano} inclui`, p.indices], ['os últimos 12 meses incluem', hoje]];
+    }
+    const avisos = trechos
+      .map(([nome, ind]) => [nome, crisesNoPeriodo(meses[ind[0]], meses[ind[ind.length - 1]])])
+      .filter(([, lista]) => lista.length);
+    caixaAviso.hidden = !avisos.length;
+    if (avisos.length) {
+      const partes = avisos.map(([sujeito, lista]) => `${sujeito} ${listaDeAnos(lista.map((x) => x.nome))}`);
+      caixaAviso.textContent = `Atenção: ${partes.join('; ')}. Crises mexem com quase todos os números; o aviso não muda as contas.`;
+    }
+  };
+
+  const atualizar = () => { desenharModo(); desenharHoje(); };
+  atualizar();
+  aoMudarCidade(desenharHoje);
+  select.addEventListener('change', atualizar);
+
+  registrarDownload('resumo', () => {
+    const linhas = [['hoje (últimos 12 meses)', ...itens.map((it) => arred(it.hoje.valor, 2))]];
+    const pm = periodos.get('m:mesmo');
+    if (pm) {
+      const valores = itens.map((it) => mesmo(it, pm));
+      linhas.push([`governo ${pm.atual.rotulo} até agora (dívida: variação em pontos)`, ...valores.map((m) => arred(m?.vAtual, 2))]);
+      linhas.push([`governo ${pm.anterior.rotulo}, mesmo período (dívida: variação em pontos)`, ...valores.map((m) => arred(m?.vAnterior, 2))]);
+    }
+    for (const p of periodos.values()) {
+      if (!p.mesmo) linhas.push([p.rotulo, ...itens.map((it) => arred(valorNoPeriodo(it, p), 2))]);
+    }
+    return { nome: 'comparacao-por-ano-e-governo.csv', cabecalhos: ['período', ...itens.map((it) => it.nome)], linhas };
+  });
 }
 
 // ---------------------------------------------------------------------------
