@@ -2496,12 +2496,19 @@ function montarResumo(ctx) {
   // que é o padrão) e anos completos.
   const anteriores = [...mandatos].filter((m) => m.fim).sort((a, b) => b.inicio.localeCompare(a.inicio));
   const periodos = new Map();
+  // Cada governo é representado pelo último ano atribuído a ele (o ano é de
+  // quem governou a maior parte dele): como o governo entregou o país. A
+  // média do mandato misturaria crises do meio do caminho, como a pandemia.
+  const todosOsAnosDoCalendario = [...new Set(meses.map((mes) => c.anoDe(mes)))];
   anteriores.forEach((m) => {
-    const indices = c.mesesDoMandato(mandatos, meses, m.id);
-    if (!indices.length) return;
-    const de = c.anoDe(meses[indices[0]]);
-    const ate = c.anoDe(meses[indices[indices.length - 1]]);
-    periodos.set(`g:${m.id}`, { indices, rotulo: `Governo ${m.rotulo}`, curto: m.rotulo, quando: `no governo ${m.rotulo}`, de, ate, partido: m.partido });
+    const anosDoGoverno = todosOsAnosDoCalendario.filter((a) => c.governoDoAno(mandatos, a)?.id === m.id);
+    if (!anosDoGoverno.length) return;
+    const ano = Math.max(...anosDoGoverno);
+    const indices = meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
+    periodos.set(`g:${m.id}`, {
+      indices, ano, governo: true, rotulo: `Governo ${m.rotulo}`, curto: `${m.rotulo} (${ano})`,
+      quando: `no último ano do governo ${m.rotulo} (${ano})`, de: ano, ate: ano, partido: m.partido,
+    });
   });
   const todosOsAnos = [...new Set(itens.flatMap((it) => [...it.anos.keys()]))].sort((a, b) => b - a);
   todosOsAnos.forEach((ano) => {
@@ -2519,7 +2526,7 @@ function montarResumo(ctx) {
     const grupoAno = el('optgroup', null, null, sel);
     grupoAno.label = 'Anos';
     for (const [chave, p] of periodos) {
-      const texto = p.ano ? p.rotulo : `${p.rotulo}, ${p.de} a ${p.ate}`;
+      const texto = p.governo ? `${p.rotulo}, último ano (${p.ano})` : p.rotulo;
       el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
     }
     sel.value = periodos.keys().next().value;
@@ -2527,7 +2534,7 @@ function montarResumo(ctx) {
   const select = seletores[0];
 
   const descricaoPeriodo = (it, p) => {
-    if (p.ano) return { media: 'média do ano', trimestral: 'média do ano', acumulado: 'no ano', fim: 'em dezembro', doze: 'no ano' }[it.tipo];
+    if (p.ano) return { media: `média de ${p.ano}`, trimestral: `média de ${p.ano}`, acumulado: `em ${p.ano}`, fim: `dez/${p.ano}`, doze: `em ${p.ano}` }[it.tipo];
     const intervalo = `${p.de} a ${p.ate}`;
     return { media: `média de ${intervalo}`, trimestral: `média de ${intervalo}`, acumulado: `média por ano, ${intervalo}`,
       fim: `no fim, ${f.mesCurto(meses[p.indices[p.indices.length - 1]])}`, doze: `média por ano, ${intervalo}` }[it.tipo];
@@ -2710,7 +2717,7 @@ function montarResumo(ctx) {
     cabecalhos: ['período', ...itens.map((it) => it.nome)],
     linhas: [
       ['hoje (últimos 12 meses)', ...itens.map((it) => arred(it.hoje.valor, 2))],
-      ...[...periodos.values()].map((p) => [p.ano ? String(p.ano) : `${p.rotulo} (${p.de} a ${p.ate})`,
+      ...[...periodos.values()].map((p) => [p.governo ? `${p.rotulo}, último ano (${p.ano})` : String(p.ano),
         ...itens.map((it) => arred(valorNoPeriodo(it, p), 2))]),
     ],
   }));
