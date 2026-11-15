@@ -389,43 +389,46 @@
         </label>
       </div>
       <div class="resumo" data-campo="estados-resumo"></div>
+
+      <h3>Dívida e folha de pagamento, ano a ano</h3>
       <div class="controles">
         <fieldset class="segmentos">
           <legend>Mostrar</legend>
           <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
-          <label><input type="radio" name="estados-visao" value="pessoal"><span>Gasto com pessoal</span></label>
+          <label><input type="radio" name="estados-visao" value="pessoal"><span>Folha de pagamento</span></label>
         </fieldset>
       </div>
       <p class="nota" data-campo="estados-explicacao"></p>
       <div id="grafico-estados"></div>
       <details class="glossario">
-        <summary>Que receita é essa?</summary>
-        <p>É a receita corrente líquida: o que o estado arrecada no ano com impostos, repasses da União e outras receitas do dia a dia, menos o que ele é obrigado a repassar às prefeituras e outras deduções previstas em lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para limitar a dívida e o gasto com pessoal.</p>
+        <summary>O que conta como "o que entra" no ano?</summary>
+        <p>É a receita corrente líquida: impostos, repasses da União e outras receitas do dia a dia, menos a parte que o estado é obrigado a repassar às prefeituras e outras deduções da lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para os limites. A dívida já desconta o dinheiro que o estado tem em caixa.</p>
       </details>
       <details class="glossario">
-        <summary>O que acontece quando o estado passa do limite?</summary>
-        <p>Gasto com pessoal: acima de 95% do limite (o "limite prudencial"), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem dois quadrimestres para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima do limite tem até 2032 para voltar a ele aos poucos (Lei Complementar 178).</p>
-        <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem três quadrimestres para voltar a ele. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
+        <summary>O que acontece perto ou acima do limite?</summary>
+        <p>"Perto do limite" quer dizer acima de 90% dele. Nesse ponto, o tribunal de contas avisa o governo.</p>
+        <p>Folha de pagamento: acima de 95% do limite (o "limite prudencial", R$ 46,55 de cada R$ 100 na maioria dos estados), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem oito meses para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima tem até 2032 para voltar aos poucos (Lei Complementar 178).</p>
+        <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem um ano para voltar. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
       </details>
+
       <div id="estados-receita-caixa">
-      <h3>Quanto o estado arrecada com os próprios impostos</h3>
-      <div class="resumo" data-campo="estados-receita-resumo"></div>
-      <div class="controles">
-        <fieldset class="segmentos">
-          <legend>Imposto</legend>
-          <label><input type="radio" name="estados-tributo" value="icms" checked><span>ICMS</span></label>
-          <label><input type="radio" name="estados-tributo" value="ipva"><span>IPVA</span></label>
-          <label><input type="radio" name="estados-tributo" value="itcd"><span>ITCMD</span></label>
-        </fieldset>
-      </div>
-      <p class="nota" data-campo="estados-receita-explicacao"></p>
-      <div id="grafico-estados-receita"></div>
-      <details class="glossario">
-        <summary>O que são ICMS, IPVA e ITCMD?</summary>
-        <p>ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet. Vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação. Os três são cobrados pelos estados e pelo Distrito Federal.</p>
-        <p>Parte do dinheiro vai para as prefeituras do estado: 25% do ICMS e 50% do IPVA (Constituição, art. 158). Os valores mostrados aqui são o total arrecadado, antes desses repasses. Com a reforma tributária, o ICMS vai ser substituído aos poucos pelo IBS entre 2029 e 2033.</p>
-      </details>
-      <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos dos estados</button>
+        <h3>Impostos do estado, ano a ano</h3>
+        <div class="controles">
+          <fieldset class="segmentos">
+            <legend>Imposto</legend>
+            <label><input type="radio" name="estados-tributo" value="icms" checked><span>ICMS</span></label>
+            <label><input type="radio" name="estados-tributo" value="ipva"><span>IPVA</span></label>
+            <label><input type="radio" name="estados-tributo" value="itcd"><span>ITCMD</span></label>
+          </fieldset>
+        </div>
+        <p class="nota" data-campo="estados-receita-explicacao"></p>
+        <div id="grafico-estados-receita"></div>
+        <details class="glossario">
+          <summary>O que são ICMS, IPVA e ITCMD?</summary>
+          <p>ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet. Vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
+          <p>Os valores mostrados são o total que o estado arrecadou. Depois, um quarto do ICMS e metade do IPVA vão para as prefeituras. Com a reforma tributária, o ICMS vai ser substituído aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
+        </details>
+        <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos dos estados</button>
       </div>
 
       <h3>Todos os estados</h3>
@@ -436,9 +439,9 @@
       </div>
       <div class="resumo" data-campo="estados-todos"></div>
       <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
-      <p class="nota">Os números são os que cada estado informa ao Tesouro Nacional no relatório do fim do ano e cobrem só o Poder Executivo, sem Assembleia, Judiciário, Ministério Público e Tribunal de Contas. O tribunal de contas de cada estado define detalhes do que entra no gasto com pessoal, e essas regras mudaram com o tempo. Por isso, saltos grandes de um ano para o outro podem vir de mudança na forma de contar, e não só no gasto. O limite da dívida é o da lei, igual para todos; em alguns relatórios o estado informou outro valor.</p>
-      <button type="button" class="botao" data-baixar="estados">Baixar planilha com os dados</button>
-      <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e gasto com pessoal: Relatório de Gestão Fiscal do Poder Executivo de cada estado, 3º quadrimestre (anexo 1, despesa com pessoal; anexo 2, dívida consolidada líquida); o relatório do fim do ano sai no começo do ano seguinte. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, anexo 3, que sai a cada dois meses com os valores de cada mês. O site confere os relatórios mais recentes todo dia e os anteriores uma vez por mês, para pegar correções.</p>
+      <p class="nota">Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
+      <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
+      <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
     </section>
 
     <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">

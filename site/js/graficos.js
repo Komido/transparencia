@@ -154,9 +154,10 @@ export function criarGrafico(container, opcoes) {
     rotulos.forEach((rot, i) => {
       const texto = atual.rotuloEixoX(rot, i);
       if (!texto) return;
-      const xx = x(i);
       const meia = larguraTexto(texto, 11) / 2;
-      if (xx - meia < ultimoX + 8 || xx + meia > largura - 2 || xx - meia < 2) return;
+      // Rótulo das pontas encosta na borda em vez de sumir.
+      const xx = Math.min(Math.max(x(i), meia + 2), largura - 2 - meia);
+      if (xx - meia < ultimoX + 8) return;
       const t = svgEl('text', { x: xx, y: altura - 8, class: 'eixo-rotulo', 'text-anchor': 'middle' }, svg);
       t.textContent = texto;
       ultimoX = xx + meia;
