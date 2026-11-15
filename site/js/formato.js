@@ -44,11 +44,16 @@ export function reaisCompacto(v) {
 export function reaisPorExtenso(v) {
   if (v == null || !Number.isFinite(v)) return 'n/d';
   const a = Math.abs(v);
-  // Singular abaixo de 2: "R$ 1,4 trilhão", "R$ 1,9 bilhão".
-  const nome = (n, singular, plural) => (Math.abs(n) < 2 ? singular : plural);
-  if (a >= 1e12) return `R$\u00A0${nf(a < 2e12 ? 1 : 2, a < 2e12 ? 1 : 2).format(v / 1e12)} ${nome(v / 1e12, 'trilhão', 'trilhões')}`;
-  if (a >= 1e9) return `R$\u00A0${nf(1, 1).format(v / 1e9)} ${nome(v / 1e9, 'bilhão', 'bilhões')}`;
-  if (a >= 1e6) return `R$\u00A0${nf(0, 0).format(v / 1e6)} ${nome(v / 1e6, 'milhão', 'milhões')}`;
+  // Singular abaixo de 2: "R$ 1,4 trilhão", "R$ 1,9 bilhão". A regra olha o
+  // número já arredondado, para não escrever "R$ 2,0 bilhão" quando o valor
+  // é 1,97 bilhão.
+  const escrever = (n, casas, singular, plural) => {
+    const mostrado = Math.round(Math.abs(n) * 10 ** casas) / 10 ** casas;
+    return `R$\u00A0${nf(casas, casas).format(n)} ${mostrado < 2 ? singular : plural}`;
+  };
+  if (a >= 1e12) return escrever(v / 1e12, a < 2e12 ? 1 : 2, 'trilhão', 'trilhões');
+  if (a >= 1e9) return escrever(v / 1e9, 1, 'bilhão', 'bilhões');
+  if (a >= 1e6) return escrever(v / 1e6, a < 1e7 ? 1 : 0, 'milhão', 'milhões');
   return moeda(v, 0);
 }
 

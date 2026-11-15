@@ -289,14 +289,14 @@ function montarComposicaoEstados(ctx) {
     const icms = soma('icms');
     const ipva = soma('ipva');
     const itcd = soma('itcd');
-    linhas.push(`Estados: nos 12 meses até ${f.mesLongo(ate)}, os estados e o Distrito Federal arrecadaram ${f.reaisPorExtenso(icms)} de ICMS, `
-      + `${f.reaisPorExtenso(ipva)} de IPVA e ${f.reaisPorExtenso(itcd)} de ITCMD (herança e doação).`);
+    linhas.push({ rotulo: 'Estados', texto: `nos 12 meses até ${f.mesLongo(ate)}, os estados e o Distrito Federal arrecadaram ${f.reaisPorExtenso(icms)} de ICMS, `
+      + `${f.reaisPorExtenso(ipva)} de IPVA e ${f.reaisPorExtenso(itcd)} de ITCMD (herança e doação).` });
     const k = ctx.meses.indexOf(ate);
     const janela = k >= 11 ? ctx.total.slice(k - 11, k + 1) : [];
     if (janela.length === 12 && janela.every((v) => v != null)) {
       const federal = janela.reduce((a, v) => a + v, 0) * 1e6;
-      linhas.push(`No mesmo período, a arrecadação federal foi de ${f.reaisPorExtenso(federal)}: para cada R$ 100 federais, `
-        + `os estados arrecadaram ${f.moeda(((icms + ipva + itcd) / federal) * 100, 0)} com esses três impostos.`);
+      linhas.push({ rotulo: null, texto: `No mesmo período, a arrecadação federal foi de ${f.reaisPorExtenso(federal)}: para cada R$ 100 federais, `
+        + `os estados arrecadaram ${f.moeda(((icms + ipva + itcd) / federal) * 100, 0)} com esses três impostos.` });
     }
   }
   const ctb = ctx.d.carga_tributaria;
@@ -308,18 +308,18 @@ function montarComposicaoEstados(ctx) {
     const iptu = item('municipios_iptu');
     const itbi = item('municipios_itbi');
     if (iss != null && iptu != null && itbi != null) {
-      linhas.push(`Prefeituras: em ${ano}, arrecadaram ${f.reaisPorExtenso((iss + iptu + itbi) * 1e6)} com ISS, IPTU e ITBI, `
-        + `pela estimativa anual do Tesouro Nacional (${f.reaisPorExtenso(iss * 1e6)} de ISS, ${f.reaisPorExtenso(iptu * 1e6)} de IPTU e ${f.reaisPorExtenso(itbi * 1e6)} de ITBI).`);
+      linhas.push({ rotulo: 'Prefeituras', texto: `em ${ano}, arrecadaram ${f.reaisPorExtenso((iss + iptu + itbi) * 1e6)} com ISS, IPTU e ITBI, `
+        + `pela estimativa anual do Tesouro Nacional (${f.reaisPorExtenso(iss * 1e6)} de ISS, ${f.reaisPorExtenso(iptu * 1e6)} de IPTU e ${f.reaisPorExtenso(itbi * 1e6)} de ITBI).` });
     }
     const total = item('governo_geral_total');
     const pct = item('governo_geral_total', 'pct_pib');
     if (total != null && pct != null) {
-      linhas.push(`Tudo junto: em ${ano}, União, estados e prefeituras cobraram ${f.reaisPorExtenso(total * 1e6)} em tributos, `
-        + `ou ${f.moeda(pct, 0)} de cada R$ 100 que o país produziu.`);
+      linhas.push({ rotulo: 'Tudo junto', texto: `em ${ano}, União, estados e prefeituras cobraram ${f.reaisPorExtenso(total * 1e6)} em tributos, `
+        + `ou ${f.moeda(pct, 0)} de cada R$ 100 que o país produziu.` });
     }
   }
   if (!linhas.length) return;
-  definirTopicos('composicao-estados', linhas.join(' '));
+  definirItens('composicao-estados', linhas);
   $('#composicao-estados-caixa').hidden = false;
 }
 
@@ -682,7 +682,7 @@ function montarEstados(ctx) {
       const total = doze.icms + doze.ipva + doze.itcd;
       itens.push({
         rotulo: 'Impostos',
-        texto: `nos 12 meses até ${f.mesLongo(rec.doze_meses_ate)}, o estado arrecadou ${f.reaisPorExtenso(total)}. `
+        texto: `nos 12 meses até ${f.mesLongo(rec.doze_meses_ate)}, ${uf.sigla === 'DF' ? 'o Distrito Federal' : 'o estado'} arrecadou ${f.reaisPorExtenso(total)}. `
           + `O ICMS, imposto embutido no preço das mercadorias, respondeu por ${f.porcentagem((doze.icms / total) * 100, 0)} disso.`,
       });
     }
@@ -692,7 +692,7 @@ function montarEstados(ctx) {
       const total = dozeCap.iss + dozeCap.iptu + dozeCap.itbi;
       itens.push({
         rotulo: ehBrasilia(capital) ? 'Impostos de Brasília' : `Prefeitura de ${capital.nome}`,
-        texto: `nos 12 meses até ${f.mesLongo(capital.ultimo_mes)}, ${quemCobra(capital)} arrecadou ${f.reaisPorExtenso(total)} com ISS, IPTU e ITBI. `
+        texto: `nos 12 meses até ${f.mesLongo(capital.ultimo_mes)}, ${ehBrasilia(capital) ? 'o governo do Distrito Federal arrecadou' : 'arrecadou'} ${f.reaisPorExtenso(total)} com ISS, IPTU e ITBI. `
           + `O ISS, imposto sobre serviços, respondeu por ${f.porcentagem((dozeCap.iss / total) * 100, 0)} disso.`,
       });
     }
