@@ -23,28 +23,75 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      - name: Tesouro, Boletim da Carga Tributária Bruta (impostos municipais)
+      - name: Cota parlamentar, Câmara e Senado (formato dos arquivos)
         continue-on-error: true
         run: |
           set -u
-          url=https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/thot/arquivos/publicacoes/54334_1699660/Boletim_CTB_2025.pdf
-          curl -sSfL --max-time 120 -A "ArrecadometroBrasil/1.0" "$url" -o /tmp/ctb.pdf || { echo "falhou"; exit 0; }
-          sha256sum /tmp/ctb.pdf
-          pdfinfo /tmp/ctb.pdf | head -20
-          pdftotext -layout /tmp/ctb.pdf /tmp/ctb.txt
-          wc -l /tmp/ctb.txt
-          echo "--- links e planilhas citados"
-          grep -n -i -o -E "https?://[^ )]+" /tmp/ctb.txt | sort -u | head -40
-          grep -n -i -E "xlsx|planilha|dados abertos|tesouro transparente" /tmp/ctb.txt | head -20
-          echo "--- texto completo (até 1500 linhas)"
-          head -n 1500 /tmp/ctb.txt
-          echo "--- página de publicações"
-          for pagina in \
-            "https://www.tesourotransparente.gov.br/publicacoes/boletim-estimativa-da-carga-tributaria-bruta-do-governo-geral" \
-            "https://www.tesourotransparente.gov.br/temas/estatisticas-fiscais-e-planejamento/carga-tributaria-do-governo-geral"; do
-            echo "=== $pagina"
-            curl -sSL --max-time 60 -A "ArrecadometroBrasil/1.0" -o /tmp/pagina.html -w "%{http_code}\n" "$pagina" || continue
-            grep -o -i -E "href=\"[^\"]+\"" /tmp/pagina.html | grep -i -E "ctb|carga|xlsx|xls|csv|pdf" | sort -u | head -40
+          mkdir -p /tmp/cota && cd /tmp/cota
+          cat > resumo.py <<'PY'
+          import csv, sys, collections
+          caminho, separador = sys.argv[1], sys.argv[2]
+          bruto = open(caminho, 'rb').read()
+          print('bytes', len(bruto), 'começo', bruto[:4])
+          for codificacao in ('utf-8-sig', 'cp1252', 'latin-1'):
+              try:
+                  texto = bruto.decode(codificacao)
+                  print('codificação que funciona:', codificacao)
+                  break
+              except UnicodeDecodeError:
+                  continue
+          linhas = texto.splitlines()
+          print('primeiras linhas:')
+          for l in linhas[:3]:
+              print('  ', l[:400])
+          inicio = 0
+          while inicio < len(linhas) and separador not in linhas[inicio]:
+              inicio += 1
+          if linhas and linhas[0].count(separador) <= 1 and len(linhas) > 1:
+              inicio = 1
+          leitor = csv.DictReader(linhas[inicio:], delimiter=separador)
+          print('colunas:', leitor.fieldnames)
+          contagens = collections.defaultdict(collections.Counter)
+          n = 0
+          exemplos = []
+          for linha in leitor:
+              n += 1
+              for coluna in leitor.fieldnames:
+                  if any(p in coluna.lower() for p in ('descri', 'tipo', 'uf', 'partido', 'mes', 'ano', 'senador', 'nucarteira', 'idecadastro', 'txnomeparlamentar', 'numano', 'nummes', 'codlegislatura')):
+                      contagens[coluna][linha.get(coluna)] += 1
+              if n <= 2:
+                  exemplos.append(linha)
+          print('linhas de dados', n)
+          for coluna, cont in contagens.items():
+              print(f'{coluna}: {len(cont)} valores distintos; mais comuns {cont.most_common(12)}')
+          for e in exemplos:
+              print('exemplo', e)
+          PY
+          echo "=== Câmara, arquivo anual"
+          for ano in 2025 2016; do
+            url="https://www.camara.leg.br/cotas/Ano-${ano}.csv.zip"
+            echo "--- $url"
+            curl -sSL --max-time 300 -A "ArrecadometroBrasil/1.0" -o "camara-${ano}.zip" -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
+            unzip -o -q "camara-${ano}.zip" -d "camara-${ano}" || { echo "não é zip"; head -c 500 "camara-${ano}.zip"; continue; }
+            ls -la "camara-${ano}"
+            arquivo=$(ls camara-${ano}/* | head -1)
+            python3 resumo.py "$arquivo" ";"
+          done
+          echo "=== Senado"
+          for url in \
+            "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2025.csv" \
+            "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2016.csv"; do
+            echo "--- $url"
+            curl -sSL --max-time 180 -A "ArrecadometroBrasil/1.0" -o senado.csv -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
+            python3 resumo.py senado.csv ";"
+          done
+          for url in \
+            "https://adm.senado.gov.br/adm-dadosabertos/api/v1/senadores/despesas_ceaps/2025" \
+            "https://dadosabertos.camara.leg.br/api/v2/deputados?itens=2" \
+            "https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json"; do
+            echo "--- $url"
+            curl -sSL --max-time 120 -A "ArrecadometroBrasil/1.0" -H "Accept: application/json" -o api.out -w "%{http_code} %{size_download} bytes %{content_type}\n" "$url" || { echo "falhou"; continue; }
+            head -c 1500 api.out; echo
           done
 
       - name: DIEESE, metodologia da cesta e do salário necessário
