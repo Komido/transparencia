@@ -87,6 +87,14 @@ Abra http://localhost:8000. Os cabeçalhos de segurança de `site/_headers` só 
 
 Abra uma issue descrevendo o número, a fonte oficial e o período. Para falhas de segurança, use a opção de relato privado na aba Security do repositório, em vez de uma issue pública.
 
+## Licenças
+
+- Código: MIT ([LICENSE](LICENSE)).
+- Textos do site e documentação: CC BY 4.0.
+- Dados: pertencem às fontes oficiais, sempre citadas.
+
+Detalhes em [LICENCA-CONTEUDO.md](LICENCA-CONTEUDO.md).
+
 ## Limitações conhecidas
 
 Listadas em `site/metodologia.html#limitacoes`. As principais: a arrecadação por tributo começa em 2000; dezembro de 2025 tem um erro no arquivo da Receita (sinalizado no site); a isenção do IR de 1996 a 2000 ainda não foi conferida no texto da Lei 9.250/1995.
