@@ -80,12 +80,25 @@
         <label class="seletor seletor-bloco" id="orc-renda-outra-caixa" hidden>Renda em reais
           <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
         </label>
-        <label class="seletor seletor-bloco">Quem mora
-          <select id="orc-adultos">
-            <option value="2" selected>2 adultos</option>
-            <option value="1">1 adulto</option>
-          </select>
-        </label>
+        <div class="orc-pessoas">
+          <label class="seletor seletor-bloco">Adultos
+            <select id="orc-adultos">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <label class="seletor seletor-bloco">Crianças
+            <select id="orc-criancas">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+        </div>
       </div>
       <ul class="orc-lista" id="orc-lista"></ul>
       <dl class="numeros orc-totais">
@@ -99,8 +112,16 @@
         <summary>O que fica de fora desta conta?</summary>
         <p>A conta mostra só o básico da casa: comida, aluguel, luz, água e gás. Ficam de fora transporte, remédios, roupas, escola, internet, telefone e lazer, que o DIEESE inclui no salário necessário. Os valores são médias do país; na sua cidade podem ser bem diferentes, por isso cada campo pode ser trocado pelo valor da sua casa.</p>
       </details>
+      <details class="glossario">
+        <summary>De onde vem cada valor?</summary>
+        <p>Comida: cesta básica do DIEESE, uma por adulto e meia por criança. Aluguel: há duas referências. A primeira é o valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF do IBGE (para quem tem casa própria, o IBGE estima quanto aquela casa custaria de aluguel). A segunda é o preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A primeira mostra como vivem as famílias com essa renda; a segunda, quanto custa alugar um apartamento anunciado numa cidade grande. Luz, água e gás: quanto as famílias da mesma faixa de renda gastavam por mês na Pesquisa de Orçamentos Familiares do IBGE (2017-2018), corrigido pela inflação de cada conta. É uma média: inclui famílias que pagam tarifa social e famílias maiores ou menores.</p>
+      </details>
+      <details class="glossario">
+        <summary>Como o DIEESE calcula o salário necessário?</summary>
+        <p>O DIEESE pega a cesta básica mais cara entre as capitais e multiplica por 3, porque considera uma família de 2 adultos e 2 crianças, e duas crianças comem como um adulto. Depois divide por 0,3571, porque uma pesquisa de orçamento do próprio DIEESE (São Paulo, 1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outras famílias, usamos a mesma conta com o número de pessoas escolhido.</p>
+      </details>
       <button type="button" class="botao" data-baixar="orcamento">Baixar planilha com os dados</button>
-      <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
+      <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), Fipe (Índice FipeZAP de aluguel), IBGE (POF 2017-2018 e inflação por item), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
     </section>
 
     <section id="anos" class="bloco bloco-dados" aria-labelledby="anos-titulo">
@@ -190,6 +211,9 @@
           <label><input type="radio" name="sm-regua" value="dolar"><span>Em dólar</span></label>
           <label><input type="radio" name="sm-regua" value="necessario"><span>Com o necessário</span></label>
         </fieldset>
+        <label class="seletor" id="sm-ano-caixa">Comparar com
+          <select id="sm-ano"></select>
+        </label>
       </div>
       <p class="nota" data-campo="sm-explicacao"></p>
       <div id="grafico-salario"></div>
@@ -296,7 +320,7 @@
 
     <section id="proximas" class="bloco" aria-labelledby="proximas-titulo">
       <h2 id="proximas-titulo">Em breve</h2>
-      <p>Orçamento de uma família (aluguel, luz, água e comida), gastos do governo por área, e os mesmos números para cada estado e cidade, sempre com a data do dado e a fonte oficial.</p>
+      <p>Gastos do governo por área, e os mesmos números para cada estado e cidade, inclusive o orçamento da família com os preços de cada cidade, sempre com a data do dado e a fonte oficial.</p>
     </section>
 
     <section id="fontes" class="bloco" aria-labelledby="fontes-titulo">

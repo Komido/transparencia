@@ -467,6 +467,33 @@ export function noSalarioDeHoje(precos, salario, iReferencia) {
     ? null : (p * base) / salario[i]));
 }
 
+// Quanto os preços subiram desde um mês-base: produto de (1 + variação) dos
+// meses seguintes até o último publicado. Um mês sem dado no meio interrompe a
+// conta (devolve null), para não estimar o que a fonte não publicou.
+export function fatorDesde(meses, variacoes, mesBase) {
+  const iBase = meses.indexOf(mesBase);
+  const iUlt = ultimoIndice(variacoes ?? []);
+  if (iBase < 0 || iUlt <= iBase) return null;
+  let fator = 1;
+  for (let i = iBase + 1; i <= iUlt; i += 1) {
+    if (variacoes[i] == null) return null;
+    fator *= 1 + variacoes[i] / 100;
+  }
+  return { fator, ate: meses[iUlt] };
+}
+
+// Pessoas da casa em "adultos equivalentes", pela regra do DIEESE: duas
+// crianças consomem como um adulto.
+export const unidadesDeConsumo = (adultos, criancas) => adultos + criancas / 2;
+
+// Faixa de renda da POF para uma renda em salários mínimos. As faixas da POF
+// estão em reais de 15/01/2018; divididas pelo salário mínimo da época, viram
+// múltiplos do salário mínimo (até 2, até 3, até 6...).
+export function faixaDaPof(classes, salariosMinimos, salarioMinimoReferencia) {
+  return classes.find((cl) => cl.renda_ate == null || salariosMinimos <= cl.renda_ate / salarioMinimoReferencia + 1e-9)
+    ?? classes[classes.length - 1];
+}
+
 // Último valor publicado de uma série mensal, com o mês.
 export function ultimoValor(meses, valores) {
   const i = ultimoIndice(valores ?? []);

@@ -271,7 +271,6 @@ function montarSalario(ctx) {
   const { meses, s, mandatos } = ctx;
   const sm = c.salarioMinimo(meses, s);
   const anual = c.anualSalario(meses, sm);
-  const faixas = c.faixasDeMandato(mandatos, meses);
   const iUlt = c.ultimoIndice(sm.real);
   const iDolar = c.ultimoIndice(sm.emDolar);
   const iNec = c.ultimoIndice(sm.frenteNecessario);
@@ -300,53 +299,89 @@ function montarSalario(ctx) {
   item(`Em dólar (${f.mesCurto(meses[iDolar])})`, f.dolar(sm.emDolar[iDolar], 0));
   item(`Parte do salário necessário, segundo o DIEESE (${f.mesCurto(meses[iNec])})`, f.porcentagem(sm.frenteNecessario[iNec], 0));
 
+  // Poder de compra: o salário de um mês-base, corrigido só pela inflação
+  // (INPC) dali em diante, ao lado do salário de verdade. A distância entre as
+  // linhas é o ganho (ou a perda) acima da inflação desde o mês-base.
+  const inpc = c.indiceAcumulado(s.inpc_var);
+  const { candidatos: basesPossiveis } = mesesParaComparar(meses, sm.real);
+  let anoBase = null;
+  const selBase = $('#sm-ano');
+
   const reguas = {
-    real: {
-      nome: 'Salário mínimo: valor na época e em dinheiro de hoje',
-      series: [
-        { nome: 'Valor na época', classe: 'serie-1', valores: s.salario_minimo },
-        { nome: 'Em dinheiro de hoje', classe: 'serie-2', valores: sm.real },
-      ],
-      formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
-      explicacao: `A linha azul é o salário que se recebia em cada época. A laranja é quanto esse salário valeria hoje, corrigido pela inflação até ${f.mesLongo(sm.referencia)}. A distância entre as duas é a inflação acumulada desde então. Para saber se o salário compra mais ou menos, olhe a laranja: quanto mais alta, mais ele comprava.`,
+    real: () => {
+      const iB = indiceDoAno(meses, basesPossiveis, anoBase);
+      preencherAnos(selBase, meses, basesPossiveis, iB);
+      const corrigido = meses.map((m, i) => (i < iB || inpc[i] == null ? null : (s.salario_minimo[iB] * inpc[i]) / inpc[iB]));
+      const iFim = c.ultimoIndice(corrigido);
+      const nomeBase = f.mesCurto(meses[iB]);
+      return {
+        inicio: iB,
+        nome: `Salário mínimo e o salário de ${nomeBase} corrigido só pela inflação`,
+        series: [
+          { nome: 'Salário mínimo', classe: 'serie-1', valores: s.salario_minimo },
+          { nome: `Salário de ${nomeBase} só com a inflação`, classe: 'serie-2', valores: corrigido },
+        ],
+        formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
+        explicacao: `A linha azul é o salário mínimo de cada mês. A laranja mostra quanto ele seria se, a partir de ${f.mesLongo(meses[iB])} (${f.moeda(s.salario_minimo[iB], 0)}), só tivesse sido corrigido pela inflação (INPC). `
+          + `Em ${f.mesLongo(meses[iFim])}, essa conta dá ${f.moeda(corrigido[iFim], 0)}, e o salário é ${f.moeda(s.salario_minimo[iFim], 0)}. `
+          + 'Quando a azul fica acima da laranja, o salário ganhou da inflação; abaixo, perdeu.',
+      };
     },
-    dolar: {
+    dolar: () => ({
       nome: 'Salário mínimo em dólares',
       valores: sm.emDolar,
       formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.dolar(v, 0)),
       explicacao: 'Quantos dólares o salário de cada mês comprava, pela cotação daquele mês.',
-    },
-    necessario: {
-      nome: 'Salário mínimo como parte do necessário (DIEESE)',
-      valores: sm.frenteNecessario,
-      formato: (v) => f.porcentagem(v, 0),
-      explicacao: 'O DIEESE calcula todo mês quanto uma família de quatro pessoas precisa para viver com o básico. A linha mostra quanto o salário mínimo cobre desse valor: 100% seria cobrir tudo.',
+    }),
+    necessario: () => {
+      const iN = c.ultimoIndice(s.smn_dieese);
+      return {
+        inicio: s.smn_dieese.findIndex((v) => v != null),
+        nome: 'Salário mínimo e o salário mínimo necessário do DIEESE',
+        series: [
+          { nome: 'Salário mínimo', classe: 'serie-1', valores: s.salario_minimo },
+          { nome: 'Necessário (DIEESE)', classe: 'serie-2', valores: s.smn_dieese },
+        ],
+        formato: (v, eixo) => (eixo ? f.numero(v, 0) : f.moeda(v, 0)),
+        explicacao: `A linha laranja é quanto o DIEESE calcula que uma família de 2 adultos e 2 crianças precisa por mês para viver com o básico. A distância até a linha azul é quanto falta ao salário mínimo: em ${f.mesLongo(meses[iN])}, ${f.moeda(s.smn_dieese[iN] - s.salario_minimo[iN], 0)}, e o mínimo cobre ${f.porcentagem(sm.frenteNecessario[iN], 0)} do necessário.`,
+      };
     },
   };
 
   const configurar = (chave) => {
-    const r = reguas[chave];
+    const r = reguas[chave]();
+    const i0 = Math.max(0, r.inicio ?? 0);
+    const mesesG = meses.slice(i0);
+    const series = (r.series ?? [{ nome: r.nome, classe: 'serie-1', valores: r.valores }])
+      .map((serie) => ({ ...serie, valores: serie.valores.slice(i0) }));
     return {
-      tipo: 'linhas',
-      rotulos: meses,
-      faixas,
-      series: r.series ?? [{ nome: r.nome, classe: 'serie-1', valores: r.valores }],
-      formatoY: r.formato,
-      rotuloEixoX: rotuloMesNoEixo(5),
-      tituloTooltip: (i) => f.mesCurto(meses[i]),
-      extraTooltip: (i) => textoGoverno(ctx, meses[i]),
-      descricao: r.nome,
-      incluirZero: true,
+      opcoes: {
+        tipo: 'linhas',
+        rotulos: mesesG,
+        faixas: c.faixasDeMandato(mandatos, mesesG),
+        series,
+        formatoY: r.formato,
+        rotuloEixoX: rotuloMesNoEixo(5),
+        tituloTooltip: (i) => f.mesCurto(mesesG[i]),
+        extraTooltip: (i) => textoGoverno(ctx, mesesG[i]),
+        descricao: r.nome,
+        incluirZero: true,
+      },
+      explicacao: r.explicacao,
     };
   };
 
-  const grafico = criarGrafico($('#grafico-salario'), configurar('real'));
-  definir('sm-explicacao', reguas.real.explicacao);
-  document.querySelectorAll('input[name="sm-regua"]').forEach((r) => r.addEventListener('change', () => {
-    const chave = valorRadio('sm-regua');
-    grafico.atualizar(configurar(chave));
-    definir('sm-explicacao', reguas[chave].explicacao);
-  }));
+  let grafico = null;
+  const desenharSalario = () => {
+    const chave = valorRadio('sm-regua') ?? 'real';
+    $('#sm-ano-caixa').hidden = chave !== 'real';
+    const { opcoes, explicacao } = configurar(chave);
+    if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-salario'), opcoes);
+    definir('sm-explicacao', explicacao);
+  };
+  document.querySelectorAll('input[name="sm-regua"]').forEach((r) => r.addEventListener('change', desenharSalario));
+  selBase.addEventListener('change', (ev) => { anoBase = c.anoDe(meses[Number(ev.target.value)]); desenharSalario(); });
+  desenharSalario();
 
   const resumo = c.resumoPorGoverno(anual, mandatos, ['variacaoReal', 'emDolar', 'frenteNecessario']);
   preencherTabela($('#tabela-salario-governos'),
@@ -657,27 +692,72 @@ function montarCompras(ctx) {
 // ---------------------------------------------------------------------------
 
 // Despesas do básico da casa. padrao() devolve o valor médio do país, com a
-// explicação de onde ele vem, ou null quando ainda não há fonte automática.
-// A pessoa pode trocar qualquer valor pelo da sua casa.
+// explicação de onde ele vem, ou null quando falta dado. A pessoa pode trocar
+// qualquer valor pelo da sua casa.
+const AREA_EXEMPLO_M2 = 40;
+
+// Gasto da POF 2017-2018 da faixa de renda, trazido para hoje pela inflação
+// do próprio item (IPCA por subitem, desde janeiro de 2018).
+function valorDaPof(ctx, familia, chave, serieIpca) {
+  const pof = ctx.d.orcamento?.pof;
+  const valor2018 = familia.faixa?.itens?.[chave];
+  const f2 = pof && c.fatorDesde(ctx.meses, ctx.s[serieIpca], pof.mes_referencia);
+  return valor2018 == null || !f2 ? null : { valor: valor2018 * f2.fator, ate: f2.ate };
+}
+
+function gastoDaPof(ctx, familia, chave, serieIpca, nomeDaInflacao) {
+  const v = valorDaPof(ctx, familia, chave, serieIpca);
+  return v && {
+    valor: v.valor,
+    nota: `Gasto médio das famílias da mesma faixa de renda (POF 2017-2018, IBGE), corrigido pela inflação ${nomeDaInflacao} até ${f.mesCurto(v.ate)}`,
+  };
+}
+
 const ITENS_ORCAMENTO = [
   {
     id: 'comida', nome: 'Comida',
-    padrao: ({ meses, s }, adultos) => {
+    padrao: ({ meses, s }, familia) => {
       const u = c.ultimoValor(meses, s.cesta_total);
-      return u && {
-        valor: u.valor * adultos,
-        nota: `${adultos === 1 ? 'Uma cesta básica' : `${adultos} cestas básicas`} do DIEESE, média de capitais em ${f.mesCurto(u.mes)}`,
+      if (!u) return null;
+      const cestas = familia.unidades;
+      const textoCestas = cestas === 1 ? 'Uma cesta básica' : `${f.numero(cestas, cestas % 1 ? 1 : 0)} cestas básicas`;
+      return {
+        valor: u.valor * cestas,
+        nota: `${textoCestas} do DIEESE, média de capitais em ${f.mesCurto(u.mes)}${familia.criancas ? ' (cada criança conta como meia cesta, como no cálculo do DIEESE)' : ''}`,
       };
     },
   },
-  { id: 'aluguel', nome: 'Aluguel', padrao: () => null },
-  { id: 'luz', nome: 'Luz', padrao: () => null },
-  { id: 'agua', nome: 'Água', padrao: () => null },
+  {
+    id: 'aluguel', nome: 'Aluguel',
+    opcoes: [
+      { id: 'pof', nome: 'Moradias das famílias com essa renda (IBGE)' },
+      { id: 'anuncio', nome: `Apartamento anunciado de ${AREA_EXEMPLO_M2} m² (FipeZAP)` },
+    ],
+    padrao: (ctx, familia, opcao) => {
+      const { meses, s } = ctx;
+      if (opcao !== 'anuncio') {
+        const v = valorDaPof(ctx, familia, 'aluguel', 'ipca_aluguel_var');
+        return v && {
+          valor: v.valor,
+          nota: `Valor médio de aluguel das moradias das famílias da mesma faixa de renda (POF 2017-2018, IBGE; para quem tem casa própria, o IBGE usa o aluguel estimado), corrigido pela inflação do aluguel até ${f.mesCurto(v.ate)}`,
+        };
+      }
+      const u = c.ultimoValor(meses, s.aluguel_m2);
+      return u && {
+        valor: u.valor * AREA_EXEMPLO_M2,
+        nota: `Apartamento de ${AREA_EXEMPLO_M2} m² a ${f.moeda(u.valor, 2)} por m², preço médio pedido em anúncios nas cidades do Índice FipeZAP em ${f.mesCurto(u.mes)}. Em bairros mais simples costuma ser menor`,
+      };
+    },
+  },
+  { id: 'luz', nome: 'Luz', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'luz', 'ipca_luz_var', 'da energia elétrica') },
+  { id: 'agua', nome: 'Água', padrao: (ctx, familia) => gastoDaPof(ctx, familia, 'agua', 'ipca_agua_var', 'da conta de água e esgoto') },
   {
     id: 'gas', nome: 'Gás de cozinha',
-    padrao: ({ meses, s }) => {
-      const u = c.ultimoValor(meses, s.comb_glp);
-      return u && { valor: u.valor, nota: `Um botijão de 13 kg por mês, preço médio da ANP em ${f.mesCurto(u.mes)}` };
+    padrao: (ctx, familia) => {
+      const g = gastoDaPof(ctx, familia, 'gas', 'ipca_gas_var', 'do gás de botijão');
+      const botijao = c.ultimoValor(ctx.meses, ctx.s.comb_glp);
+      if (g && botijao) g.nota += `. Dá cerca de ${f.numero(g.valor / botijao.valor, 1)} botijão por mês`;
+      return g;
     },
   },
 ];
@@ -693,6 +773,8 @@ function montarOrcamento(ctx) {
   const campoOutra = $('#orc-renda-outra');
   const caixaOutra = $('#orc-renda-outra-caixa');
   const selAdultos = $('#orc-adultos');
+  const selCriancas = $('#orc-criancas');
+  const pof = ctx.d.orcamento?.pof;
   selRenda.replaceChildren();
   for (const n of RENDAS_EM_SALARIOS) {
     const nome = n === 1 ? '1 salário mínimo' : `${f.numero(n, n % 1 ? 1 : 0)} salários mínimos`;
@@ -704,6 +786,7 @@ function montarOrcamento(ctx) {
 
   // Valores digitados pela pessoa valem até ela pedir os valores médios de novo.
   const digitados = new Map();
+  const opcoesEscolhidas = new Map();
   const lista = $('#orc-lista');
   const linhas = new Map();
   for (const item of ITENS_ORCAMENTO) {
@@ -720,6 +803,17 @@ function montarOrcamento(ctx) {
     input.min = '0';
     input.max = '1000000';
     input.step = '1';
+    if (item.opcoes) {
+      const rotuloRef = el('label', 'seletor orc-referencia', 'Referência', li);
+      const sel = el('select', null, null, rotuloRef);
+      sel.id = `orc-${item.id}-ref`;
+      for (const op of item.opcoes) el('option', null, op.nome, sel).value = op.id;
+      sel.addEventListener('change', () => {
+        opcoesEscolhidas.set(item.id, sel.value);
+        digitados.delete(item.id);
+        calcular(false);
+      });
+    }
     const nota = el('p', 'orc-nota', null, li);
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
@@ -742,10 +836,17 @@ function montarOrcamento(ctx) {
 
   const calcular = (reescreverCampos = true) => {
     const adultos = Number(selAdultos.value) || 2;
+    const criancas = Number(selCriancas.value) || 0;
     caixaOutra.hidden = selRenda.value !== 'outro';
     const r = renda();
+    const familia = {
+      adultos,
+      criancas,
+      unidades: c.unidadesDeConsumo(adultos, criancas),
+      faixa: pof?.classes?.length ? c.faixaDaPof(pof.classes, r / sm.valor, pof.salario_minimo_referencia) : null,
+    };
     const despesas = ITENS_ORCAMENTO.map((item) => {
-      const p = item.padrao(ctx, adultos);
+      const p = item.padrao(ctx, familia, opcoesEscolhidas.get(item.id) ?? item.opcoes?.[0]?.id);
       const valor = digitados.has(item.id) ? digitados.get(item.id) : (p ? Math.round(p.valor) : null);
       return { id: item.id, nome: item.nome, valor, nota: digitados.has(item.id) ? 'Valor digitado por você' : (p?.nota ?? 'Ainda sem fonte automática para este item. Digite o valor da sua casa.') };
     });
@@ -760,12 +861,13 @@ function montarOrcamento(ctx) {
     }
 
     const semValor = res.itens.filter((d) => d.valor == null).map((d) => d.nome.toLowerCase());
-    const pessoas = adultos === 1 ? 'Uma pessoa que mora sozinha' : 'Um casal';
+    const pessoasTexto = `${adultos === 1 ? '1 adulto' : `${adultos} adultos`}${criancas ? ` e ${criancas === 1 ? '1 criança' : `${criancas} crianças`}` : ''}`;
+    const pessoas = adultos === 1 && !criancas ? 'Uma pessoa que mora sozinha' : `Uma casa com ${pessoasTexto}`;
     const rendaTexto = selRenda.value === 'outro'
       ? `renda de ${f.moeda(r, 0)}`
       : `renda de ${selRenda.selectedOptions[0].textContent.replace(/ \(.*\)$/, '')} (${f.moeda(r, 0)})`;
     let resumo = r > 0
-      ? `${pessoas} com ${rendaTexto} gasta cerca de ${f.moeda(res.total, 0)} por mês com o básico da casa: ${f.porcentagem(res.parteTotal, 0)} da renda. `
+      ? `${pessoas}, com ${rendaTexto}, gasta cerca de ${f.moeda(res.total, 0)} por mês com o básico da casa: ${f.porcentagem(res.parteTotal, 0)} da renda. `
       : 'Informe a renda da casa. ';
     if (r > 0) {
       resumo += res.sobra >= 0
@@ -778,12 +880,19 @@ function montarOrcamento(ctx) {
     definir('orc-sobra-rotulo', res.sobra >= 0 ? 'Sobra' : 'Falta');
     definir('orc-sobra', f.moeda(Math.abs(res.sobra), 0));
 
+    // Salário necessário do DIEESE: calculado para 2 adultos e 2 crianças
+    // (3 adultos equivalentes). Para outra família, o mesmo método dá o valor
+    // proporcional às pessoas: necessário × unidades ÷ 3.
     const nec = c.ultimoValor(meses, s.smn_dieese);
     if (nec) {
       const smNec = c.ultimoValor(meses, s.salario_minimo.map((v, i) => (s.smn_dieese[i] == null ? null : v)));
-      definir('orc-digno', `Para o DIEESE, uma família de quatro pessoas (dois adultos e duas crianças) precisaria de ${f.moeda(nec.valor, 0)} por mês, em ${f.mesLongo(nec.mes)}, para pagar comida, moradia, saúde, educação, roupas, higiene, transporte, lazer e previdência. `
-        + `Isso equivale a ${f.numero(nec.valor / smNec.valor, 1)} salários mínimos. `
-        + (r > 0 ? `A renda escolhida acima cobre ${f.porcentagem((r / nec.valor) * 100, 0)} desse valor.` : ''));
+      const necFamilia = (nec.valor * familia.unidades) / 3;
+      let texto = `Pelas contas do DIEESE, uma família de 2 adultos e 2 crianças precisaria de ${f.moeda(nec.valor, 0)} por mês, em ${f.mesLongo(nec.mes)}, para pagar comida, moradia, saúde, educação, roupas, higiene, transporte, lazer e previdência: ${f.numero(nec.valor / smNec.valor, 1)} salários mínimos. `;
+      if (familia.unidades !== 3) {
+        texto += `Pelo mesmo método, para ${pessoasTexto}, o valor seria ${f.moeda(necFamilia, 0)} (${f.numero(necFamilia / smNec.valor, 1)} salários mínimos). `;
+      }
+      if (r > 0) texto += `A renda escolhida cobre ${f.porcentagem((r / necFamilia) * 100, 0)} desse valor.`;
+      definir('orc-digno', texto);
     }
 
     registrarDownload('orcamento', () => ({
@@ -797,6 +906,7 @@ function montarOrcamento(ctx) {
   selRenda.addEventListener('change', () => calcular(false));
   campoOutra.addEventListener('input', () => calcular(false));
   selAdultos.addEventListener('change', () => calcular(false));
+  selCriancas.addEventListener('change', () => calcular(false));
   $('#orc-restaurar').addEventListener('click', () => { digitados.clear(); calcular(true); });
   calcular(true);
 }

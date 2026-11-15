@@ -97,9 +97,9 @@
 
       <h2 id="salario">Salário mínimo</h2>
       <ul>
-        <li><strong>Poder de compra:</strong> o gráfico mostra o salário da época e o mesmo salário corrigido pelo INPC até o mês de referência (em dinheiro de hoje).</li>
+        <li><strong>Poder de compra:</strong> o gráfico mostra o salário mínimo de cada mês e o salário de um mês escolhido (o mesmo mês do calendário em anos anteriores) corrigido só pelo INPC dali em diante. A distância entre as linhas é o ganho ou a perda acima da inflação desde aquele mês.</li>
         <li><strong>Em dólar:</strong> salário do mês dividido pela cotação média do dólar no mesmo mês (dólares da época).</li>
-        <li><strong>Com o necessário:</strong> salário dividido pelo salário mínimo necessário estimado pelo DIEESE, que calcula o valor capaz de cobrir as despesas básicas de uma família de quatro pessoas. É uma estimativa do DIEESE, com metodologia própria.</li>
+        <li><strong>Com o necessário:</strong> o gráfico mostra o salário mínimo e o salário mínimo necessário do DIEESE, em reais; a distância entre as linhas é quanto falta. O DIEESE calcula o valor capaz de cobrir as despesas básicas de uma família de 2 adultos e 2 crianças; o método está descrito na seção "Orçamento da família". É uma estimativa do DIEESE, com metodologia própria.</li>
       </ul>
       <p>O ganho real médio por governo é a média, nos anos de cada mandato, da variação do salário médio do ano corrigido pelo INPC.</p>
 
@@ -145,6 +145,20 @@
         <li><strong>Praticamente igual:</strong> diferença menor que 1% do valor do ano escolhido.</li>
         <li><strong>Anos mais e menos favoráveis:</strong> todos os anos completos ordenados pelo valor, com o valor ao lado, para que valores muito próximos fiquem visíveis.</li>
         <li><strong>Ano inicial da comparação:</strong> o primeiro ano em que todos os itens têm dado. A pessoa pode escolher qualquer outro.</li>
+      </ul>
+
+      <h2 id="orcamento">Orçamento da família</h2>
+      <p>A seção "O salário dá para viver?" soma o básico da casa para uma renda e uma família escolhidas e mostra quanto sobra ou falta. Os valores são médias do país e cada um pode ser trocado pelo valor da casa da pessoa.</p>
+      <ul>
+        <li><strong>Pessoas:</strong> pela regra do DIEESE, duas crianças consomem como um adulto. A família é contada em adultos equivalentes: adultos + crianças ÷ 2.</li>
+        <li><strong>Comida:</strong> custo da cesta básica do DIEESE (média das 15 capitais, como na seção de compras) vezes os adultos equivalentes.</li>
+        <li><strong>Luz, água e gás:</strong> gasto médio mensal das famílias da mesma faixa de renda na Pesquisa de Orçamentos Familiares 2017-2018 do IBGE (tabela 6715), trazido para hoje pela inflação do próprio item no IPCA (energia elétrica residencial, taxa de água e esgoto, gás de botijão), a partir de janeiro de 2018. Os valores da POF estão a preços de 15 de janeiro de 2018, data de referência da pesquisa.</li>
+        <li><strong>Faixa de renda:</strong> as faixas da POF estão em reais de janeiro de 2018 e correspondem a múltiplos do salário mínimo da época, R$ 954 (até 2, até 3, até 6, até 10, até 15, até 25 e mais de 25 salários mínimos). A renda escolhida é convertida em salários mínimos de hoje para achar a faixa.</li>
+        <li><strong>Aluguel, referência do IBGE (padrão):</strong> valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF, que inclui o aluguel pago e, para quem tem casa própria ou cedida, o aluguel estimado pelo IBGE. Corrigido pela inflação do aluguel residencial no IPCA.</li>
+        <li><strong>Aluguel, referência FipeZAP (opcional):</strong> preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A área é um exemplo, não um dado. Anúncios de apartamentos em cidades grandes ficam acima do que pagam as famílias de renda mais baixa.</li>
+        <li><strong>Por que médias da POF:</strong> a pesquisa mostra o que famílias com aquela renda gastam de fato, incluindo quem paga tarifa social e famílias de tamanhos diferentes. Por isso o valor não muda com o número de pessoas. É a fonte oficial com gasto por faixa de renda; ela tem dados de 2017-2018, corrigidos pela inflação.</li>
+        <li><strong>Salário necessário:</strong> o DIEESE calcula o valor para 2 adultos e 2 crianças (3 adultos equivalentes): custo da cesta mais cara entre as capitais × 3 ÷ 0,3571, porque uma pesquisa de orçamento do DIEESE em São Paulo (1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outra família, o site usa o mesmo método: valor do DIEESE × adultos equivalentes ÷ 3.</li>
+        <li><strong>Fora da conta:</strong> transporte, remédios, roupas, escola, internet, telefone e lazer.</li>
       </ul>
 
       <h2 id="dolar">Dólar a preços de hoje</h2>
