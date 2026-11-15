@@ -495,18 +495,29 @@ function montarContas(ctx) {
     const ate = f.mesLongo(pPib.hoje.ate);
     const p = pR.hoje.valor * 1e6;
     const n = nR.hoje.valor * 1e6;
-    const linhas = [];
-    linhas.push(p >= 0
-      ? `Nos 12 meses até ${ate}, o governo federal arrecadou ${f.reaisPorExtenso(p)} a mais do que gastou, sem contar os juros da dívida (${f.porcentagem(pPib.hoje.valor, 1)} de tudo o que o país produz em um ano, o PIB).`
-      : `Nos 12 meses até ${ate}, o governo federal gastou ${f.reaisPorExtenso(-p)} a mais do que arrecadou, sem contar os juros da dívida (${f.porcentagem(-pPib.hoje.valor, 1)} de tudo o que o país produz em um ano, o PIB).`);
-    linhas.push(`Os juros da dívida custaram ${f.reaisPorExtenso(jR.hoje.valor * 1e6)} (${f.porcentagem(jPib.hoje.valor, 1)} do que o país produz em um ano).`);
-    linhas.push(n >= 0
-      ? `Mesmo com os juros, sobraram ${f.reaisPorExtenso(n)} (${f.porcentagem(nPib.hoje.valor, 1)} do que o país produz em um ano).`
-      : `Somando os juros, faltaram ${f.reaisPorExtenso(-n)} (${f.porcentagem(-nPib.hoje.valor, 1)} do que o país produz em um ano), cobertos com dívida nova.`);
-    if (dPib.hoje) {
-      linhas.push(`A dívida bruta do governo (União, estados e municípios) equivale a ${f.porcentagem(dPib.hoje.valor, 0)} de tudo o que o país produz em um ano (${f.mesLongo(dPib.hoje.ate)}): para cada R$ 100 que o país produz em um ano, o governo deve ${f.moeda(dPib.hoje.valor, 0)}.`);
-    }
-    definirTopicos('contas-resumo', linhas.join(' '));
+    // A conta em três linhas: sem os juros, os juros, e o total. A parte do
+    // PIB aparece uma vez, no cabeçalho da coluna.
+    const caixa = campo('contas-resumo')[0];
+    caixa.replaceChildren();
+    el('p', 'conta-titulo', `Governo federal, nos 12 meses até ${ate}`, caixa);
+    const dl = el('dl', 'conta conta-pib', null, caixa);
+    const cab = el('div', 'conta-cabeca', null, dl);
+    el('dt', null, '', cab);
+    el('dd', null, 'em reais', cab);
+    el('dd', null, '% do PIB', cab);
+    const linha = (rotulo, reais, pct, classe) => {
+      const div = el('div', classe ?? null, null, dl);
+      el('dt', null, rotulo, div);
+      el('dd', null, f.reaisCompacto(Math.abs(reais)), div);
+      el('dd', null, f.porcentagem(Math.abs(pct), 1), div);
+    };
+    linha(p >= 0 ? 'Sem contar os juros, sobrou (superávit)' : 'Sem contar os juros, faltou (déficit)', p, pPib.hoje.valor);
+    linha(p >= 0 ? 'Menos os juros da dívida' : 'Mais os juros da dívida', jR.hoje.valor * 1e6, jPib.hoje.valor);
+    linha(n >= 0 ? 'No total, sobrou' : 'No total, faltou', n, nPib.hoje.valor, `conta-fim${n < 0 ? ' conta-falta' : ''}`);
+    const fim = [];
+    if (n < 0) fim.push('O que faltou foi pago com dinheiro emprestado, e por isso a dívida cresce.');
+    if (dPib.hoje) fim.push(`Hoje o governo (União, estados e municípios) deve ${f.moeda(dPib.hoje.valor, 0)} para cada R$ 100 que o país produz em um ano (${f.mesCurto(dPib.hoje.ate)}).`);
+    el('p', 'conta-nota', `PIB é tudo o que o país produz em um ano. ${fim.join(' ')}`, caixa);
   }
 
   // Gráfico por ano --------------------------------------------------------
@@ -867,7 +878,9 @@ function montarEstados(ctx) {
         uf.nome,
         // Mesmas casas decimais na coluna toda: dívida em reais inteiros (os
         // limites são 200 e 180); folha com centavos (44,10, 46,55, 48,60, 49).
-        div == null ? 'sem dado' : { texto: f.moeda(div, 0), detalhe: marca(sitDiv), destaque: sitDiv === 'acima do limite' },
+        // Dívida líquida negativa: o estado tem mais em caixa do que deve.
+        div == null ? 'sem dado' : div < 0 ? { texto: 'não deve', detalhe: 'mais caixa que dívida' }
+          : { texto: f.moeda(div, 0), detalhe: marca(sitDiv), destaque: sitDiv === 'acima do limite' },
         fol == null ? 'sem dado' : { texto: f.moeda(fol, 2), detalhe: marca(sitFol), destaque: sitFol === 'acima do limite' },
       ];
     });
@@ -2847,7 +2860,7 @@ function montarResumo(ctx) {
       const limDiv = bloco.limite_divida_pct ?? 200;
       if (div != null) {
         linhaEstado({ nome: 'Dívida do estado', dica: `para cada R$ 100 que entram no ano (${ano}); a lei permite ${f.moeda(limDiv, 0)}`,
-          valor: f.moeda(div, 0), selo: selo(situacao(div, limDiv, bloco.alerta_divida_pct ?? 180)) });
+          valor: div < 0 ? 'não deve' : f.moeda(div, 0), selo: selo(situacao(div, limDiv, bloco.alerta_divida_pct ?? 180)) });
       }
       const fol = ind('pessoal_rcl_pct');
       if (fol != null) {

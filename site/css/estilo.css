@@ -895,7 +895,7 @@ td.num .detalhe { white-space: normal; }
 .orc-seg:last-child { border-radius: 0 4px 4px 0; }
 .orc-seg-comida, .orc-comida .orc-cor, .orc-leg-comida .orc-leg-cor { background: var(--serie-1); }
 .orc-seg-aluguel, .orc-aluguel .orc-cor, .orc-leg-aluguel .orc-leg-cor { background: var(--serie-2); }
-.orc-seg-contas, .orc-contas .orc-cor, .orc-leg-contas .orc-leg-cor { background: var(--serie-3); }
+.orc-seg-contas, .contas .orc-cor, .orc-leg-contas .orc-leg-cor { background: var(--serie-3); }
 .orc-seg-sobra, .orc-leg-sobra .orc-leg-cor { background: var(--trilho); }
 .orc-leg-sobra .orc-leg-cor { border: 1px solid var(--borda-controle); }
 .orc-marca { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--tinta); }
@@ -926,15 +926,23 @@ td.num .detalhe { white-space: normal; }
 .orc-referencia { grid-column: 2 / -1; width: 100%; }
 .orc-referencia span { font-size: var(--fs-2); }
 /* A conta: renda menos o básico dá a sobra. */
-.orc-conta { margin: var(--e-2) 0 var(--e-2); padding-top: var(--e-2); border-top: 2px solid var(--tinta); }
-.orc-conta div { display: grid; grid-template-columns: minmax(0, 1fr) auto 2.75rem; column-gap: var(--e-2); align-items: baseline; padding: 2px 0; }
-.orc-conta dt { color: var(--tinta-2); }
-.orc-conta dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-.orc-conta dd + dd { font-size: var(--fs-2); color: var(--tinta-2); }
-.orc-conta-fim dt, .orc-conta-fim dd:first-of-type { font-weight: 700; color: var(--tinta); font-size: var(--fs-4); }
-.orc-conta-fim dd.orc-falta { color: var(--ruim); }
+.conta { margin: var(--e-2) 0 var(--e-2); padding-top: var(--e-2); border-top: 2px solid var(--tinta); }
+.conta div { display: grid; grid-template-columns: minmax(0, 1fr) auto 2.75rem; column-gap: var(--e-2); align-items: baseline; padding: 2px 0; }
+.conta dt { color: var(--tinta-2); }
+.conta dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.conta dd + dd { font-size: var(--fs-2); color: var(--tinta-2); }
+.conta-fim dt, .conta-fim dd:first-of-type { font-weight: 700; color: var(--tinta); font-size: var(--fs-4); }
+.conta-fim dd.orc-falta { color: var(--ruim); }
 .orc-fonte-curta { margin-top: var(--e-1); }
 #orc-restaurar { margin: var(--e-1) 0 var(--e-2); }
+/* Contas do governo: a mesma conta, com a coluna da parte do PIB. */
+.conta-titulo { margin: 0 0 var(--e-1); font-weight: 600; }
+.conta-pib { margin-top: 0; border-top: 0; padding-top: 0; }
+.conta-pib div { grid-template-columns: minmax(0, 1fr) auto 4rem; }
+.conta-pib .conta-cabeca dd { font-size: var(--fs-1); color: var(--tinta-3); }
+.conta-pib .conta-fim { margin-top: var(--e-1); padding-top: var(--e-1); border-top: 2px solid var(--tinta); }
+.conta-falta dd:first-of-type { color: var(--ruim); }
+.conta-nota { margin: var(--e-2) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }
 .orc-cobre { margin: var(--e-2) 0 var(--e-4); }
 .orc-cobre .comp-barra { background: var(--serie-1); border-radius: 0 5px 5px 0; }
 
