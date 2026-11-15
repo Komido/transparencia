@@ -937,6 +937,8 @@ function frasesPeriodo(ano) {
 // colegas do mesmo estado (mesma base de quem ficou o ano todo), porque o
 // limite da cota muda de estado para estado: em reais, a lista dos que mais
 // gastam seria quase só de estados longe de Brasília.
+const MINIMO_POR_ESTADO = 5;
+
 function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
   const listaMais = $('#cota-ranking-mais');
   const listaMenos = $('#cota-ranking-menos');
@@ -948,8 +950,17 @@ function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
     definirItens('cota-ranking-nota', [{ rotulo: null, texto: `Sem ranking ${nomes.daCasa} para esse ano: a lista oficial não informa quem ficou no cargo o ano todo, e comparar com quem ficou poucos meses seria injusto.` }]);
     return;
   }
-  const comparaveis = base.filter((p) => p.uf && medias.get(p.uf)?.media > 0 && medias.get(p.uf).n > 1)
+  // Com poucos colegas no estado, um só que gaste muito pouco derruba a
+  // média e faz quem gastou pouco parecer gastador. No Senado (3 por estado)
+  // aconteceu em 2025: em Goiás, um senador com R$ 181 mil ficou 65% acima da
+  // média, porque outro não usou a cota.
+  const comparaveis = base.filter((p) => p.uf && medias.get(p.uf)?.media > 0 && medias.get(p.uf).n >= MINIMO_POR_ESTADO)
     .map((p) => ({ p, razao: p.total / medias.get(p.uf).media }));
+  if (comparaveis.length < 20) {
+    caixa.hidden = true;
+    definirItens('cota-ranking-nota', [{ rotulo: null, texto: `Sem ranking ${nomes.daCasa}: com só 3 ${nomes.plural} por estado, a comparação com a média do estado não é confiável, e o limite muda de estado para estado. Um ranking justo precisa do limite oficial de cada estado, que ainda não está no site.` }]);
+    return;
+  }
   const ordem = (a, b) => a.razao - b.razao || a.p.total - b.p.total || a.p.nome.localeCompare(b.p.nome, 'pt-BR');
   const crescente = [...comparaveis].sort(ordem);
   const n = Math.min(10, Math.floor(crescente.length / 2));
@@ -1113,7 +1124,8 @@ async function montarCota(ctx) {
           ? `Em ${ano}, ${quantos(todo.length)}${onde} ${todo.length === 1 ? fr.ficou : fr.ficaram} e não ${todo.length === 1 ? 'teve' : 'tiveram'} nenhum gasto da cota: ${listaDeAnos(todo.map(rotuloParlamentar))}.`
           : `Em ${ano}, todos os ${nomes.plural}${onde} que ${fr.ficaram} usaram a cota.` }];
         if (parte.length) {
-          itensSem.push({ rotulo: null, texto: `${parte.length === 1 ? `1 ${nomes.singular}` : `Outros ${parte.length} ${nomes.plural}`} ${parte.length === 1 ? 'ficou' : 'ficaram'} só parte do ano no cargo, como suplentes ou quem saiu para ser ministro, e não ${parte.length === 1 ? 'teve' : 'tiveram'} gasto: ${listaDeAnos(parte.map(rotuloParlamentar))}.` });
+          const quem = parte.length === 1 ? `1 ${nomes.singular}` : `${todo.length ? 'Outros ' : ''}${parte.length} ${nomes.plural}`;
+          itensSem.push({ rotulo: null, texto: `${quem}${todo.length ? '' : onde} ${parte.length === 1 ? 'ficou' : 'ficaram'} só parte do ano no cargo, como suplentes ou quem saiu para ser ministro, e não ${parte.length === 1 ? 'teve' : 'tiveram'} gasto: ${listaDeAnos(parte.map(rotuloParlamentar))}.` });
         }
         itensSem.push({ rotulo: null, texto: 'Não ter gasto não prova que a pessoa recusou a cota de forma declarada.' });
         definirItens('cota-sem-gasto', itensSem);
