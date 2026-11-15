@@ -93,8 +93,13 @@
     <div class="inicio-grade">
       <section id="hoje" class="cartao hoje bloco-dados" aria-labelledby="hoje-titulo">
         <h2 id="hoje-titulo">Como está o Brasil hoje?</h2>
-        <p class="sub">Últimos 12 meses, comparados com a história de cada número.</p>
-        <ul id="hoje-lista"></ul>
+        <p class="sub">Últimos 12 meses. O selo compara com a história de cada número; a linha de baixo, com o período escolhido.</p>
+        <div class="filtros hoje-filtros">
+          <label class="campo largo"><span>Comparar com</span>
+            <select id="hoje-comparar"></select>
+          </label>
+        </div>
+        <div id="hoje-lista"></div>
         <p class="rodape-cartao"><a href="#resumo">Comparar com outro ano ou governo</a></p>
       </section>
 
@@ -143,15 +148,16 @@
           <select id="resumo-comparar"></select>
         </label>
       </div>
-      <ul class="anos-lista" id="resumo-lista"></ul>
+      <div id="resumo-lista"></div>
       <details class="entenda">
         <summary>Entenda e baixe os dados</summary>
         <div class="entenda-corpo">
           <h3>Como o site decide se está bom ou ruim?</h3>
           <p>Cada item é comparado com a própria história: os últimos 12 meses contra cada ano completo desde o começo da pesquisa. Está bom quando hoje é melhor do que em pelo menos dois terços desses anos; ruim quando é melhor em no máximo um terço; na média no resto. A inflação é comparada com a meta oficial.</p>
-          <p>Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e isso é opinião. Dólar e arrecadação ficam de fora: dólar caro prejudica quem compra importados e ajuda quem exporta; mais arrecadação pode significar mais serviços ou mais peso no bolso.</p>
+          <p>Os itens ficam em dois grupos: o bolso das pessoas e as contas do país. Os dois contam: uma melhora no bolso com as contas do governo piorando pode não durar, porque déficit e dívida maiores viram mais juros, mais imposto ou menos serviço depois.</p>
+          <p>Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e isso é opinião. Os impostos aparecem sem nota: mais arrecadação pode significar mais serviços ou mais peso no bolso. O dólar fica de fora: dólar caro prejudica quem compra importados e ajuda quem exporta.</p>
           <h3>Como os governos são comparados?</h3>
-          <p>Cada governo conta do mês em que tomou posse até o último mês no cargo, com a mesma regra para todos. O valor é a média do período; a inflação é a média por ano, e a dívida é a do último mês. O governo atual ainda não terminou e não aparece na lista: "hoje" são os últimos 12 meses.</p>
+          <p>Cada governo conta do mês em que tomou posse até o último mês no cargo, com a mesma regra para todos. O valor é a média do período; a inflação, o déficit, os juros e os impostos são a média por ano, e a dívida é a do último mês. O governo atual ainda não terminou e não aparece na lista: "hoje" são os últimos 12 meses.</p>
           <p>O resultado depende também da economia mundial, do Congresso e de crises como a pandemia de 2020. Os números mostram o que aconteceu, não o mérito de quem governou.</p>
           <button type="button" class="botao" data-baixar="resumo">Baixar planilha com os dados</button>
         </div>
@@ -368,7 +374,7 @@
           <legend>Mostrar</legend>
           <div class="segmentos">
             <label><input type="radio" name="arrec-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
-            <label><input type="radio" name="arrec-medida" value="pib"><span>Parte do PIB</span></label>
+            <label><input type="radio" name="arrec-medida" value="pib"><span>Parte da economia</span></label>
           </div>
         </fieldset>
       </div>
@@ -396,8 +402,8 @@
       <details class="entenda">
         <summary>Entenda e baixe os dados</summary>
         <div class="entenda-corpo">
-          <h3>O que é "parte do PIB"?</h3>
-          <p>O PIB é a soma de tudo o que o país produz. Dizer que a arrecadação foi 16% do PIB significa que, de cada R$ 100 produzidos, R$ 16 foram pagos nesses impostos e contribuições.</p>
+          <h3>O que é "parte da economia"?</h3>
+          <p>É a comparação com o PIB, a soma de tudo o que o país produz em um ano. Dizer que a arrecadação foi 16% significa que, de cada R$ 100 produzidos no país, R$ 16 foram pagos nesses impostos e contribuições.</p>
           <h3>Por que esta conta deixa o INSS de fora?</h3>
           <p>Para comparar anos de forma justa, usamos só o que aparece na base da Receita Federal desde 2000. A contribuição ao INSS só passou a ser registrada nessa base em 2005, e as receitas de outros órgãos em 2010. Se entrassem na conta, os anos seguintes pareceriam maiores só porque a forma de registrar mudou.</p>
           <button type="button" class="botao" data-baixar="arrecadacao">Baixar planilha com os dados</button>
@@ -577,16 +583,16 @@
         <fieldset class="campo largo">
           <legend>O que mostrar</legend>
           <div class="segmentos segmentos-quatro">
-            <label><input type="radio" name="contas-visao" value="primario" checked><span>Antes dos juros</span></label>
+            <label><input type="radio" name="contas-visao" value="primario" checked><span>Sem os juros</span></label>
             <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
-            <label><input type="radio" name="contas-visao" value="nominal"><span>Resultado final</span></label>
+            <label><input type="radio" name="contas-visao" value="nominal"><span>Com os juros</span></label>
             <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
           </div>
         </fieldset>
         <fieldset class="campo largo" id="contas-medida-caixa">
           <legend>Medida</legend>
           <div class="segmentos">
-            <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte do PIB</span></label>
+            <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte da economia</span></label>
             <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
           </div>
         </fieldset>
@@ -602,8 +608,8 @@
         <summary>Entenda e baixe os dados</summary>
         <div class="entenda-corpo">
           <h3>O que são esses resultados?</h3>
-          <p>"Antes dos juros" (resultado primário) é a diferença entre o que o governo arrecadou e o que gastou, sem contar os juros da dívida. "Resultado final" (resultado nominal) inclui os juros. Quando o resultado final é negativo, o governo precisa pegar dinheiro emprestado, e a dívida cresce. Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
-          <h3>Por que comparar com o PIB?</h3>
+          <p>"Sem os juros" (o resultado primário) é a diferença entre o que o governo arrecadou e o que gastou com tudo, menos os juros da dívida. "Com os juros" (o resultado nominal) inclui os juros. Quando o resultado é negativo, faltou dinheiro (é o déficit) e o governo precisa pegar emprestado, e a dívida cresce; quando é positivo, sobrou (superávit). Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
+          <h3>Por que comparar com tudo o que o país produz (o PIB)?</h3>
           <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
           <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
         </div>

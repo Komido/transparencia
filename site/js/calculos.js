@@ -410,7 +410,9 @@ export function quantidadeComprada(salario, preco, tamanho = 1) {
 export function valoresAnuais(meses, valores, tipo) {
   const pontos = (fim) => {
     if (tipo === 'trimestral') return [fim - 9, fim - 6, fim - 3, fim];
-    if (tipo === 'fim') return [fim];
+    // 'doze': a série já vem somada em 12 meses (déficit e juros do Banco
+    // Central, impostos em 12 meses); o valor do ano é o de dezembro.
+    if (tipo === 'fim' || tipo === 'doze') return [fim];
     return Array.from({ length: 12 }, (_, k) => fim - 11 + k);
   };
   const calcular = (fim) => {
@@ -420,7 +422,7 @@ export function valoresAnuais(meses, valores, tipo) {
     if (v.some((x) => x == null)) return null;
     if (tipo === 'acumulado') return (v.reduce((a, x) => a * (1 + x / 100), 1) - 1) * 100;
     if (tipo === 'soma') return v.reduce((a, x) => a + x, 0);
-    if (tipo === 'fim') return v[v.length - 1];
+    if (tipo === 'fim' || tipo === 'doze') return v[v.length - 1];
     return v.reduce((a, x) => a + x, 0) / v.length;
   };
 
@@ -436,6 +438,22 @@ export function valoresAnuais(meses, valores, tipo) {
   return { anos, hoje };
 }
 
+// Soma móvel de 12 meses de a dividida pela de b, em %, quando os 12 meses
+// das duas séries têm dado (impostos em 12 meses como parte do PIB).
+export function razaoDozeMeses(a, b) {
+  return a.map((_, i) => {
+    if (i < 11) return null;
+    let sa = 0;
+    let sb = 0;
+    for (let k = i - 11; k <= i; k += 1) {
+      if (a[k] == null || b[k] == null) return null;
+      sa += a[k];
+      sb += b[k];
+    }
+    return sb > 0 ? (sa / sb) * 100 : null;
+  });
+}
+
 // Compara dois valores. 1: o primeiro é mais favorável; -1: menos favorável;
 // 0: diferença menor que 1% do segundo (praticamente igual).
 // Índices dos meses de um mandato (o mês é de quem governava no dia 15).
@@ -446,12 +464,14 @@ export function mesesDoMandato(mandatos, meses, id) {
 // Valor de um período (os meses de um mandato), com a mesma regra dos anos:
 // 'media' média dos meses; 'trimestral' média dos trimestres que fecham no
 // período (março, junho, setembro e dezembro); 'acumulado' média por ano da
-// variação acumulada; 'fim' o último mês. "cobertura" é a parte mínima dos
+// variação acumulada; 'fim' o último mês; 'doze' média dos valores de
+// dezembro (anos completos) do período. "cobertura" é a parte mínima dos
 // meses que precisa ter dado (1 = todos); 'fim' sempre exige o último mês.
 export function valorDoPeriodo(meses, valores, tipo, indices, cobertura = 1) {
   if (!indices.length) return null;
   let pontos = indices;
   if (tipo === 'trimestral') pontos = indices.filter((i) => mesDoAno(meses[i]) % 3 === 0);
+  if (tipo === 'doze') pontos = indices.filter((i) => mesDoAno(meses[i]) === 12);
   if (tipo === 'fim') pontos = [indices[indices.length - 1]];
   const v = pontos.map((i) => valores[i]).filter((x) => x != null);
   if (!v.length || v.length < Math.ceil(pontos.length * (tipo === 'fim' ? 1 : cobertura))) return null;

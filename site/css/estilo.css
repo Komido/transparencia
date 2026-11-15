@@ -1028,3 +1028,28 @@ td.num .detalhe { white-space: normal; }
 .comp-unidade { font-size: var(--fs-2); color: var(--tinta-2); }
 .comp-antes .comp-numero { color: var(--tinta-2); }
 .comp-frase { margin: var(--e-3) 0 0; }
+
+/* Grupos da abertura e da comparação: bolso, contas do país, estado. */
+.hoje-grupo {
+  margin: var(--e-4) 0 var(--e-1);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-3);
+}
+.hoje-grupo:first-child { margin-top: var(--e-2); }
+.hoje-estado { margin: var(--e-3) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }
+.selo-neutro { color: var(--tinta-2); }
+.selo-neutro::before { display: none; }
+.veredito-neutro { color: var(--tinta-2); }
+.veredito-neutro::before { content: "\2195"; font-size: 0.9em; }
+.bloco .grupo-titulo { margin-top: var(--e-5); }
+.comparacao.sem-barras .comp-trilho { display: none; }
+/* Linha de comparação com o período escolhido, embaixo de cada item. */
+.hoje li > a .hoje-compara { grid-column: 1 / -1; margin-top: -2px; font-size: var(--fs-1); color: var(--tinta-2); }
+.compara-melhor { color: var(--bom); }
+.compara-pior { color: var(--ruim); }
+.compara-neutro { color: var(--tinta-2); }
+.hoje-filtros { margin: var(--e-2) 0 var(--e-1); }
+.hoje-valor, .comp-valor { white-space: normal; text-align: right; }

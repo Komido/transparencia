@@ -138,7 +138,7 @@ function montarArrecadacao(ctx) {
       rotulos: anos,
       faixas,
       series: [{
-        nome: real ? 'Arrecadação federal, em dinheiro de hoje' : 'Arrecadação federal como parte do PIB',
+        nome: real ? 'Arrecadação federal, em dinheiro de hoje' : 'Arrecadação federal como parte da economia (PIB)',
         classe: 'serie-1',
         valores: anual.map((l) => (real ? l.real / 1e3 : l.carga)),
         parciais: real ? parciais : new Set(),
@@ -147,7 +147,7 @@ function montarArrecadacao(ctx) {
       formatoY: real
         ? (v, eixo) => (eixo ? `${f.numero(v, 0)}` : `R$\u00A0${f.numero(v, 1)} bi`)
         : (v) => f.porcentagem(v, 1),
-      unidade: real ? 'bilhões de reais de hoje' : '% do PIB',
+      unidade: real ? 'bilhões de reais de hoje' : '% de tudo o que o país produz no ano (PIB)',
       rotuloEixoX: (ano) => String(ano),
       tituloTooltip: (i) => (anual[i].parcial ? `${anos[i]} (${anual[i].meses} meses)` : String(anos[i])),
       extraTooltip: (i) => {
@@ -160,14 +160,14 @@ function montarArrecadacao(ctx) {
       },
       descricao: real
         ? `Arrecadação federal por ano, em bilhões de reais de ${f.mesLongo(referencia)}.`
-        : 'Arrecadação federal por ano, como parte do PIB.',
+        : 'Arrecadação federal por ano, como parte de tudo o que o país produz (PIB).',
     };
   };
 
   const notaMedida = (medida) => {
     const base = medida === 'real'
       ? `Valores em bilhões de reais, em dinheiro de ${f.mesLongo(referencia)} (corrigidos pela inflação medida pelo IPCA).`
-      : 'Arrecadação dividida pelo PIB dos mesmos meses. O PIB mensal é uma estimativa do Banco Central.';
+      : 'Arrecadação dividida por tudo o que o país produziu nos mesmos meses (o PIB). O PIB de cada mês é uma estimativa do Banco Central.';
     const parcial = ultimoParcial
       ? ` ${ultimoParcial.ano} tem só ${ultimoParcial.meses} meses publicados${medida === 'real' ? ' e aparece em tom mais claro' : ''}.`
       : '';
@@ -183,7 +183,7 @@ function montarArrecadacao(ctx) {
   }));
 
   preencherTabela($('#tabela-arrecadacao-anual'),
-    ['Ano', 'Em dinheiro de hoje (R$ bilhões)', 'Parte do PIB', 'Frente ao ano anterior, sem a inflação'],
+    ['Ano', 'Em dinheiro de hoje (R$ bilhões)', 'Parte da economia (PIB)', 'Frente ao ano anterior, sem a inflação'],
     anual.map((l) => [
       l.parcial ? `${l.ano} (${l.meses} meses)` : String(l.ano),
       f.numero(l.real / 1e3, 1),
@@ -197,7 +197,7 @@ function montarArrecadacao(ctx) {
     const resumo = c.resumoPorGoverno(anual, mandatos, ['carga', 'variacaoReal'],
       { excluirPrimeiroAno: excluir, agruparPorPartido: agrupar });
     preencherTabela($('#tabela-arrecadacao-governos'),
-      [agrupar ? 'Partido' : 'Mandato', 'Parte do PIB (média dos anos)', 'Crescimento por ano, sem a inflação (média)'],
+      [agrupar ? 'Partido' : 'Mandato', 'Parte da economia (PIB), média dos anos', 'Crescimento por ano, sem a inflação (média)'],
       resumo.map((r) => [
         {
           texto: r.rotulo,
@@ -498,14 +498,14 @@ function montarContas(ctx) {
     const n = nR.hoje.valor * 1e6;
     const linhas = [];
     linhas.push(p >= 0
-      ? `Nos 12 meses até ${ate}, o governo federal arrecadou ${f.reaisPorExtenso(p)} a mais do que gastou, sem contar os juros da dívida (${f.porcentagem(pPib.hoje.valor, 1)} do PIB).`
-      : `Nos 12 meses até ${ate}, o governo federal gastou ${f.reaisPorExtenso(-p)} a mais do que arrecadou, sem contar os juros da dívida (${f.porcentagem(-pPib.hoje.valor, 1)} do PIB).`);
-    linhas.push(`Os juros da dívida custaram ${f.reaisPorExtenso(jR.hoje.valor * 1e6)} (${f.porcentagem(jPib.hoje.valor, 1)} do PIB).`);
+      ? `Nos 12 meses até ${ate}, o governo federal arrecadou ${f.reaisPorExtenso(p)} a mais do que gastou, sem contar os juros da dívida (${f.porcentagem(pPib.hoje.valor, 1)} de tudo o que o país produz em um ano, o PIB).`
+      : `Nos 12 meses até ${ate}, o governo federal gastou ${f.reaisPorExtenso(-p)} a mais do que arrecadou, sem contar os juros da dívida (${f.porcentagem(-pPib.hoje.valor, 1)} de tudo o que o país produz em um ano, o PIB).`);
+    linhas.push(`Os juros da dívida custaram ${f.reaisPorExtenso(jR.hoje.valor * 1e6)} (${f.porcentagem(jPib.hoje.valor, 1)} do que o país produz em um ano).`);
     linhas.push(n >= 0
-      ? `Mesmo com os juros, sobraram ${f.reaisPorExtenso(n)} (${f.porcentagem(nPib.hoje.valor, 1)} do PIB).`
-      : `Somando os juros, faltaram ${f.reaisPorExtenso(-n)} (${f.porcentagem(-nPib.hoje.valor, 1)} do PIB), cobertos com dívida nova.`);
+      ? `Mesmo com os juros, sobraram ${f.reaisPorExtenso(n)} (${f.porcentagem(nPib.hoje.valor, 1)} do que o país produz em um ano).`
+      : `Somando os juros, faltaram ${f.reaisPorExtenso(-n)} (${f.porcentagem(-nPib.hoje.valor, 1)} do que o país produz em um ano), cobertos com dívida nova.`);
     if (dPib.hoje) {
-      linhas.push(`A dívida bruta do governo (União, estados e municípios) está em ${f.porcentagem(dPib.hoje.valor, 0)} do PIB em ${f.mesLongo(dPib.hoje.ate)}: para cada R$ 100 que o país produz em um ano, o governo deve ${f.moeda(dPib.hoje.valor, 0)}.`);
+      linhas.push(`A dívida bruta do governo (União, estados e municípios) equivale a ${f.porcentagem(dPib.hoje.valor, 0)} de tudo o que o país produz em um ano (${f.mesLongo(dPib.hoje.ate)}): para cada R$ 100 que o país produz em um ano, o governo deve ${f.moeda(dPib.hoje.valor, 0)}.`);
     }
     definirTopicos('contas-resumo', linhas.join(' '));
   }
@@ -515,7 +515,7 @@ function montarContas(ctx) {
   const faixas = c.faixasAnuais(mandatos, anos);
   const visoes = {
     primario: {
-      nome: 'Antes dos juros: sobrou (+) ou faltou (−)', pib: pPib, real: pReal,
+      nome: 'Sem os juros: sobrou (+) ou faltou (−)', pib: pPib, real: pReal,
       explicacao: 'Diferença entre o que o governo federal arrecadou e o que gastou no ano, sem contar os juros da dívida. Acima de zero, sobrou dinheiro (superávit); abaixo, faltou (déficit).',
     },
     juros: {
@@ -523,7 +523,7 @@ function montarContas(ctx) {
       explicacao: 'Quanto a dívida custou em juros no ano.',
     },
     nominal: {
-      nome: 'Resultado final, com os juros', pib: nPib, real: nReal,
+      nome: 'Com os juros: sobrou (+) ou faltou (−)', pib: nPib, real: nReal,
       explicacao: 'O que sobrou ou faltou depois de pagar os juros. Quando falta, o governo pega dinheiro emprestado e a dívida cresce.',
     },
     divida: {
@@ -546,16 +546,16 @@ function montarContas(ctx) {
       faixas,
       series: [{ nome: v.nome, classe: 'serie-1', valores, parciais: new Set() }],
       formatoY: medida === 'pib'
-        ? (x, eixo) => (eixo ? f.numero(x, 0) : `${f.porcentagem(x, 1)} do PIB`)
+        ? (x, eixo) => (eixo ? f.numero(x, 0) : `${f.porcentagem(x, 1)} do que o país produz`)
         : (x, eixo) => (eixo ? f.numero(x, 0) : `R$\u00A0${f.numero(x, 1)} bi`),
-      unidade: medida === 'pib' ? '% do PIB' : 'bilhões de reais de hoje',
+      unidade: medida === 'pib' ? '% de tudo o que o país produz no ano (PIB)' : 'bilhões de reais de hoje',
       rotuloEixoX: (ano) => (ano % 5 === 0 ? String(ano) : null),
       tituloTooltip: (i) => String(anos[i]),
       extraTooltip: (i) => {
         const g = c.governoDoAno(mandatos, anos[i]);
         return g ? `Governo: ${g.rotulo} (${g.partido})` : null;
       },
-      descricao: `${v.nome}, por ano, ${medida === 'pib' ? 'em % do PIB' : 'em bilhões de reais de hoje'}.`,
+      descricao: `${v.nome}, por ano, ${medida === 'pib' ? 'em % de tudo o que o país produz no ano' : 'em bilhões de reais de hoje'}.`,
       incluirZero: true,
     };
     if (grafico) grafico.atualizar(opcoes); else grafico = criarGrafico($('#grafico-contas'), opcoes);
@@ -568,7 +568,7 @@ function montarContas(ctx) {
   const resumo = c.resumoPorGoverno(linhasAno, mandatos, ['primario', 'nominal']);
   const sinal = (x) => (x == null ? 'sem dado' : f.porcentagem(x, 1, true));
   preencherTabela($('#tabela-contas-governos'),
-    ['Mandato', 'Antes dos juros (média por ano, % do PIB)', 'Resultado final (média por ano, % do PIB)', 'Dívida bruta no fim (% do PIB)'],
+    ['Mandato', 'Sem os juros: sobrou (+) ou faltou (−), média por ano, % da economia', 'Com os juros: sobrou (+) ou faltou (−), média por ano, % da economia', 'Dívida no fim, % da economia'],
     resumo.map((r) => {
       const ultimo = r.anos.length ? Math.max(...r.anos) : null;
       const divida = ultimo != null ? dPib.anos.get(ultimo) : null;
@@ -2298,13 +2298,13 @@ function indicadoresDoAno(ctx) {
   const salario = { rotulo: 'o salário mínimo', serie: s.salario_minimo };
   const lista = [
     {
-      id: 'salario', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario', dica: 'em dinheiro de hoje',
+      id: 'salario', grupo: 'bolso', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario', dica: 'em dinheiro de hoje',
       explica: 'quanto vale em dinheiro de hoje (corrigido pela inflação, INPC)',
       valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
       causas: [salario, { rotulo: 'os preços (INPC)', serie: inpc }],
     },
     {
-      id: 'cestas', nome: 'Cestas básicas por salário mínimo', curto: 'cestas básicas por salário', secao: '#compras',
+      id: 'cestas', grupo: 'bolso', nome: 'Cestas básicas por salário mínimo', curto: 'cestas básicas por salário', secao: '#compras',
       nomeCurto: 'Cestas básicas', dica: 'quantas o salário mínimo compra',
       explica: 'quantas cestas do DIEESE um salário mínimo compra',
       valores: s.cesta_total ? c.quantidadeComprada(s.salario_minimo, s.cesta_total) : null,
@@ -2312,41 +2312,77 @@ function indicadoresDoAno(ctx) {
       causas: [salario, { rotulo: 'a cesta básica', serie: s.cesta_total }],
     },
     {
-      id: 'desemprego', nome: 'Desemprego', curto: 'desemprego', secao: null,
+      id: 'desemprego', grupo: 'bolso', nome: 'Desemprego', curto: 'desemprego', secao: null,
       explica: 'de cada 100 pessoas que trabalham ou procuram trabalho, quantas não encontram',
       valores: s.desocupacao, tipo: 'trimestral', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'renda', nome: 'Renda de quem trabalha', curto: 'renda do trabalho', secao: null, dica: 'média, em dinheiro de hoje',
+      id: 'renda', grupo: 'bolso', nome: 'Renda de quem trabalha', curto: 'renda do trabalho', secao: null, dica: 'média, em dinheiro de hoje',
       explica: 'média de todos os trabalhos, com ou sem carteira, em dinheiro de hoje',
       valores: s.renda_trabalho, tipo: 'trimestral', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
     },
     {
-      id: 'inflacao', nome: 'Inflação', curto: 'inflação', secao: null, meta: t.META_INFLACAO,
+      id: 'inflacao', grupo: 'bolso', nome: 'Inflação', curto: 'inflação', secao: null, meta: t.META_INFLACAO,
       dica: `em 12 meses; meta: ${f.porcentagem(t.META_INFLACAO.centro, 0)} ao ano`,
       explica: 'quanto os preços subiram em 12 meses (IPCA)',
       valores: s.ipca_var, tipo: 'acumulado', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
-      id: 'botijao', nome: 'Botijão de gás', curto: 'botijão de gás', secao: '#combustiveis', dica: 'parte do salário mínimo',
+      id: 'botijao', grupo: 'bolso', nome: 'Botijão de gás', curto: 'botijão de gás', secao: '#combustiveis', dica: 'parte do salário mínimo',
       explica: 'quanto pesa no salário mínimo',
       valores: s.comb_glp ? parteDoSalario(s.comb_glp, 1) : null,
       tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
       causas: [{ rotulo: 'o botijão', serie: s.comb_glp }, salario],
     },
     {
-      id: 'tanque', nome: 'Tanque de gasolina', curto: 'gasolina', secao: '#combustiveis', dica: `${TANQUE_LITROS} litros, parte do salário mínimo`,
+      id: 'tanque', grupo: 'bolso', nome: 'Tanque de gasolina', curto: 'gasolina', secao: '#combustiveis', dica: `${TANQUE_LITROS} litros, parte do salário mínimo`,
       explica: `quanto ${TANQUE_LITROS} litros pesam no salário mínimo`,
       valores: s.comb_gasolina ? parteDoSalario(s.comb_gasolina, TANQUE_LITROS) : null,
       tipo: 'media', maiorMelhor: false, formato: (v) => f.porcentagem(v, 0),
       causas: [{ rotulo: 'a gasolina', serie: s.comb_gasolina }, salario],
     },
     {
-      id: 'divida', nome: 'Dívida do governo', curto: 'dívida do governo', secao: '#contas',
-      explica: 'tudo o que União, estados e municípios devem, comparado com o que o país produz em um ano (PIB)',
-      valores: s.divida_bruta_pib, tipo: 'fim', maiorMelhor: false, formato: (v) => `${f.porcentagem(v, 1)} do PIB`,
-      dica: 'parte do PIB', formatoCurto: (v) => f.porcentagem(v, 0),
+      id: 'divida', grupo: 'pais', dica: 'em % do que o país produz em um ano', nome: 'Dívida do governo', curto: 'dívida do governo', secao: '#contas',
+      explica: 'tudo o que União, estados e municípios devem, em % de tudo o que o país produz em um ano (o PIB). 83% quer dizer que a dívida equivale a 83 de cada 100 reais produzidos no país em um ano',
+      valores: s.divida_bruta_pib, tipo: 'fim', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
+      formatoCurto: (v) => f.porcentagem(v, 0),
       deficit: Array.isArray(s.nfsp_nominal) ? c.deflacionar(s.nfsp_nominal, ipca) : null,
+    },
+    // Séries do Banco Central já somadas em 12 meses, em % do PIB. Positivo é
+    // déficit (o governo precisou pegar dinheiro emprestado).
+    {
+      id: 'deficit', grupo: 'pais', nome: 'Contas do governo, com os juros', nomeCurto: 'Contas do governo, com os juros', curto: 'contas do governo com os juros', secao: '#contas',
+      explica: 'quanto faltou ou sobrou de dinheiro ao governo federal em 12 meses, contando os juros da dívida. Quando o governo gasta mais do que arrecada, falta dinheiro (é o déficit) e ele precisa pegar emprestado, o que aumenta a dívida; quando arrecada mais do que gasta, sobra (superávit). O valor está em % de tudo o que o país produz em um ano (o PIB)',
+      dica: 'em 12 meses, em % do que o país produz',
+      valores: s.nfsp_nominal_pib, tipo: 'doze', maiorMelhor: false,
+      formato: (v) => (v >= 0 ? `faltou ${f.porcentagem(v, 1)}` : `sobrou ${f.porcentagem(-v, 1)}`),
+      formatoCurto: (v) => (v >= 0 ? `faltou ${f.porcentagem(v, 1)}` : `sobrou ${f.porcentagem(-v, 1)}`),
+    },
+    {
+      id: 'primario', grupo: 'pais', nome: 'Contas do governo, sem os juros', curto: 'contas do governo sem os juros', secao: '#contas',
+      explica: 'a mesma conta sem os juros da dívida: mostra se o que o governo arrecada paga os gastos do dia a dia (salários, aposentadorias, saúde, educação). Faltou quer dizer gasto maior que a arrecadação (déficit); sobrou, arrecadação maior que o gasto (superávit). Em % de tudo o que o país produz em um ano (o PIB)',
+      dica: 'em 12 meses, em % do que o país produz',
+      // Invertido: positivo é sobra, negativo é falta.
+      valores: Array.isArray(s.nfsp_primario_pib) ? s.nfsp_primario_pib.map((v) => (v == null ? null : -v)) : null,
+      tipo: 'doze', maiorMelhor: true,
+      formato: (v) => (v < 0 ? `faltou ${f.porcentagem(-v, 1)}` : `sobrou ${f.porcentagem(v, 1)}`),
+      formatoCurto: (v) => (v < 0 ? `faltou ${f.porcentagem(-v, 1)}` : `sobrou ${f.porcentagem(v, 1)}`),
+    },
+    {
+      id: 'juros', grupo: 'pais', nome: 'Juros da dívida', curto: 'juros da dívida', secao: '#contas',
+      explica: 'quanto o governo federal pagou de juros sobre o que deve, em 12 meses, em % de tudo o que o país produz em um ano (o PIB). Quanto maior a dívida e os juros do país, maior essa conta',
+      dica: 'pagos em 12 meses, em % do que o país produz',
+      valores: s.nfsp_juros_pib, tipo: 'doze', maiorMelhor: false,
+      formato: (v) => f.porcentagem(v, 1), formatoCurto: (v) => f.porcentagem(v, 1),
+    },
+    // Sem nota: mais imposto pode significar mais serviços ou mais peso no
+    // bolso, e decidir isso é opinião. Mostra o número e a direção.
+    {
+      id: 'impostos', grupo: 'pais', nome: 'Impostos federais', curto: 'impostos federais', secao: '#arrecadacao', neutro: true,
+      explica: 'quanto o governo federal arrecadou em impostos e contribuições em 12 meses, em % de tudo o que o país produz em um ano (o PIB); sem a contribuição ao INSS, para comparar anos de forma justa',
+      dica: 'em 12 meses, em % do que o país produz',
+      valores: c.razaoDozeMeses(ctx.comparavel, s.pib_mensal), tipo: 'doze', maiorMelhor: true,
+      formato: (v) => f.porcentagem(v, 1), formatoCurto: (v) => f.porcentagem(v, 1),
     },
   ];
   return lista
@@ -2367,6 +2403,7 @@ const listaDeAnos = (anos) => (anos.length <= 1 ? anos.join('')
 
 // Situação de hoje: inflação pela meta oficial; o resto pela própria história.
 function nivelDeHoje(it) {
+  if (it.neutro) return null;
   if (it.meta) {
     const v = it.hoje.valor;
     if (v > it.meta.teto) return { nivel: 'ruim', frase: `Está acima da meta, que é ${f.porcentagem(it.meta.centro, 0)} ao ano, aceitando até ${f.porcentagem(it.meta.teto, 1)}.` };
@@ -2384,13 +2421,20 @@ const NOME_NIVEL = { bom: 'Bom', medio: 'Na média', ruim: 'Ruim' };
 // Selo curto com o veredito e duas barras na mesma escala, começando do zero:
 // a diferença de tamanho mostra quanto mudou. Usada no resumo e nas seções
 // que têm "Comparar com".
-function seloVeredito(pai, r) {
-  const [classe, texto] = r === 1 ? ['melhor', 'Melhor hoje'] : r === -1 ? ['pior', 'Pior hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado'];
+function seloVeredito(pai, r, neutro = false) {
+  // Neutro: só a direção (maior ou menor), sem dizer se é melhor.
+  const [classe, texto] = neutro
+    ? (r === 1 ? ['neutro', 'Maior hoje'] : r === -1 ? ['neutro', 'Menor hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado'])
+    : (r === 1 ? ['melhor', 'Melhor hoje'] : r === -1 ? ['pior', 'Pior hoje'] : r === 0 ? ['igual', 'Quase igual'] : ['sem', 'Sem dado']);
   return el('span', `veredito veredito-${classe}`, texto, pai);
 }
 
 function barrasAntesHoje(pai, linhas, formato) {
   const comp = el('div', 'comparacao', null, pai);
+  // Barra começando do zero só faz sentido com valores positivos; com
+  // déficit de um lado e sobra do outro, ficam só os números.
+  const comBarras = linhas.every((l) => l.valor == null || l.valor >= 0);
+  if (!comBarras) comp.classList.add('sem-barras');
   const maior = Math.max(...linhas.map((l) => Math.abs(l.valor ?? 0))) || 1;
   for (const l of linhas) {
     const div = el('div', `comp-linha ${l.classe}`, null, comp);
@@ -2400,7 +2444,7 @@ function barrasAntesHoje(pai, linhas, formato) {
     el('span', 'comp-valor', l.valor == null ? 'sem dado' : formato(l.valor), topoLinha);
     const trilho = el('div', 'comp-trilho', null, div);
     trilho.setAttribute('aria-hidden', 'true');
-    if (l.valor != null) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (Math.max(0, l.valor) / maior) * 100)}%`;
+    if (l.valor != null && comBarras) el('div', 'comp-barra', null, trilho).style.width = `${Math.max(1, (l.valor / maior) * 100)}%`;
   }
   return comp;
 }
@@ -2447,22 +2491,6 @@ function montarResumo(ctx) {
   if (!itens.length) { $('#resumo').hidden = true; return; }
   itens.forEach((it) => { it.situacao = nivelDeHoje(it); });
 
-  // Abertura: como está cada número hoje, comparado com a própria história.
-  // Primeiro o que está bom, depois na média e ruim; cada linha leva à seção.
-  const listaHoje = $('#hoje-lista');
-  if (listaHoje) {
-    listaHoje.replaceChildren();
-    const ordem = { bom: 0, medio: 1, ruim: 2 };
-    [...itens].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => {
-      const li = el('li', null, null, listaHoje);
-      const a = el('a', null, null, li);
-      a.href = it.secao ?? '#resumo';
-      const nome = el('span', 'hoje-nome', it.nomeCurto ?? it.nome, a);
-      if (it.dica) el('small', null, it.dica, nome);
-      el('span', 'hoje-valor', (it.formatoCurto ?? it.formato)(it.hoje.valor), a);
-      if (it.situacao) el('span', `selo selo-${it.situacao.nivel}`, NOME_NIVEL[it.situacao.nivel], a);
-    });
-  }
 
   // Opções de comparação: governos que já terminaram (o mais recente primeiro,
   // que é o padrão) e anos completos.
@@ -2473,37 +2501,125 @@ function montarResumo(ctx) {
     if (!indices.length) return;
     const de = c.anoDe(meses[indices[0]]);
     const ate = c.anoDe(meses[indices[indices.length - 1]]);
-    periodos.set(`g:${m.id}`, { indices, rotulo: `Governo ${m.rotulo}`, quando: `no governo ${m.rotulo}`, de, ate, partido: m.partido });
+    periodos.set(`g:${m.id}`, { indices, rotulo: `Governo ${m.rotulo}`, curto: m.rotulo, quando: `no governo ${m.rotulo}`, de, ate, partido: m.partido });
   });
   const todosOsAnos = [...new Set(itens.flatMap((it) => [...it.anos.keys()]))].sort((a, b) => b - a);
   todosOsAnos.forEach((ano) => {
     const indices = meses.map((mes, i) => (c.anoDe(mes) === ano ? i : -1)).filter((i) => i >= 0);
-    periodos.set(`a:${ano}`, { indices, rotulo: String(ano), quando: `em ${ano}`, de: ano, ate: ano, ano });
+    periodos.set(`a:${ano}`, { indices, rotulo: String(ano), curto: `Em ${ano}`, quando: `em ${ano}`, de: ano, ate: ano, ano });
   });
 
-  const select = $('#resumo-comparar');
-  select.replaceChildren();
-  const grupoGov = el('optgroup', null, null, select);
-  grupoGov.label = 'Governos anteriores';
-  const grupoAno = el('optgroup', null, null, select);
-  grupoAno.label = 'Anos';
-  for (const [chave, p] of periodos) {
-    const texto = p.ano ? p.rotulo : `${p.rotulo}, ${p.de} a ${p.ate}`;
-    el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
+  // O mesmo período vale na abertura e nos cartões: os dois seletores andam
+  // juntos.
+  const seletores = [$('#resumo-comparar'), $('#hoje-comparar')].filter(Boolean);
+  for (const sel of seletores) {
+    sel.replaceChildren();
+    const grupoGov = el('optgroup', null, null, sel);
+    grupoGov.label = 'Governos anteriores';
+    const grupoAno = el('optgroup', null, null, sel);
+    grupoAno.label = 'Anos';
+    for (const [chave, p] of periodos) {
+      const texto = p.ano ? p.rotulo : `${p.rotulo}, ${p.de} a ${p.ate}`;
+      el('option', null, texto, p.ano ? grupoAno : grupoGov).value = chave;
+    }
+    sel.value = periodos.keys().next().value;
   }
-  select.value = periodos.keys().next().value;
+  const select = seletores[0];
 
   const descricaoPeriodo = (it, p) => {
-    if (p.ano) return { media: 'média do ano', trimestral: 'média do ano', acumulado: 'no ano', fim: 'em dezembro' }[it.tipo];
+    if (p.ano) return { media: 'média do ano', trimestral: 'média do ano', acumulado: 'no ano', fim: 'em dezembro', doze: 'no ano' }[it.tipo];
     const intervalo = `${p.de} a ${p.ate}`;
     return { media: `média de ${intervalo}`, trimestral: `média de ${intervalo}`, acumulado: `média por ano, ${intervalo}`,
-      fim: `no fim, ${f.mesCurto(meses[p.indices[p.indices.length - 1]])}` }[it.tipo];
+      fim: `no fim, ${f.mesCurto(meses[p.indices[p.indices.length - 1]])}`, doze: `média por ano, ${intervalo}` }[it.tipo];
   };
   const descricaoHoje = (it) => (it.tipo === 'fim' ? f.mesCurto(it.hoje.ate) : `${f.mesCurto(it.hoje.de)} a ${f.mesCurto(it.hoje.ate)}`);
   // Governos: aceita até 10% dos meses sem dado (a ANP, por exemplo, não
   // publicou setembro de 2020). Anos continuam exigindo os 12 meses.
   const valorNoPeriodo = (it, p) => (p.ano ? it.anos.get(p.ano) ?? null : c.valorDoPeriodo(meses, it.valores, it.tipo, p.indices, 0.9));
   const primeiroMesComDado = (it) => meses[it.valores.findIndex((v) => v != null)];
+
+  // Abertura: como está cada número hoje, comparado com a própria história,
+  // em grupos: o bolso das pessoas, as contas do país e, com uma cidade
+  // escolhida, as contas do estado. Só o bolso daria uma ideia incompleta.
+  // Em cada grupo, primeiro o que está bom, depois na média e ruim; cada
+  // linha leva à seção.
+  const caixaHoje = $('#hoje-lista');
+  const ordem = { bom: 0, medio: 1, ruim: 2 };
+  const linhaHoje = (lista, { href, nome, dica, valor, selo, comparacao }) => {
+    const li = el('li', null, null, lista);
+    const a = el('a', null, null, li);
+    a.href = href;
+    const span = el('span', 'hoje-nome', nome, a);
+    if (dica) el('small', null, dica, span);
+    el('span', 'hoje-valor', valor, a);
+    if (selo) el('span', `selo selo-${selo.nivel}`, selo.texto, a);
+    if (comparacao) {
+      const linha = el('span', 'hoje-compara', `${comparacao.texto} · `, a);
+      el('strong', `compara-${comparacao.classe}`, comparacao.palavra, linha);
+    }
+  };
+  // Comparação com o período escolhido, em palavras (sem seta: no
+  // desemprego, cair é melhorar).
+  const comparacaoHoje = (it) => {
+    const p = periodos.get(seletores[seletores.length - 1]?.value ?? select.value);
+    if (!p) return null;
+    const v = valorNoPeriodo(it, p);
+    if (v == null) return { texto: `${p.curto}: sem dado`, palavra: 'sem comparação', classe: 'neutro' };
+    const r = c.comparar(it.hoje.valor, v, it.neutro ? true : it.maiorMelhor);
+    const [palavra, classe] = it.neutro
+      ? (r === 1 ? ['maior hoje', 'neutro'] : r === -1 ? ['menor hoje', 'neutro'] : ['quase igual', 'neutro'])
+      : (r === 1 ? ['melhor hoje', 'melhor'] : r === -1 ? ['pior hoje', 'pior'] : ['quase igual', 'neutro']);
+    return { texto: `${p.curto}: ${(it.formatoCurto ?? it.formato)(v)}`, palavra, classe };
+  };
+  const desenharHoje = () => {
+    if (!caixaHoje) return;
+    caixaHoje.replaceChildren();
+    for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
+      const doGrupo = itens.filter((it) => it.grupo === grupo);
+      if (!doGrupo.length) continue;
+      el('p', 'hoje-grupo', titulo, caixaHoje);
+      const lista = el('ul', null, null, caixaHoje);
+      [...doGrupo].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => linhaHoje(lista, {
+        href: it.secao ?? '#resumo',
+        nome: it.nomeCurto ?? it.nome,
+        dica: it.dica,
+        valor: (it.formatoCurto ?? it.formato)(it.hoje.valor),
+        selo: it.situacao ? { nivel: it.situacao.nivel, texto: NOME_NIVEL[it.situacao.nivel] } : (it.neutro ? { nivel: 'neutro', texto: 'Sem nota' } : null),
+        comparacao: comparacaoHoje(it),
+      }));
+    }
+    // Contas do estado da cidade escolhida: dívida e folha frente ao limite
+    // da lei, no último ano publicado.
+    const bloco = ctx.d.estados_fiscal;
+    const uf = cidade.dados?.uf ? bloco?.estados?.find((e) => e.sigla === cidade.dados.uf) : null;
+    if (uf && bloco.anos?.length) {
+      const k = bloco.anos.length - 1;
+      const ano = bloco.anos[k];
+      const ind = (chave) => uf.indicadores?.[chave]?.[k] ?? null;
+      const nivelLimite = { 'dentro do limite': ['bom', 'Dentro do limite'], 'perto do limite': ['medio', 'Perto do limite'], 'acima do limite': ['ruim', 'Acima do limite'] };
+      const selo = (sit) => (sit ? { nivel: nivelLimite[sit][0], texto: nivelLimite[sit][1] } : null);
+      el('p', 'hoje-grupo', `Nas contas do estado (${uf.nome})`, caixaHoje);
+      const lista = el('ul', null, null, caixaHoje);
+      const div = ind('dcl_rcl_pct');
+      const limDiv = bloco.limite_divida_pct ?? 200;
+      if (div != null) {
+        linhaHoje(lista, { href: '#estados', nome: 'Dívida do estado', dica: `para cada R$ 100 que entram no ano (${ano}); a lei permite ${f.moeda(limDiv, 0)}`,
+          valor: f.moeda(div, 0), selo: selo(situacao(div, limDiv, bloco.alerta_divida_pct ?? 180)) });
+      }
+      const fol = ind('pessoal_rcl_pct');
+      if (fol != null) {
+        linhaHoje(lista, { href: '#estados', nome: 'Folha de pagamento', dica: `de cada R$ 100 que entram (${ano}); a lei permite ${f.moeda(ind('pessoal_limite_pct'), 2)}`,
+          valor: f.moeda(fol, 0), selo: selo(situacao(fol, ind('pessoal_limite_pct'), ind('pessoal_alerta_pct'))) });
+      }
+    } else {
+      const p = el('p', 'hoje-estado', 'Para ver também as contas do seu estado, ', caixaHoje);
+      const a = el('a', null, 'escolha o estado', p);
+      a.href = '#estados';
+      p.append('.');
+    }
+  };
+  desenharHoje();
+  aoMudarCidade(desenharHoje);
 
   // "Por quê": variação das séries de origem entre o período e hoje.
   const variacaoDaCausa = (serie, p) => {
@@ -2539,19 +2655,25 @@ function montarResumo(ctx) {
 
   const desenhar = () => {
     const p = periodos.get(select.value);
-    const lista = $('#resumo-lista');
-    lista.replaceChildren();
+    const caixaLista = $('#resumo-lista');
+    caixaLista.replaceChildren();
+    const listas = {};
+    for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
+      if (!itens.some((it) => it.grupo === grupo)) continue;
+      el('h3', 'grupo-titulo', titulo, caixaLista);
+      listas[grupo] = el('ul', 'anos-lista', null, caixaLista);
+    }
     for (const it of itens) {
-      const li = el('li', 'ano-item', null, lista);
+      const li = el('li', 'ano-item', null, listas[it.grupo]);
       const vSel = valorNoPeriodo(it, p);
-      const r = vSel == null ? null : c.comparar(it.hoje.valor, vSel, it.maiorMelhor);
+      const r = vSel == null ? null : c.comparar(it.hoje.valor, vSel, it.neutro ? true : it.maiorMelhor);
 
       // Topo: nome do item e um selo curto com o veredito. O selo (bom, na
       // média, ruim) da abertura compara com a história; este compara só com
       // o período escolhido.
       const topo = el('div', 'ano-topo', null, li);
       el('h3', 'ano-nome', it.nome, topo);
-      seloVeredito(topo, r);
+      seloVeredito(topo, r, it.neutro);
       el('p', 'ano-explica', it.explica, li);
 
       // Duas barras na mesma escala, começando do zero: o período escolhido e hoje.
@@ -2569,13 +2691,18 @@ function montarResumo(ctx) {
       const porque = vSel == null ? null : fraseCausas(it, p);
       if (porque) el('p', 'ano-porque', porque, li);
       if (it.situacao) el('p', 'ano-ranking', it.situacao.frase, li);
+      if (it.neutro) el('p', 'ano-ranking', 'Sem nota: mais imposto pode significar mais serviços ou mais peso no bolso, e decidir isso é opinião.', li);
       if (it.secao) {
         const a = el('a', 'ano-link', 'Ver detalhes', li);
         a.href = it.secao;
       }
     }
   };
-  select.addEventListener('change', desenhar);
+  seletores.forEach((sel) => sel.addEventListener('change', () => {
+    seletores.forEach((outro) => { outro.value = sel.value; });
+    desenharHoje();
+    desenhar();
+  }));
   desenhar();
 
   registrarDownload('resumo', () => ({
