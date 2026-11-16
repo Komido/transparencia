@@ -23,33 +23,43 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      - name: Contas anuais das prefeituras em lote (FINBRA/DCA, Tesouro)
+      - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
         continue-on-error: true
         run: |
           set -u
-          mkdir -p /tmp/finbra && cd /tmp/finbra
-          baixar() { curl -sSL --max-time 120 -A "Mozilla/5.0 (X11; Linux x86_64)" -o "$2" -w "%{http_code} %{size_download} bytes %{time_total}s\n" "$1"; }
-          for q in finbra "financas do brasil" "contas anuais" dca; do
-            echo "=== CKAN do Tesouro Transparente: busca '$q'"
-            url="https://www.tesourotransparente.gov.br/ckan/api/3/action/package_search?rows=10&q=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "$q")"
-            baixar "$url" busca.json || continue
-            python3 - busca.json <<'PY2'
-          import json, sys
-          try:
-              d = json.load(open(sys.argv[1]))
-          except Exception as e:
-              print("resposta não é JSON:", e); raise SystemExit
-          for p in d.get("result", {}).get("results", []):
-              print("*", p.get("name"), "|", p.get("title"))
-              for r in p.get("resources", [])[:15]:
-                  print("   -", r.get("format"), "|", r.get("name"), "|", r.get("url"), "|", r.get("size"))
+          mkdir -p /tmp/lei && cd /tmp/lei
+          curl -sSL --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o lei.html -w "%{http_code} %{size_download} bytes\n" \
+            "https://www.planalto.gov.br/ccivil_03/leis/l9250.htm"
+          python3 - lei.html <<'PY2'
+          import html, re, sys
+          bruto = open(sys.argv[1], "rb").read()
+          for cod in ("utf-8", "cp1252"):
+              try:
+                  texto = bruto.decode(cod); break
+              except UnicodeDecodeError:
+                  continue
+          texto = html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"(?is)<(script|style).*?</\1>", " ", texto)))
+          linhas = [re.sub(r"\s+", " ", l).strip() for l in re.split(r"(?=Art\. ?\d)", texto)]
+          for l in linhas:
+              if l.startswith(("Art. 3", "Art. 4", "Art.3", "Art.4")) or re.search(r"10\.800|900,00", l):
+                  print(l[:700]); print("---")
           PY2
+
+      - name: Ipeadata, séries de arrecadação federal antes de 2000
+        continue-on-error: true
+        run: |
+          set -u
+          mkdir -p /tmp/ipea && cd /tmp/ipea
+          for termo in "Arrecadação" "receitas federais" "Receita Federal"; do
+            q=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "contains(SERNOME,'$termo')")
+            curl -sSL --max-time 120 -o meta.json -w "%{http_code} %{size_download} bytes\n" \
+              "http://www.ipeadata.gov.br/api/odata4/Metadados?\$filter=$q&\$select=SERCODIGO,SERNOME,FNTSIGLA,PERNOME,UNINOME,SERMINDATA,SERMAXDATA,SERSTATUS"
+            python3 -c "
+          import json
+          d = json.load(open('meta.json'))
+          for s in d.get('value', [])[:60]:
+              print(s.get('SERCODIGO'), '|', s.get('SERNOME'), '|', s.get('FNTSIGLA'), '|', s.get('PERNOME'), '|', s.get('UNINOME'), '|', (s.get('SERMINDATA') or '')[:10], 'a', (s.get('SERMAXDATA') or '')[:10], '|', s.get('SERSTATUS'))
+          " || head -c 400 meta.json
+            echo "==="
           done
-          echo "=== Página do FINBRA no SICONFI"
-          baixar "https://siconfi.tesouro.gov.br/siconfi/pages/public/consulta_finbra/finbra_list.jsf" finbra.html
-          grep -oiE 'href="[^"]+"' finbra.html | grep -iE 'zip|csv|finbra|download' | sort -u | head -40
-          grep -oiE '[^<>]{0,60}(exerc[ií]cio|ano)[^<>]{0,60}' finbra.html | sort -u | head -20
-          echo "=== Uma chamada da API /dca (São Paulo, 2024, Anexo I-C), para medir tempo e tamanho"
-          baixar "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca?an_exercicio=2024&no_anexo=DCA-Anexo%20I-C&id_ente=3550308" dca.json
-          python3 -c "import json;d=json.load(open('dca.json'));print('itens:',len(d['items']));print('colunas:',list(d['items'][0].keys()) if d['items'] else '-')"
 
