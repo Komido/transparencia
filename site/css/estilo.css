@@ -250,7 +250,7 @@ p { margin: 0 0 var(--e-3); }
 .navegacao a[aria-current="page"] { color: var(--tinta); font-weight: 600; }
 
 /* Ao saltar para uma seção, ela não fica atrás do topo fixo. */
-main section[id] { scroll-margin-top: calc(var(--topo) + 8px); }
+main section[id], .texto h2[id] { scroll-margin-top: calc(var(--topo) + 8px); }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
@@ -1158,5 +1158,46 @@ td.num .detalhe { white-space: normal; }
   .orc-painel .filtros .largo { grid-column: 1 / -1; }
   .orc-contas > h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
   .orc-cobre { max-width: 46rem; }
+}
+
+/* Índice lateral ------------------------------------------------------------
+   A partir de 1280 px, as seções ganham ao lado um índice que acompanha a
+   rolagem e marca onde a pessoa está. O site fica mais largo nessa faixa
+   para as seções não perderem espaço; a abertura continua na largura toda.
+   Abaixo disso, o menu "Seções" do topo faz esse papel. */
+.indice { display: none; }
+@media (min-width: 1280px) {
+  :root { --largura: 1280px; }
+  .corpo { display: grid; grid-template-columns: 12.5rem minmax(0, 1fr); column-gap: var(--e-6); align-items: start; }
+  .indice:not([hidden]) {
+    display: block;
+    position: sticky;
+    top: calc(var(--topo) + var(--e-4));
+    margin-top: var(--e-6);
+    max-height: calc(100vh - var(--topo) - 2 * var(--e-4));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    font-size: var(--fs-2);
+  }
+  .indice-grupo + .indice-grupo { margin-top: var(--e-3); }
+  .indice-titulo {
+    margin: 0 0 var(--e-1);
+    font-size: var(--fs-1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tinta-3);
+  }
+  .indice ul { list-style: none; margin: 0; padding: 0; }
+  .indice a {
+    display: block;
+    padding: 3px 0 3px var(--e-3);
+    border-left: 2px solid var(--borda);
+    color: var(--tinta-2);
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .indice a:hover { color: var(--tinta); text-decoration: underline; }
+  .indice a[aria-current="true"] { color: var(--tinta); font-weight: 600; border-left-color: var(--tinta); }
 }
 

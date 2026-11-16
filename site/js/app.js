@@ -1,5 +1,6 @@
 import * as c from './calculos.js';
 import * as f from './formato.js';
+import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
 import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal } from './dados.js';
@@ -3227,17 +3228,16 @@ function iniciarNavegacao() {
     if (ev.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
   });
 
-  // A seção em leitura fica marcada no menu.
-  const visiveis = new Set();
-  const observador = new IntersectionObserver((entradas) => {
-    entradas.forEach((e) => (e.isIntersecting ? visiveis.add(e.target.id) : visiveis.delete(e.target.id)));
-    const atual = secoes.find((sec) => visiveis.has(sec.id));
-    links.forEach((a) => {
-      if (atual && a.getAttribute('href') === `#${atual.id}`) a.setAttribute('aria-current', 'true');
-      else a.removeAttribute('aria-current');
-    });
-  }, { rootMargin: '-70px 0px -55% 0px' });
-  secoes.forEach((sec) => observador.observe(sec));
+  // Índice lateral: os mesmos grupos e links do menu, montados aqui para
+  // não repetir a lista no HTML. A parte em leitura fica marcada nos dois.
+  const indice = $('#indice');
+  if (indice) {
+    montarIndice(indice, [...menu.querySelectorAll('.secoes-grupo')].map((grupo) => ({
+      titulo: grupo.querySelector('.secoes-titulo')?.textContent,
+      links: [...grupo.querySelectorAll('a')].map((a) => ({ texto: a.textContent, href: a.getAttribute('href') })),
+    })));
+  }
+  acompanharLeitura([...links, ...(indice ? indice.querySelectorAll('a[href^="#"]') : [])], secoes, indice);
 }
 
 // ---------------------------------------------------------------------------

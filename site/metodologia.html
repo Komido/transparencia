@@ -25,265 +25,269 @@
   </header>
 
   <main id="conteudo" class="conteiner">
-    <article class="bloco texto">
-      <h1>Metodologia</h1>
-      <p>Esta página explica como cada número do site é obtido. O código que faz os cálculos no seu navegador está em <a href="js/calculos.js">js/calculos.js</a>. O projeto inteiro, incluindo a coleta e a validação dos dados, está no repositório público <a href="https://github.com/Komido/transparencia" rel="noopener">github.com/Komido/transparencia</a>, com o histórico de cada mudança de regra.</p>
+    <!-- Em tela larga, índice fixo dos tópicos, montado pelo metodologia.js. -->
+    <div class="corpo">
+      <nav class="indice" id="indice" aria-label="Tópicos desta página" hidden></nav>
+      <article class="bloco texto">
+        <h1>Metodologia</h1>
+        <p>Esta página explica como cada número do site é obtido. O código que faz os cálculos no seu navegador está em <a href="js/calculos.js">js/calculos.js</a>. O projeto inteiro, incluindo a coleta e a validação dos dados, está no repositório público <a href="https://github.com/Komido/transparencia" rel="noopener">github.com/Komido/transparencia</a>, com o histórico de cada mudança de regra.</p>
 
-      <section class="regua" aria-labelledby="regua-titulo">
-        <strong id="regua-titulo">Mesma régua para todos os governos e partidos</strong>
-        <p>Todas as regras abaixo valem igualmente para qualquer governo, partido, estado ou cidade. Nenhum período recebe tratamento diferente.</p>
-      </section>
+        <section class="regua" aria-labelledby="regua-titulo">
+          <strong id="regua-titulo">Mesma régua para todos os governos e partidos</strong>
+          <p>Todas as regras abaixo valem igualmente para qualquer governo, partido, estado ou cidade. Nenhum período recebe tratamento diferente.</p>
+        </section>
 
-      <h2 id="principios">Compromissos</h2>
-      <ol>
-        <li>As regras foram definidas antes de olhar os resultados e estão todas descritas nesta página.</li>
-        <li>As mesmas regras valem para todos. Quando uma opção existe (por exemplo, excluir o primeiro ano de cada mandato), ela muda o cálculo de todos ao mesmo tempo.</li>
-        <li>Só fontes oficiais e públicas, com link para o dado bruto e a data do último dado disponível.</li>
-        <li>Os textos descrevem o que os números mostram. Não há adjetivos, ranking de melhor ou pior governo, nem atribuição de causa.</li>
-        <li>Dado ausente fica ausente. Nada é estimado ou interpolado, com uma exceção identificada como tal: o contador em tempo real.</li>
-        <li>Erros encontrados nas fontes aparecem como avisos. O dado não é corrigido por nós.</li>
-        <li>Mudanças de regra ficam registradas, com data e motivo, no histórico do projeto.</li>
-      </ol>
+        <h2 id="principios">Compromissos</h2>
+        <ol>
+          <li>As regras foram definidas antes de olhar os resultados e estão todas descritas nesta página.</li>
+          <li>As mesmas regras valem para todos. Quando uma opção existe (por exemplo, excluir o primeiro ano de cada mandato), ela muda o cálculo de todos ao mesmo tempo.</li>
+          <li>Só fontes oficiais e públicas, com link para o dado bruto e a data do último dado disponível.</li>
+          <li>Os textos descrevem o que os números mostram. Não há adjetivos, ranking de melhor ou pior governo, nem atribuição de causa.</li>
+          <li>Dado ausente fica ausente. Nada é estimado ou interpolado, com uma exceção identificada como tal: o contador em tempo real.</li>
+          <li>Erros encontrados nas fontes aparecem como avisos. O dado não é corrigido por nós.</li>
+          <li>Mudanças de regra ficam registradas, com data e motivo, no histórico do projeto.</li>
+        </ol>
 
-      <h2 id="governos">Como cada período é atribuído a um governo</h2>
-      <ul>
-        <li><strong>Mês:</strong> pertence a quem exercia a Presidência no dia 15.</li>
-        <li><strong>Ano:</strong> pertence a quem governou mais meses dele. Em caso de empate, a quem estava no cargo em dezembro.</li>
-        <li><strong>Primeiro ano de mandato:</strong> executa o orçamento aprovado no ano anterior. Nas tabelas de comparação existe a opção de excluí-lo, e ela vale para todos os mandatos, inclusive reeleições.</li>
-        <li><strong>Partido:</strong> o partido pelo qual a chapa foi registrada na eleição, segundo o TSE. Mudanças de filiação durante o mandato não alteram a atribuição.</li>
-      </ul>
-      <p>Exemplo de 2016: Dilma Rousseff foi afastada em 12/05/2016, e Michel Temer passou a exercer a Presidência nessa data. Pela regra do dia 15, maio a dezembro contam para Temer. Como ele governou 8 dos 12 meses, o ano de 2016 também conta para ele.</p>
-      <p><strong>O que a comparação não diz:</strong> resultados de um período dependem também do Congresso, da economia mundial, do preço das commodities, de decisões de governos anteriores e de receitas extraordinárias. As tabelas descrevem o que aconteceu em cada período; elas não medem o mérito de nenhum governo.</p>
-      <div class="tabela-rolagem"><table id="tabela-mandatos"></table></div>
+        <h2 id="governos">Como cada período é atribuído a um governo</h2>
+        <ul>
+          <li><strong>Mês:</strong> pertence a quem exercia a Presidência no dia 15.</li>
+          <li><strong>Ano:</strong> pertence a quem governou mais meses dele. Em caso de empate, a quem estava no cargo em dezembro.</li>
+          <li><strong>Primeiro ano de mandato:</strong> executa o orçamento aprovado no ano anterior. Nas tabelas de comparação existe a opção de excluí-lo, e ela vale para todos os mandatos, inclusive reeleições.</li>
+          <li><strong>Partido:</strong> o partido pelo qual a chapa foi registrada na eleição, segundo o TSE. Mudanças de filiação durante o mandato não alteram a atribuição.</li>
+        </ul>
+        <p>Exemplo de 2016: Dilma Rousseff foi afastada em 12/05/2016, e Michel Temer passou a exercer a Presidência nessa data. Pela regra do dia 15, maio a dezembro contam para Temer. Como ele governou 8 dos 12 meses, o ano de 2016 também conta para ele.</p>
+        <p><strong>O que a comparação não diz:</strong> resultados de um período dependem também do Congresso, da economia mundial, do preço das commodities, de decisões de governos anteriores e de receitas extraordinárias. As tabelas descrevem o que aconteceu em cada período; elas não medem o mérito de nenhum governo.</p>
+        <div class="tabela-rolagem"><table id="tabela-mandatos"></table></div>
 
-      <h2 id="inflacao">Valores corrigidos pela inflação</h2>
-      <p>Valores de épocas diferentes só são comparáveis depois de corrigidos pela inflação. O site usa:</p>
-      <ul>
-        <li><strong>IPCA (IBGE)</strong> para arrecadação, dólar e tabela do Imposto de Renda. É o índice oficial de inflação do país.</li>
-        <li><strong>INPC (IBGE)</strong> para o salário mínimo. É o índice usado nos reajustes do mínimo e mede a inflação das famílias de menor renda.</li>
-      </ul>
-      <p class="formula">valor real = valor do mês × índice do mês de referência ÷ índice do mês</p>
-      <p>O mês de referência é o último com inflação oficial publicada. A correção é feita mês a mês, antes de somar ou fazer médias anuais.</p>
-      <h3>Preços comparados pelo salário</h3>
-      <p>Para preços de produtos (alimentos, combustíveis e gás), a pergunta que interessa a quem vive de salário é se ficou mais fácil ou mais difícil pagar. Por isso esses preços são comparados pelo salário mínimo, e não pela inflação:</p>
-      <p class="formula">parte do salário = preço do mês ÷ salário mínimo do mesmo mês</p>
-      <p>Preço e salário são sempre da mesma época, então não é preciso corrigir nada pela inflação. A comparação entre a data escolhida e hoje mostra, lado a lado, o salário, o preço e a parte do salário (ou a quantidade) em cada data. As duas réguas respondem perguntas diferentes: a inflação mostra se o produto ficou caro em relação aos outros preços; o salário mostra se ficou mais fácil de pagar para quem ganha o mínimo. A régua usa o salário mínimo; para quem teve aumentos diferentes, o resultado muda.</p>
+        <h2 id="inflacao">Valores corrigidos pela inflação</h2>
+        <p>Valores de épocas diferentes só são comparáveis depois de corrigidos pela inflação. O site usa:</p>
+        <ul>
+          <li><strong>IPCA (IBGE)</strong> para arrecadação, dólar e tabela do Imposto de Renda. É o índice oficial de inflação do país.</li>
+          <li><strong>INPC (IBGE)</strong> para o salário mínimo. É o índice usado nos reajustes do mínimo e mede a inflação das famílias de menor renda.</li>
+        </ul>
+        <p class="formula">valor real = valor do mês × índice do mês de referência ÷ índice do mês</p>
+        <p>O mês de referência é o último com inflação oficial publicada. A correção é feita mês a mês, antes de somar ou fazer médias anuais.</p>
+        <h3>Preços comparados pelo salário</h3>
+        <p>Para preços de produtos (alimentos, combustíveis e gás), a pergunta que interessa a quem vive de salário é se ficou mais fácil ou mais difícil pagar. Por isso esses preços são comparados pelo salário mínimo, e não pela inflação:</p>
+        <p class="formula">parte do salário = preço do mês ÷ salário mínimo do mesmo mês</p>
+        <p>Preço e salário são sempre da mesma época, então não é preciso corrigir nada pela inflação. A comparação entre a data escolhida e hoje mostra, lado a lado, o salário, o preço e a parte do salário (ou a quantidade) em cada data. As duas réguas respondem perguntas diferentes: a inflação mostra se o produto ficou caro em relação aos outros preços; o salário mostra se ficou mais fácil de pagar para quem ganha o mínimo. A régua usa o salário mínimo; para quem teve aumentos diferentes, o resultado muda.</p>
 
-      <h2 id="arrecadacao">Arrecadação federal</h2>
-      <p><strong>Fonte:</strong> arquivo de dados abertos da Receita Federal com a arrecadação mensal por UF e por tributo, desde janeiro de 2000. Os valores estão em reais correntes.</p>
-      <h3>Série comparável</h3>
-      <p>A receita previdenciária só entra nessa base em agosto de 2005, e as receitas administradas por outros órgãos em setembro de 2010. Incluí-las faria os anos posteriores parecerem maiores só por mudança de cobertura. Por isso, as comparações entre anos e governos usam a série comparável: impostos e contribuições administrados pela Receita, sem essas duas rubricas.</p>
-      <p>O contador em tempo real e o gráfico de composição usam o total, porque mostram o retrato atual e não comparações no tempo.</p>
-      <h3>Em % do PIB</h3>
-      <p>Arrecadação dividida pelo PIB dos mesmos meses. O PIB mensal é a estimativa do Banco Central (série 4380 do SGS), compatível com o PIB trimestral do IBGE. Esta medida é a arrecadação federal em relação ao PIB; ela não é a carga tributária total do país, que inclui estados e municípios.</p>
-      <h3>Variação real</h3>
-      <p>Variação do valor corrigido pelo IPCA em relação aos mesmos meses do ano anterior. Para anos completos, é a variação anual comum. Para o ano em curso, compara o mesmo pedaço do calendário.</p>
-      <h3>Média por governo</h3>
-      <p>Média simples dos valores anuais atribuídos a cada mandato. A tabela informa quais anos entraram na conta. O primeiro mandato de FHC fica sem dado porque a base da Receita começa em 2000; o ano 2000 não tem variação calculada porque falta 1999.</p>
-      <h3>Formatos numéricos do arquivo da Receita</h3>
-      <p>O arquivo mistura formatos: na maior parte dos meses usa vírgula decimal; em junho de 2023 e maio de 2024 usa ponto como separador de milhar; em 2001 e 2002 usa vírgula como separador de milhar no mesmo mês em que aparecem centavos com duas casas. Regra adotada: um mês usa vírgula como milhar quando algum valor dele tem duas ou mais vírgulas em grupos de três dígitos; só nesses meses um valor como "408,348" é lido como 408.348 reais. A escolha muda o total mensal desses meses em no máximo 0,36%. Qualquer formato fora dessas regras faz a carga ser recusada.</p>
-      <div class="tabela-rolagem"><table id="tabela-rubricas"></table></div>
+        <h2 id="arrecadacao">Arrecadação federal</h2>
+        <p><strong>Fonte:</strong> arquivo de dados abertos da Receita Federal com a arrecadação mensal por UF e por tributo, desde janeiro de 2000. Os valores estão em reais correntes.</p>
+        <h3>Série comparável</h3>
+        <p>A receita previdenciária só entra nessa base em agosto de 2005, e as receitas administradas por outros órgãos em setembro de 2010. Incluí-las faria os anos posteriores parecerem maiores só por mudança de cobertura. Por isso, as comparações entre anos e governos usam a série comparável: impostos e contribuições administrados pela Receita, sem essas duas rubricas.</p>
+        <p>O contador em tempo real e o gráfico de composição usam o total, porque mostram o retrato atual e não comparações no tempo.</p>
+        <h3>Em % do PIB</h3>
+        <p>Arrecadação dividida pelo PIB dos mesmos meses. O PIB mensal é a estimativa do Banco Central (série 4380 do SGS), compatível com o PIB trimestral do IBGE. Esta medida é a arrecadação federal em relação ao PIB; ela não é a carga tributária total do país, que inclui estados e municípios.</p>
+        <h3>Variação real</h3>
+        <p>Variação do valor corrigido pelo IPCA em relação aos mesmos meses do ano anterior. Para anos completos, é a variação anual comum. Para o ano em curso, compara o mesmo pedaço do calendário.</p>
+        <h3>Média por governo</h3>
+        <p>Média simples dos valores anuais atribuídos a cada mandato. A tabela informa quais anos entraram na conta. O primeiro mandato de FHC fica sem dado porque a base da Receita começa em 2000; o ano 2000 não tem variação calculada porque falta 1999.</p>
+        <h3>Formatos numéricos do arquivo da Receita</h3>
+        <p>O arquivo mistura formatos: na maior parte dos meses usa vírgula decimal; em junho de 2023 e maio de 2024 usa ponto como separador de milhar; em 2001 e 2002 usa vírgula como separador de milhar no mesmo mês em que aparecem centavos com duas casas. Regra adotada: um mês usa vírgula como milhar quando algum valor dele tem duas ou mais vírgulas em grupos de três dígitos; só nesses meses um valor como "408,348" é lido como 408.348 reais. A escolha muda o total mensal desses meses em no máximo 0,36%. Qualquer formato fora dessas regras faz a carga ser recusada.</p>
+        <div class="tabela-rolagem"><table id="tabela-rubricas"></table></div>
 
-      <h2 id="contador">Contador em tempo real</h2>
-      <p>A arrecadação oficial é publicada uma vez por mês. O contador soma:</p>
-      <ol>
-        <li>o total já publicado pela Receita para os meses do ano corrente;</li>
-        <li>uma estimativa para o período ainda não publicado: a média por segundo dos últimos 12 meses publicados, aplicada desde o primeiro dia do mês seguinte ao último publicado.</li>
-      </ol>
-      <p class="formula">estimado = (soma dos últimos 12 meses ÷ segundos desses 12 meses) × segundos desde o início do período não publicado</p>
-      <p>Quando a Receita publica um novo mês, a parte estimada é substituída pelo valor oficial.</p>
+        <h2 id="contador">Contador em tempo real</h2>
+        <p>A arrecadação oficial é publicada uma vez por mês. O contador soma:</p>
+        <ol>
+          <li>o total já publicado pela Receita para os meses do ano corrente;</li>
+          <li>uma estimativa para o período ainda não publicado: a média por segundo dos últimos 12 meses publicados, aplicada desde o primeiro dia do mês seguinte ao último publicado.</li>
+        </ol>
+        <p class="formula">estimado = (soma dos últimos 12 meses ÷ segundos desses 12 meses) × segundos desde o início do período não publicado</p>
+        <p>Quando a Receita publica um novo mês, a parte estimada é substituída pelo valor oficial.</p>
 
-      <h2 id="salario">Salário mínimo</h2>
-      <ul>
-        <li><strong>Poder de compra:</strong> o gráfico mostra o salário mínimo de cada mês e o salário de um mês escolhido (o mesmo mês do calendário em anos anteriores) corrigido só pelo INPC dali em diante. A distância entre as linhas é o ganho ou a perda acima da inflação desde aquele mês.</li>
-        <li><strong>Em dólar:</strong> salário do mês dividido pela cotação média do dólar no mesmo mês (dólares da época).</li>
-        <li><strong>Com o necessário:</strong> o gráfico mostra o salário mínimo e o salário mínimo necessário do DIEESE, em reais; a distância entre as linhas é quanto falta. O DIEESE calcula o valor capaz de cobrir as despesas básicas de uma família de 2 adultos e 2 crianças; o método está descrito na seção "Orçamento da família". É uma estimativa do DIEESE, com metodologia própria.</li>
-      </ul>
-      <p>O ganho real médio por governo é a média, nos anos de cada mandato, da variação do salário médio do ano corrigido pelo INPC.</p>
+        <h2 id="salario">Salário mínimo</h2>
+        <ul>
+          <li><strong>Poder de compra:</strong> o gráfico mostra o salário mínimo de cada mês e o salário de um mês escolhido (o mesmo mês do calendário em anos anteriores) corrigido só pelo INPC dali em diante. A distância entre as linhas é o ganho ou a perda acima da inflação desde aquele mês.</li>
+          <li><strong>Em dólar:</strong> salário do mês dividido pela cotação média do dólar no mesmo mês (dólares da época).</li>
+          <li><strong>Com o necessário:</strong> o gráfico mostra o salário mínimo e o salário mínimo necessário do DIEESE, em reais; a distância entre as linhas é quanto falta. O DIEESE calcula o valor capaz de cobrir as despesas básicas de uma família de 2 adultos e 2 crianças; o método está descrito na seção "Orçamento da família". É uma estimativa do DIEESE, com metodologia própria.</li>
+        </ul>
+        <p>O ganho real médio por governo é a média, nos anos de cada mandato, da variação do salário médio do ano corrigido pelo INPC.</p>
 
-      <h2 id="precos">Preços do dia a dia</h2>
-      <h3>O que o salário mínimo compra</h3>
-      <p>Quantidade que um salário mínimo compra num mês:</p>
-      <p class="formula">quantidade = salário mínimo do mês ÷ preço do item no mesmo mês</p>
-      <p>Salário e preço são do mesmo mês e estão na mesma moeda, então a conta não precisa de correção pela inflação. A comparação usa sempre o mesmo mês do calendário (por exemplo, outubro contra outubro), para que variações de safra e de época do ano não distorçam o resultado. Os pacotes mostrados são múltiplos do preço por quilo publicado: arroz em pacote de 5 kg (5 × preço do kg) e café em pacote de 500 g (0,5 × preço do kg).</p>
-      <h3>Alimentos e cesta básica</h3>
-      <p><strong>Fonte:</strong> Pesquisa Nacional da Cesta Básica de Alimentos, do DIEESE, que publica todo mês o preço médio de cada alimento e o custo da cesta em cada capital pesquisada.</p>
-      <ul>
-        <li><strong>Média do país:</strong> média simples das <span data-campo="precos-capitais-qtd">15</span> capitais pesquisadas todo mês desde 1995 (<span data-campo="precos-capitais">sem dado</span>). Usar sempre as mesmas capitais evita que a média mude só porque uma capital entrou ou saiu da pesquisa. Um mês só tem valor quando pelo menos <span data-campo="precos-minimo">12</span> dessas capitais têm preço publicado; caso contrário, fica sem dado.</li>
-        <li><strong>A média não é ponderada pela população.</strong> Ela descreve o preço típico nas capitais, não no interior.</li>
-        <li><strong>Unidades:</strong> a unidade de cada preço foi conferida dividindo o gasto mensal com o item pelo seu preço médio, o que devolve a quantidade da cesta definida em lei (por exemplo, 6 kg de carne e 7,5 litros de leite em São Paulo). O óleo de soja não aparece porque essa conta não confirmou a unidade com segurança.</li>
-        <li><strong>Cesta básica:</strong> a quantidade de cada alimento segue o Decreto-Lei 399/1938 e muda conforme a região, então a média do país mistura cestas regionais diferentes.</li>
-        <li><strong>Dezembro de 2015:</strong> o DIEESE publica esse mês duas vezes, uma delas marcada como recalculada. O site usa a versão recalculada.</li>
-      </ul>
-      <h3>Combustíveis e gás de cozinha</h3>
-      <p><strong>Fonte:</strong> Levantamento de Preços de Combustíveis da ANP, série histórica mensal do Brasil, preço médio de revenda (o que o consumidor paga no posto ou na revenda de gás). A série começa em julho de 2001.</p>
-      <ul>
-        <li>Produtos: gasolina comum, etanol hidratado, óleo diesel comum (a ANP publica o diesel S10 numa série separada e mais curta, que não entra aqui) e GLP em botijão de 13 kg.</li>
-        <li>A ANP publica planilhas Excel. Uma rotina automática baixa as planilhas todos os dias, converte para CSV e guarda no repositório a assinatura digital (SHA-256) de cada planilha original, para que qualquer pessoa possa conferir se o arquivo usado é o mesmo que a ANP publicou.</li>
-        <li>A ANP pesquisa uma amostra de postos, e o tamanho dela mudou bastante ao longo dos anos (na gasolina comum, de cerca de 14 mil a 58 mil postos pesquisados por mês).</li>
-        <li>Por estado, o site usa as planilhas mensais por estado da mesma pesquisa, só com gasolina comum, etanol, diesel e GLP. A planilha por estado tem linhas repetidas com valores diferentes em outro produto (GNV), que o site não usa.</li>
-        <li><strong>Tanque cheio:</strong> 50 litros vezes o preço médio do litro, dividido pelo salário mínimo do mesmo mês. O botijão é comparado ao salário mínimo da mesma forma.</li>
-      </ul>
+        <h2 id="precos">Preços do dia a dia</h2>
+        <h3>O que o salário mínimo compra</h3>
+        <p>Quantidade que um salário mínimo compra num mês:</p>
+        <p class="formula">quantidade = salário mínimo do mês ÷ preço do item no mesmo mês</p>
+        <p>Salário e preço são do mesmo mês e estão na mesma moeda, então a conta não precisa de correção pela inflação. A comparação usa sempre o mesmo mês do calendário (por exemplo, outubro contra outubro), para que variações de safra e de época do ano não distorçam o resultado. Os pacotes mostrados são múltiplos do preço por quilo publicado: arroz em pacote de 5 kg (5 × preço do kg) e café em pacote de 500 g (0,5 × preço do kg).</p>
+        <h3>Alimentos e cesta básica</h3>
+        <p><strong>Fonte:</strong> Pesquisa Nacional da Cesta Básica de Alimentos, do DIEESE, que publica todo mês o preço médio de cada alimento e o custo da cesta em cada capital pesquisada.</p>
+        <ul>
+          <li><strong>Média do país:</strong> média simples das <span data-campo="precos-capitais-qtd">15</span> capitais pesquisadas todo mês desde 1995 (<span data-campo="precos-capitais">sem dado</span>). Usar sempre as mesmas capitais evita que a média mude só porque uma capital entrou ou saiu da pesquisa. Um mês só tem valor quando pelo menos <span data-campo="precos-minimo">12</span> dessas capitais têm preço publicado; caso contrário, fica sem dado.</li>
+          <li><strong>A média não é ponderada pela população.</strong> Ela descreve o preço típico nas capitais, não no interior.</li>
+          <li><strong>Unidades:</strong> a unidade de cada preço foi conferida dividindo o gasto mensal com o item pelo seu preço médio, o que devolve a quantidade da cesta definida em lei (por exemplo, 6 kg de carne e 7,5 litros de leite em São Paulo). O óleo de soja não aparece porque essa conta não confirmou a unidade com segurança.</li>
+          <li><strong>Cesta básica:</strong> a quantidade de cada alimento segue o Decreto-Lei 399/1938 e muda conforme a região, então a média do país mistura cestas regionais diferentes.</li>
+          <li><strong>Dezembro de 2015:</strong> o DIEESE publica esse mês duas vezes, uma delas marcada como recalculada. O site usa a versão recalculada.</li>
+        </ul>
+        <h3>Combustíveis e gás de cozinha</h3>
+        <p><strong>Fonte:</strong> Levantamento de Preços de Combustíveis da ANP, série histórica mensal do Brasil, preço médio de revenda (o que o consumidor paga no posto ou na revenda de gás). A série começa em julho de 2001.</p>
+        <ul>
+          <li>Produtos: gasolina comum, etanol hidratado, óleo diesel comum (a ANP publica o diesel S10 numa série separada e mais curta, que não entra aqui) e GLP em botijão de 13 kg.</li>
+          <li>A ANP publica planilhas Excel. Uma rotina automática baixa as planilhas todos os dias, converte para CSV e guarda no repositório a assinatura digital (SHA-256) de cada planilha original, para que qualquer pessoa possa conferir se o arquivo usado é o mesmo que a ANP publicou.</li>
+          <li>A ANP pesquisa uma amostra de postos, e o tamanho dela mudou bastante ao longo dos anos (na gasolina comum, de cerca de 14 mil a 58 mil postos pesquisados por mês).</li>
+          <li>Por estado, o site usa as planilhas mensais por estado da mesma pesquisa, só com gasolina comum, etanol, diesel e GLP. A planilha por estado tem linhas repetidas com valores diferentes em outro produto (GNV), que o site não usa.</li>
+          <li><strong>Tanque cheio:</strong> 50 litros vezes o preço médio do litro, dividido pelo salário mínimo do mesmo mês. O botijão é comparado ao salário mínimo da mesma forma.</li>
+        </ul>
 
-      <h2 id="emprego">Desemprego e renda do trabalho</h2>
-      <p><strong>Fonte:</strong> PNAD Contínua do IBGE, consultada pela API do SIDRA. Desemprego: tabela 6381, taxa de desocupação das pessoas de 14 anos ou mais. Renda: tabela 6390, rendimento médio mensal real habitualmente recebido em todos os trabalhos.</p>
-      <ul>
-        <li>A pesquisa é divulgada por trimestre móvel (por exemplo, jan-fev-mar). Cada trimestre é gravado no último mês dele.</li>
-        <li>A renda já vem corrigida pelo próprio IBGE para valores do trimestre mais recente. Por isso o histórico inteiro muda um pouco a cada divulgação.</li>
-        <li>A série começa no trimestre jan-fev-mar de 2012. As pesquisas de emprego anteriores do IBGE cobriam só algumas regiões metropolitanas e usavam outra metodologia, então não são emendadas a esta.</li>
-      </ul>
+        <h2 id="emprego">Desemprego e renda do trabalho</h2>
+        <p><strong>Fonte:</strong> PNAD Contínua do IBGE, consultada pela API do SIDRA. Desemprego: tabela 6381, taxa de desocupação das pessoas de 14 anos ou mais. Renda: tabela 6390, rendimento médio mensal real habitualmente recebido em todos os trabalhos.</p>
+        <ul>
+          <li>A pesquisa é divulgada por trimestre móvel (por exemplo, jan-fev-mar). Cada trimestre é gravado no último mês dele.</li>
+          <li>A renda já vem corrigida pelo próprio IBGE para valores do trimestre mais recente. Por isso o histórico inteiro muda um pouco a cada divulgação.</li>
+          <li>A série começa no trimestre jan-fev-mar de 2012. As pesquisas de emprego anteriores do IBGE cobriam só algumas regiões metropolitanas e usavam outra metodologia, então não são emendadas a esta.</li>
+        </ul>
 
-      <h2 id="resumo">Como está o Brasil hoje (resumo)</h2>
-      <p>A primeira seção do site compara cada item separadamente com a própria história e com o período que a pessoa escolher. De início, compara o governo atual com o anterior no mesmo período de mandato; também dá para escolher o último ano de um governo que já terminou ou um ano qualquer. Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e essa decisão é uma opinião.</p>
-      <ul>
-        <li><strong>Itens e o lado melhor:</strong> salário mínimo em dinheiro de hoje, corrigido pelo INPC (mais é melhor); cestas básicas que um salário mínimo compra (mais é melhor); desemprego (menos é melhor); renda média do trabalho (mais é melhor); inflação em 12 meses (menos é melhor, e a régua é a meta); botijão de gás e tanque de 50 litros de gasolina como parte do salário mínimo (menos é melhor); dívida bruta do governo geral em % do PIB (menos é melhor).</li>
-        <li><strong>Grupos:</strong> os itens aparecem em dois grupos, o bolso das pessoas e as contas do país, para que a melhora ou a piora de um lado não esconda o outro. Contas do país: dívida bruta do governo geral em % do PIB (menos é melhor); quanto faltou (déficit) ou sobrou (superávit) nas contas do governo federal e do Banco Central contando os juros, em 12 meses, em % do PIB (faltar menos é melhor; Banco Central, SGS 5717); a mesma conta sem os juros (sobrar é melhor; SGS 5783, com o sinal invertido para que positivo seja sobra); juros da dívida, em 12 meses, em % do PIB (menos é melhor; SGS 5750); impostos federais em 12 meses como parte do PIB, pela série comparável da arrecadação, sem o INSS.</li>
-        <li><strong>Na abertura:</strong> cada item mostra o valor dos últimos 12 meses, o selo da comparação com a própria história e, embaixo, a comparação escolhida, com o veredito (melhor, pior ou quase igual). Ao tocar no item, abrem as barras dos dois períodos na mesma escala, o porquê, quando os dados mostram, e o caminho para a seção completa.</li>
-        <li><strong>Impostos sem nota:</strong> mais arrecadação pode significar mais serviços públicos ou mais peso no bolso, e decidir isso é opinião. O site mostra o número e se ele é maior ou menor do que no período escolhido, sem selo de bom ou ruim.</li>
-        <li><strong>Contas do estado:</strong> com uma cidade escolhida, a abertura mostra também a dívida e a folha de pagamento do governo do estado no último ano publicado, comparadas com os limites da Lei de Responsabilidade Fiscal, como na seção dos estados.</li>
-        <li><strong>Fora do resumo:</strong> o dólar. Dólar mais caro prejudica quem compra produtos importados e ajuda quem exporta.</li>
+        <h2 id="resumo">Como está o Brasil hoje (resumo)</h2>
+        <p>A primeira seção do site compara cada item separadamente com a própria história e com o período que a pessoa escolher. De início, compara o governo atual com o anterior no mesmo período de mandato; também dá para escolher o último ano de um governo que já terminou ou um ano qualquer. Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e essa decisão é uma opinião.</p>
+        <ul>
+          <li><strong>Itens e o lado melhor:</strong> salário mínimo em dinheiro de hoje, corrigido pelo INPC (mais é melhor); cestas básicas que um salário mínimo compra (mais é melhor); desemprego (menos é melhor); renda média do trabalho (mais é melhor); inflação em 12 meses (menos é melhor, e a régua é a meta); botijão de gás e tanque de 50 litros de gasolina como parte do salário mínimo (menos é melhor); dívida bruta do governo geral em % do PIB (menos é melhor).</li>
+          <li><strong>Grupos:</strong> os itens aparecem em dois grupos, o bolso das pessoas e as contas do país, para que a melhora ou a piora de um lado não esconda o outro. Contas do país: dívida bruta do governo geral em % do PIB (menos é melhor); quanto faltou (déficit) ou sobrou (superávit) nas contas do governo federal e do Banco Central contando os juros, em 12 meses, em % do PIB (faltar menos é melhor; Banco Central, SGS 5717); a mesma conta sem os juros (sobrar é melhor; SGS 5783, com o sinal invertido para que positivo seja sobra); juros da dívida, em 12 meses, em % do PIB (menos é melhor; SGS 5750); impostos federais em 12 meses como parte do PIB, pela série comparável da arrecadação, sem o INSS.</li>
+          <li><strong>Na abertura:</strong> cada item mostra o valor dos últimos 12 meses, o selo da comparação com a própria história e, embaixo, a comparação escolhida, com o veredito (melhor, pior ou quase igual). Ao tocar no item, abrem as barras dos dois períodos na mesma escala, o porquê, quando os dados mostram, e o caminho para a seção completa.</li>
+          <li><strong>Impostos sem nota:</strong> mais arrecadação pode significar mais serviços públicos ou mais peso no bolso, e decidir isso é opinião. O site mostra o número e se ele é maior ou menor do que no período escolhido, sem selo de bom ou ruim.</li>
+          <li><strong>Contas do estado:</strong> com uma cidade escolhida, a abertura mostra também a dívida e a folha de pagamento do governo do estado no último ano publicado, comparadas com os limites da Lei de Responsabilidade Fiscal, como na seção dos estados.</li>
+          <li><strong>Fora do resumo:</strong> o dólar. Dólar mais caro prejudica quem compra produtos importados e ajuda quem exporta.</li>
 
-        <li><strong>Hoje:</strong> os últimos 12 meses com dado publicado de cada item. Desemprego e renda usam a média dos 4 trimestres; a inflação é a variação acumulada nos 12 meses; a dívida é a do último mês publicado.</li>
-        <li><strong>Bom, na média ou ruim:</strong> hoje é comparado com cada ano completo desde o começo da pesquisa. Bom quando é melhor do que em pelo menos dois terços dos anos; ruim quando é melhor em no máximo um terço; na média no resto. Diferença menor que 1% conta como empate e não conta como "melhor".</li>
-        <li><strong>Inflação:</strong> comparada com a meta do Conselho Monetário Nacional, 3% ao ano com tolerância de 1,5 ponto (meta contínua desde 2025). Acima de 4,5%, ruim; entre 1,5% e 4,5%, boa; abaixo de 1,5%, na média.</li>
-        <li><strong>Ano escolhido:</strong> média dos 12 meses do ano (desemprego e renda, média dos 4 trimestres; inflação, variação de janeiro a dezembro; dívida, dezembro). Só entram anos com todos os meses publicados.</li>
-        <li><strong>Mesmo período de governo (padrão):</strong> o governo atual, do primeiro mês até o último publicado de cada item, contra o governo anterior nos mesmos meses de mandato (o primeiro mês de um com o primeiro do outro, e assim por diante). O mês é de quem governava no dia 15. Os dois têm o mesmo tempo para mostrar resultado, e o período não depende de escolher um ano bom ou ruim. Salário, cestas, preços, desemprego e renda: média do período (desemprego e renda pelos trimestres; inflação, média por ano). Contas do governo com e sem juros, juros e impostos: soma do fluxo mensal do período dividida pelo PIB dos mesmos meses (Banco Central, SGS 4573, 4639 e 4606, e PIB mensal, SGS 4380; arrecadação comparável da Receita Federal). Dívida: quanto subiu ou caiu, em pontos de % do PIB, do mês anterior ao início do período até o último mês, porque o tamanho da dívida no começo é herança do governo anterior. Um governo que acabou de começar tem poucos meses para comparar, e o site mostra o período usado em cada item.</li>
-        <li><strong>Último ano de um governo:</strong> o último ano atribuído ao governo, com a regra do ano das outras tabelas (o ano é de quem governou mais meses dele): FHC 1998 e 2002, Lula 2006 e 2010, Dilma 2014 e 2015, Temer 2018, Bolsonaro 2022. É como o governo entregou o país. A média do mandato misturaria crises do meio do caminho, como a pandemia de 2020 ou a crise de 2009. O último ano de mandato é sempre ano de eleição, com possíveis medidas fora do comum, e isso vale igualmente para todos. Os valores do ano seguem a regra do "Ano escolhido".</li>
-        <li><strong>Aviso de crise:</strong> aparece quando um dos períodos comparados inclui pelo menos um mês de uma crise com data oficial. Recessões: cronologia do Comitê de Datação de Ciclos Econômicos (CODACE) da FGV, do trimestre seguinte ao pico até o vale: 2º e 3º trimestres de 1995; 1º trimestre de 1998 ao 1º de 1999; 2º ao 4º trimestre de 2001; 1º e 2º trimestres de 2003; 4º trimestre de 2008 e 1º de 2009; 2º trimestre de 2014 ao 4º de 2016; 1º e 2º trimestres de 2020 (conferido no quadro publicado pelo IBRE/FGV, que vai até o 3º trimestre de 2023; uma recessão nova entra quando o comitê a anunciar). Pandemia de covid-19: de fevereiro de 2020, quando a Portaria GM/MS nº 188 declarou a Emergência em Saúde Pública de Importância Nacional, a maio de 2022, quando entrou em vigor a Portaria GM/MS nº 913, de 22 de abril de 2022, que a encerrou 30 dias depois de publicada. O aviso só informa e não muda nenhum número: a regra é a mesma para todos os governos e não tenta medir quanto da crise veio de fora ou de decisões do governo. O mesmo aviso aparece embaixo de cada tabela que compara governos, dizendo quais governos têm anos que cruzam uma dessas crises.</li>
-        <li><strong>Por quê:</strong> só onde os dados mostram o mecanismo, e só nas opções de ano e último ano de governo; no mesmo período de governo, a dívida mostra de quanto a quanto ela foi nos dois governos. Salário, cestas, botijão e gasolina: quanto cada parte da conta subiu ou caiu entre a média do período escolhido e a média dos últimos 12 meses. Dívida: quanto o governo federal gastou a mais do que arrecadou, contando os juros (resultado nominal das NFSP do Banco Central), do fim do período escolhido até o último mês, em dinheiro de hoje pelo IPCA. A dívida em % do PIB também muda com o crescimento da economia e com outras operações, então essa frase explica a maior parte, não toda a variação.</li>
-      </ul>
+          <li><strong>Hoje:</strong> os últimos 12 meses com dado publicado de cada item. Desemprego e renda usam a média dos 4 trimestres; a inflação é a variação acumulada nos 12 meses; a dívida é a do último mês publicado.</li>
+          <li><strong>Bom, na média ou ruim:</strong> hoje é comparado com cada ano completo desde o começo da pesquisa. Bom quando é melhor do que em pelo menos dois terços dos anos; ruim quando é melhor em no máximo um terço; na média no resto. Diferença menor que 1% conta como empate e não conta como "melhor".</li>
+          <li><strong>Inflação:</strong> comparada com a meta do Conselho Monetário Nacional, 3% ao ano com tolerância de 1,5 ponto (meta contínua desde 2025). Acima de 4,5%, ruim; entre 1,5% e 4,5%, boa; abaixo de 1,5%, na média.</li>
+          <li><strong>Ano escolhido:</strong> média dos 12 meses do ano (desemprego e renda, média dos 4 trimestres; inflação, variação de janeiro a dezembro; dívida, dezembro). Só entram anos com todos os meses publicados.</li>
+          <li><strong>Mesmo período de governo (padrão):</strong> o governo atual, do primeiro mês até o último publicado de cada item, contra o governo anterior nos mesmos meses de mandato (o primeiro mês de um com o primeiro do outro, e assim por diante). O mês é de quem governava no dia 15. Os dois têm o mesmo tempo para mostrar resultado, e o período não depende de escolher um ano bom ou ruim. Salário, cestas, preços, desemprego e renda: média do período (desemprego e renda pelos trimestres; inflação, média por ano). Contas do governo com e sem juros, juros e impostos: soma do fluxo mensal do período dividida pelo PIB dos mesmos meses (Banco Central, SGS 4573, 4639 e 4606, e PIB mensal, SGS 4380; arrecadação comparável da Receita Federal). Dívida: quanto subiu ou caiu, em pontos de % do PIB, do mês anterior ao início do período até o último mês, porque o tamanho da dívida no começo é herança do governo anterior. Um governo que acabou de começar tem poucos meses para comparar, e o site mostra o período usado em cada item.</li>
+          <li><strong>Último ano de um governo:</strong> o último ano atribuído ao governo, com a regra do ano das outras tabelas (o ano é de quem governou mais meses dele): FHC 1998 e 2002, Lula 2006 e 2010, Dilma 2014 e 2015, Temer 2018, Bolsonaro 2022. É como o governo entregou o país. A média do mandato misturaria crises do meio do caminho, como a pandemia de 2020 ou a crise de 2009. O último ano de mandato é sempre ano de eleição, com possíveis medidas fora do comum, e isso vale igualmente para todos. Os valores do ano seguem a regra do "Ano escolhido".</li>
+          <li><strong>Aviso de crise:</strong> aparece quando um dos períodos comparados inclui pelo menos um mês de uma crise com data oficial. Recessões: cronologia do Comitê de Datação de Ciclos Econômicos (CODACE) da FGV, do trimestre seguinte ao pico até o vale: 2º e 3º trimestres de 1995; 1º trimestre de 1998 ao 1º de 1999; 2º ao 4º trimestre de 2001; 1º e 2º trimestres de 2003; 4º trimestre de 2008 e 1º de 2009; 2º trimestre de 2014 ao 4º de 2016; 1º e 2º trimestres de 2020 (conferido no quadro publicado pelo IBRE/FGV, que vai até o 3º trimestre de 2023; uma recessão nova entra quando o comitê a anunciar). Pandemia de covid-19: de fevereiro de 2020, quando a Portaria GM/MS nº 188 declarou a Emergência em Saúde Pública de Importância Nacional, a maio de 2022, quando entrou em vigor a Portaria GM/MS nº 913, de 22 de abril de 2022, que a encerrou 30 dias depois de publicada. O aviso só informa e não muda nenhum número: a regra é a mesma para todos os governos e não tenta medir quanto da crise veio de fora ou de decisões do governo. O mesmo aviso aparece embaixo de cada tabela que compara governos, dizendo quais governos têm anos que cruzam uma dessas crises.</li>
+          <li><strong>Por quê:</strong> só onde os dados mostram o mecanismo, e só nas opções de ano e último ano de governo; no mesmo período de governo, a dívida mostra de quanto a quanto ela foi nos dois governos. Salário, cestas, botijão e gasolina: quanto cada parte da conta subiu ou caiu entre a média do período escolhido e a média dos últimos 12 meses. Dívida: quanto o governo federal gastou a mais do que arrecadou, contando os juros (resultado nominal das NFSP do Banco Central), do fim do período escolhido até o último mês, em dinheiro de hoje pelo IPCA. A dívida em % do PIB também muda com o crescimento da economia e com outras operações, então essa frase explica a maior parte, não toda a variação.</li>
+        </ul>
 
-      <h2 id="orcamento">Orçamento da família</h2>
-      <p>A seção "O salário dá para viver?" soma o básico da casa para uma renda e uma família escolhidas e mostra quanto sobra ou falta. Os valores são médias do país e cada um pode ser trocado pelo valor da casa da pessoa.</p>
-      <ul>
-        <li><strong>Pessoas:</strong> pela regra do DIEESE, duas crianças consomem como um adulto. A família é contada em adultos equivalentes: adultos + crianças ÷ 2.</li>
-        <li><strong>Comida:</strong> custo da cesta básica do DIEESE (média das 15 capitais, como na seção de compras) vezes os adultos equivalentes.</li>
-        <li><strong>Luz, água e gás:</strong> gasto médio mensal das famílias da mesma faixa de renda na Pesquisa de Orçamentos Familiares 2017-2018 do IBGE (tabela 6715), trazido para hoje pela inflação do próprio item no IPCA (energia elétrica residencial, taxa de água e esgoto, gás de botijão), a partir de janeiro de 2018. Os valores da POF estão a preços de 15 de janeiro de 2018, data de referência da pesquisa.</li>
-        <li><strong>Faixa de renda:</strong> as faixas da POF estão em reais de janeiro de 2018 e correspondem a múltiplos do salário mínimo da época, R$ 954 (até 2, até 3, até 6, até 10, até 15, até 25 e mais de 25 salários mínimos). A renda escolhida é convertida em salários mínimos de hoje para achar a faixa.</li>
-        <li><strong>Aluguel, referência do IBGE (padrão):</strong> valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF, que inclui o aluguel pago e, para quem tem casa própria ou cedida, o aluguel estimado pelo IBGE. Corrigido pela inflação do aluguel residencial no IPCA.</li>
-        <li><strong>Aluguel, referência FipeZAP (opcional):</strong> preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A área é um exemplo, não um dado. Anúncios de apartamentos em cidades grandes ficam acima do que pagam as famílias de renda mais baixa.</li>
-        <li><strong>Por que médias da POF:</strong> a pesquisa mostra o que famílias com aquela renda gastam de fato, incluindo quem paga tarifa social e famílias de tamanhos diferentes. Por isso o valor não muda com o número de pessoas. É a fonte oficial com gasto por faixa de renda; ela tem dados de 2017-2018, corrigidos pela inflação.</li>
-        <li><strong>Salário necessário:</strong> o DIEESE calcula o valor para 2 adultos e 2 crianças (3 adultos equivalentes): custo da cesta mais cara entre as capitais × 3 ÷ 0,3571, porque uma pesquisa de orçamento do DIEESE em São Paulo (1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outra família, o site usa o mesmo método: valor do DIEESE × adultos equivalentes ÷ 3.</li>
-        <li><strong>Fora da conta:</strong> transporte, remédios, roupas, escola, internet, telefone e lazer.</li>
-      </ul>
+        <h2 id="orcamento">Orçamento da família</h2>
+        <p>A seção "O salário dá para viver?" soma o básico da casa para uma renda e uma família escolhidas e mostra quanto sobra ou falta. Os valores são médias do país e cada um pode ser trocado pelo valor da casa da pessoa.</p>
+        <ul>
+          <li><strong>Pessoas:</strong> pela regra do DIEESE, duas crianças consomem como um adulto. A família é contada em adultos equivalentes: adultos + crianças ÷ 2.</li>
+          <li><strong>Comida:</strong> custo da cesta básica do DIEESE (média das 15 capitais, como na seção de compras) vezes os adultos equivalentes.</li>
+          <li><strong>Luz, água e gás:</strong> gasto médio mensal das famílias da mesma faixa de renda na Pesquisa de Orçamentos Familiares 2017-2018 do IBGE (tabela 6715), trazido para hoje pela inflação do próprio item no IPCA (energia elétrica residencial, taxa de água e esgoto, gás de botijão), a partir de janeiro de 2018. Os valores da POF estão a preços de 15 de janeiro de 2018, data de referência da pesquisa.</li>
+          <li><strong>Faixa de renda:</strong> as faixas da POF estão em reais de janeiro de 2018 e correspondem a múltiplos do salário mínimo da época, R$ 954 (até 2, até 3, até 6, até 10, até 15, até 25 e mais de 25 salários mínimos). A renda escolhida é convertida em salários mínimos de hoje para achar a faixa.</li>
+          <li><strong>Aluguel, referência do IBGE (padrão):</strong> valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF, que inclui o aluguel pago e, para quem tem casa própria ou cedida, o aluguel estimado pelo IBGE. Corrigido pela inflação do aluguel residencial no IPCA.</li>
+          <li><strong>Aluguel, referência FipeZAP (opcional):</strong> preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A área é um exemplo, não um dado. Anúncios de apartamentos em cidades grandes ficam acima do que pagam as famílias de renda mais baixa.</li>
+          <li><strong>Por que médias da POF:</strong> a pesquisa mostra o que famílias com aquela renda gastam de fato, incluindo quem paga tarifa social e famílias de tamanhos diferentes. Por isso o valor não muda com o número de pessoas. É a fonte oficial com gasto por faixa de renda; ela tem dados de 2017-2018, corrigidos pela inflação.</li>
+          <li><strong>Salário necessário:</strong> o DIEESE calcula o valor para 2 adultos e 2 crianças (3 adultos equivalentes): custo da cesta mais cara entre as capitais × 3 ÷ 0,3571, porque uma pesquisa de orçamento do DIEESE em São Paulo (1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outra família, o site usa o mesmo método: valor do DIEESE × adultos equivalentes ÷ 3.</li>
+          <li><strong>Fora da conta:</strong> transporte, remédios, roupas, escola, internet, telefone e lazer.</li>
+        </ul>
 
-      <h2 id="gastos">Gastos do governo federal por área</h2>
-      <p><strong>Fonte:</strong> Declaração de Contas Anuais (DCA) da União, Anexo I-E, publicada pelo Tesouro Nacional no SICONFI e consultada pela API oficial. O anexo traz a despesa por função de governo (saúde, educação...) e por subfunção, desde 2014. O site usa a <strong>despesa liquidada</strong>, sem as despesas intraorçamentárias (pagamentos entre órgãos do próprio governo federal).</p>
-      <ul>
-        <li><strong>Conferência:</strong> a carga de cada ano é recusada se a soma das funções não bater com o total declarado.</li>
-        <li><strong>Rolagem da dívida:</strong> as subfunções 841 e 842 da função Encargos Especiais (refinanciamento da dívida interna e externa) são dívida que venceu paga com dívida nova. Ficam fora da base "de cada R$ 100" e aparecem à parte no texto.</li>
-        <li><strong>Encargos especiais separados:</strong> serviço da dívida (subfunções 843 e 844) aparece como "Juros e pagamento da dívida"; outras transferências (845), como "Repasses a estados, municípios e outras transferências"; transferências para a educação básica (847), como "Repasses para a educação básica"; outros encargos especiais (846) e demais subfunções, como "Outros encargos".</li>
-        <li><strong>Demais áreas:</strong> cada função de governo aparece com um nome do dia a dia. Áreas com menos de 1% do total no ano são somadas em "Outras áreas", com a lista de quais são.</li>
-        <li><strong>Em dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo índice do IPCA do último mês publicado dividido pela média do índice nos 12 meses daquele ano.</li>
-        <li><strong>Limites:</strong> os números são só da União. Saúde e educação também são pagas por estados e municípios, com dinheiro próprio e com os repasses federais, que aparecem aqui como repasses e não como saúde ou educação. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</li>
-      </ul>
+        <h2 id="gastos">Gastos do governo federal por área</h2>
+        <p><strong>Fonte:</strong> Declaração de Contas Anuais (DCA) da União, Anexo I-E, publicada pelo Tesouro Nacional no SICONFI e consultada pela API oficial. O anexo traz a despesa por função de governo (saúde, educação...) e por subfunção, desde 2014. O site usa a <strong>despesa liquidada</strong>, sem as despesas intraorçamentárias (pagamentos entre órgãos do próprio governo federal).</p>
+        <ul>
+          <li><strong>Conferência:</strong> a carga de cada ano é recusada se a soma das funções não bater com o total declarado.</li>
+          <li><strong>Rolagem da dívida:</strong> as subfunções 841 e 842 da função Encargos Especiais (refinanciamento da dívida interna e externa) são dívida que venceu paga com dívida nova. Ficam fora da base "de cada R$ 100" e aparecem à parte no texto.</li>
+          <li><strong>Encargos especiais separados:</strong> serviço da dívida (subfunções 843 e 844) aparece como "Juros e pagamento da dívida"; outras transferências (845), como "Repasses a estados, municípios e outras transferências"; transferências para a educação básica (847), como "Repasses para a educação básica"; outros encargos especiais (846) e demais subfunções, como "Outros encargos".</li>
+          <li><strong>Demais áreas:</strong> cada função de governo aparece com um nome do dia a dia. Áreas com menos de 1% do total no ano são somadas em "Outras áreas", com a lista de quais são.</li>
+          <li><strong>Em dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo índice do IPCA do último mês publicado dividido pela média do índice nos 12 meses daquele ano.</li>
+          <li><strong>Limites:</strong> os números são só da União. Saúde e educação também são pagas por estados e municípios, com dinheiro próprio e com os repasses federais, que aparecem aqui como repasses e não como saúde ou educação. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</li>
+        </ul>
 
-      <h2 id="contas">Contas públicas</h2>
-      <p><strong>Fonte:</strong> estatísticas fiscais do Banco Central, necessidades de financiamento do setor público (NFSP) sem desvalorização cambial, recorte "Governo Federal e Banco Central" (o governo federal inclui o INSS). Séries do SGS: 4639 (resultado primário), 4606 (juros nominais) e 4573 (resultado nominal), em reais por mês; 5783, 5750 e 5717, as mesmas em % do PIB acumuladas em 12 meses. Dívida bruta do governo geral (União, estados e municípios), SGS 13762, em % do PIB, metodologia usada a partir de 2008, disponível desde dezembro de 2006. Os códigos foram conferidos pelo título oficial de cada série no portal de dados abertos do Banco Central.</p>
-      <ul>
-        <li><strong>Sinal:</strong> nas NFSP, valor positivo é déficit. O site inverte o sinal para a leitura do dia a dia: positivo é "sobrou", negativo é "faltou".</li>
-        <li><strong>Valor do ano em % do PIB:</strong> o número de dezembro da série acumulada em 12 meses, que cobre o ano inteiro. A dívida também usa o valor de dezembro.</li>
-        <li><strong>Valor do ano em reais de hoje:</strong> soma dos 12 meses, com cada mês corrigido pelo IPCA até o mês de referência.</li>
-        <li><strong>Resumo:</strong> os últimos 12 meses publicados, em reais da época de cada mês.</li>
-        <li><strong>Por governo:</strong> média simples dos anos atribuídos a cada mandato (mesma regra das outras tabelas) e a dívida em dezembro do último ano do mandato. O ano em curso só entra quando dezembro é publicado.</li>
-      </ul>
+        <h2 id="contas">Contas públicas</h2>
+        <p><strong>Fonte:</strong> estatísticas fiscais do Banco Central, necessidades de financiamento do setor público (NFSP) sem desvalorização cambial, recorte "Governo Federal e Banco Central" (o governo federal inclui o INSS). Séries do SGS: 4639 (resultado primário), 4606 (juros nominais) e 4573 (resultado nominal), em reais por mês; 5783, 5750 e 5717, as mesmas em % do PIB acumuladas em 12 meses. Dívida bruta do governo geral (União, estados e municípios), SGS 13762, em % do PIB, metodologia usada a partir de 2008, disponível desde dezembro de 2006. Os códigos foram conferidos pelo título oficial de cada série no portal de dados abertos do Banco Central.</p>
+        <ul>
+          <li><strong>Sinal:</strong> nas NFSP, valor positivo é déficit. O site inverte o sinal para a leitura do dia a dia: positivo é "sobrou", negativo é "faltou".</li>
+          <li><strong>Valor do ano em % do PIB:</strong> o número de dezembro da série acumulada em 12 meses, que cobre o ano inteiro. A dívida também usa o valor de dezembro.</li>
+          <li><strong>Valor do ano em reais de hoje:</strong> soma dos 12 meses, com cada mês corrigido pelo IPCA até o mês de referência.</li>
+          <li><strong>Resumo:</strong> os últimos 12 meses publicados, em reais da época de cada mês.</li>
+          <li><strong>Por governo:</strong> média simples dos anos atribuídos a cada mandato (mesma regra das outras tabelas) e a dívida em dezembro do último ano do mandato. O ano em curso só entra quando dezembro é publicado.</li>
+        </ul>
 
-      <h2 id="estados">Contas dos estados</h2>
-      <p><strong>Fonte:</strong> Relatório de Gestão Fiscal (RGF) do Poder Executivo de cada estado e do Distrito Federal, 3º quadrimestre, obtido na API do Siconfi (Tesouro Nacional) desde 2015. Anexo 1 (despesa com pessoal) e anexo 2 (dívida consolidada líquida). O último ano fechado é conferido todo dia; os anteriores, uma vez por mês, para pegar relatórios corrigidos pelos estados.</p>
-      <ul>
-        <li><strong>Dívida:</strong> dívida consolidada líquida (dívida menos o dinheiro em caixa e outros haveres) em % da receita corrente líquida, como o estado informa no anexo 2. De 2020 em diante, o relatório usa a receita corrente líquida ajustada para o cálculo dos limites de endividamento; até 2019, a receita corrente líquida sem ajuste. Quando a linha da dívida líquida vem em branco, o site usa a fórmula do próprio relatório, dívida consolidada menos deduções (aconteceu no Amapá em 2017).</li>
-        <li><strong>Limite da dívida:</strong> duas vezes a receita corrente líquida, ou 200% (Resolução do Senado Federal nº 40/2001, art. 3º, I), com alerta em 180%, 90% do limite (LRF, art. 59, § 1º, III). É o mesmo para todos os estados. O site não usa o limite que cada estado informa porque, em 21 dos 297 relatórios de 2015 a 2025, o valor informado não corresponde à lei (zero em 9 relatórios de Ceará e Distrito Federal, cerca de 90% em 11 de Roraima e 169,9% em 1 de São Paulo).</li>
-        <li><strong>Gasto com pessoal:</strong> despesa total com pessoal do Poder Executivo em % da receita corrente líquida, como o estado informa no anexo 1. Quando o percentual não vem no relatório, é calculado com o valor em reais e a receita do próprio relatório (Paraná em 2017 e Bahia em 2015). O resultado confere com os percentuais publicados.</li>
-        <li><strong>Limites de pessoal:</strong> vêm do relatório de cada estado. Para o Executivo, 49% da receita corrente líquida, ou 48,6% nos estados que têm tribunal de contas dos municípios (LRF, art. 20, II, c, e § 4º); limite prudencial em 95% do limite e alerta em 90%. Os 297 relatórios conferem com essa regra.</li>
-        <li><strong>Comparação entre estados e entre anos:</strong> o tribunal de contas de cada estado define detalhes do que entra no gasto com pessoal, e essas regras mudaram com o tempo. Saltos grandes de um ano para o outro podem vir de mudança na forma de contar. O site mostra os números como foram informados, sem ajuste.</li>
-        <li><strong>Fora do site:</strong> o resultado primário dos estados (RREO, anexo 6) não é mostrado porque a forma de cálculo mudou em 2018 e depois, e a série não é comparável entre anos.</li>
-      </ul>
+        <h2 id="estados">Contas dos estados</h2>
+        <p><strong>Fonte:</strong> Relatório de Gestão Fiscal (RGF) do Poder Executivo de cada estado e do Distrito Federal, 3º quadrimestre, obtido na API do Siconfi (Tesouro Nacional) desde 2015. Anexo 1 (despesa com pessoal) e anexo 2 (dívida consolidada líquida). O último ano fechado é conferido todo dia; os anteriores, uma vez por mês, para pegar relatórios corrigidos pelos estados.</p>
+        <ul>
+          <li><strong>Dívida:</strong> dívida consolidada líquida (dívida menos o dinheiro em caixa e outros haveres) em % da receita corrente líquida, como o estado informa no anexo 2. De 2020 em diante, o relatório usa a receita corrente líquida ajustada para o cálculo dos limites de endividamento; até 2019, a receita corrente líquida sem ajuste. Quando a linha da dívida líquida vem em branco, o site usa a fórmula do próprio relatório, dívida consolidada menos deduções (aconteceu no Amapá em 2017).</li>
+          <li><strong>Limite da dívida:</strong> duas vezes a receita corrente líquida, ou 200% (Resolução do Senado Federal nº 40/2001, art. 3º, I), com alerta em 180%, 90% do limite (LRF, art. 59, § 1º, III). É o mesmo para todos os estados. O site não usa o limite que cada estado informa porque, em 21 dos 297 relatórios de 2015 a 2025, o valor informado não corresponde à lei (zero em 9 relatórios de Ceará e Distrito Federal, cerca de 90% em 11 de Roraima e 169,9% em 1 de São Paulo).</li>
+          <li><strong>Gasto com pessoal:</strong> despesa total com pessoal do Poder Executivo em % da receita corrente líquida, como o estado informa no anexo 1. Quando o percentual não vem no relatório, é calculado com o valor em reais e a receita do próprio relatório (Paraná em 2017 e Bahia em 2015). O resultado confere com os percentuais publicados.</li>
+          <li><strong>Limites de pessoal:</strong> vêm do relatório de cada estado. Para o Executivo, 49% da receita corrente líquida, ou 48,6% nos estados que têm tribunal de contas dos municípios (LRF, art. 20, II, c, e § 4º); limite prudencial em 95% do limite e alerta em 90%. Os 297 relatórios conferem com essa regra.</li>
+          <li><strong>Comparação entre estados e entre anos:</strong> o tribunal de contas de cada estado define detalhes do que entra no gasto com pessoal, e essas regras mudaram com o tempo. Saltos grandes de um ano para o outro podem vir de mudança na forma de contar. O site mostra os números como foram informados, sem ajuste.</li>
+          <li><strong>Fora do site:</strong> o resultado primário dos estados (RREO, anexo 6) não é mostrado porque a forma de cálculo mudou em 2018 e depois, e a série não é comparável entre anos.</li>
+        </ul>
 
-      <h2 id="impostos-estados">Impostos dos estados</h2>
-      <p><strong>Fonte:</strong> Relatório Resumido da Execução Orçamentária (RREO) de cada estado e do Distrito Federal, anexo 3 (receita corrente líquida), obtido na API do Siconfi (Tesouro Nacional) desde 2015. O anexo traz a receita de cada um dos 12 meses que terminam no fim do bimestre e o total desses 12 meses.</p>
-      <ul>
-        <li><strong>O que entra:</strong> ICMS, IPVA e ITCD (ITCMD, imposto sobre herança e doação), nas linhas "líquido, exceto transferências e FUNDEB": depois das restituições, mas antes dos repasses às prefeituras (25% do ICMS e 50% do IPVA) e ao FUNDEB. É o que o estado arrecadou. Taxas, contribuições e outras receitas dos estados ficam de fora.</li>
-        <li><strong>Conferências:</strong> a carga é recusada se faltar algum dos 12 meses de um imposto ou se a soma dos meses não bater com o total do relatório (diferença acima de 5 centavos). Nos relatórios testados, a soma bateu centavo por centavo.</li>
-        <li><strong>Diferença em relação a outros números:</strong> o CONFAZ e as secretarias de Fazenda divulgam a arrecadação com outra forma de registro, e os totais podem diferir um pouco. Nos dois casos conferidos, ICMS de 2024: Mato Grosso do Sul, R$ 17,03 bilhões aqui e R$ 16,94 bilhões no CONFAZ (0,5%); São Paulo, R$ 223,8 bilhões aqui e R$ 226,3 bilhões noticiados (1,1%).</li>
-        <li><strong>Valores como informados:</strong> alguns meses têm valores fora do padrão, como IPVA ou ITCD negativos (restituições maiores que a arrecadação do mês) ou o ICMS do Acre em dezembro de 2018, o dobro da média do ano. O site não corrige esses valores.</li>
-        <li><strong>Mês em mais de um relatório:</strong> cada relatório repete meses dos anteriores. Vale o valor do relatório mais recente, para pegar correções feitas pelo estado.</li>
-        <li><strong>Ano:</strong> soma dos 12 meses de janeiro a dezembro. Em dinheiro de hoje, o ano é corrigido pela média do IPCA do ano, a mesma regra dos gastos federais.</li>
-        <li><strong>Últimos 12 meses:</strong> terminam no último mês que todos os 27 já informaram, para que a soma do país e a comparação com a arrecadação federal usem os mesmos meses. Os estados entregam o relatório até 30 dias depois do fim de cada bimestre, então esse mês costuma ficar de um a três meses atrás do federal; um estado atrasado atrasa a soma do país.</li>
-        <li><strong>Comparação com a arrecadação federal:</strong> a arrecadação federal dos mesmos 12 meses, com todos os tributos e as receitas de outros órgãos (a mesma base de "De onde vem").</li>
-        <li><strong>Coleta com ritmo:</strong> a API do Tesouro recusa pedidos quando recebe muitos de uma vez (em 15/11/2026, 41 de um lote de 104 voltaram com HTTP 429 ou conexão cortada). Os pedidos ao Tesouro saem no máximo 12 a cada 5 minutos, e falhas passageiras são repetidas até 4 vezes em 24 horas.</li>
-      </ul>
+        <h2 id="impostos-estados">Impostos dos estados</h2>
+        <p><strong>Fonte:</strong> Relatório Resumido da Execução Orçamentária (RREO) de cada estado e do Distrito Federal, anexo 3 (receita corrente líquida), obtido na API do Siconfi (Tesouro Nacional) desde 2015. O anexo traz a receita de cada um dos 12 meses que terminam no fim do bimestre e o total desses 12 meses.</p>
+        <ul>
+          <li><strong>O que entra:</strong> ICMS, IPVA e ITCD (ITCMD, imposto sobre herança e doação), nas linhas "líquido, exceto transferências e FUNDEB": depois das restituições, mas antes dos repasses às prefeituras (25% do ICMS e 50% do IPVA) e ao FUNDEB. É o que o estado arrecadou. Taxas, contribuições e outras receitas dos estados ficam de fora.</li>
+          <li><strong>Conferências:</strong> a carga é recusada se faltar algum dos 12 meses de um imposto ou se a soma dos meses não bater com o total do relatório (diferença acima de 5 centavos). Nos relatórios testados, a soma bateu centavo por centavo.</li>
+          <li><strong>Diferença em relação a outros números:</strong> o CONFAZ e as secretarias de Fazenda divulgam a arrecadação com outra forma de registro, e os totais podem diferir um pouco. Nos dois casos conferidos, ICMS de 2024: Mato Grosso do Sul, R$ 17,03 bilhões aqui e R$ 16,94 bilhões no CONFAZ (0,5%); São Paulo, R$ 223,8 bilhões aqui e R$ 226,3 bilhões noticiados (1,1%).</li>
+          <li><strong>Valores como informados:</strong> alguns meses têm valores fora do padrão, como IPVA ou ITCD negativos (restituições maiores que a arrecadação do mês) ou o ICMS do Acre em dezembro de 2018, o dobro da média do ano. O site não corrige esses valores.</li>
+          <li><strong>Mês em mais de um relatório:</strong> cada relatório repete meses dos anteriores. Vale o valor do relatório mais recente, para pegar correções feitas pelo estado.</li>
+          <li><strong>Ano:</strong> soma dos 12 meses de janeiro a dezembro. Em dinheiro de hoje, o ano é corrigido pela média do IPCA do ano, a mesma regra dos gastos federais.</li>
+          <li><strong>Últimos 12 meses:</strong> terminam no último mês que todos os 27 já informaram, para que a soma do país e a comparação com a arrecadação federal usem os mesmos meses. Os estados entregam o relatório até 30 dias depois do fim de cada bimestre, então esse mês costuma ficar de um a três meses atrás do federal; um estado atrasado atrasa a soma do país.</li>
+          <li><strong>Comparação com a arrecadação federal:</strong> a arrecadação federal dos mesmos 12 meses, com todos os tributos e as receitas de outros órgãos (a mesma base de "De onde vem").</li>
+          <li><strong>Coleta com ritmo:</strong> a API do Tesouro recusa pedidos quando recebe muitos de uma vez (em 15/11/2026, 41 de um lote de 104 voltaram com HTTP 429 ou conexão cortada). Os pedidos ao Tesouro saem no máximo 12 a cada 5 minutos, e falhas passageiras são repetidas até 4 vezes em 24 horas.</li>
+        </ul>
 
-      <h2 id="impostos-municipais">Impostos das prefeituras</h2>
-      <ul>
-        <li><strong>Capitais, mês a mês:</strong> ISS, IPTU e ITBI de cada capital desde 2015, pelo mesmo anexo 3 do RREO usado para os estados, com as mesmas conferências e a mesma regra para meses repetidos. Cada capital mostra os próprios últimos 12 meses, porque elas não são somadas e uma prefeitura atrasada não deve atrasar as outras.</li>
-        <li><strong>Brasília:</strong> não tem prefeitura. Quem cobra ISS, IPTU e ITBI é o governo do Distrito Federal, e esses impostos vêm do relatório do próprio Distrito Federal. Os valores batem com os que o Tesouro põe no bloco dos estados (2025: ISS de R$ 3,86 bilhões no relatório e R$ 3,84 bilhões no boletim).</li>
-        <li><strong>Todos os municípios do país:</strong> a API do Siconfi responde uma prefeitura por vez, e são 5.570, muitas delas com dados incompletos. O total do país vem da Estimativa da Carga Tributária Bruta do Governo Geral, do Tesouro Nacional, que completa as prefeituras sem dados com técnicas de imputação. O boletim sai uma vez por ano, em PDF e sem planilha; os valores são copiados das Tabelas 1 e 3 e conferidos pela soma (edição de 25/03/2026, sha256 c7e51243ca43c7d54e94b40905fced20bb5e18bd479ae1a3b7aaa6b1110d4727). Por isso esse número é anual e só muda quando sai uma nova edição.</li>
-        <li><strong>Total de tributos do país:</strong> a carga tributária bruta do mesmo boletim, que soma União, estados e municípios. Não inclui o FGTS nem o Sistema S, que o Tesouro deixa de fora por não serem tributos.</li>
-      </ul>
+        <h2 id="impostos-municipais">Impostos das prefeituras</h2>
+        <ul>
+          <li><strong>Capitais, mês a mês:</strong> ISS, IPTU e ITBI de cada capital desde 2015, pelo mesmo anexo 3 do RREO usado para os estados, com as mesmas conferências e a mesma regra para meses repetidos. Cada capital mostra os próprios últimos 12 meses, porque elas não são somadas e uma prefeitura atrasada não deve atrasar as outras.</li>
+          <li><strong>Brasília:</strong> não tem prefeitura. Quem cobra ISS, IPTU e ITBI é o governo do Distrito Federal, e esses impostos vêm do relatório do próprio Distrito Federal. Os valores batem com os que o Tesouro põe no bloco dos estados (2025: ISS de R$ 3,86 bilhões no relatório e R$ 3,84 bilhões no boletim).</li>
+          <li><strong>Todos os municípios do país:</strong> a API do Siconfi responde uma prefeitura por vez, e são 5.570, muitas delas com dados incompletos. O total do país vem da Estimativa da Carga Tributária Bruta do Governo Geral, do Tesouro Nacional, que completa as prefeituras sem dados com técnicas de imputação. O boletim sai uma vez por ano, em PDF e sem planilha; os valores são copiados das Tabelas 1 e 3 e conferidos pela soma (edição de 25/03/2026, sha256 c7e51243ca43c7d54e94b40905fced20bb5e18bd479ae1a3b7aaa6b1110d4727). Por isso esse número é anual e só muda quando sai uma nova edição.</li>
+          <li><strong>Total de tributos do país:</strong> a carga tributária bruta do mesmo boletim, que soma União, estados e municípios. Não inclui o FGTS nem o Sistema S, que o Tesouro deixa de fora por não serem tributos.</li>
+        </ul>
 
-      <h2 id="portal">Ministérios, cartão corporativo e viagens</h2>
-      <ul>
-        <li><strong>Fonte:</strong> Portal da Transparência, da Controladoria-Geral da União, pelos arquivos públicos de download: execução da despesa (um arquivo por mês, desde 2014), cartão de pagamento do governo federal (um por mês, desde 2013) e viagens a serviço (um por ano, desde 2015). Uma tarefa semanal baixa o ano corrente e o anterior; uma vez por mês, todos os anos, para pegar correções. Ela roda em três partes (viagens, cartão e despesa), uma depois da outra, confere colunas, meses e totais e grava só somas por ano e órgão superior; o SHA-256 de cada original fica registrado. Se algo não bater numa parte, nada dela é gravado e o site continua com a versão anterior dessa parte. No ano corrente entram só meses completos, até o mês passado.</li>
-        <li><strong>Ministérios:</strong> valor liquidado no mês, somado no ano, por órgão superior. Os grupos "Juros e Encargos da Dívida" e "Amortização/Refinanciamento da Dívida" ficam fora da conta por órgão e vão só na planilha, em linhas próprias: o site não mostra esse valor porque é o juro pago em dinheiro pelo Tesouro, diferente dos juros do Banco Central em "As contas fecham?", que contam também o que a dívida rendeu sem ser paga. Linhas sem código de órgão (até hoje, só com valor zero) ficam de fora; se um dia vierem com valor, entram como "Sem órgão informado". O próprio Portal usa o código -1, chamado "Sem informação", para gasto sem órgão identificado (R$ 810 milhões em 2023 e R$ 628 milhões em 2024, em valores da época); o site mostra essa linha como "Órgão não informado pelo Portal". A parte "repassada a estados e prefeituras" soma as modalidades de transferência a estados, Distrito Federal e municípios. Ministérios mudam de nome e de estrutura; a série de cada um segue o código do órgão superior, e o nome mostrado é o do próprio ano.</li>
-        <li><strong>Cartão corporativo:</strong> soma do valor de cada lançamento, pelo mês do extrato. Os lançamentos que o Portal marca como "informações protegidas por sigilo" entram no total e são somados à parte; saques em dinheiro também.</li>
-        <li><strong>Viagens:</strong> diárias, passagens e outros gastos, menos o valor devolvido, de todas as viagens do arquivo do ano, realizadas ou não. No ano corrente, só as que começaram até o mês passado: o arquivo já traz viagens marcadas para depois. Viagens com dados sob sigilo entram no total e são contadas à parte; quando o órgão também está sob sigilo, elas aparecem como "órgão sob sigilo".</li>
-        <li><strong>Ministros:</strong> o Portal não tem um campo "ministro de Estado". A lista usa quem viajou ocupando cargo de natureza especial (função "Cargo de Natureza Especial"), que inclui os ministros e outros cargos do mesmo nível. É o único caso em que o site mostra nomes de servidores: nome, órgão, número de viagens e valor, como o Portal publica. Viagens sob sigilo não entram nessa lista.</li>
-        <li><strong>Dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo IPCA de hoje dividido pela média do IPCA dos meses daquele ano. Na comparação entre governos, cada ano conta para quem governou a maior parte dele, e o ano em curso fica de fora.</li>
-        <li><strong>Nomes cortados:</strong> nos arquivos do cartão e da despesa, o nome do órgão vem cortado em cerca de 45 letras. O site usa o nome completo do mesmo código, que aparece no arquivo de viagens.</li>
-      </ul>
+        <h2 id="portal">Ministérios, cartão corporativo e viagens</h2>
+        <ul>
+          <li><strong>Fonte:</strong> Portal da Transparência, da Controladoria-Geral da União, pelos arquivos públicos de download: execução da despesa (um arquivo por mês, desde 2014), cartão de pagamento do governo federal (um por mês, desde 2013) e viagens a serviço (um por ano, desde 2015). Uma tarefa semanal baixa o ano corrente e o anterior; uma vez por mês, todos os anos, para pegar correções. Ela roda em três partes (viagens, cartão e despesa), uma depois da outra, confere colunas, meses e totais e grava só somas por ano e órgão superior; o SHA-256 de cada original fica registrado. Se algo não bater numa parte, nada dela é gravado e o site continua com a versão anterior dessa parte. No ano corrente entram só meses completos, até o mês passado.</li>
+          <li><strong>Ministérios:</strong> valor liquidado no mês, somado no ano, por órgão superior. Os grupos "Juros e Encargos da Dívida" e "Amortização/Refinanciamento da Dívida" ficam fora da conta por órgão e vão só na planilha, em linhas próprias: o site não mostra esse valor porque é o juro pago em dinheiro pelo Tesouro, diferente dos juros do Banco Central em "As contas fecham?", que contam também o que a dívida rendeu sem ser paga. Linhas sem código de órgão (até hoje, só com valor zero) ficam de fora; se um dia vierem com valor, entram como "Sem órgão informado". O próprio Portal usa o código -1, chamado "Sem informação", para gasto sem órgão identificado (R$ 810 milhões em 2023 e R$ 628 milhões em 2024, em valores da época); o site mostra essa linha como "Órgão não informado pelo Portal". A parte "repassada a estados e prefeituras" soma as modalidades de transferência a estados, Distrito Federal e municípios. Ministérios mudam de nome e de estrutura; a série de cada um segue o código do órgão superior, e o nome mostrado é o do próprio ano.</li>
+          <li><strong>Cartão corporativo:</strong> soma do valor de cada lançamento, pelo mês do extrato. Os lançamentos que o Portal marca como "informações protegidas por sigilo" entram no total e são somados à parte; saques em dinheiro também.</li>
+          <li><strong>Viagens:</strong> diárias, passagens e outros gastos, menos o valor devolvido, de todas as viagens do arquivo do ano, realizadas ou não. No ano corrente, só as que começaram até o mês passado: o arquivo já traz viagens marcadas para depois. Viagens com dados sob sigilo entram no total e são contadas à parte; quando o órgão também está sob sigilo, elas aparecem como "órgão sob sigilo".</li>
+          <li><strong>Ministros:</strong> o Portal não tem um campo "ministro de Estado". A lista usa quem viajou ocupando cargo de natureza especial (função "Cargo de Natureza Especial"), que inclui os ministros e outros cargos do mesmo nível. É o único caso em que o site mostra nomes de servidores: nome, órgão, número de viagens e valor, como o Portal publica. Viagens sob sigilo não entram nessa lista.</li>
+          <li><strong>Dinheiro de hoje:</strong> o valor de cada ano é multiplicado pelo IPCA de hoje dividido pela média do IPCA dos meses daquele ano. Na comparação entre governos, cada ano conta para quem governou a maior parte dele, e o ano em curso fica de fora.</li>
+          <li><strong>Nomes cortados:</strong> nos arquivos do cartão e da despesa, o nome do órgão vem cortado em cerca de 45 letras. O site usa o nome completo do mesmo código, que aparece no arquivo de viagens.</li>
+        </ul>
 
-      <h2 id="cota">Cota parlamentar</h2>
-      <ul>
-        <li><strong>Fontes:</strong> Câmara dos Deputados, arquivo anual da Cota para o Exercício da Atividade Parlamentar (camara.leg.br/cotas/Ano-AAAA.csv.zip), e Senado Federal, arquivo anual da cota dos senadores (senado.leg.br/transparencia/LAI/verba/despesa_ceaps_AAAA.csv), desde 2019. Uma tarefa diária baixa os arquivos do ano corrente e do anterior, e aos domingos todos os anos, para pegar correções. Ela confere colunas, valores e totais e grava só as somas; o SHA-256 de cada original fica registrado. Se algo não bater, nada é gravado e o site continua com a versão anterior.</li>
-        <li><strong>Valor:</strong> o líquido reembolsado (vlrLiquido na Câmara, VALOR_REEMBOLSADO no Senado). Passagens devolvidas entram com sinal negativo, como no arquivo. Despesas das lideranças de partido na Câmara, que não são de um deputado, ficam fora das somas por parlamentar.</li>
-        <li><strong>Tipos de despesa:</strong> as duas Casas usam nomes diferentes. Cada tipo entra num grupo comum pelas palavras do nome: passagens; divulgação do mandato; consultorias e pesquisas; segurança; escritório (aluguel, contas e material); telefone e correio; carro, combustível, hospedagem e alimentação; outros. O Senado junta locomoção, hospedagem, alimentação e combustível num tipo só, por isso esses itens formam um grupo único também na Câmara. A Câmara tem ainda o tipo "Complementação do auxílio-moradia", que fica num grupo próprio; no arquivo, ele aparece com valores negativos (R$ 1,8 milhão negativos em 2025, somando todos os deputados). O site soma como está no arquivo e não interpreta esses lançamentos. Alguns lançamentos do Senado vêm sem tipo de despesa e entram em "outros".</li>
-        <li><strong>Estado e partido:</strong> na Câmara, os do próprio arquivo (o partido do último mês com despesa no ano). No Senado, o arquivo traz só o nome; estado e partido vêm da lista oficial de senadores das legislaturas desde 2019, pelo nome.</li>
-        <li><strong>Quem ficou o ano todo:</strong> conta como no cargo o ano todo quem esteve em exercício em algum momento de cada trimestre do ano (no ano corrente, de cada trimestre já começado). Na Câmara, pela API de Dados Abertos, consultada trimestre a trimestre; no Senado, pelos períodos de exercício da lista oficial de senadores, juntados pelo código de cada senador. Suplentes que assumiram no meio do ano e quem se afastou por um trimestre inteiro, por exemplo para ser ministro, ficam fora. Quem se afastou, mas voltou ao cargo em todos os trimestres, conta como ano todo.</li>
-        <li><strong>Quem não usou a cota:</strong> parlamentares em exercício em algum momento do ano que não aparecem no arquivo da cota, separados entre quem ficou o ano todo e quem ficou só parte do ano. Não ter gasto não prova recusa declarada da cota.</li>
-        <li><strong>Médias e ranking:</strong> cada estado tem um limite mensal diferente, por causa das passagens até Brasília. Por isso as médias (do estado, da Casa e da tabela por estado) usam só quem ficou o ano todo, incluindo quem não usou a cota, com gasto zero. O ranking é do Brasil todo e ordena pela razão entre o gasto de cada um e a média do seu estado; só entram estados com pelo menos 5 parlamentares nessa base. Por isso o Senado, com 3 senadores por estado, fica sem ranking: em 2025, em Goiás, um senador que gastou R$ 181 mil ficaria 65% acima da média só porque outro não usou a cota. Um ranking justo do Senado precisa do limite oficial de cada estado, que ainda não está no site. Ordenar só pelo valor em reais mediria a distância até Brasília: em 2025, 8 dos 10 maiores gastos da Câmara foram de deputados de Roraima, Acre e Rondônia. Nos anos de troca de legislatura (2019 e 2023), quem saiu no fim de janeiro fica fora das médias, e quem tomou posse em fevereiro e seguiu no cargo conta como ano todo.</li>
-        <li><strong>Fora do site:</strong> salário, auxílio-moradia, apartamento funcional e a verba para pagar funcionários do gabinete não fazem parte da cota e não estão aqui. Doação ou recusa de salário declarada por um parlamentar, em geral, não aparece em dado oficial que permita conferir.</li>
-      </ul>
+        <h2 id="cota">Cota parlamentar</h2>
+        <ul>
+          <li><strong>Fontes:</strong> Câmara dos Deputados, arquivo anual da Cota para o Exercício da Atividade Parlamentar (camara.leg.br/cotas/Ano-AAAA.csv.zip), e Senado Federal, arquivo anual da cota dos senadores (senado.leg.br/transparencia/LAI/verba/despesa_ceaps_AAAA.csv), desde 2019. Uma tarefa diária baixa os arquivos do ano corrente e do anterior, e aos domingos todos os anos, para pegar correções. Ela confere colunas, valores e totais e grava só as somas; o SHA-256 de cada original fica registrado. Se algo não bater, nada é gravado e o site continua com a versão anterior.</li>
+          <li><strong>Valor:</strong> o líquido reembolsado (vlrLiquido na Câmara, VALOR_REEMBOLSADO no Senado). Passagens devolvidas entram com sinal negativo, como no arquivo. Despesas das lideranças de partido na Câmara, que não são de um deputado, ficam fora das somas por parlamentar.</li>
+          <li><strong>Tipos de despesa:</strong> as duas Casas usam nomes diferentes. Cada tipo entra num grupo comum pelas palavras do nome: passagens; divulgação do mandato; consultorias e pesquisas; segurança; escritório (aluguel, contas e material); telefone e correio; carro, combustível, hospedagem e alimentação; outros. O Senado junta locomoção, hospedagem, alimentação e combustível num tipo só, por isso esses itens formam um grupo único também na Câmara. A Câmara tem ainda o tipo "Complementação do auxílio-moradia", que fica num grupo próprio; no arquivo, ele aparece com valores negativos (R$ 1,8 milhão negativos em 2025, somando todos os deputados). O site soma como está no arquivo e não interpreta esses lançamentos. Alguns lançamentos do Senado vêm sem tipo de despesa e entram em "outros".</li>
+          <li><strong>Estado e partido:</strong> na Câmara, os do próprio arquivo (o partido do último mês com despesa no ano). No Senado, o arquivo traz só o nome; estado e partido vêm da lista oficial de senadores das legislaturas desde 2019, pelo nome.</li>
+          <li><strong>Quem ficou o ano todo:</strong> conta como no cargo o ano todo quem esteve em exercício em algum momento de cada trimestre do ano (no ano corrente, de cada trimestre já começado). Na Câmara, pela API de Dados Abertos, consultada trimestre a trimestre; no Senado, pelos períodos de exercício da lista oficial de senadores, juntados pelo código de cada senador. Suplentes que assumiram no meio do ano e quem se afastou por um trimestre inteiro, por exemplo para ser ministro, ficam fora. Quem se afastou, mas voltou ao cargo em todos os trimestres, conta como ano todo.</li>
+          <li><strong>Quem não usou a cota:</strong> parlamentares em exercício em algum momento do ano que não aparecem no arquivo da cota, separados entre quem ficou o ano todo e quem ficou só parte do ano. Não ter gasto não prova recusa declarada da cota.</li>
+          <li><strong>Médias e ranking:</strong> cada estado tem um limite mensal diferente, por causa das passagens até Brasília. Por isso as médias (do estado, da Casa e da tabela por estado) usam só quem ficou o ano todo, incluindo quem não usou a cota, com gasto zero. O ranking é do Brasil todo e ordena pela razão entre o gasto de cada um e a média do seu estado; só entram estados com pelo menos 5 parlamentares nessa base. Por isso o Senado, com 3 senadores por estado, fica sem ranking: em 2025, em Goiás, um senador que gastou R$ 181 mil ficaria 65% acima da média só porque outro não usou a cota. Um ranking justo do Senado precisa do limite oficial de cada estado, que ainda não está no site. Ordenar só pelo valor em reais mediria a distância até Brasília: em 2025, 8 dos 10 maiores gastos da Câmara foram de deputados de Roraima, Acre e Rondônia. Nos anos de troca de legislatura (2019 e 2023), quem saiu no fim de janeiro fica fora das médias, e quem tomou posse em fevereiro e seguiu no cargo conta como ano todo.</li>
+          <li><strong>Fora do site:</strong> salário, auxílio-moradia, apartamento funcional e a verba para pagar funcionários do gabinete não fazem parte da cota e não estão aqui. Doação ou recusa de salário declarada por um parlamentar, em geral, não aparece em dado oficial que permita conferir.</li>
+        </ul>
 
-      <h2 id="cidades">Números por capital</h2>
-      <p>No orçamento da família e na seção "O que o salário compra", a pessoa pode escolher uma das 27 capitais. A escolha fica guardada só no navegador dela.</p>
-      <ul>
-        <li><strong>Comida e alimentos:</strong> preços que o DIEESE pesquisa na própria capital. As capitais que entraram na pesquisa depois de 2015 têm histórico mais curto, e os meses sem pesquisa na cidade ficam em branco.</li>
-        <li><strong>Luz, água, gás e aluguel (referência do IBGE):</strong> gasto das famílias da mesma faixa de renda no estado da capital, na POF 2017-2018 (tabela 6715 por unidade da federação), corrigido pela inflação nacional de cada item. A amostra da POF por estado é menor que a nacional, então a margem de erro é maior.</li>
-        <li><strong>Aluguel anunciado (FipeZAP):</strong> preço médio por m² da própria cidade, nas 16 capitais acompanhadas pelo Índice FipeZAP. Nas demais, essa opção fica indisponível.</li>
-        <li><strong>Gasolina, etanol, diesel e botijão:</strong> média mensal dos postos pesquisados pela ANP no estado da capital (planilhas mensais por estado, convertidas para CSV como as nacionais). Vale para a seção de combustíveis, para "O que o salário compra" e para a conta de botijões no orçamento. É a média do estado inteiro, não só da capital.</li>
-        <li><strong>Salário necessário do DIEESE:</strong> é um valor único para o país, calculado com a cesta mais cara entre as capitais, e não muda com a cidade escolhida.</li>
-      </ul>
+        <h2 id="cidades">Números por capital</h2>
+        <p>No orçamento da família e na seção "O que o salário compra", a pessoa pode escolher uma das 27 capitais. A escolha fica guardada só no navegador dela.</p>
+        <ul>
+          <li><strong>Comida e alimentos:</strong> preços que o DIEESE pesquisa na própria capital. As capitais que entraram na pesquisa depois de 2015 têm histórico mais curto, e os meses sem pesquisa na cidade ficam em branco.</li>
+          <li><strong>Luz, água, gás e aluguel (referência do IBGE):</strong> gasto das famílias da mesma faixa de renda no estado da capital, na POF 2017-2018 (tabela 6715 por unidade da federação), corrigido pela inflação nacional de cada item. A amostra da POF por estado é menor que a nacional, então a margem de erro é maior.</li>
+          <li><strong>Aluguel anunciado (FipeZAP):</strong> preço médio por m² da própria cidade, nas 16 capitais acompanhadas pelo Índice FipeZAP. Nas demais, essa opção fica indisponível.</li>
+          <li><strong>Gasolina, etanol, diesel e botijão:</strong> média mensal dos postos pesquisados pela ANP no estado da capital (planilhas mensais por estado, convertidas para CSV como as nacionais). Vale para a seção de combustíveis, para "O que o salário compra" e para a conta de botijões no orçamento. É a média do estado inteiro, não só da capital.</li>
+          <li><strong>Salário necessário do DIEESE:</strong> é um valor único para o país, calculado com a cesta mais cara entre as capitais, e não muda com a cidade escolhida.</li>
+        </ul>
 
-      <h2 id="dolar">Dólar a preços de hoje</h2>
-      <p>A cotação nominal de 1995 e a de hoje não são comparáveis diretamente, porque Brasil e Estados Unidos tiveram inflações diferentes. O site traz cada cotação para preços de hoje:</p>
-      <p class="formula">dólar a preços de hoje = cotação do mês × (IPCA de hoje ÷ IPCA do mês) × (CPI dos EUA no mês ÷ CPI dos EUA hoje)</p>
-      <p>O CPI-U é publicado pelo U.S. Bureau of Labor Statistics. Em outubro de 2025 o BLS não publicou o índice; esse mês fica sem valor a preços de hoje.</p>
+        <h2 id="dolar">Dólar a preços de hoje</h2>
+        <p>A cotação nominal de 1995 e a de hoje não são comparáveis diretamente, porque Brasil e Estados Unidos tiveram inflações diferentes. O site traz cada cotação para preços de hoje:</p>
+        <p class="formula">dólar a preços de hoje = cotação do mês × (IPCA de hoje ÷ IPCA do mês) × (CPI dos EUA no mês ÷ CPI dos EUA hoje)</p>
+        <p>O CPI-U é publicado pelo U.S. Bureau of Labor Statistics. Em outubro de 2025 o BLS não publicou o índice; esse mês fica sem valor a preços de hoje.</p>
 
-      <h2 id="ir">Tabela do Imposto de Renda</h2>
-      <p><strong>Isenção efetiva:</strong> maior rendimento tributável mensal sem imposto.</p>
-      <ul>
-        <li>Até abril de 2023: o limite da faixa isenta da tabela.</li>
-        <li>De maio de 2023 a dezembro de 2025: o limite da tabela mais o desconto simplificado mensal.</li>
-        <li>A partir de janeiro de 2026: R$ 5.000,00, pela tabela de redução da Lei 15.270/2025.</li>
-      </ul>
-      <p><strong>Limite de 1996 corrigido:</strong> R$ 900,00 de janeiro de 1996 corrigidos pelo IPCA acumulado até o mês anterior. A diferença entre as duas linhas é quanto a isenção precisaria subir para repor a inflação desde 1996.</p>
-      <p>Na tabela por governo, o período vai do mês anterior à posse até o último mês no cargo. Para o primeiro mandato de FHC, começa em janeiro de 1996, primeira tabela em reais.</p>
-      <div class="tabela-rolagem"><table id="tabela-ir"></table></div>
+        <h2 id="ir">Tabela do Imposto de Renda</h2>
+        <p><strong>Isenção efetiva:</strong> maior rendimento tributável mensal sem imposto.</p>
+        <ul>
+          <li>Até abril de 2023: o limite da faixa isenta da tabela.</li>
+          <li>De maio de 2023 a dezembro de 2025: o limite da tabela mais o desconto simplificado mensal.</li>
+          <li>A partir de janeiro de 2026: R$ 5.000,00, pela tabela de redução da Lei 15.270/2025.</li>
+        </ul>
+        <p><strong>Limite de 1996 corrigido:</strong> R$ 900,00 de janeiro de 1996 corrigidos pelo IPCA acumulado até o mês anterior. A diferença entre as duas linhas é quanto a isenção precisaria subir para repor a inflação desde 1996.</p>
+        <p>Na tabela por governo, o período vai do mês anterior à posse até o último mês no cargo. Para o primeiro mandato de FHC, começa em janeiro de 1996, primeira tabela em reais.</p>
+        <div class="tabela-rolagem"><table id="tabela-ir"></table></div>
 
-      <h2 id="limitacoes">Limitações conhecidas</h2>
-      <ul>
-        <li>A arrecadação por tributo começa em 2000: não há dados de 1995 a 1999 nesta base.</li>
-        <li>No arquivo da Receita, a receita previdenciária e as receitas de outros órgãos de dezembro de 2025 repetem os valores de fevereiro de 2026 em todas as UFs. O total oficial de dezembro de 2025 divulgado pela Receita foi de R$ 292,7 bilhões; o arquivo soma R$ 261,7 bilhões. A série comparável não usa essas rubricas; o contador e a composição usam e ficam subestimados nesse mês. O site mostra um aviso enquanto a fonte não for corrigida.</li>
-        <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
-        <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
-        <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias da ANP no país ou no estado. Na sua cidade os preços podem ser diferentes.</li>
-        <li>O contador e a lista da composição da arrecadação mostram só tributos federais. Os impostos dos estados (ICMS, IPVA e ITCMD) aparecem à parte, com até três meses de atraso em relação aos federais. O total das prefeituras do país é anual e só muda quando o Tesouro publica um novo boletim, uma vez por ano. O FGTS não está no site.</li>
-        <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
-      </ul>
+        <h2 id="limitacoes">Limitações conhecidas</h2>
+        <ul>
+          <li>A arrecadação por tributo começa em 2000: não há dados de 1995 a 1999 nesta base.</li>
+          <li>No arquivo da Receita, a receita previdenciária e as receitas de outros órgãos de dezembro de 2025 repetem os valores de fevereiro de 2026 em todas as UFs. O total oficial de dezembro de 2025 divulgado pela Receita foi de R$ 292,7 bilhões; o arquivo soma R$ 261,7 bilhões. A série comparável não usa essas rubricas; o contador e a composição usam e ficam subestimados nesse mês. O site mostra um aviso enquanto a fonte não for corrigida.</li>
+          <li>O valor de R$ 900,00 da isenção do IR de 1996 a 2000 vem da Lei 9.250/1995. A página da Receita só lista tabelas a partir do ano-calendário 2001, com o mesmo valor; o texto da lei não pôde ser conferido automaticamente nesta versão.</li>
+          <li>O PIB mensal é uma estimativa do Banco Central e pode ser revisado.</li>
+          <li>Os preços de alimentos vêm só das capitais pesquisadas pelo DIEESE, e os de combustíveis são médias da ANP no país ou no estado. Na sua cidade os preços podem ser diferentes.</li>
+          <li>O contador e a lista da composição da arrecadação mostram só tributos federais. Os impostos dos estados (ICMS, IPVA e ITCMD) aparecem à parte, com até três meses de atraso em relação aos federais. O total das prefeituras do país é anual e só muda quando o Tesouro publica um novo boletim, uma vez por ano. O FGTS não está no site.</li>
+          <li>A arrecadação federal por UF não é usada para comparar estados: o tributo é registrado onde a empresa tem sede, o que concentra valores em poucos estados.</li>
+        </ul>
 
-      <h2 id="seguranca">Privacidade e segurança</h2>
-      <p>O site é composto só de arquivos estáticos. Ele não usa cookies, não tem login, não coleta dados pessoais e não carrega nada de outros domínios. Os dados são coletados e validados num servidor separado, e o site recebe apenas o arquivo final já pronto.</p>
-    </article>
+        <h2 id="seguranca">Privacidade e segurança</h2>
+        <p>O site é composto só de arquivos estáticos. Ele não usa cookies, não tem login, não coleta dados pessoais e não carrega nada de outros domínios. Os dados são coletados e validados num servidor separado, e o site recebe apenas o arquivo final já pronto.</p>
+      </article>
+    </div>
   </main>
 
   <footer class="rodape">

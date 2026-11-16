@@ -3,6 +3,7 @@
 import { carregarPainel, ehLinkSeguro } from './dados.js';
 import { preencherTabela } from './graficos.js';
 import * as f from './formato.js';
+import { montarIndice, acompanharLeitura } from './indice.js';
 
 async function iniciar() {
   let d;
@@ -60,4 +61,14 @@ async function iniciar() {
   definir('atualizado-em', f.dataDeTimestamp(d.gerado_em));
 }
 
+// Índice dos tópicos (cada h2 da página), que aparece ao lado em tela larga.
+function iniciarIndice() {
+  const nav = document.getElementById('indice');
+  const titulos = [...document.querySelectorAll('.texto h2[id]')];
+  if (!nav || !titulos.length) return;
+  montarIndice(nav, [{ titulo: 'Nesta página', links: titulos.map((h) => ({ texto: h.textContent, href: `#${h.id}` })) }]);
+  acompanharLeitura([...nav.querySelectorAll('a')], titulos, nav);
+}
+
+iniciarIndice();
 iniciar();

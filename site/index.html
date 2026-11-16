@@ -160,625 +160,632 @@
       </nav>
     </div>
 
-    <section id="orcamento" class="bloco bloco-dados" aria-labelledby="orcamento-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="orcamento-titulo">O salário dá para viver?</h2>
-      <!-- No computador, resultado e conta lado a lado: quem troca um valor vê a sobra mudar sem rolar a página. -->
-      <div class="orc-grade">
-        <div class="orc-painel">
-          <div class="resumo orc-resumo" data-campo="orc-resumo"></div>
-          <div class="orc-barra" id="orc-barra" role="img"></div>
-          <ul class="orc-legenda" id="orc-legenda"></ul>
-          <div class="filtros">
-            <label class="campo largo"><span>Cidade</span>
-              <select id="orc-cidade" data-cidade></select>
-            </label>
-            <label class="campo largo"><span>Renda da casa</span>
-              <select id="orc-renda"></select>
-            </label>
-            <label class="campo largo" id="orc-renda-outra-caixa" hidden><span>Renda em reais</span>
-              <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
-            </label>
-            <label class="campo"><span>Adultos</span>
-              <select id="orc-adultos">
-                <option value="1">1</option>
-                <option value="2" selected>2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </label>
-            <label class="campo"><span>Crianças</span>
-              <select id="orc-criancas">
-                <option value="0" selected>0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </label>
-          </div>
-        </div>
-        <div class="orc-contas">
-          <h3>O básico da casa, por mês</h3>
-          <p class="nota">São valores médios. Toque num valor para trocar pelo da sua casa.</p>
-          <ul class="orc-lista" id="orc-lista"></ul>
-          <dl class="conta">
-            <div><dt>Renda da casa</dt><dd data-campo="orc-renda-total">sem dado</dd><dd></dd></div>
-            <div><dt>Básico da casa</dt><dd data-campo="orc-total">sem dado</dd><dd data-campo="orc-total-parte"></dd></div>
-            <div class="conta-fim"><dt data-campo="orc-sobra-rotulo">Sobra</dt><dd data-campo="orc-sobra">sem dado</dd><dd data-campo="orc-sobra-parte"></dd></div>
-          </dl>
-          <p class="nota orc-fonte-curta">Aluguel, luz, água e gás: média das famílias com a mesma renda na pesquisa de orçamentos do IBGE, corrigida pela inflação de cada conta.</p>
-          <button type="button" class="botao" id="orc-restaurar" hidden>Voltar aos valores médios</button>
-        </div>
-      </div>
-      <h3>Quanto o DIEESE diz que seria preciso?</h3>
-      <div class="resumo" data-campo="orc-digno"></div>
-      <div class="comp-trilho orc-cobre" aria-hidden="true"><div class="comp-barra" id="orc-cobre-barra"></div></div>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que fica de fora desta conta?</h3>
-          <p>A conta mostra só o básico da casa: comida, aluguel, luz, água e gás. Ficam de fora transporte, remédios, roupas, escola, internet, telefone e lazer, que o DIEESE inclui no salário necessário. Os valores são médias do país; na sua cidade podem ser bem diferentes, por isso cada campo pode ser trocado pelo valor da sua casa.</p>
-          <h3>De onde vem cada valor?</h3>
-          <p>Comida: cesta básica do DIEESE, uma por adulto e meia por criança. Aluguel: há duas referências. A primeira é o valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF do IBGE (para quem tem casa própria, o IBGE estima quanto aquela casa custaria de aluguel). A segunda é o preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A primeira mostra como vivem as famílias com essa renda; a segunda, quanto custa alugar um apartamento anunciado numa cidade grande. Luz, água e gás: quanto as famílias da mesma faixa de renda gastavam por mês na Pesquisa de Orçamentos Familiares do IBGE (2017-2018), corrigido pela inflação de cada conta. É uma média: inclui famílias que pagam tarifa social e famílias maiores ou menores.</p>
-          <h3>Como o DIEESE calcula o salário necessário?</h3>
-          <p data-campo="orc-dieese-familia"></p>
-          <p>O DIEESE pega a cesta básica mais cara entre as capitais e multiplica por 3, porque considera uma família de 2 adultos e 2 crianças, e duas crianças comem como um adulto. Depois divide por 0,3571, porque uma pesquisa de orçamento do próprio DIEESE (São Paulo, 1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outras famílias, usamos a mesma conta com o número de pessoas escolhido.</p>
-          <button type="button" class="botao" data-baixar="orcamento">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), Fipe (Índice FipeZAP de aluguel), IBGE (POF 2017-2018 e inflação por item), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
-    </section>
-
-    <section id="compras" class="bloco bloco-dados" aria-labelledby="compras-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="compras-titulo">Com um salário mínimo, quanto dá para comprar?</h2>
-      <div class="resumo" data-campo="compras-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Cidade</span>
-          <select id="compras-cidade" data-cidade></select>
-        </label>
-        <label class="campo"><span>Comparar com</span>
-          <select id="compras-ano"></select>
-        </label>
-        <fieldset class="campo escolhas largo">
-          <legend>O que comparar</legend>
-          <div class="escolhas-lista" id="compras-itens"></div>
-        </fieldset>
-      </div>
-      <div class="comparacao-caixa" id="compras-comparacao"></div>
-      <dl class="numeros" id="compras-numeros"></dl>
-      <h3>Mês a mês</h3>
-      <div id="grafico-compras"></div>
-      <p class="como-ler">Cada ponto é quanto um salário mínimo comprava naquele mês, com o preço e o salário daquele mesmo mês. Quanto mais alto, mais o salário comprava. Toque no gráfico para ver cada mês.</p>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>Como ler o gráfico</h3>
-          <p>Cada ponto divide o salário mínimo daquele mês pelo preço daquele mesmo mês. Como os dois são da mesma época, a inflação não distorce a comparação: se os preços sobem mais que o salário, a linha cai.</p>
-          <h3>De onde vêm esses preços?</h3>
-          <p data-campo="compras-nota-fonte"></p>
-          <button type="button" class="botao" data-baixar="compras">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: DIEESE (alimentos) e ANP (gasolina e gás), que publicam os preços uma vez por mês, no começo do mês seguinte. O salário mínimo muda uma vez por ano, em janeiro.</p>
-    </section>
-
-    <section id="combustiveis" class="bloco bloco-dados" aria-labelledby="combustiveis-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="combustiveis-titulo">Quanto custa abastecer e comprar gás de cozinha?</h2>
-      <div class="resumo" data-campo="combustiveis-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Cidade</span>
-          <select id="combustiveis-cidade" data-cidade></select>
-        </label>
-        <label class="campo"><span>Comparar com</span>
-          <select id="combustiveis-ano"></select>
-        </label>
-        <fieldset class="campo escolhas largo">
-          <legend>Combustível</legend>
-          <div class="escolhas-lista" id="combustiveis-itens"></div>
-        </fieldset>
-      </div>
-      <div class="comparacao-caixa" id="combustiveis-comparacao"></div>
-      <dl class="numeros" id="combustiveis-numeros"></dl>
-      <h3>Mês a mês</h3>
-      <div id="grafico-combustiveis"></div>
-      <p class="como-ler">Cada ponto mostra quanto o tanque (ou o botijão) levava do salário mínimo naquele mês. Quanto mais baixa a linha, mais fácil era pagar. Toque no gráfico para ver o preço e o salário de cada mês.</p>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>Por que comparar com o salário mínimo?</h3>
-          <p>Um preço de 2001 e um de hoje não podem ser comparados direto, porque o dinheiro mudou de valor. Dividir o preço pelo salário mínimo da mesma época mostra quanto do salário ele levava, e isso pode ser comparado entre épocas. É a conta de quem ganha o mínimo: se o tanque leva uma parte menor do salário, ficou mais fácil pagar.</p>
-          <button type="button" class="botao" data-baixar="combustiveis">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: ANP, Levantamento de Preços de Combustíveis. A ANP pesquisa os postos toda semana; a média do mês sai no começo do mês seguinte. Com uma cidade escolhida, o preço é a média dos postos do estado dela.</p>
-    </section>
-
-    <section id="salario" class="bloco bloco-dados" aria-labelledby="salario-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="salario-titulo">O salário mínimo vale mais ou menos do que antes?</h2>
-      <div class="resumo" data-campo="sm-resumo"></div>
-      <div class="filtros">
-        <label class="campo" id="sm-ano-caixa"><span>Comparar com</span>
-          <select id="sm-ano"></select>
-        </label>
-      </div>
-      <div class="comparacao-caixa" id="sm-comparacao"></div>
-      <dl class="numeros" id="numeros-salario"></dl>
-      <h3>Ao longo do tempo</h3>
-      <div class="filtros">
-        <fieldset class="campo largo">
-          <legend>Mostrar</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="sm-regua" value="real" checked><span>Em dinheiro de hoje</span></label>
-            <label><input type="radio" name="sm-regua" value="dolar"><span>Em dólar</span></label>
-            <label><input type="radio" name="sm-regua" value="necessario"><span>Com o necessário</span></label>
-          </div>
-        </fieldset>
-      </div>
-      <p class="nota" data-campo="sm-explicacao"></p>
-      <div id="grafico-salario"></div>
-      <details class="tabela-dados">
-        <summary>Comparação entre governos</summary>
-        <div class="tabela-rolagem"><table id="tabela-salario-governos"></table></div>
-        <p class="nota">Aumento por ano, sem a inflação: em média, quanto o salário subiu acima dos preços a cada ano de cada governo. O ano em curso é comparado com os mesmos meses do ano anterior.</p>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que é o "salário mínimo necessário"?</h3>
-          <p>É o valor que o DIEESE calcula todo mês como suficiente para uma família de quatro pessoas (dois adultos e duas crianças) pagar alimentação, moradia, saúde, educação, transporte, roupas, higiene, lazer e previdência, como prevê a Constituição. É uma estimativa do DIEESE, com metodologia própria.</p>
-          <h3>O que é "descontada a inflação"?</h3>
-          <p>Os preços sobem com o tempo. Para saber se o salário de hoje compra mais ou menos do que o de antes, corrigimos os valores antigos pela inflação. Para o salário usamos o INPC, do IBGE, que mede a inflação das famílias de menor renda e é usado nos reajustes do mínimo.</p>
-          <button type="button" class="botao" data-baixar="salario">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: salário mínimo (Banco Central, SGS 1619), INPC (IBGE via Banco Central, SGS 188), dólar (Banco Central, SGS 3698) e salário mínimo necessário (DIEESE). O salário mínimo muda uma vez por ano, em janeiro; a inflação e o valor do DIEESE saem uma vez por mês.</p>
-    </section>
-
-    <section id="ir" class="bloco bloco-dados" aria-labelledby="ir-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="ir-titulo">Quem paga Imposto de Renda?</h2>
-      <div class="resumo" data-campo="ir-resumo"></div>
-      <dl class="numeros" id="numeros-ir"></dl>
-      <div id="grafico-ir"></div>
-      <p class="como-ler">A linha cheia é o maior salário sem imposto em cada época. A tracejada é quanto esse limite valeria se tivesse acompanhado a inflação desde 1996. Quando a tracejada fica acima da cheia, mais gente passa a pagar o imposto sem ter tido aumento real.</p>
-      <details class="tabela-dados">
-        <summary>Correção em cada governo</summary>
-        <div class="tabela-rolagem"><table id="tabela-ir-governos"></table></div>
-        <p class="nota">Cada linha vai do mês anterior à posse até o último mês no cargo (ou o último mês com dado). A comparação começa em janeiro de 1996, primeira tabela do Imposto de Renda em reais.</p>
-      </details>
-      <details class="entenda">
-        <summary>Baixe os dados</summary>
-        <div class="entenda-corpo">
-          <button type="button" class="botao" data-baixar="ir">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: tabelas do IRPF publicadas pela Receita Federal, e IPCA (IBGE). A tabela só muda quando uma lei altera os valores; a inflação sai uma vez por mês.</p>
-    </section>
-
-    <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
-      <p class="tema">Seu bolso</p>
-      <h2 id="dolar-titulo">O dólar está caro ou barato?</h2>
-      <div class="resumo" data-campo="dolar-resumo"></div>
-      <dl class="numeros" id="numeros-dolar"></dl>
-      <div id="grafico-dolar"></div>
-      <p class="como-ler">A linha cheia é a cotação de cada mês. A tracejada é a mesma cotação em dinheiro de hoje, descontada a inflação do Brasil e a dos Estados Unidos. É ela que mostra se o real está mais forte ou mais fraco do que no passado.</p>
-      <details class="entenda">
-        <summary>Baixe os dados</summary>
-        <div class="entenda-corpo">
-          <button type="button" class="botao" data-baixar="dolar">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: dólar comercial, venda, média mensal (Banco Central, SGS 3698), IPCA (IBGE) e inflação dos EUA (U.S. Bureau of Labor Statistics). O dólar muda todo dia, mas o site usa a média de cada mês, que fecha no fim do mês.</p>
-    </section>
-
-    <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
-      <p class="tema">Impostos</p>
-      <h2 id="arrecadacao-titulo">Quanto o governo federal arrecada por ano?</h2>
-      <div class="resumo" data-campo="arrec-resumo"></div>
-      <div class="filtros">
-        <fieldset class="campo largo">
-          <legend>Mostrar</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="arrec-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
-            <label><input type="radio" name="arrec-medida" value="pib"><span>Parte da economia</span></label>
-          </div>
-        </fieldset>
-      </div>
-      <div id="grafico-arrecadacao"></div>
-      <p class="nota" data-campo="arrec-nota"></p>
-      <details class="tabela-dados">
-        <summary>Ver os números por ano</summary>
-        <div class="tabela-rolagem"><table id="tabela-arrecadacao-anual"></table></div>
-      </details>
-      <details class="tabela-dados">
-        <summary>Comparação entre governos</summary>
-        <div class="filtros">
-          <fieldset class="campo largo">
-            <legend>Agrupar por</legend>
-            <div class="segmentos">
-              <label><input type="radio" name="arrec-agrupar" value="mandato" checked><span>Mandato</span></label>
-              <label><input type="radio" name="arrec-agrupar" value="partido"><span>Partido</span></label>
+    <!-- No computador largo, as seções ganham ao lado um índice fixo, montado
+         pelo app.js a partir do menu "Seções". -->
+    <div class="corpo">
+      <nav class="indice" id="indice" aria-label="Nesta página" hidden></nav>
+      <div class="corpo-secoes">
+        <section id="orcamento" class="bloco bloco-dados" aria-labelledby="orcamento-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="orcamento-titulo">O salário dá para viver?</h2>
+          <!-- No computador, resultado e conta lado a lado: quem troca um valor vê a sobra mudar sem rolar a página. -->
+          <div class="orc-grade">
+            <div class="orc-painel">
+              <div class="resumo orc-resumo" data-campo="orc-resumo"></div>
+              <div class="orc-barra" id="orc-barra" role="img"></div>
+              <ul class="orc-legenda" id="orc-legenda"></ul>
+              <div class="filtros">
+                <label class="campo largo"><span>Cidade</span>
+                  <select id="orc-cidade" data-cidade></select>
+                </label>
+                <label class="campo largo"><span>Renda da casa</span>
+                  <select id="orc-renda"></select>
+                </label>
+                <label class="campo largo" id="orc-renda-outra-caixa" hidden><span>Renda em reais</span>
+                  <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
+                </label>
+                <label class="campo"><span>Adultos</span>
+                  <select id="orc-adultos">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </label>
+                <label class="campo"><span>Crianças</span>
+                  <select id="orc-criancas">
+                    <option value="0" selected>0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </label>
+              </div>
             </div>
-          </fieldset>
-          <label class="opcao largo"><input type="checkbox" id="arrec-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
-        </div>
-        <div class="tabela-rolagem"><table id="tabela-arrecadacao-governos"></table></div>
-        <p class="nota">Cada ano conta para quem governou a maior parte dele. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior. A opção acima tira esse ano da conta de todos ao mesmo tempo. A arrecadação também sobe e desce com a economia, então a tabela mostra o que aconteceu no período, não o mérito de quem governou.</p>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que é "parte da economia"?</h3>
-          <p>É a comparação com o PIB, a soma de tudo o que o país produz em um ano. Dizer que a arrecadação foi 16% significa que, de cada R$ 100 produzidos no país, R$ 16 foram pagos nesses impostos e contribuições.</p>
-          <h3>Por que esta conta deixa o INSS de fora?</h3>
-          <p>Para comparar anos de forma justa, usamos só o que aparece na base da Receita Federal desde 2000. A contribuição ao INSS só passou a ser registrada nessa base em 2005, e as receitas de outros órgãos em 2010. Se entrassem na conta, os anos seguintes pareceriam maiores só porque a forma de registrar mudou.</p>
-          <button type="button" class="botao" data-baixar="arrecadacao">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: Receita Federal (arrecadação), IBGE via Banco Central (IPCA, SGS 433) e Banco Central (PIB mensal, SGS 4380). Todos saem uma vez por mês. O ano em curso só fecha quando a Receita publica dezembro.</p>
-    </section>
-
-    <section id="composicao" class="bloco bloco-dados" aria-labelledby="composicao-titulo">
-      <p class="tema">Impostos</p>
-      <h2 id="composicao-titulo">De onde vem o dinheiro dos impostos federais?</h2>
-      <div class="resumo" data-campo="composicao-resumo"></div>
-      <ul class="barras" id="lista-composicao"></ul>
-      <p class="nota">Cada barra mostra a parte do total. A lista tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. O FGTS fica de fora: vai para a conta do trabalhador e não conta como imposto.</p>
-      <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">sem dado</span>.</p>
-      <div id="composicao-estados-caixa" hidden>
-        <h3>E os impostos de estados e prefeituras?</h3>
-        <div class="resumo" data-campo="composicao-estados"></div>
-        <p class="nota"><a href="#estados">Veja quanto o seu estado e a sua capital arrecadam</a>.</p>
-        <p class="fonte">Fontes: Tesouro Nacional. Estados: Relatório Resumido da Execução Orçamentária de cada estado (anexo 3, no Siconfi), valores antes dos repasses às prefeituras. Prefeituras e total do país: Estimativa da Carga Tributária Bruta do Governo Geral, publicada uma vez por ano.</p>
-      </div>
-    </section>
-
-    <section id="gastos" class="bloco bloco-dados" aria-labelledby="gastos-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="gastos-titulo">Para onde vai o dinheiro do governo federal?</h2>
-      <div class="resumo" data-campo="gastos-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Ano</span>
-          <select id="gastos-ano"></select>
-        </label>
-      </div>
-      <ul class="barras" id="lista-gastos"></ul>
-      <h3>Comparar áreas ao longo dos anos</h3>
-      <div class="filtros">
-        <label class="campo"><span>Área</span>
-          <select id="gastos-area-a"></select>
-        </label>
-        <label class="campo"><span>Comparar com</span>
-          <select id="gastos-area-b"></select>
-        </label>
-        <fieldset class="campo largo">
-          <legend>Mostrar</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="gastos-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
-            <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
+            <div class="orc-contas">
+              <h3>O básico da casa, por mês</h3>
+              <p class="nota">São valores médios. Toque num valor para trocar pelo da sua casa.</p>
+              <ul class="orc-lista" id="orc-lista"></ul>
+              <dl class="conta">
+                <div><dt>Renda da casa</dt><dd data-campo="orc-renda-total">sem dado</dd><dd></dd></div>
+                <div><dt>Básico da casa</dt><dd data-campo="orc-total">sem dado</dd><dd data-campo="orc-total-parte"></dd></div>
+                <div class="conta-fim"><dt data-campo="orc-sobra-rotulo">Sobra</dt><dd data-campo="orc-sobra">sem dado</dd><dd data-campo="orc-sobra-parte"></dd></div>
+              </dl>
+              <p class="nota orc-fonte-curta">Aluguel, luz, água e gás: média das famílias com a mesma renda na pesquisa de orçamentos do IBGE, corrigida pela inflação de cada conta.</p>
+              <button type="button" class="botao" id="orc-restaurar" hidden>Voltar aos valores médios</button>
+            </div>
           </div>
-        </fieldset>
-      </div>
-      <div class="resumo" data-campo="gastos-comparacao"></div>
-      <div id="grafico-gastos"></div>
-      <p class="como-ler">Cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que é a "rolagem da dívida"?</h3>
-          <p>Quando uma parte da dívida pública vence, o governo pode pagar com dinheiro do orçamento ou emitir dívida nova para pagar a velha. Essa segunda forma é a rolagem. Ela aparece no orçamento como gasto, mas não é dinheiro que vai para serviços ou para as pessoas: troca uma dívida por outra. Por isso fica fora da conta "de cada R$ 100".</p>
-          <h3>Que gasto é esse?</h3>
-          <p>Todo gasto público passa por três etapas: empenho (o governo reserva o dinheiro), liquidação (o serviço foi entregue e o valor passa a ser devido) e pagamento. O site usa a liquidação, que mostra o que foi de fato executado no ano. Os números são da União; estados e municípios gastam com saúde e educação também, com dinheiro próprio e com os repasses federais.</p>
-          <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
-    </section>
+          <h3>Quanto o DIEESE diz que seria preciso?</h3>
+          <div class="resumo" data-campo="orc-digno"></div>
+          <div class="comp-trilho orc-cobre" aria-hidden="true"><div class="comp-barra" id="orc-cobre-barra"></div></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que fica de fora desta conta?</h3>
+              <p>A conta mostra só o básico da casa: comida, aluguel, luz, água e gás. Ficam de fora transporte, remédios, roupas, escola, internet, telefone e lazer, que o DIEESE inclui no salário necessário. Os valores são médias do país; na sua cidade podem ser bem diferentes, por isso cada campo pode ser trocado pelo valor da sua casa.</p>
+              <h3>De onde vem cada valor?</h3>
+              <p>Comida: cesta básica do DIEESE, uma por adulto e meia por criança. Aluguel: há duas referências. A primeira é o valor médio de aluguel das moradias das famílias da mesma faixa de renda na POF do IBGE (para quem tem casa própria, o IBGE estima quanto aquela casa custaria de aluguel). A segunda é o preço médio por m² pedido em anúncios de apartamentos nas cidades do Índice FipeZAP, vezes 40 m². A primeira mostra como vivem as famílias com essa renda; a segunda, quanto custa alugar um apartamento anunciado numa cidade grande. Luz, água e gás: quanto as famílias da mesma faixa de renda gastavam por mês na Pesquisa de Orçamentos Familiares do IBGE (2017-2018), corrigido pela inflação de cada conta. É uma média: inclui famílias que pagam tarifa social e famílias maiores ou menores.</p>
+              <h3>Como o DIEESE calcula o salário necessário?</h3>
+              <p data-campo="orc-dieese-familia"></p>
+              <p>O DIEESE pega a cesta básica mais cara entre as capitais e multiplica por 3, porque considera uma família de 2 adultos e 2 crianças, e duas crianças comem como um adulto. Depois divide por 0,3571, porque uma pesquisa de orçamento do próprio DIEESE (São Paulo, 1994/95) mostrou que a comida é 35,71% dos gastos das famílias de baixa renda. Para outras famílias, usamos a mesma conta com o número de pessoas escolhido.</p>
+              <button type="button" class="botao" data-baixar="orcamento">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: DIEESE (cesta básica e salário necessário), Fipe (Índice FipeZAP de aluguel), IBGE (POF 2017-2018 e inflação por item), ANP (gás) e Banco Central (salário mínimo). Os valores mudam quando cada fonte publica, em geral uma vez por mês.</p>
+        </section>
 
-    <section id="ministerios" class="bloco bloco-dados" aria-labelledby="ministerios-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="ministerios-titulo">Quanto cada ministério gasta?</h2>
-      <div class="resumo" data-campo="ministerios-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Ano</span>
-          <select id="ministerios-ano"></select>
-        </label>
-      </div>
-      <ul class="barras" id="ministerios-lista"></ul>
-      <h3>Um ministério ao longo dos anos</h3>
-      <div class="filtros">
-        <label class="campo largo"><span>Ministério</span>
-          <select id="ministerios-orgao"></select>
-        </label>
-      </div>
-      <p class="nota" data-campo="ministerios-explicacao"></p>
-      <div id="grafico-ministerios"></div>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>Que gasto é esse?</h3>
-          <p>É o valor liquidado: o serviço ou a compra foi entregue e o pagamento passou a ser devido. É a mesma etapa usada em "Para onde vai o dinheiro", que mostra o gasto por área; aqui ele aparece por ministério, como o governo se organiza.</p>
-          <h3>Por que a dívida fica de fora?</h3>
-          <p>Juros e pagamento da dívida pública são feitos pelo Ministério da Fazenda e somam centenas de bilhões por mês, a maior parte trocando dívida velha por nova. Se entrassem, a Fazenda pareceria o ministério que mais gasta com serviços. Por isso aparecem à parte.</p>
-          <h3>Por que alguns ministérios têm valores tão grandes?</h3>
-          <p>A Previdência paga as aposentadorias e pensões do INSS. Saúde e Educação repassam boa parte do dinheiro a estados e prefeituras, que atendem a população. A Fazenda faz os repasses de impostos que a Constituição manda dividir com estados e municípios. A lista mostra quanto de cada ministério foi repassado.</p>
-          <h3>Ministérios mudam de nome</h3>
-          <p>Ministérios são criados, juntados e separados de um governo para outro. O gráfico segue o código do órgão no sistema do governo, e a dica de cada ano mostra o nome que ele tinha naquele ano.</p>
-          <button type="button" class="botao" data-baixar="ministerios">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), execução da despesa, arquivos mensais desde 2014. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="ministerios-atualizado">sem dado</span>.</p>
-    </section>
-
-    <section id="cartao" class="bloco bloco-dados" aria-labelledby="cartao-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="cartao-titulo">Quanto o governo federal gasta no cartão corporativo?</h2>
-      <p class="intro">O cartão de pagamento do governo federal é usado para despesas pequenas ou que não podem esperar o processo normal de compra. Cada lançamento fica registrado no Portal da Transparência.</p>
-      <div class="resumo" data-campo="cartao-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Ano</span>
-          <select id="cartao-ano"></select>
-        </label>
-      </div>
-      <h3>Quem mais usou</h3>
-      <ul class="barras" id="cartao-lista"></ul>
-      <h3>Ano a ano</h3>
-      <div id="grafico-cartao"></div>
-      <p class="como-ler">A linha cheia é o total gasto no ano; a tracejada, a parte sob sigilo. Em dinheiro de hoje.</p>
-      <details class="tabela-dados">
-        <summary>Comparação entre governos</summary>
-        <div class="tabela-rolagem"><table id="tabela-cartao-governos"></table></div>
-        <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que é o gasto "sob sigilo"?</h3>
-          <p>São lançamentos que o Portal da Transparência mostra só com o valor, marcados como "informações protegidas por sigilo", sem dizer o que foi comprado nem onde. O site soma esses valores no total e mostra quanto eles representam em cada órgão.</p>
-          <h3>Por que há saques em dinheiro?</h3>
-          <p>O cartão permite saque em dinheiro, com regras próprias. Os saques aparecem separados porque o registro mostra só o saque, não com o que o dinheiro foi gasto.</p>
-          <h3>Gasto alto é sinal de problema?</h3>
-          <p>Não necessariamente. O valor depende do tamanho de cada órgão e do tipo de trabalho que ele faz. Os números mostram quanto foi gasto, não se o gasto foi correto.</p>
-          <button type="button" class="botao" data-baixar="cartao">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), cartão de pagamento do governo federal, arquivos mensais desde 2013. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="cartao-atualizado">sem dado</span>.</p>
-    </section>
-
-    <section id="viagens" class="bloco bloco-dados" aria-labelledby="viagens-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="viagens-titulo">Quanto o governo federal gasta com viagens a serviço?</h2>
-      <div class="resumo" data-campo="viagens-resumo"></div>
-      <div class="filtros">
-        <label class="campo"><span>Ano</span>
-          <select id="viagens-ano"></select>
-        </label>
-      </div>
-      <h3>Por ministério</h3>
-      <ul class="barras" id="viagens-lista"></ul>
-      <h3>Viagens de ministros</h3>
-      <div class="resumo resumo-menor" data-campo="viagens-ministros-nota"></div>
-      <ol class="ranking" id="viagens-ministros"></ol>
-      <h3>Ano a ano</h3>
-      <div id="grafico-viagens"></div>
-      <details class="tabela-dados">
-        <summary>Comparação entre governos</summary>
-        <div class="tabela-rolagem"><table id="tabela-viagens-governos"></table></div>
-        <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que entra na conta?</h3>
-          <p>Diárias (o dinheiro para hospedagem e alimentação durante a viagem), passagens e outros gastos da viagem, menos o que o servidor devolveu. Entram todas as viagens de servidores e convidados do governo federal registradas no Portal da Transparência no ano.</p>
-          <h3>Quem são os "ministros" da lista?</h3>
-          <p>As pessoas que viajaram ocupando cargo de natureza especial: os ministros de Estado e outros cargos do mesmo nível. O Portal não traz o cargo "ministro de Estado" em um campo próprio; por isso a lista usa esse critério, igual para todos os anos. Viagens sob sigilo não entram na lista.</p>
-          <h3>O que é a parte sob sigilo?</h3>
-          <p>Viagens em que o Portal esconde quem viajou e para onde, como as ligadas a investigações e à segurança. O valor entra no total.</p>
-          <button type="button" class="botao" data-baixar="viagens">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), viagens a serviço, um arquivo por ano desde 2015. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="viagens-atualizado">sem dado</span>.</p>
-    </section>
-
-    <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="contas-titulo">As contas do governo federal fecham?</h2>
-      <div class="resumo" data-campo="contas-resumo"></div>
-      <div class="filtros">
-        <fieldset class="campo largo">
-          <legend>O que mostrar</legend>
-          <div class="segmentos segmentos-quatro">
-            <label><input type="radio" name="contas-visao" value="primario" checked><span>Sem os juros</span></label>
-            <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
-            <label><input type="radio" name="contas-visao" value="nominal"><span>Com os juros</span></label>
-            <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
+        <section id="compras" class="bloco bloco-dados" aria-labelledby="compras-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="compras-titulo">Com um salário mínimo, quanto dá para comprar?</h2>
+          <div class="resumo" data-campo="compras-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Cidade</span>
+              <select id="compras-cidade" data-cidade></select>
+            </label>
+            <label class="campo"><span>Comparar com</span>
+              <select id="compras-ano"></select>
+            </label>
+            <fieldset class="campo escolhas largo">
+              <legend>O que comparar</legend>
+              <div class="escolhas-lista" id="compras-itens"></div>
+            </fieldset>
           </div>
-        </fieldset>
-        <fieldset class="campo largo" id="contas-medida-caixa">
-          <legend>Medida</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte da economia</span></label>
-            <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
+          <div class="comparacao-caixa" id="compras-comparacao"></div>
+          <dl class="numeros" id="compras-numeros"></dl>
+          <h3>Mês a mês</h3>
+          <div id="grafico-compras"></div>
+          <p class="como-ler">Cada ponto é quanto um salário mínimo comprava naquele mês, com o preço e o salário daquele mesmo mês. Quanto mais alto, mais o salário comprava. Toque no gráfico para ver cada mês.</p>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Como ler o gráfico</h3>
+              <p>Cada ponto divide o salário mínimo daquele mês pelo preço daquele mesmo mês. Como os dois são da mesma época, a inflação não distorce a comparação: se os preços sobem mais que o salário, a linha cai.</p>
+              <h3>De onde vêm esses preços?</h3>
+              <p data-campo="compras-nota-fonte"></p>
+              <button type="button" class="botao" data-baixar="compras">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: DIEESE (alimentos) e ANP (gasolina e gás), que publicam os preços uma vez por mês, no começo do mês seguinte. O salário mínimo muda uma vez por ano, em janeiro.</p>
+        </section>
+
+        <section id="combustiveis" class="bloco bloco-dados" aria-labelledby="combustiveis-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="combustiveis-titulo">Quanto custa abastecer e comprar gás de cozinha?</h2>
+          <div class="resumo" data-campo="combustiveis-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Cidade</span>
+              <select id="combustiveis-cidade" data-cidade></select>
+            </label>
+            <label class="campo"><span>Comparar com</span>
+              <select id="combustiveis-ano"></select>
+            </label>
+            <fieldset class="campo escolhas largo">
+              <legend>Combustível</legend>
+              <div class="escolhas-lista" id="combustiveis-itens"></div>
+            </fieldset>
           </div>
-        </fieldset>
-      </div>
-      <p class="nota" data-campo="contas-explicacao"></p>
-      <div id="grafico-contas"></div>
-      <details class="tabela-dados">
-        <summary>Comparação entre governos</summary>
-        <div class="tabela-rolagem"><table id="tabela-contas-governos"></table></div>
-        <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou.</p>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que são esses resultados?</h3>
-          <p>"Sem os juros" (o resultado primário) é a diferença entre o que o governo arrecadou e o que gastou com tudo, menos os juros da dívida. "Com os juros" (o resultado nominal) inclui os juros. Quando o resultado é negativo, faltou dinheiro (é o déficit) e o governo precisa pegar emprestado, e a dívida cresce; quando é positivo, sobrou (superávit). Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
-          <h3>Por que os juros aqui são maiores do que em "Para onde vai o dinheiro"?</h3>
-          <p>Aqui o Banco Central conta os juros que a dívida rendeu no ano, pagos ou somados à própria dívida, e inclui o Banco Central. Em "Para onde vai o dinheiro" entra só o que o governo pagou de fato no ano. As duas contas estão certas; medem coisas diferentes.</p>
-          <h3>Por que comparar com tudo o que o país produz (o PIB)?</h3>
-          <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
-          <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
-    </section>
+          <div class="comparacao-caixa" id="combustiveis-comparacao"></div>
+          <dl class="numeros" id="combustiveis-numeros"></dl>
+          <h3>Mês a mês</h3>
+          <div id="grafico-combustiveis"></div>
+          <p class="como-ler">Cada ponto mostra quanto o tanque (ou o botijão) levava do salário mínimo naquele mês. Quanto mais baixa a linha, mais fácil era pagar. Toque no gráfico para ver o preço e o salário de cada mês.</p>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Por que comparar com o salário mínimo?</h3>
+              <p>Um preço de 2001 e um de hoje não podem ser comparados direto, porque o dinheiro mudou de valor. Dividir o preço pelo salário mínimo da mesma época mostra quanto do salário ele levava, e isso pode ser comparado entre épocas. É a conta de quem ganha o mínimo: se o tanque leva uma parte menor do salário, ficou mais fácil pagar.</p>
+              <button type="button" class="botao" data-baixar="combustiveis">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: ANP, Levantamento de Preços de Combustíveis. A ANP pesquisa os postos toda semana; a média do mês sai no começo do mês seguinte. Com uma cidade escolhida, o preço é a média dos postos do estado dela.</p>
+        </section>
 
-    <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
-      <p class="tema">Contas do governo</p>
-      <h2 id="estados-titulo">Como estão as contas do seu estado?</h2>
-      <div class="filtros">
-        <label class="campo largo"><span>Estado</span>
-          <select id="estados-uf"></select>
-        </label>
-      </div>
-      <div class="resumo" data-campo="estados-resumo"></div>
-
-      <div id="estados-detalhe">
-      <h3>Dívida e folha de pagamento, ano a ano</h3>
-      <div class="filtros">
-        <fieldset class="campo largo">
-          <legend>Mostrar</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
-            <label><input type="radio" name="estados-visao" value="pessoal"><span>Folha de pagamento</span></label>
+        <section id="salario" class="bloco bloco-dados" aria-labelledby="salario-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="salario-titulo">O salário mínimo vale mais ou menos do que antes?</h2>
+          <div class="resumo" data-campo="sm-resumo"></div>
+          <div class="filtros">
+            <label class="campo" id="sm-ano-caixa"><span>Comparar com</span>
+              <select id="sm-ano"></select>
+            </label>
           </div>
-        </fieldset>
-      </div>
-      <p class="nota" data-campo="estados-explicacao"></p>
-      <div id="grafico-estados"></div>
-
-      <div id="estados-receita-caixa">
-        <h3>Impostos do estado e da capital, ano a ano</h3>
-        <div class="filtros">
-          <label class="campo largo"><span>Imposto</span>
-            <select id="estados-tributo"></select>
-          </label>
-        </div>
-        <p class="nota" data-campo="estados-receita-explicacao"></p>
-        <div id="grafico-estados-receita"></div>
-      </div>
-      </div>
-
-      <h3>Todos os estados</h3>
-      <div class="filtros">
-        <label class="campo"><span>Ano</span>
-          <select id="estados-ano"></select>
-        </label>
-      </div>
-      <div class="resumo" data-campo="estados-todos"></div>
-      <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>O que conta como "o que entra" no ano?</h3>
-          <p>É a receita corrente líquida: impostos, repasses da União e outras receitas do dia a dia, menos a parte que o estado é obrigado a repassar às prefeituras e outras deduções da lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para os limites. A dívida já desconta o dinheiro que o estado tem em caixa.</p>
-          <h3>O que acontece perto ou acima do limite?</h3>
-          <p>"Perto do limite" quer dizer acima de 90% dele. Nesse ponto, o tribunal de contas avisa o governo.</p>
-          <p>Folha de pagamento: acima de 95% do limite (o "limite prudencial", R$ 46,55 de cada R$ 100 na maioria dos estados), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem oito meses para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima tem até 2032 para voltar aos poucos (Lei Complementar 178).</p>
-          <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem um ano para voltar. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
-          <h3>O que é cada imposto?</h3>
-          <p>Do estado: ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet, e vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
-          <p>Da prefeitura: ISS é o imposto sobre serviços, do salão de beleza ao hospital e ao banco, e também vem embutido no preço. IPTU é o imposto anual sobre casas, apartamentos e terrenos na cidade. ITBI é o imposto pago na compra de um imóvel. Em Brasília, quem cobra esses três é o governo do Distrito Federal.</p>
-          <p>Os valores são o total arrecadado. Um quarto do ICMS e metade do IPVA do estado vão depois para as prefeituras. Com a reforma tributária, ICMS e ISS vão ser substituídos aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
-          <h3>De onde vêm os números?</h3>
-          <p>Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
-          <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
-          <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos de estados e capitais</button>
-        </div>
-      </details>
-      <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
-    </section>
-
-    <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">
-      <p class="tema">Congresso</p>
-      <h2 id="cota-titulo">Quanto deputados e senadores gastam da cota?</h2>
-      <p class="intro">A cota parlamentar paga despesas do mandato: passagens, escritório no estado, combustível, divulgação e outras. O parlamentar gasta e pede o reembolso. Usar a cota dentro do limite é permitido por lei, e o limite muda de estado para estado, por causa da distância até Brasília.</p>
-      <div class="filtros">
-        <fieldset class="campo largo">
-          <legend>Casa</legend>
-          <div class="segmentos">
-            <label><input type="radio" name="cota-casa" value="camara" checked><span>Câmara</span></label>
-            <label><input type="radio" name="cota-casa" value="senado"><span>Senado</span></label>
+          <div class="comparacao-caixa" id="sm-comparacao"></div>
+          <dl class="numeros" id="numeros-salario"></dl>
+          <h3>Ao longo do tempo</h3>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="sm-regua" value="real" checked><span>Em dinheiro de hoje</span></label>
+                <label><input type="radio" name="sm-regua" value="dolar"><span>Em dólar</span></label>
+                <label><input type="radio" name="sm-regua" value="necessario"><span>Com o necessário</span></label>
+              </div>
+            </fieldset>
           </div>
-        </fieldset>
-        <label class="campo"><span>Ano</span>
-          <select id="cota-ano"></select>
-        </label>
-        <label class="campo largo"><span>Estado</span>
-          <select id="cota-uf"></select>
-        </label>
+          <p class="nota" data-campo="sm-explicacao"></p>
+          <div id="grafico-salario"></div>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="tabela-rolagem"><table id="tabela-salario-governos"></table></div>
+            <p class="nota">Aumento por ano, sem a inflação: em média, quanto o salário subiu acima dos preços a cada ano de cada governo. O ano em curso é comparado com os mesmos meses do ano anterior.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é o "salário mínimo necessário"?</h3>
+              <p>É o valor que o DIEESE calcula todo mês como suficiente para uma família de quatro pessoas (dois adultos e duas crianças) pagar alimentação, moradia, saúde, educação, transporte, roupas, higiene, lazer e previdência, como prevê a Constituição. É uma estimativa do DIEESE, com metodologia própria.</p>
+              <h3>O que é "descontada a inflação"?</h3>
+              <p>Os preços sobem com o tempo. Para saber se o salário de hoje compra mais ou menos do que o de antes, corrigimos os valores antigos pela inflação. Para o salário usamos o INPC, do IBGE, que mede a inflação das famílias de menor renda e é usado nos reajustes do mínimo.</p>
+              <button type="button" class="botao" data-baixar="salario">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: salário mínimo (Banco Central, SGS 1619), INPC (IBGE via Banco Central, SGS 188), dólar (Banco Central, SGS 3698) e salário mínimo necessário (DIEESE). O salário mínimo muda uma vez por ano, em janeiro; a inflação e o valor do DIEESE saem uma vez por mês.</p>
+        </section>
+
+        <section id="ir" class="bloco bloco-dados" aria-labelledby="ir-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="ir-titulo">Quem paga Imposto de Renda?</h2>
+          <div class="resumo" data-campo="ir-resumo"></div>
+          <dl class="numeros" id="numeros-ir"></dl>
+          <div id="grafico-ir"></div>
+          <p class="como-ler">A linha cheia é o maior salário sem imposto em cada época. A tracejada é quanto esse limite valeria se tivesse acompanhado a inflação desde 1996. Quando a tracejada fica acima da cheia, mais gente passa a pagar o imposto sem ter tido aumento real.</p>
+          <details class="tabela-dados">
+            <summary>Correção em cada governo</summary>
+            <div class="tabela-rolagem"><table id="tabela-ir-governos"></table></div>
+            <p class="nota">Cada linha vai do mês anterior à posse até o último mês no cargo (ou o último mês com dado). A comparação começa em janeiro de 1996, primeira tabela do Imposto de Renda em reais.</p>
+          </details>
+          <details class="entenda">
+            <summary>Baixe os dados</summary>
+            <div class="entenda-corpo">
+              <button type="button" class="botao" data-baixar="ir">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: tabelas do IRPF publicadas pela Receita Federal, e IPCA (IBGE). A tabela só muda quando uma lei altera os valores; a inflação sai uma vez por mês.</p>
+        </section>
+
+        <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="dolar-titulo">O dólar está caro ou barato?</h2>
+          <div class="resumo" data-campo="dolar-resumo"></div>
+          <dl class="numeros" id="numeros-dolar"></dl>
+          <div id="grafico-dolar"></div>
+          <p class="como-ler">A linha cheia é a cotação de cada mês. A tracejada é a mesma cotação em dinheiro de hoje, descontada a inflação do Brasil e a dos Estados Unidos. É ela que mostra se o real está mais forte ou mais fraco do que no passado.</p>
+          <details class="entenda">
+            <summary>Baixe os dados</summary>
+            <div class="entenda-corpo">
+              <button type="button" class="botao" data-baixar="dolar">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: dólar comercial, venda, média mensal (Banco Central, SGS 3698), IPCA (IBGE) e inflação dos EUA (U.S. Bureau of Labor Statistics). O dólar muda todo dia, mas o site usa a média de cada mês, que fecha no fim do mês.</p>
+        </section>
+
+        <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
+          <p class="tema">Impostos</p>
+          <h2 id="arrecadacao-titulo">Quanto o governo federal arrecada por ano?</h2>
+          <div class="resumo" data-campo="arrec-resumo"></div>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="arrec-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
+                <label><input type="radio" name="arrec-medida" value="pib"><span>Parte da economia</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <div id="grafico-arrecadacao"></div>
+          <p class="nota" data-campo="arrec-nota"></p>
+          <details class="tabela-dados">
+            <summary>Ver os números por ano</summary>
+            <div class="tabela-rolagem"><table id="tabela-arrecadacao-anual"></table></div>
+          </details>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="filtros">
+              <fieldset class="campo largo">
+                <legend>Agrupar por</legend>
+                <div class="segmentos">
+                  <label><input type="radio" name="arrec-agrupar" value="mandato" checked><span>Mandato</span></label>
+                  <label><input type="radio" name="arrec-agrupar" value="partido"><span>Partido</span></label>
+                </div>
+              </fieldset>
+              <label class="opcao largo"><input type="checkbox" id="arrec-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
+            </div>
+            <div class="tabela-rolagem"><table id="tabela-arrecadacao-governos"></table></div>
+            <p class="nota">Cada ano conta para quem governou a maior parte dele. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior. A opção acima tira esse ano da conta de todos ao mesmo tempo. A arrecadação também sobe e desce com a economia, então a tabela mostra o que aconteceu no período, não o mérito de quem governou.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é "parte da economia"?</h3>
+              <p>É a comparação com o PIB, a soma de tudo o que o país produz em um ano. Dizer que a arrecadação foi 16% significa que, de cada R$ 100 produzidos no país, R$ 16 foram pagos nesses impostos e contribuições.</p>
+              <h3>Por que esta conta deixa o INSS de fora?</h3>
+              <p>Para comparar anos de forma justa, usamos só o que aparece na base da Receita Federal desde 2000. A contribuição ao INSS só passou a ser registrada nessa base em 2005, e as receitas de outros órgãos em 2010. Se entrassem na conta, os anos seguintes pareceriam maiores só porque a forma de registrar mudou.</p>
+              <button type="button" class="botao" data-baixar="arrecadacao">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: Receita Federal (arrecadação), IBGE via Banco Central (IPCA, SGS 433) e Banco Central (PIB mensal, SGS 4380). Todos saem uma vez por mês. O ano em curso só fecha quando a Receita publica dezembro.</p>
+        </section>
+
+        <section id="composicao" class="bloco bloco-dados" aria-labelledby="composicao-titulo">
+          <p class="tema">Impostos</p>
+          <h2 id="composicao-titulo">De onde vem o dinheiro dos impostos federais?</h2>
+          <div class="resumo" data-campo="composicao-resumo"></div>
+          <ul class="barras" id="lista-composicao"></ul>
+          <p class="nota">Cada barra mostra a parte do total. A lista tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. O FGTS fica de fora: vai para a conta do trabalhador e não conta como imposto.</p>
+          <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">sem dado</span>.</p>
+          <div id="composicao-estados-caixa" hidden>
+            <h3>E os impostos de estados e prefeituras?</h3>
+            <div class="resumo" data-campo="composicao-estados"></div>
+            <p class="nota"><a href="#estados">Veja quanto o seu estado e a sua capital arrecadam</a>.</p>
+            <p class="fonte">Fontes: Tesouro Nacional. Estados: Relatório Resumido da Execução Orçamentária de cada estado (anexo 3, no Siconfi), valores antes dos repasses às prefeituras. Prefeituras e total do país: Estimativa da Carga Tributária Bruta do Governo Geral, publicada uma vez por ano.</p>
+          </div>
+        </section>
+
+        <section id="gastos" class="bloco bloco-dados" aria-labelledby="gastos-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="gastos-titulo">Para onde vai o dinheiro do governo federal?</h2>
+          <div class="resumo" data-campo="gastos-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="gastos-ano"></select>
+            </label>
+          </div>
+          <ul class="barras" id="lista-gastos"></ul>
+          <h3>Comparar áreas ao longo dos anos</h3>
+          <div class="filtros">
+            <label class="campo"><span>Área</span>
+              <select id="gastos-area-a"></select>
+            </label>
+            <label class="campo"><span>Comparar com</span>
+              <select id="gastos-area-b"></select>
+            </label>
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="gastos-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
+                <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="resumo" data-campo="gastos-comparacao"></div>
+          <div id="grafico-gastos"></div>
+          <p class="como-ler">Cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é a "rolagem da dívida"?</h3>
+              <p>Quando uma parte da dívida pública vence, o governo pode pagar com dinheiro do orçamento ou emitir dívida nova para pagar a velha. Essa segunda forma é a rolagem. Ela aparece no orçamento como gasto, mas não é dinheiro que vai para serviços ou para as pessoas: troca uma dívida por outra. Por isso fica fora da conta "de cada R$ 100".</p>
+              <h3>Que gasto é esse?</h3>
+              <p>Todo gasto público passa por três etapas: empenho (o governo reserva o dinheiro), liquidação (o serviço foi entregue e o valor passa a ser devido) e pagamento. O site usa a liquidação, que mostra o que foi de fato executado no ano. Os números são da União; estados e municípios gastam com saúde e educação também, com dinheiro próprio e com os repasses federais.</p>
+              <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
+        </section>
+
+        <section id="ministerios" class="bloco bloco-dados" aria-labelledby="ministerios-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="ministerios-titulo">Quanto cada ministério gasta?</h2>
+          <div class="resumo" data-campo="ministerios-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="ministerios-ano"></select>
+            </label>
+          </div>
+          <ul class="barras" id="ministerios-lista"></ul>
+          <h3>Um ministério ao longo dos anos</h3>
+          <div class="filtros">
+            <label class="campo largo"><span>Ministério</span>
+              <select id="ministerios-orgao"></select>
+            </label>
+          </div>
+          <p class="nota" data-campo="ministerios-explicacao"></p>
+          <div id="grafico-ministerios"></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Que gasto é esse?</h3>
+              <p>É o valor liquidado: o serviço ou a compra foi entregue e o pagamento passou a ser devido. É a mesma etapa usada em "Para onde vai o dinheiro", que mostra o gasto por área; aqui ele aparece por ministério, como o governo se organiza.</p>
+              <h3>Por que a dívida fica de fora?</h3>
+              <p>Juros e pagamento da dívida pública são feitos pelo Ministério da Fazenda e somam centenas de bilhões por mês, a maior parte trocando dívida velha por nova. Se entrassem, a Fazenda pareceria o ministério que mais gasta com serviços. Por isso aparecem à parte.</p>
+              <h3>Por que alguns ministérios têm valores tão grandes?</h3>
+              <p>A Previdência paga as aposentadorias e pensões do INSS. Saúde e Educação repassam boa parte do dinheiro a estados e prefeituras, que atendem a população. A Fazenda faz os repasses de impostos que a Constituição manda dividir com estados e municípios. A lista mostra quanto de cada ministério foi repassado.</p>
+              <h3>Ministérios mudam de nome</h3>
+              <p>Ministérios são criados, juntados e separados de um governo para outro. O gráfico segue o código do órgão no sistema do governo, e a dica de cada ano mostra o nome que ele tinha naquele ano.</p>
+              <button type="button" class="botao" data-baixar="ministerios">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), execução da despesa, arquivos mensais desde 2014. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="ministerios-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="cartao" class="bloco bloco-dados" aria-labelledby="cartao-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="cartao-titulo">Quanto o governo federal gasta no cartão corporativo?</h2>
+          <p class="intro">O cartão de pagamento do governo federal é usado para despesas pequenas ou que não podem esperar o processo normal de compra. Cada lançamento fica registrado no Portal da Transparência.</p>
+          <div class="resumo" data-campo="cartao-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="cartao-ano"></select>
+            </label>
+          </div>
+          <h3>Quem mais usou</h3>
+          <ul class="barras" id="cartao-lista"></ul>
+          <h3>Ano a ano</h3>
+          <div id="grafico-cartao"></div>
+          <p class="como-ler">A linha cheia é o total gasto no ano; a tracejada, a parte sob sigilo. Em dinheiro de hoje.</p>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="tabela-rolagem"><table id="tabela-cartao-governos"></table></div>
+            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é o gasto "sob sigilo"?</h3>
+              <p>São lançamentos que o Portal da Transparência mostra só com o valor, marcados como "informações protegidas por sigilo", sem dizer o que foi comprado nem onde. O site soma esses valores no total e mostra quanto eles representam em cada órgão.</p>
+              <h3>Por que há saques em dinheiro?</h3>
+              <p>O cartão permite saque em dinheiro, com regras próprias. Os saques aparecem separados porque o registro mostra só o saque, não com o que o dinheiro foi gasto.</p>
+              <h3>Gasto alto é sinal de problema?</h3>
+              <p>Não necessariamente. O valor depende do tamanho de cada órgão e do tipo de trabalho que ele faz. Os números mostram quanto foi gasto, não se o gasto foi correto.</p>
+              <button type="button" class="botao" data-baixar="cartao">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), cartão de pagamento do governo federal, arquivos mensais desde 2013. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="cartao-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="viagens" class="bloco bloco-dados" aria-labelledby="viagens-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="viagens-titulo">Quanto o governo federal gasta com viagens a serviço?</h2>
+          <div class="resumo" data-campo="viagens-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="viagens-ano"></select>
+            </label>
+          </div>
+          <h3>Por ministério</h3>
+          <ul class="barras" id="viagens-lista"></ul>
+          <h3>Viagens de ministros</h3>
+          <div class="resumo resumo-menor" data-campo="viagens-ministros-nota"></div>
+          <ol class="ranking" id="viagens-ministros"></ol>
+          <h3>Ano a ano</h3>
+          <div id="grafico-viagens"></div>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="tabela-rolagem"><table id="tabela-viagens-governos"></table></div>
+            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que entra na conta?</h3>
+              <p>Diárias (o dinheiro para hospedagem e alimentação durante a viagem), passagens e outros gastos da viagem, menos o que o servidor devolveu. Entram todas as viagens de servidores e convidados do governo federal registradas no Portal da Transparência no ano.</p>
+              <h3>Quem são os "ministros" da lista?</h3>
+              <p>As pessoas que viajaram ocupando cargo de natureza especial: os ministros de Estado e outros cargos do mesmo nível. O Portal não traz o cargo "ministro de Estado" em um campo próprio; por isso a lista usa esse critério, igual para todos os anos. Viagens sob sigilo não entram na lista.</p>
+              <h3>O que é a parte sob sigilo?</h3>
+              <p>Viagens em que o Portal esconde quem viajou e para onde, como as ligadas a investigações e à segurança. O valor entra no total.</p>
+              <button type="button" class="botao" data-baixar="viagens">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), viagens a serviço, um arquivo por ano desde 2015. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="viagens-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="contas-titulo">As contas do governo federal fecham?</h2>
+          <div class="resumo" data-campo="contas-resumo"></div>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>O que mostrar</legend>
+              <div class="segmentos segmentos-quatro">
+                <label><input type="radio" name="contas-visao" value="primario" checked><span>Sem os juros</span></label>
+                <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
+                <label><input type="radio" name="contas-visao" value="nominal"><span>Com os juros</span></label>
+                <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
+              </div>
+            </fieldset>
+            <fieldset class="campo largo" id="contas-medida-caixa">
+              <legend>Medida</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte da economia</span></label>
+                <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <p class="nota" data-campo="contas-explicacao"></p>
+          <div id="grafico-contas"></div>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="tabela-rolagem"><table id="tabela-contas-governos"></table></div>
+            <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que são esses resultados?</h3>
+              <p>"Sem os juros" (o resultado primário) é a diferença entre o que o governo arrecadou e o que gastou com tudo, menos os juros da dívida. "Com os juros" (o resultado nominal) inclui os juros. Quando o resultado é negativo, faltou dinheiro (é o déficit) e o governo precisa pegar emprestado, e a dívida cresce; quando é positivo, sobrou (superávit). Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
+              <h3>Por que os juros aqui são maiores do que em "Para onde vai o dinheiro"?</h3>
+              <p>Aqui o Banco Central conta os juros que a dívida rendeu no ano, pagos ou somados à própria dívida, e inclui o Banco Central. Em "Para onde vai o dinheiro" entra só o que o governo pagou de fato no ano. As duas contas estão certas; medem coisas diferentes.</p>
+              <h3>Por que comparar com tudo o que o país produz (o PIB)?</h3>
+              <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
+              <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
+        </section>
+
+        <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="estados-titulo">Como estão as contas do seu estado?</h2>
+          <div class="filtros">
+            <label class="campo largo"><span>Estado</span>
+              <select id="estados-uf"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="estados-resumo"></div>
+
+          <div id="estados-detalhe">
+          <h3>Dívida e folha de pagamento, ano a ano</h3>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
+                <label><input type="radio" name="estados-visao" value="pessoal"><span>Folha de pagamento</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <p class="nota" data-campo="estados-explicacao"></p>
+          <div id="grafico-estados"></div>
+
+          <div id="estados-receita-caixa">
+            <h3>Impostos do estado e da capital, ano a ano</h3>
+            <div class="filtros">
+              <label class="campo largo"><span>Imposto</span>
+                <select id="estados-tributo"></select>
+              </label>
+            </div>
+            <p class="nota" data-campo="estados-receita-explicacao"></p>
+            <div id="grafico-estados-receita"></div>
+          </div>
+          </div>
+
+          <h3>Todos os estados</h3>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="estados-ano"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="estados-todos"></div>
+          <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que conta como "o que entra" no ano?</h3>
+              <p>É a receita corrente líquida: impostos, repasses da União e outras receitas do dia a dia, menos a parte que o estado é obrigado a repassar às prefeituras e outras deduções da lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para os limites. A dívida já desconta o dinheiro que o estado tem em caixa.</p>
+              <h3>O que acontece perto ou acima do limite?</h3>
+              <p>"Perto do limite" quer dizer acima de 90% dele. Nesse ponto, o tribunal de contas avisa o governo.</p>
+              <p>Folha de pagamento: acima de 95% do limite (o "limite prudencial", R$ 46,55 de cada R$ 100 na maioria dos estados), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem oito meses para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima tem até 2032 para voltar aos poucos (Lei Complementar 178).</p>
+              <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem um ano para voltar. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
+              <h3>O que é cada imposto?</h3>
+              <p>Do estado: ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet, e vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
+              <p>Da prefeitura: ISS é o imposto sobre serviços, do salão de beleza ao hospital e ao banco, e também vem embutido no preço. IPTU é o imposto anual sobre casas, apartamentos e terrenos na cidade. ITBI é o imposto pago na compra de um imóvel. Em Brasília, quem cobra esses três é o governo do Distrito Federal.</p>
+              <p>Os valores são o total arrecadado. Um quarto do ICMS e metade do IPVA do estado vão depois para as prefeituras. Com a reforma tributária, ICMS e ISS vão ser substituídos aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
+              <h3>De onde vêm os números?</h3>
+              <p>Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
+              <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
+              <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos de estados e capitais</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
+        </section>
+
+        <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">
+          <p class="tema">Congresso</p>
+          <h2 id="cota-titulo">Quanto deputados e senadores gastam da cota?</h2>
+          <p class="intro">A cota parlamentar paga despesas do mandato: passagens, escritório no estado, combustível, divulgação e outras. O parlamentar gasta e pede o reembolso. Usar a cota dentro do limite é permitido por lei, e o limite muda de estado para estado, por causa da distância até Brasília.</p>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>Casa</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="cota-casa" value="camara" checked><span>Câmara</span></label>
+                <label><input type="radio" name="cota-casa" value="senado"><span>Senado</span></label>
+              </div>
+            </fieldset>
+            <label class="campo"><span>Ano</span>
+              <select id="cota-ano"></select>
+            </label>
+            <label class="campo largo"><span>Estado</span>
+              <select id="cota-uf"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="cota-resumo"></div>
+          <h3>Com o que o dinheiro foi gasto</h3>
+          <ul class="barras" id="cota-grupos"></ul>
+
+          <h3>Quem mais e quem menos gastou</h3>
+          <div class="resumo resumo-menor" data-campo="cota-ranking-nota"></div>
+          <div class="rankings">
+            <div>
+              <p class="ranking-titulo">Gastaram mais</p>
+              <ol class="ranking" id="cota-ranking-mais"></ol>
+            </div>
+            <div>
+              <p class="ranking-titulo">Gastaram menos</p>
+              <ol class="ranking" id="cota-ranking-menos"></ol>
+            </div>
+          </div>
+
+          <h3>Por parlamentar</h3>
+          <div class="filtros">
+            <label class="campo largo"><span data-campo="cota-rotulo-parlamentar">Deputado</span>
+              <select id="cota-parlamentar"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="cota-parlamentar-resumo"></div>
+          <ul class="barras" id="cota-parlamentar-grupos"></ul>
+
+          <h3>Quem não usou a cota no ano</h3>
+          <div class="resumo resumo-menor" data-campo="cota-sem-gasto"></div>
+
+          <details class="tabela-dados">
+            <summary>Média por estado</summary>
+            <div class="tabela-rolagem"><table id="tabela-cota-estados"></table></div>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Como ler esses números?</h3>
+              <p>O valor é o que foi reembolsado, já descontadas as passagens devolvidas. A comparação justa é com a média dos parlamentares do mesmo estado, que têm o mesmo limite. Quem ficou só parte do ano no cargo, como um suplente ou um deputado que virou ministro, gasta menos por isso. Essas pessoas ficam fora do ranking e das médias.</p>
+              <p>Gasto alto não quer dizer irregularidade, e gasto baixo não quer dizer mais trabalho. Os números mostram quanto foi usado, não se o uso foi bom.</p>
+              <button type="button" class="botao" data-baixar="cota">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: Câmara dos Deputados (Cota para o Exercício da Atividade Parlamentar, arquivo anual, e lista de deputados em exercício da API de Dados Abertos) e Senado Federal (Cota para o Exercício da Atividade Parlamentar dos Senadores, arquivo anual, e lista de senadores dos Dados Abertos). Atualizado uma vez por dia. Atualização: <span data-campo="cota-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="avisos" class="bloco bloco-dados" aria-labelledby="avisos-titulo">
+          <p class="tema">Sobre os dados</p>
+          <h2 id="avisos-titulo">Avisos sobre os dados</h2>
+          <p class="intro">Problemas encontrados nas fontes oficiais. Os dados são mostrados como a fonte publica; os avisos dizem o que está errado e o que é afetado.</p>
+          <div id="lista-avisos"></div>
+        </section>
+
+        <section id="fontes" class="bloco" aria-labelledby="fontes-titulo">
+          <p class="tema">Sobre os dados</p>
+          <h2 id="fontes-titulo">Fontes e atualização</h2>
+          <p>Todo dia, de manhã, o site confere cada fonte oficial. Se uma fonte publicou dado novo, ele é conferido e aparece aqui no mesmo dia. Se nada mudou, o site continua igual. Por isso a data do último dado não é a mesma em todas as seções: cada órgão publica no seu ritmo, em geral uma vez por mês.</p>
+          <p>Quando uma fonte muda de formato ou devolve um dado estranho, a coleta é recusada e o site continua com a versão anterior, sem mostrar número errado.</p>
+          <details class="entenda">
+            <summary>Situação de cada fonte</summary>
+            <div class="entenda-corpo">
+              <ul class="lista-fontes" id="lista-fontes"></ul>
+            </div>
+          </details>
+          <p class="fonte">Todos os dados desta página: <a href="dados/painel.json" download>painel.json</a>. Versão dos dados: <code data-campo="versao">sem dado</code>. Como cada número é calculado: <a href="metodologia.html">metodologia</a>.</p>
+        </section>
       </div>
-      <div class="resumo" data-campo="cota-resumo"></div>
-      <h3>Com o que o dinheiro foi gasto</h3>
-      <ul class="barras" id="cota-grupos"></ul>
-
-      <h3>Quem mais e quem menos gastou</h3>
-      <div class="resumo resumo-menor" data-campo="cota-ranking-nota"></div>
-      <div class="rankings">
-        <div>
-          <p class="ranking-titulo">Gastaram mais</p>
-          <ol class="ranking" id="cota-ranking-mais"></ol>
-        </div>
-        <div>
-          <p class="ranking-titulo">Gastaram menos</p>
-          <ol class="ranking" id="cota-ranking-menos"></ol>
-        </div>
-      </div>
-
-      <h3>Por parlamentar</h3>
-      <div class="filtros">
-        <label class="campo largo"><span data-campo="cota-rotulo-parlamentar">Deputado</span>
-          <select id="cota-parlamentar"></select>
-        </label>
-      </div>
-      <div class="resumo" data-campo="cota-parlamentar-resumo"></div>
-      <ul class="barras" id="cota-parlamentar-grupos"></ul>
-
-      <h3>Quem não usou a cota no ano</h3>
-      <div class="resumo resumo-menor" data-campo="cota-sem-gasto"></div>
-
-      <details class="tabela-dados">
-        <summary>Média por estado</summary>
-        <div class="tabela-rolagem"><table id="tabela-cota-estados"></table></div>
-      </details>
-      <details class="entenda">
-        <summary>Entenda e baixe os dados</summary>
-        <div class="entenda-corpo">
-          <h3>Como ler esses números?</h3>
-          <p>O valor é o que foi reembolsado, já descontadas as passagens devolvidas. A comparação justa é com a média dos parlamentares do mesmo estado, que têm o mesmo limite. Quem ficou só parte do ano no cargo, como um suplente ou um deputado que virou ministro, gasta menos por isso. Essas pessoas ficam fora do ranking e das médias.</p>
-          <p>Gasto alto não quer dizer irregularidade, e gasto baixo não quer dizer mais trabalho. Os números mostram quanto foi usado, não se o uso foi bom.</p>
-          <button type="button" class="botao" data-baixar="cota">Baixar planilha com os dados</button>
-        </div>
-      </details>
-      <p class="fonte">Fontes: Câmara dos Deputados (Cota para o Exercício da Atividade Parlamentar, arquivo anual, e lista de deputados em exercício da API de Dados Abertos) e Senado Federal (Cota para o Exercício da Atividade Parlamentar dos Senadores, arquivo anual, e lista de senadores dos Dados Abertos). Atualizado uma vez por dia. Atualização: <span data-campo="cota-atualizado">sem dado</span>.</p>
-    </section>
-
-    <section id="avisos" class="bloco bloco-dados" aria-labelledby="avisos-titulo">
-      <p class="tema">Sobre os dados</p>
-      <h2 id="avisos-titulo">Avisos sobre os dados</h2>
-      <p class="intro">Problemas encontrados nas fontes oficiais. Os dados são mostrados como a fonte publica; os avisos dizem o que está errado e o que é afetado.</p>
-      <div id="lista-avisos"></div>
-    </section>
-
-    <section id="fontes" class="bloco" aria-labelledby="fontes-titulo">
-      <p class="tema">Sobre os dados</p>
-      <h2 id="fontes-titulo">Fontes e atualização</h2>
-      <p>Todo dia, de manhã, o site confere cada fonte oficial. Se uma fonte publicou dado novo, ele é conferido e aparece aqui no mesmo dia. Se nada mudou, o site continua igual. Por isso a data do último dado não é a mesma em todas as seções: cada órgão publica no seu ritmo, em geral uma vez por mês.</p>
-      <p>Quando uma fonte muda de formato ou devolve um dado estranho, a coleta é recusada e o site continua com a versão anterior, sem mostrar número errado.</p>
-      <details class="entenda">
-        <summary>Situação de cada fonte</summary>
-        <div class="entenda-corpo">
-          <ul class="lista-fontes" id="lista-fontes"></ul>
-        </div>
-      </details>
-      <p class="fonte">Todos os dados desta página: <a href="dados/painel.json" download>painel.json</a>. Versão dos dados: <code data-campo="versao">sem dado</code>. Como cada número é calculado: <a href="metodologia.html">metodologia</a>.</p>
-    </section>
+    </div>
   </main>
 
   <footer class="rodape">
