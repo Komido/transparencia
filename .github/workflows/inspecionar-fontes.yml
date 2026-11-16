@@ -1,7 +1,7 @@
 name: Inspecionar fontes em PDF e Excel
 
 # Tarefa manual, só de leitura: baixa arquivos que o banco não consegue ler
-# (PDF e Excel) e mostra no registro da execução os trechos necessários para
+# (PDF, Excel, APIs com chave) e mostra no registro da execução os trechos necessários para
 # conferir regras e formatos antes de usar a fonte. Não grava nada no
 # repositório.
 
@@ -22,6 +22,43 @@ jobs:
         run: |
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
+
+      # Benefícios por município na API do Portal da Transparência. A chave
+      # (secret PORTAL_TRANSPARENCIA_CHAVE) vai só no cabeçalho e o GitHub a
+      # esconde no registro. Dados agregados por cidade, sem pessoas.
+      - name: Portal da Transparência, benefícios por município
+        continue-on-error: true
+        env:
+          CHAVE: ${{ secrets.PORTAL_TRANSPARENCIA_CHAVE }}
+        run: |
+          set -u
+          if [ -z "${CHAVE}" ]; then echo "secret PORTAL_TRANSPARENCIA_CHAVE vazio ou ausente"; exit 1; fi
+          echo "chave presente (${#CHAVE} caracteres)"
+          api=https://api.portaldatransparencia.gov.br/api-de-dados
+          pedir() {
+            echo "=== $1"
+            curl -sS --max-time 60 -D cab.txt -o resp.json -w "HTTP %{http_code} %{size_download} bytes %{time_total}s\n" \
+              -H "accept: application/json" -H "chave-api-dados: ${CHAVE}" "$api/$1" || return 0
+            grep -i "^x-rate\|^retry-after\|^content-type" cab.txt || true
+            head -c 1500 resp.json; echo
+            sleep 2
+          }
+          echo "--- sem chave (deve recusar)"
+          curl -sS --max-time 60 -o /dev/null -w "HTTP %{http_code}\n" "$api/bpc-por-municipio?mesAno=202609&codigoIbge=3550308&pagina=1" || true
+          for cod in 3550308 3143104 1200401; do
+            for mes in 202609 202610 202611; do
+              pedir "novo-bolsa-familia-por-municipio?mesAno=${mes}&codigoIbge=${cod}&pagina=1"
+              pedir "bpc-por-municipio?mesAno=${mes}&codigoIbge=${cod}&pagina=1"
+            done
+          done
+          echo "--- página 2 (deve vir vazia)"
+          pedir "bpc-por-municipio?mesAno=202609&codigoIbge=3550308&pagina=2"
+          echo "--- programas anteriores ao Novo Bolsa Família"
+          pedir "novo-bolsa-familia-por-municipio?mesAno=202303&codigoIbge=3550308&pagina=1"
+          pedir "novo-bolsa-familia-por-municipio?mesAno=202302&codigoIbge=3550308&pagina=1"
+          pedir "auxilio-brasil-por-municipio?mesAno=202206&codigoIbge=3550308&pagina=1"
+          pedir "bolsa-familia-por-municipio?mesAno=202001&codigoIbge=3550308&pagina=1"
+          pedir "bpc-por-municipio?mesAno=201501&codigoIbge=3550308&pagina=1"
 
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
         continue-on-error: true
