@@ -759,6 +759,12 @@
               <dl class="numeros" id="mun-compara"></dl>
               <p class="nota" data-campo="mun-compara-nota"></p>
             </div>
+            <div id="mun-beneficios" hidden>
+              <h3>Dinheiro federal pago direto aos moradores</h3>
+              <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
+              <dl class="numeros empilhado" id="mun-beneficios-numeros"></dl>
+              <p class="nota" data-campo="mun-beneficios-nota"></p>
+            </div>
           </div>
           <details class="entenda">
             <summary>Entenda e baixe os dados</summary>
@@ -771,10 +777,13 @@
               <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
               <h3>O que quer dizer cada aviso?</h3>
               <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
+              <h3>Bolsa Família e BPC</h3>
+              <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
               <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
+              <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
             </div>
           </details>
-          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3, ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>.</p>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3, ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
         </section>
 
         <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">

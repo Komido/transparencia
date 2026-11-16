@@ -215,3 +215,24 @@ export async function carregarAgenda() {
     && typeof x.secao === 'string' && /^#[a-z-]+$/.test(x.secao))) falhar('agenda');
   return d;
 }
+
+// Bolsa Família e BPC por cidade, últimos meses (scripts/beneficios_para_json.py).
+// municipios: { codigo IBGE: [ [nbf_valor, nbf_qtd, bpc_valor, bpc_qtd] ou null, ... um por mês ] }
+const CAMPOS_BENEFICIOS = ['nbf_valor', 'nbf_qtd', 'bpc_valor', 'bpc_qtd'];
+export async function carregarBeneficiosUf(uf) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('benefícios: UF');
+  const resposta = await fetch(`dados/beneficios/${uf}.json`, { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar os benefícios de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || !Array.isArray(d.meses) || !d.meses.length || !d.meses.every(ehMes)
+    || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_BENEFICIOS) || !d.municipios || typeof d.municipios !== 'object') {
+    falhar(`benefícios de ${uf}`);
+  }
+  for (const [cod, serie] of Object.entries(d.municipios)) {
+    if (!/^[0-9]{7}$/.test(cod) || !Array.isArray(serie) || serie.length !== d.meses.length
+      || !serie.every((x) => x === null || (Array.isArray(x) && x.length === 4 && x.every((v) => v === null || (Number.isFinite(v) && v >= 0))))) {
+      falhar(`benefícios da cidade ${cod}`);
+    }
+  }
+  return d;
+}

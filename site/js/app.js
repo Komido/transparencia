@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -928,6 +928,23 @@ function fatorParaHoje(ctx, ano) {
   return doAno.length && ref ? ref / (doAno.reduce((a, v) => a + v, 0) / doAno.length) : null;
 }
 
+// Fator para trazer um mês para o dinheiro de hoje (IPCA). Mês depois do
+// último IPCA publicado: 1.
+function fatorMesParaHoje(ctx, mes) {
+  const { meses, ipca } = ctx;
+  const u = c.ultimoIndice(ipca);
+  const i = meses.indexOf(mes);
+  if (u < 0) return null;
+  if (i < 0 || i >= u) return i < 0 && mes < meses[0] ? null : 1;
+  return ipca[i] ? ipca[u] / ipca[i] : null;
+}
+
+function mesAnterior(mes, n) {
+  const [a, m] = mes.split('-').map(Number);
+  const total = a * 12 + (m - 1) - n;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+}
+
 const anoFechado = (d, ano) => (d.ate_mes[String(ano)] ?? 0) >= 12 && ano < new Date().getFullYear();
 
 // Seletor de ano: o mais recente primeiro; começa no último ano fechado.
@@ -1411,7 +1428,7 @@ function montarMunicipios(ctx) {
   const listaSug = $('#mun-sugestoes');
   const selAno = $('#mun-ano');
   if (!entrada || !listaSug || !selAno) return;
-  const estado = { indice: null, carregando: null, porUf: new Map(), cidade: null, sugestoes: [], ativa: -1 };
+  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), cidade: null, sugestoes: [], ativa: -1 };
 
   const carregarIndice = () => {
     if (!estado.carregando) {
@@ -1494,6 +1511,7 @@ function montarMunicipios(ctx) {
     }
     $('#mun-baixar').hidden = false;
     desenhar();
+    desenharBeneficios();
   };
 
   entrada.addEventListener('focus', () => { carregarIndice().catch(() => {}); });
@@ -1601,6 +1619,80 @@ function montarMunicipios(ctx) {
     }
     definir('mun-compara-nota', `Mediana das cidades com contas conferidas em ${ano}: metade está acima e metade abaixo. Mesmo tamanho: ${faixas[iFaixa]?.rotulo ?? ''}${medFaixa.n ? ` (${f.numero(medFaixa.n)} cidades)` : ''}${medUf.n ? `; ${uf}: ${f.numero(medUf.n)} cidades` : ''}.`);
   }
+
+  // Bolsa Família e BPC da cidade: último mês publicado e o mesmo mês do ano
+  // anterior. Não depende do ano escolhido nem do relatório da prefeitura.
+  async function desenharBeneficios() {
+    const caixa = $('#mun-beneficios');
+    const { codigo, nome, uf } = estado.cidade;
+    caixa.hidden = true;
+    let d = estado.beneficios.get(uf);
+    if (d === undefined) {
+      try {
+        d = await carregarBeneficiosUf(uf);
+      } catch (erro) {
+        console.error(erro);
+        d = null;
+      }
+      estado.beneficios.set(uf, d);
+    }
+    if (!d || estado.cidade?.codigo !== codigo) return;
+    $('#mun-baixar-beneficios').hidden = false;
+    const serie = d.municipios[String(codigo).padStart(7, '0')];
+    const iUlt = d.meses.length - 1;
+    const atual = serie?.[iUlt];
+    if (!atual) return;
+    const mesAtual = d.meses[iUlt];
+    const iAnt = d.meses.indexOf(mesAnterior(mesAtual, 12));
+    const antes = iAnt >= 0 ? serie[iAnt] : null;
+    const fatorAnt = iAnt >= 0 ? fatorMesParaHoje(ctx, d.meses[iAnt]) : null;
+    const dl = $('#mun-beneficios-numeros');
+    dl.replaceChildren();
+    // Uma informação por linha; valores arredondados ("R$ 839 mil").
+    const linha = (rotulo, valor, detalhes) => {
+      const div = el('div', null, null, dl);
+      el('dt', null, rotulo, div);
+      el('dd', null, valor >= 1e6 ? f.reaisPorExtenso(valor) : f.reaisCompacto(valor), div);
+      detalhes.forEach((t) => el('dd', 'detalhe', t, div));
+    };
+    const [bfValor, bfQtd, bpcValor, bpcQtd] = atual;
+    if (bfValor != null && bfQtd) {
+      const det = [`${f.numero(bfQtd)} famílias, média de ${f.moeda(bfValor / bfQtd, 0)} por família`];
+      if (antes?.[0] != null && antes[1] && fatorAnt) {
+        det.push(`Um ano antes: ${f.numero(antes[1])} famílias, média de ${f.moeda((antes[0] * fatorAnt) / antes[1], 0)} (em dinheiro de hoje)`);
+      }
+      linha(`Bolsa Família em ${f.mesLongo(mesAtual)}`, bfValor, det);
+    }
+    if (bpcValor != null && bpcQtd) {
+      const det = [`${f.numero(bpcQtd)} pessoas`];
+      if (antes?.[3]) det.push(`Um ano antes: ${f.numero(antes[3])} pessoas`);
+      linha(`BPC em ${f.mesLongo(mesAtual)}`, bpcValor, det);
+    }
+    if (!dl.children.length) return;
+    // Soma dos últimos 12 meses, só se a cidade tiver os 12.
+    const ultimos = serie.slice(-12);
+    if (d.meses.length >= 12 && ultimos.length === 12 && ultimos.every((x) => x && x[0] != null && x[2] != null)) {
+      const meses12 = d.meses.slice(-12);
+      const total = ultimos.reduce((a, x, k) => a + (x[0] + x[2]) * (fatorMesParaHoje(ctx, meses12[k]) ?? 1), 0);
+      linha('Os dois, nos últimos 12 meses', total, [`De ${f.mesLongo(meses12[0])} a ${f.mesLongo(meses12[11])}, em dinheiro de hoje`]);
+    }
+    definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.`);
+    caixa.hidden = false;
+  }
+
+  registrarDownload('beneficios', () => {
+    const uf = estado.cidade?.uf;
+    const d = uf ? estado.beneficios.get(uf) : null;
+    const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
+    return {
+      nome: `bolsa-familia-e-bpc-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
+      cabecalhos: ['mes', 'codigo_ibge', 'cidade', 'uf', 'bolsa_familia_reais', 'bolsa_familia_familias', 'bpc_reais', 'bpc_pessoas'],
+      linhas: d ? d.meses.flatMap((mes, k) => Object.entries(d.municipios).map(([cod, serie]) => {
+        const x = serie[k];
+        return [mes, cod, nomes.get(cod) ?? '', uf, x?.[0] ?? '', x?.[1] ?? '', x?.[2] ?? '', x?.[3] ?? ''];
+      })) : [],
+    };
+  });
 
   registrarDownload('municipios', () => {
     const uf = estado.cidade?.uf;

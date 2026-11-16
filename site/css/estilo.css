@@ -1320,3 +1320,10 @@ td.num .detalhe { white-space: normal; }
   .novidades:not(.agenda) li { break-inside: avoid; }
   .novidades:not(.agenda) li:first-child { border-top: 1px solid var(--borda); }
 }
+
+/* Números com várias linhas de detalhe: uma coluna no celular. */
+.numeros.empilhado { grid-template-columns: 1fr; }
+.numeros.empilhado div:last-child:nth-child(odd) { grid-column: auto; }
+@media (min-width: 720px) {
+  .numeros.empilhado { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+}
