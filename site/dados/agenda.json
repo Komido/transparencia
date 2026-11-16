@@ -1,0 +1,47 @@
+{
+ "fonte": "https://servicodados.ibge.gov.br/api/v3/calendario/",
+ "itens": [
+  {
+   "data": "2026-11-27",
+   "produto": "pnad",
+   "nome": "Desemprego e renda de quem trabalha (PNAD Contínua)",
+   "secao": "#hoje"
+  },
+  {
+   "data": "2026-12-11",
+   "produto": "inpc",
+   "nome": "Inflação das famílias de menor renda (INPC), usada no reajuste do salário mínimo",
+   "secao": "#salario"
+  },
+  {
+   "data": "2026-12-11",
+   "produto": "ipca",
+   "nome": "Inflação oficial (IPCA)",
+   "secao": "#hoje"
+  },
+  {
+   "data": "2026-12-29",
+   "produto": "pnad",
+   "nome": "Desemprego e renda de quem trabalha (PNAD Contínua)",
+   "secao": "#hoje"
+  },
+  {
+   "data": "2027-01-12",
+   "produto": "inpc",
+   "nome": "Inflação das famílias de menor renda (INPC), usada no reajuste do salário mínimo",
+   "secao": "#salario"
+  },
+  {
+   "data": "2027-01-12",
+   "produto": "ipca",
+   "nome": "Inflação oficial (IPCA)",
+   "secao": "#hoje"
+  },
+  {
+   "data": "2027-01-29",
+   "produto": "pnad",
+   "nome": "Desemprego e renda de quem trabalha (PNAD Contínua)",
+   "secao": "#hoje"
+  }
+ ]
+}
