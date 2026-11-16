@@ -5,6 +5,7 @@ name: Atualizar dados do painel
 # mais um índice, para o site baixar só a cidade escolhida.
 # O visitante do site nunca acessa o Supabase: só baixa arquivos estáticos.
 # O commit só acontece quando o conteúdo dos dados muda (campo "versao").
+# Depois, a agenda das próximas divulgações do IBGE (scripts/agenda_ibge.py).
 #
 # Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), todo dia às 08:23 de Brasília, depois da coleta das 06:41.
 # O agendamento do próprio GitHub (schedule) nunca disparou neste repositório;
@@ -84,3 +85,30 @@ jobs:
           git commit -m "Atualiza dados do painel (versão ${nova:0:12})"
           git pull --rebase --quiet
           git push
+
+      # A agenda não impede a atualização dos dados: se o IBGE falhar, segue a
+      # versão anterior da agenda.
+      - name: Agenda de divulgações do IBGE
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          git pull --rebase --quiet
+          de=$(date -u +%m-%d-%Y)
+          ate=$(date -u -d '+120 days' +%m-%d-%Y)
+          curl --fail --silent --show-error --max-time 60 --retry 3 --retry-delay 10 \
+            "https://servicodados.ibge.gov.br/api/v3/calendario/?qtd=500&de=${de}&ate=${ate}" -o /tmp/calendario.json
+          python3 scripts/agenda_ibge.py /tmp/calendario.json site/dados/agenda.json
+          if git diff --quiet -- site/dados/agenda.json \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/agenda.json)" ]; then
+            echo "Agenda sem mudança."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/agenda.json
+          git commit -q -m "Atualiza agenda de divulgações do IBGE"
+          for i in 1 2 3; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
