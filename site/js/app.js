@@ -577,8 +577,9 @@ function montarContas(ctx) {
 
   // Por governo -------------------------------------------------------------
   const linhasAno = anos.map((a) => ({ ano: a, primario: pPib.anos.get(a) ?? null, nominal: nPib.anos.get(a) ?? null, divida: dPib.anos.get(a) ?? null }));
-  const resumo = c.resumoPorGoverno(linhasAno, mandatos, ['primario', 'nominal']);
   const sinal = (x) => (x == null ? 'sem dado' : f.porcentagem(x, 1, true));
+  const desenharGovernos = () => {
+  const resumo = c.resumoPorGoverno(linhasAno, mandatos, ['primario', 'nominal'], { excluirPrimeiroAno: $('#contas-excluir-primeiro').checked });
   preencherTabela($('#tabela-contas-governos'),
     ['Mandato', 'Sem os juros: sobrou (+) ou faltou (−), média por ano, % da economia', 'Com os juros: sobrou (+) ou faltou (−), média por ano, % da economia', 'Dívida no fim, % da economia'],
     resumo.map((r) => {
@@ -593,6 +594,9 @@ function montarContas(ctx) {
     }),
     'Positivo: sobrou dinheiro. Negativo: faltou.');
   avisarCrises($('#tabela-contas-governos'), resumo);
+  };
+  $('#contas-excluir-primeiro').addEventListener('change', desenharGovernos);
+  desenharGovernos();
 
   registrarDownload('contas', () => ({
     nome: 'contas-publicas-por-ano.csv',
@@ -995,14 +999,22 @@ function avisarCrises(tabela, resumo) {
   aviso.textContent = `Atenção, crises com data oficial nos anos da tabela: ${partes.join('; ')}. Crises mexem com quase todos os números; o aviso não muda as contas.`;
 }
 
+// A caixa "Não contar o 1º ano de cada mandato" fica no mesmo bloco da tabela
+// e tira esse ano de todos os governos ao mesmo tempo.
 function tabelaPorGoverno(ctx, tabela, linhas, colunas) {
-  const resumo = c.resumoPorGoverno(linhas, ctx.mandatos, colunas.map((x) => x.chave)).filter((r) => r.anos.length);
-  preencherTabela(tabela, ['Mandato', ...colunas.map((x) => x.titulo)],
-    resumo.map((r) => [
-      { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
-      ...colunas.map((x) => (r.anosComDado[x.chave] ? x.formato(r.medias[x.chave], r) : 'sem dado')),
-    ]));
-  avisarCrises(tabela, resumo);
+  const excluir = tabela.closest('details')?.querySelector('input[id$="-excluir-primeiro"]');
+  const desenhar = () => {
+    const resumo = c.resumoPorGoverno(linhas, ctx.mandatos, colunas.map((x) => x.chave), { excluirPrimeiroAno: Boolean(excluir?.checked) })
+      .filter((r) => r.anos.length);
+    preencherTabela(tabela, ['Mandato', ...colunas.map((x) => x.titulo)],
+      resumo.map((r) => [
+        { texto: r.rotulo, detalhe: `${r.partido} · ${descreverAnos(r)}` },
+        ...colunas.map((x) => (r.anosComDado[x.chave] ? x.formato(r.medias[x.chave], r) : 'sem dado')),
+      ]));
+    avisarCrises(tabela, resumo);
+  };
+  excluir?.addEventListener('change', desenhar);
+  desenhar();
 }
 
 async function montarMinisterios(ctx) {
@@ -1926,7 +1938,8 @@ function montarSalario(ctx) {
   desenharTopo();
   desenharSalario();
 
-  const resumo = c.resumoPorGoverno(anual, mandatos, ['variacaoReal', 'emDolar', 'frenteNecessario']);
+  const desenharGovernos = () => {
+  const resumo = c.resumoPorGoverno(anual, mandatos, ['variacaoReal', 'emDolar', 'frenteNecessario'], { excluirPrimeiroAno: $('#salario-excluir-primeiro').checked });
   preencherTabela($('#tabela-salario-governos'),
     ['Mandato', 'Aumento por ano, sem a inflação', 'Em dólar', 'Parte do necessário'],
     resumo.map((r) => [
@@ -1937,6 +1950,9 @@ function montarSalario(ctx) {
     ]),
     'Médias dos anos de cada mandato.');
   avisarCrises($('#tabela-salario-governos'), resumo);
+  };
+  $('#salario-excluir-primeiro').addEventListener('change', desenharGovernos);
+  desenharGovernos();
 
   registrarDownload('salario', () => ({
     nome: 'salario-minimo-mensal.csv',
