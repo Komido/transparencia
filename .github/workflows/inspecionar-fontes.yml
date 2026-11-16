@@ -23,34 +23,33 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      - name: Datas de crises (CODACE/FGV e emergência da covid-19)
+      - name: Contas anuais das prefeituras em lote (FINBRA/DCA, Tesouro)
         continue-on-error: true
         run: |
           set -u
-          mkdir -p /tmp/crises && cd /tmp/crises
-          baixar() { curl -sSL --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o "$2" -w "%{http_code} %{size_download} bytes\n" "$1"; }
-          echo "=== Quadro 1 do IBRE/FGV (datação trimestral, com a cronologia do CODACE)"
-          baixar "https://blogdoibre.fgv.br/posts/datacao-dos-ciclos-economicos-brasileiros-de-1970-2023" blog.html
-          python3 - blog.html <<'PY'
-          import sys, html, re
-          t = open(sys.argv[1], 'rb').read().decode('utf-8', 'replace')
-          t = re.sub(r'(?is)<(script|style).*?</\1>', ' ', t)
-          t = re.sub(r'(?i)<br\s*/?>|</(p|tr|li|div|h[1-6]|td|th)>', '\n', t)
-          t = html.unescape(re.sub(r'<[^>]+>', ' ', t))
-          ini, fim = t.find('Quadro 1'), t.find('Quadro 2')
-          celulas = [re.sub(r'\s+', ' ', x).strip() for x in t[ini:fim].split('\n')]
-          celulas = [x for x in celulas if x]
-          linha = []
-          for x in celulas:
-              if x in ('Recessão', 'Expansão') and linha:
-                  print(' | '.join(linha)); linha = []
-              linha.append(x)
-          print(' | '.join(linha))
-          PY
-          for url in \
-            "https://www.in.gov.br/en/web/dou/-/portaria-n-188-de-3-de-fevereiro-de-2020-241408388" \
-            "https://www.in.gov.br/en/web/dou/-/portaria-gm/ms-n-913-de-22-de-abril-de-2022-394545491"; do
-            echo "=== $url"
-            baixar "$url" portaria.html || continue
-            python3 -c "import sys,html,re; t=open(sys.argv[1],'rb').read().decode('utf-8','replace'); t=re.sub(r'(?is)<(script|style).*?</\\1>',' ',t); t=html.unescape(re.sub(r'<[^>]+>','\n',t)); [print(re.sub(r'\\s+',' ',l).strip()) for l in t.split('\n') if re.search(r'Art\\. ?[0-9]|vigor|Publicado em|Edição', l)]" portaria.html | head -30
+          mkdir -p /tmp/finbra && cd /tmp/finbra
+          baixar() { curl -sSL --max-time 120 -A "Mozilla/5.0 (X11; Linux x86_64)" -o "$2" -w "%{http_code} %{size_download} bytes %{time_total}s\n" "$1"; }
+          for q in finbra "financas do brasil" "contas anuais" dca; do
+            echo "=== CKAN do Tesouro Transparente: busca '$q'"
+            url="https://www.tesourotransparente.gov.br/ckan/api/3/action/package_search?rows=10&q=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "$q")"
+            baixar "$url" busca.json || continue
+            python3 - busca.json <<'PY2'
+          import json, sys
+          try:
+              d = json.load(open(sys.argv[1]))
+          except Exception as e:
+              print("resposta não é JSON:", e); raise SystemExit
+          for p in d.get("result", {}).get("results", []):
+              print("*", p.get("name"), "|", p.get("title"))
+              for r in p.get("resources", [])[:15]:
+                  print("   -", r.get("format"), "|", r.get("name"), "|", r.get("url"), "|", r.get("size"))
+          PY2
           done
+          echo "=== Página do FINBRA no SICONFI"
+          baixar "https://siconfi.tesouro.gov.br/siconfi/pages/public/consulta_finbra/finbra_list.jsf" finbra.html
+          grep -oiE 'href="[^"]+"' finbra.html | grep -iE 'zip|csv|finbra|download' | sort -u | head -40
+          grep -oiE '[^<>]{0,60}(exerc[ií]cio|ano)[^<>]{0,60}' finbra.html | sort -u | head -20
+          echo "=== Uma chamada da API /dca (São Paulo, 2024, Anexo I-C), para medir tempo e tamanho"
+          baixar "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca?an_exercicio=2024&no_anexo=DCA-Anexo%20I-C&id_ente=3550308" dca.json
+          python3 -c "import json;d=json.load(open('dca.json'));print('itens:',len(d['items']));print('colunas:',list(d['items'][0].keys()) if d['items'] else '-')"
+
