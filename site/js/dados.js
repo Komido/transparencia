@@ -158,7 +158,7 @@ export async function carregarPortal(nome) {
 
 // Contas das prefeituras: resumo por estado gerado por
 // scripts/municipios_para_json.py (Tesouro, RREO Anexo 3 de cada prefeitura).
-const SITUACOES_PREFEITURA = ['ok', 'nao_fecha', 'sem_relatorio', 'erro', 'df'];
+const SITUACOES_PREFEITURA = ['ok', 'nao_fecha', 'sem_relatorio', 'formato', 'erro', 'df'];
 
 export async function carregarIndiceMunicipios() {
   const resposta = await fetch('dados/municipios/indice.json', { credentials: 'same-origin' });

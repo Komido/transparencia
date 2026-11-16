@@ -9,6 +9,16 @@ Fonte oficial: Tesouro Nacional, SICONFI, API de dados abertos.
     .../tt/rreo?an_exercicio=AAAA&nr_periodo=6&co_tipo_demonstrativo=RREO
        &no_anexo=RREO-Anexo%2003&co_esfera=M&id_ente=CODIGO_IBGE
 
+Prefeituras com menos de 50 mil habitantes podem optar pelo regime
+simplificado da Lei de Responsabilidade Fiscal (art. 63), e o Tesouro guarda o
+relatório delas como "RREO Simplificado": pedir só "RREO" devolve vazio. Em
+Minas Gerais, a maioria das prefeituras usa o simplificado (conferido em
+16/11/2026 em Monte Carmelo, MG: extrato de entregas e Anexo 3 de 2025, com a
+mesma coluna e as mesmas contas do RREO completo). Por isso o script pede os
+dois tipos: primeiro o que a prefeitura usou da última vez (ou, sem
+histórico, o simplificado para quem tem menos de 50 mil habitantes) e, se vier
+vazio, o outro.
+
 A API não aceita pedido de todas as prefeituras de uma vez (sem id_ente a
 resposta vem vazia, testado em 16/11/2026) e não há arquivo em lote no Tesouro
 Transparente. Por isso o script pede uma prefeitura por vez, com pausa entre
@@ -27,7 +37,9 @@ Situação de cada prefeitura em cada ano ("s"):
   nao_fecha      relatório entregue, mas a soma das partes não bate com o
                  total; os números aparecem com aviso
   sem_relatorio  a prefeitura não entregou ao Tesouro o relatório do ano
-                 completo (resposta vazia na data da coleta)
+                 completo (resposta vazia nos dois tipos na data da coleta)
+  formato        o relatório existe, mas sem a coluna dos 12 meses ou sem a
+                 receita corrente; sem dado, para não mostrar número errado
   erro           a API não respondeu depois de várias tentativas; vale o dado
                  anterior, se houver
 
@@ -150,10 +162,11 @@ def lista_de_entes():
 
 
 def resumir_relatorio(itens):
-    """Valores do ano (coluna dos 12 meses) por campo e a situação."""
+    """Valores do ano (coluna dos 12 meses) por campo e a situação. Só é
+    chamada com resposta não vazia."""
     do_ano = [i for i in itens if i.get("coluna") == COLUNA_ANO]
     if not do_ano:
-        return {"s": "sem_relatorio"}
+        return {"s": "formato", "motivo": f"sem a coluna {COLUNA_ANO}"}
     por_conta = {}
     for i in do_ano:
         conta = i.get("cod_conta")
@@ -162,7 +175,7 @@ def resumir_relatorio(itens):
         valor = i.get("valor")
         por_conta[conta] = float(valor) if valor is not None else 0.0
     if CONTAS["receita"] not in por_conta:
-        return {"s": "sem_relatorio"}
+        return {"s": "formato", "motivo": f"sem a conta {CONTAS['receita']}"}
     v = {campo: por_conta.get(conta, 0.0) for campo, conta in CONTAS.items()}
     pop = next((int(i["populacao"]) for i in do_ano if i.get("populacao")), 0)
 
@@ -186,11 +199,47 @@ def resumir_relatorio(itens):
     return saida
 
 
-def url_rreo(ano, cod):
-    q = urllib.parse.urlencode({"an_exercicio": ano, "nr_periodo": 6, "co_tipo_demonstrativo": "RREO",
+TIPOS = {"completo": "RREO", "simplificado": "RREO Simplificado"}
+LIMITE_SIMPLIFICADO = 50_000  # LRF, art. 63
+
+
+def url_rreo(ano, cod, tipo="completo"):
+    q = urllib.parse.urlencode({"an_exercicio": ano, "nr_periodo": 6, "co_tipo_demonstrativo": TIPOS[tipo],
                                 "no_anexo": "RREO-Anexo 03", "co_esfera": "M", "id_ente": cod},
                                quote_via=urllib.parse.quote)
     return f"{API}/rreo?{q}"
+
+
+def ordem_dos_tipos(anterior, pop):
+    """Tipo a pedir primeiro: o que a prefeitura usou da última vez; sem
+    histórico, o simplificado para quem tem menos de 50 mil habitantes."""
+    primeiro = anterior if anterior in TIPOS else (
+        "simplificado" if 0 < pop < LIMITE_SIMPLIFICADO else "completo")
+    return [primeiro] + [t for t in TIPOS if t != primeiro]
+
+
+def buscar_relatorio(ano, cod, ordem):
+    """Pede os tipos na ordem dada até achar um com itens. Devolve o resumo
+    (com tipo e SHA-256 da resposta usada), {"s": "sem_relatorio"} se todos
+    vierem vazios, ou None se algum pedido falhar sem que outro tenha itens."""
+    falhou = False
+    vazios = []
+    for tipo in ordem:
+        resposta = pedir(url_rreo(ano, cod, tipo))
+        if resposta is None:
+            falhou = True
+            continue
+        dados, sha = resposta
+        itens = dados.get("items") or []
+        if itens:
+            resumo = resumir_relatorio(itens)
+            resumo["tipo"] = tipo
+            resumo["sha256"] = sha
+            return resumo
+        vazios.append(sha)
+    if falhou:
+        return None
+    return {"s": "sem_relatorio", "sha256": vazios}
 
 
 def anos_padrao(hoje):
@@ -233,16 +282,17 @@ def buscar_uf(uf, anos):
                 registro["anos"][str(ano)] = {"s": "df"}
                 continue
             total += 1
-            url = url_rreo(ano, cod)
-            resposta = pedir(url)
-            if resposta is None:
+            ordem = ordem_dos_tipos(registro["anos"].get(str(ano), {}).get("tipo"), m["pop"])
+            resumo = buscar_relatorio(ano, cod, ordem)
+            if resumo is None:
                 erros += 1
-                if str(ano) not in registro["anos"]:
+                # Vale o dado anterior, menos um "sem_relatorio" da versão que
+                # só pedia o RREO completo (sem "tipo"), que pode estar errado.
+                antes_ano = registro["anos"].get(str(ano))
+                if not antes_ano or (antes_ano.get("s") == "sem_relatorio" and "tipo" not in antes_ano
+                                     and not isinstance(antes_ano.get("sha256"), list)):
                     registro["anos"][str(ano)] = {"s": "erro"}
                 continue
-            dados, sha = resposta
-            resumo = resumir_relatorio(dados.get("items") or [])
-            resumo["sha256"] = sha
             registro["anos"][str(ano)] = resumo
         saida["municipios"][str(cod)] = registro
         if n % 25 == 0 or n == len(municipios):

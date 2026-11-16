@@ -10,7 +10,8 @@ name: Resumir as contas das prefeituras (Tesouro, SICONFI)
 #
 # Os estados rodam no máximo dois por vez, com pausa entre pedidos, para não
 # exceder o limite do Tesouro. Cada estado grava só o próprio arquivo: se um
-# falhar, os outros não se perdem.
+# falhar, os outros não se perdem. A montagem do site roda mesmo se um estado
+# falhar, mas não se a tarefa for cancelada.
 #
 # Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), uma vez
 # por mês; ver supabase/migrations/20261116190000_disparo_municipios.sql.
@@ -100,7 +101,7 @@ jobs:
 
   montar:
     needs: [preparar, buscar]
-    if: ${{ always() && needs.preparar.result == 'success' }}
+    if: ${{ !cancelled() && needs.preparar.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
