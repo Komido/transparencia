@@ -60,6 +60,22 @@ jobs:
           pedir "bolsa-familia-por-municipio?mesAno=202001&codigoIbge=3550308&pagina=1"
           pedir "bpc-por-municipio?mesAno=201501&codigoIbge=3550308&pagina=1"
 
+      # Os mesmos benefícios em arquivo mensal com todas as cidades (sem chave).
+      # Só cabeçalhos: nome do arquivo para onde o Portal redireciona e tamanho.
+      - name: Portal da Transparência, arquivos mensais de benefícios (cabeçalhos)
+        continue-on-error: true
+        run: |
+          set -u
+          for base in novo-bolsa-familia bpc auxilio-brasil bolsa-familia-pagamentos; do
+            for mes in 202609 202610; do
+              url="https://portaldatransparencia.gov.br/download-de-dados/${base}/${mes}"
+              echo "=== ${url}"
+              curl -sS -I -L --max-time 60 -A "Mozilla/5.0 (X11; Linux x86_64)" "$url" \
+                | grep -i "^HTTP\|^location\|^content-length\|^content-type\|^last-modified" || true
+              sleep 3
+            done
+          done
+
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
         continue-on-error: true
         run: |
