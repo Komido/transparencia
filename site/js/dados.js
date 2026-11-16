@@ -183,3 +183,20 @@ export async function carregarMunicipiosUf(uf, nCampos) {
   }
   return d;
 }
+
+// Tabelas oficiais de INSS e Imposto de Renda do ano (dados/folha.json).
+export async function carregarFolha() {
+  const resposta = await fetch('dados/folha.json', { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar as tabelas do salário (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  const faixasOk = (fs, comDeducao) => Array.isArray(fs) && fs.length >= 2 && fs.every((x, i) => x
+    && (x.ate === null ? i === fs.length - 1 : typeof x.ate === 'number' && x.ate > 0)
+    && typeof x.aliquota === 'number' && x.aliquota >= 0 && x.aliquota < 50
+    && (!comDeducao || typeof x.deducao === 'number'));
+  if (!d || !Number.isInteger(d.ano) || !ehData(d.conferido_em)) falhar('tabelas do salário: ano');
+  if (!d.inss || !faixasOk(d.inss.faixas, false) || !ehLinkSeguro(d.inss.fonte)) falhar('tabela do INSS');
+  const ir = d.ir;
+  if (!ir || !faixasOk(ir.faixas, true) || typeof ir.dependente !== 'number' || typeof ir.desconto_simplificado !== 'number'
+    || !ehLinkSeguro(ir.fonte)) falhar('tabela do IR');
+  return d;
+}

@@ -659,3 +659,60 @@ export function arrecadometro(meses, totalMilhoes, agoraMs = Date.now()) {
     estimadoEm: (ms) => Math.max(0, (ms - inicioEstimativa) / 1000) * porSegundo,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Salário líquido (tabelas oficiais em dados/folha.json).
+
+// INSS do empregado: cada alíquota vale só para a parte do salário dentro da
+// sua faixa; acima do teto não há contribuição.
+export function inssEmpregado(bruto, tabela) {
+  let anterior = 0;
+  let total = 0;
+  for (const { ate, aliquota } of tabela.faixas) {
+    const parte = Math.min(bruto, ate) - anterior;
+    if (parte <= 0) break;
+    total += (parte * aliquota) / 100;
+    anterior = ate;
+  }
+  return Math.round(total * 100) / 100;
+}
+
+// IR retido no mês: a fonte pagadora usa a dedução maior entre INSS mais
+// dependentes e o desconto simplificado; depois aplica a redução de 2026,
+// calculada sobre o rendimento tributável (o salário bruto).
+export function irMensal(bruto, inss, dependentes, tabela) {
+  const legal = inss + dependentes * tabela.dependente;
+  const deducao = Math.max(legal, tabela.desconto_simplificado);
+  const base = Math.max(0, bruto - deducao);
+  const faixa = tabela.faixas.find((x) => x.ate == null || base <= x.ate);
+  const semReducao = Math.max(0, (base * faixa.aliquota) / 100 - faixa.deducao);
+  const r = tabela.reducao;
+  let reducao = 0;
+  if (r && bruto <= r.ate) reducao = Math.min(semReducao, r.maximo);
+  else if (r && bruto <= r.limite) reducao = Math.max(0, r.constante - r.fator * bruto);
+  reducao = Math.min(reducao, semReducao);
+  const imposto = Math.round((semReducao - reducao) * 100) / 100;
+  return { imposto, semReducao: Math.round(semReducao * 100) / 100, reducao: Math.round(reducao * 100) / 100, base, simplificado: deducao > legal };
+}
+
+// Juros compostos: valor depois de n meses a uma taxa mensal (em %).
+export function comJuros(valor, taxaMes, meses) {
+  return valor * (1 + taxaMes / 100) ** meses;
+}
+
+// Taxa mensal (em %) convertida para o ano.
+export function taxaAoAno(taxaMes) {
+  return ((1 + taxaMes / 100) ** 12 - 1) * 100;
+}
+
+// Fator acumulado de uma série de variações mensais (em %) do mês i ao mês j,
+// inclusive. Nulo se faltar algum mês.
+export function acumularVariacoes(variacoes, i, j) {
+  let fator = 1;
+  for (let k = i; k <= j; k += 1) {
+    const v = variacoes[k];
+    if (v == null) return null;
+    fator *= 1 + v / 100;
+  }
+  return fator;
+}

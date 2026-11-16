@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -1614,6 +1614,155 @@ function montarMunicipios(ctx) {
       })) : [],
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Dinheiro no dia a dia: salário líquido (tabelas oficiais de INSS e IR do
+// ano), o que a inflação faz com o dinheiro parado (IPCA e poupança) e quanto
+// custa uma dívida (taxas médias do Banco Central).
+function barrasDeValores(lista, itens) {
+  lista.replaceChildren();
+  const maior = Math.max(...itens.map((x) => x.valor));
+  for (const x of itens) {
+    const li = el('li', null, null, lista);
+    const topo = el('div', 'barra-topo', null, li);
+    const nome = el('span', 'barra-nome', x.nome, topo);
+    if (x.explica) el('span', 'barra-explica', x.explica, nome);
+    el('span', 'barra-valor', f.moeda(x.valor, 2), topo);
+    const trilho = el('div', 'barra-trilho', null, li);
+    trilho.setAttribute('aria-hidden', 'true');
+    el('div', 'barra', null, trilho).style.width = `${Math.max(1, (x.valor / maior) * 100)}%`;
+  }
+}
+
+async function montarDinheiro(ctx) {
+  const secao = $('#dinheiro');
+  const { meses, s } = ctx;
+  let folha;
+  try {
+    folha = await carregarFolha();
+  } catch (erro) {
+    console.error(erro);
+    folha = null;
+  }
+
+  // 1. Salário líquido ------------------------------------------------------
+  const entrada = $('#din-salario');
+  const selDep = $('#din-dependentes');
+  if (folha) {
+    definir('din-conferido', f.dataCurta(folha.conferido_em));
+    const sm = c.ultimoValor(meses, s.salario_minimo);
+    entrada.value = sm ? (2 * sm.valor).toFixed(2) : '3000.00';
+    const desenharSalario = () => {
+      const bruto = Number(entrada.value);
+      if (!Number.isFinite(bruto) || bruto <= 0 || bruto > 1e7) {
+        campo('din-salario-resumo').forEach((e) => e.replaceChildren(el('p', 'resposta', 'Digite um salário bruto maior que zero.')));
+        return;
+      }
+      const dep = Number(selDep.value);
+      const inss = c.inssEmpregado(bruto, folha.inss);
+      const ir = c.irMensal(bruto, inss, dep, folha.ir);
+      const liquido = bruto - inss - ir.imposto;
+      const porCem = (x) => f.moeda((x / bruto) * 100, 0);
+      const r = folha.ir.reducao;
+      const frases = [
+        `De um salário de ${f.moeda(bruto, 2)}, ${f.moeda(inss, 2)} vão para o INSS e ${f.moeda(ir.imposto, 2)} para o Imposto de Renda; você recebe ${f.moeda(liquido, 2)}.`,
+        `De cada R$ 100 do salário, ${porCem(inss)} vão para o INSS e ${porCem(ir.imposto)} para o Imposto de Renda.`,
+      ];
+      if (r && bruto <= r.ate && ir.reducao > 0) frases.push(`Até ${f.moeda(r.ate, 0)} por mês não há Imposto de Renda desde ${folha.ano}: sem a redução, seriam ${f.moeda(ir.semReducao, 2)}.`);
+      else if (ir.reducao > 0) frases.push(`A redução de ${folha.ano} tirou ${f.moeda(ir.reducao, 2)} do imposto.`);
+      definirTopicos('din-salario-resumo', frases.join(' '));
+      definir('din-bruto', f.moeda(bruto, 2));
+      definir('din-inss', `− ${f.moeda(inss, 2)}`);
+      definir('din-inss-parte', f.porcentagem((inss / bruto) * 100, 1));
+      definir('din-ir', `− ${f.moeda(ir.imposto, 2)}`);
+      definir('din-ir-parte', f.porcentagem((ir.imposto / bruto) * 100, 1));
+      definir('din-liquido', f.moeda(liquido, 2));
+      definir('din-liquido-parte', f.porcentagem((liquido / bruto) * 100, 1));
+      const antiga = folha.ano < new Date().getFullYear();
+      definir('din-salario-nota', antiga
+        ? `Atenção: estas são as tabelas de ${folha.ano}; as de ${new Date().getFullYear()} ainda não foram atualizadas no site.`
+        : `Tabelas de ${folha.ano}. O INSS paga aposentadoria, auxílio-doença e outros benefícios. Parte do Imposto de Renda vai para estados e prefeituras, pelo FPE e pelo FPM.${ir.simplificado ? ' Neste salário, o desconto simplificado dá menos imposto que deduzir o INSS e os dependentes, e é ele que a empresa usa.' : ''}`);
+    };
+    entrada.addEventListener('input', desenharSalario);
+    selDep.addEventListener('change', desenharSalario);
+    desenharSalario();
+  } else {
+    definir('din-salario-nota', 'Não foi possível carregar as tabelas de INSS e Imposto de Renda agora.');
+  }
+
+  // 2. Inflação e poupança --------------------------------------------------
+  const iFim = c.ultimoIndice(s.ipca_var);
+  const selDesde = $('#din-desde');
+  const valorEl = $('#din-valor');
+  const anoFim = c.anoDe(meses[iFim]);
+  for (let ano = anoFim - 1; ano >= 1995; ano -= 1) {
+    const i = meses.indexOf(`${ano}-01`);
+    if (i >= 0) el('option', null, `janeiro de ${ano}`, selDesde).value = String(i);
+  }
+  selDesde.value = String(meses.indexOf(`${anoFim - 10}-01`));
+  const desenharInflacao = () => {
+    const valor = Number(valorEl.value);
+    const i0 = Number(selDesde.value);
+    if (!Number.isFinite(valor) || valor <= 0 || !(i0 >= 0)) return;
+    const inflacao = c.acumularVariacoes(s.ipca_var, i0, iFim);
+    const poupanca = s.poupanca_rend ? c.acumularVariacoes(s.poupanca_rend, i0, iFim) : null;
+    const desde = f.mesLongo(meses[i0]);
+    const ate = f.mesLongo(meses[iFim]);
+    const frases = [
+      `Para comprar hoje o que ${f.moeda(valor, 2)} compravam em ${desde}, são precisos ${f.moeda(valor * inflacao, 2)} (inflação até ${ate}).`,
+      `Parado, sem render, o dinheiro perdeu ${f.porcentagem((1 - 1 / inflacao) * 100, 0)} do que comprava.`,
+    ];
+    if (poupanca) {
+      const dif = valor * poupanca - valor * inflacao;
+      frases.push(`Na poupança, teria virado ${f.moeda(valor * poupanca, 2)}: ${f.moeda(Math.abs(dif), 2)} ${dif >= 0 ? 'a mais' : 'a menos'} que o necessário para acompanhar a inflação.`);
+    } else {
+      frases.push('A comparação com a poupança começa em junho de 2012: antes disso, a regra de rendimento era outra.');
+    }
+    definirTopicos('din-inflacao-resumo', frases.join(' '));
+    const itens = [
+      { nome: 'Parado, sem render', explica: 'o mesmo valor, comprando menos', valor },
+      { nome: 'Para comprar o mesmo hoje', explica: 'corrigido pela inflação (IPCA)', valor: valor * inflacao },
+    ];
+    if (poupanca) itens.push({ nome: 'Na poupança', explica: 'com o rendimento oficial de cada mês', valor: valor * poupanca });
+    barrasDeValores($('#din-inflacao-barras'), itens);
+  };
+  valorEl.addEventListener('input', desenharInflacao);
+  selDesde.addEventListener('change', desenharInflacao);
+  desenharInflacao();
+
+  // 3. Juros ------------------------------------------------------------------
+  const rot = c.ultimoValor(meses, s.juros_rotativo);
+  const che = c.ultimoValor(meses, s.juros_cheque_especial);
+  const pes = c.ultimoValor(meses, s.juros_credito_pessoal);
+  const pou = c.ultimoValor(meses, s.poupanca_rend);
+  if (rot && che && pes && pou) {
+    const ano = (x) => f.porcentagem(c.taxaAoAno(x), 0);
+    definirTopicos('din-juros-resumo',
+      `Em ${f.mesLongo(rot.mes)}, os bancos cobraram em média ${f.porcentagem(rot.valor, 2)} ao mês no rotativo do cartão de crédito (${ano(rot.valor)} ao ano), ${f.porcentagem(che.valor, 2)} no cheque especial (${ano(che.valor)} ao ano) e ${f.porcentagem(pes.valor, 2)} no crédito pessoal (${ano(pes.valor)} ao ano). `
+      + `A poupança rendeu ${f.porcentagem(pou.valor, 2)} em ${f.mesLongo(pou.mes)} (${ano(pou.valor)} ao ano).`);
+    const base = 500;
+    const n = 6;
+    const cartao = c.comJuros(base, rot.valor, n);
+    const limite = base * 2;
+    barrasDeValores($('#din-juros-barras'), [
+      { nome: 'Guardado na poupança', explica: 'o que o banco te paga', valor: c.comJuros(base, pou.valor, n) },
+      { nome: 'Crédito pessoal', explica: `${f.porcentagem(pes.valor, 2)} ao mês`, valor: c.comJuros(base, pes.valor, n) },
+      { nome: 'Cheque especial', explica: `${f.porcentagem(che.valor, 2)} ao mês`, valor: c.comJuros(base, che.valor, n) },
+      { nome: 'Cartão de crédito (rotativo ou parcelamento da fatura)', explica: cartao > limite ? `a lei limita os juros ao valor da dívida; sem o limite, seriam ${f.moeda(cartao, 2)}` : `${f.porcentagem(rot.valor, 2)} ao mês`, valor: Math.min(cartao, limite) },
+    ]);
+    definir('din-juros-nota', `Quanto vira uma dívida de ${f.moeda(base, 0)} depois de ${n} meses sem pagar nada, com a taxa média de ${f.mesLongo(rot.mes)}, e quanto rende o mesmo valor na poupança. Cada banco cobra uma taxa; a sua pode ser maior ou menor.`);
+  } else {
+    definir('din-juros-nota', 'As taxas de juros não estão disponíveis agora.');
+  }
+
+  registrarDownload('dinheiro', () => ({
+    nome: 'juros-e-poupanca.csv',
+    cabecalhos: ['mes', 'rotativo do cartao (% ao mes)', 'cheque especial (% ao mes)', 'credito pessoal (% ao mes)', 'poupanca (% no mes, deposito no dia 1)', 'IPCA (% no mes)'],
+    linhas: meses.map((m, i) => [m, s.juros_rotativo?.[i] ?? '', s.juros_cheque_especial?.[i] ?? '', s.juros_credito_pessoal?.[i] ?? '', s.poupanca_rend?.[i] ?? '', s.ipca_var?.[i] ?? ''])
+      .filter((l) => l.slice(1, 5).some((v) => v !== '')),
+  }));
+  secao.hidden = false;
 }
 
 async function montarCota(ctx) {
@@ -3522,7 +3671,7 @@ async function iniciar() {
     }
     montarSeletoresDeCidade();
     const etapas = [iniciarContador, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarCota,
+      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarCota, montarDinheiro,
       montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {

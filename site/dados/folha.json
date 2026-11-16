@@ -1,0 +1,29 @@
+{
+  "ano": 2026,
+  "conferido_em": "2026-11-16",
+  "inss": {
+    "descricao": "Contribuição do empregado, empregado doméstico e trabalhador avulso, progressiva por faixa",
+    "faixas": [
+      { "ate": 1621.00, "aliquota": 7.5 },
+      { "ate": 2902.84, "aliquota": 9 },
+      { "ate": 4354.27, "aliquota": 12 },
+      { "ate": 8475.55, "aliquota": 14 }
+    ],
+    "fonte": "https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/tabela-de-contribuicao-mensal"
+  },
+  "ir": {
+    "descricao": "Tabela de incidência mensal e redução mensal a partir de janeiro de 2026",
+    "faixas": [
+      { "ate": 2428.80, "aliquota": 0, "deducao": 0 },
+      { "ate": 2826.65, "aliquota": 7.5, "deducao": 182.16 },
+      { "ate": 3751.05, "aliquota": 15, "deducao": 394.16 },
+      { "ate": 4664.68, "aliquota": 22.5, "deducao": 675.49 },
+      { "ate": null, "aliquota": 27.5, "deducao": 908.73 }
+    ],
+    "dependente": 189.59,
+    "desconto_simplificado": 607.20,
+    "reducao": { "ate": 5000.00, "maximo": 312.89, "limite": 7350.00, "constante": 978.62, "fator": 0.133145 },
+    "normas": ["Lei 15.191/2025", "Lei 15.270/2025"],
+    "fonte": "https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026"
+  }
+}

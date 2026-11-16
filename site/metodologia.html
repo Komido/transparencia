@@ -238,6 +238,14 @@
           <li><strong>Dinheiro de hoje:</strong> cada ano é corrigido pela média do IPCA do ano até o último mês publicado. A planilha traz os valores da época e o fator usado.</li>
         </ul>
 
+        <h2 id="dinheiro">Dinheiro no dia a dia</h2>
+        <ul>
+          <li><strong>Salário líquido:</strong> tabelas oficiais do ano, gravadas em <a href="dados/folha.json">dados/folha.json</a> e conferidas nas páginas do INSS e da Receita Federal (data no arquivo). INSS do empregado progressivo por faixa, até o teto. Imposto de Renda pela tabela mensal sobre o salário menos a dedução maior entre o INSS mais R$ 189,59 por dependente e o desconto simplificado de R$ 607,20; depois, a redução da Lei 15.270/2025, calculada sobre o salário bruto: até R$ 5.000 o imposto zera; de R$ 5.000,01 a R$ 7.350, a redução é R$ 978,62 − 0,133145 × salário. Conferido com o exemplo da Receita: salário de R$ 6.000, INSS de R$ 641,51, redução de R$ 179,75 e imposto de R$ 385,10. Se o ano mudar e o arquivo não for atualizado, a página avisa.</li>
+          <li><strong>Inflação:</strong> IPCA acumulado do mês escolhido até o último mês publicado, inclusive.</li>
+          <li><strong>Poupança:</strong> série 195 do Banco Central (depósitos a partir de 4 de maio de 2012), só o dia 1º de cada mês: o rendimento do mês de quem depositou no dia 1º. Acumulado nos mesmos meses da inflação. Antes de junho de 2012 a regra era outra (série 25), e a comparação não é feita.</li>
+          <li><strong>Juros:</strong> taxas médias mensais das operações com pessoas físicas, recursos livres, do Banco Central: cartão de crédito rotativo (série 25477), cheque especial (25463) e crédito pessoal (25470), no último mês publicado. Taxa ao ano = (1 + taxa ao mês)<sup>12</sup> − 1. O exemplo da dívida de R$ 500 aplica juros compostos por 6 meses; no cartão, os juros e encargos do rotativo e do parcelamento da fatura não passam do valor original da dívida (Lei 14.690/2023), por isso o valor para em R$ 1.000.</li>
+        </ul>
+
         <h2 id="portal">Ministérios, cartão corporativo e viagens</h2>
         <ul>
           <li><strong>Fonte:</strong> Portal da Transparência, da Controladoria-Geral da União, pelos arquivos públicos de download: execução da despesa (um arquivo por mês, desde 2014), cartão de pagamento do governo federal (um por mês, desde 2013) e viagens a serviço (um por ano, desde 2015). Uma tarefa semanal baixa o ano corrente e o anterior; uma vez por mês, todos os anos, para pegar correções. Ela roda em três partes (viagens, cartão e despesa), uma depois da outra, confere colunas, meses e totais e grava só somas por ano e órgão superior; o SHA-256 de cada original fica registrado. Se algo não bater numa parte, nada dela é gravado e o site continua com a versão anterior dessa parte. No ano corrente entram só meses completos, até o mês passado.</li>

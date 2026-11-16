@@ -68,6 +68,7 @@
               <p class="secoes-titulo">Entenda</p>
               <ul>
                 <li><a href="#quem-faz">Quem faz o quê no governo</a></li>
+                <li><a href="#dinheiro">Dinheiro no dia a dia</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
@@ -955,6 +956,70 @@
             <li><strong>2032:</strong> prefeitos e vereadores de novo.</li>
           </ul>
           <p class="fonte">Fontes: Constituição Federal (artigos 14, 18, 27 a 30, 44 a 46, 52, 77, 82, 84, 101, 144, 153 a 156, 198 e 211), Emenda Constitucional 111/2021 (datas de posse), Emenda Constitucional 132/2023 (reforma tributária) e Lei 15.270/2025 (isenção do Imposto de Renda). Conferido em 16/11/2026.</p>
+        </section>
+
+        <section id="dinheiro" class="bloco bloco-dados" aria-labelledby="dinheiro-titulo">
+          <p class="tema">Entenda</p>
+          <h2 id="dinheiro-titulo">Dinheiro no dia a dia</h2>
+          <p class="intro">Três contas que mexem com o bolso de todo mundo, feitas com as tabelas e as taxas oficiais. São médias e regras gerais: o seu caso pode ter detalhes diferentes.</p>
+
+          <h3>Quanto do seu salário fica com o governo?</h3>
+          <p class="nota">Para quem tem carteira assinada. Digite o salário bruto, o valor antes dos descontos.</p>
+          <div class="filtros">
+            <label class="campo"><span>Salário bruto (R$)</span>
+              <input id="din-salario" type="number" inputmode="decimal" min="0" step="0.01">
+            </label>
+            <label class="campo"><span>Dependentes</span>
+              <select id="din-dependentes">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="din-salario-resumo"></div>
+          <dl class="conta" id="din-conta">
+            <div><dt>Salário bruto</dt><dd data-campo="din-bruto">sem dado</dd><dd></dd></div>
+            <div><dt>INSS</dt><dd data-campo="din-inss">sem dado</dd><dd data-campo="din-inss-parte"></dd></div>
+            <div><dt>Imposto de Renda</dt><dd data-campo="din-ir">sem dado</dd><dd data-campo="din-ir-parte"></dd></div>
+            <div class="conta-fim"><dt>Salário líquido</dt><dd data-campo="din-liquido">sem dado</dd><dd data-campo="din-liquido-parte"></dd></div>
+          </dl>
+          <p class="nota" data-campo="din-salario-nota"></p>
+
+          <h3>O que a inflação faz com o dinheiro parado?</h3>
+          <div class="filtros">
+            <label class="campo"><span>Valor (R$)</span>
+              <input id="din-valor" type="number" inputmode="decimal" min="0" step="0.01" value="1000">
+            </label>
+            <label class="campo"><span>Guardado desde</span>
+              <select id="din-desde"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="din-inflacao-resumo"></div>
+          <ul class="barras" id="din-inflacao-barras"></ul>
+
+          <h3>Quanto custa pegar dinheiro emprestado?</h3>
+          <div class="resumo" data-campo="din-juros-resumo"></div>
+          <ul class="barras" id="din-juros-barras"></ul>
+          <p class="nota" data-campo="din-juros-nota"></p>
+
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Como o salário líquido é calculado?</h3>
+              <p>O INSS é progressivo: cada alíquota (7,5%, 9%, 12% e 14%) vale só para a parte do salário dentro da sua faixa, até o teto. O Imposto de Renda usa a tabela mensal sobre o salário menos a dedução maior entre duas: o INSS mais R$ 189,59 por dependente, ou o desconto simplificado de R$ 607,20. Desde janeiro de 2026, há uma redução: quem ganha até R$ 5.000 não paga, e de R$ 5.000 a R$ 7.350 o imposto diminui aos poucos. Não entram pensão alimentícia, previdência privada, plano de saúde nem outros descontos da empresa.</p>
+              <h3>O que a empresa paga além do seu salário?</h3>
+              <p>A empresa deposita 8% do salário no seu FGTS, que é seu e não sai do seu salário. Empresas fora do Simples Nacional também pagam, em geral, 20% de INSS sobre a folha. Esses valores não aparecem no seu contracheque.</p>
+              <h3>Inflação e poupança</h3>
+              <p>A correção usa o IPCA, a inflação oficial, do mês escolhido até o último mês publicado. A poupança usa o rendimento oficial de um depósito feito no dia 1º de cada mês, pela regra dos depósitos a partir de 4 de maio de 2012; por isso a comparação com a poupança começa em junho de 2012.</p>
+              <h3>Juros</h3>
+              <p>São as taxas médias cobradas pelos bancos de pessoas físicas no último mês publicado pelo Banco Central. Cada banco cobra uma taxa, e a sua pode ser maior ou menor. No cartão de crédito, a lei limita os juros e encargos do rotativo e do parcelamento da fatura ao valor da dívida original (Lei 14.690/2023): uma dívida de R$ 500 não passa de R$ 1.000. O cheque especial tem juros limitados a 8% ao mês (Resolução CMN 4.765/2019).</p>
+              <button type="button" class="botao" data-baixar="dinheiro">Baixar planilha com as taxas</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: INSS e Receita Federal (tabelas de 2026, conferidas em <span data-campo="din-conferido">sem dado</span>), IBGE (IPCA) e Banco Central (taxas médias de juros, séries 25477, 25463 e 25470, e rendimento da poupança, série 195). As taxas mudam uma vez por mês.</p>
         </section>
 
         <section id="avisos" class="bloco bloco-dados" aria-labelledby="avisos-titulo">
