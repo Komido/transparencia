@@ -1265,3 +1265,33 @@ td.num .detalhe { white-space: normal; }
 }
 .selo-dado.aviso { background: var(--aviso-fundo); border-left-color: var(--aviso); }
 .numeros dd.detalhe { font-weight: 400; color: var(--tinta-2); }
+
+/* Quem faz o quê: um cartão por nível de governo, com quem administra e quem
+   faz as leis lado a lado a partir do tablet. */
+.niveis { display: grid; gap: var(--e-4); margin-top: var(--e-4); }
+.nivel { padding: var(--e-4); background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); }
+.bloco .nivel h3 { margin: 0 0 var(--e-3); padding: 0; border: 0; font-size: var(--fs-4); }
+.nivel h3 span { margin-left: 6px; font-size: var(--fs-2); font-weight: 400; color: var(--tinta-2); }
+.cargos { display: grid; gap: var(--e-4); }
+.cargo + .cargo { padding-top: var(--e-4); border-top: 1px solid var(--borda); }
+.cargo p { margin: 0 0 var(--e-2); max-width: var(--prosa); }
+.cargo .cargo-papel {
+  margin-bottom: 2px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.cargo .cargo-nome { font-size: 1.0625rem; font-weight: 700; }
+.cargo .cargo-exemplo { padding: var(--e-2) var(--e-3); font-size: var(--fs-2); background: var(--recuo); border-radius: var(--raio); }
+.cargo-fatos { display: grid; gap: 4px; margin: 0; font-size: var(--fs-2); }
+.cargo-fatos div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--e-2); }
+.cargo-fatos dt { color: var(--tinta-2); }
+.cargo-fatos dd { margin: 0; }
+@media (min-width: 720px) {
+  .cargos { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-5); }
+  .cargo + .cargo { padding: 0 0 0 var(--e-5); border-top: 0; border-left: 1px solid var(--borda); }
+}
+.lista-simples { margin: 0 0 var(--e-3); padding-left: 1.15em; display: grid; gap: 6px; max-width: var(--prosa); }
+.tabela-quem tbody th { min-width: 9.5rem; }
