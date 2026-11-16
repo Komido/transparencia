@@ -6,7 +6,7 @@ name: Teste de agendamento (temporário)
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/10 * * * *"
 
 permissions: {}
 
