@@ -1219,3 +1219,49 @@ td.num .detalhe { white-space: normal; }
   .barras .barra-valor { margin-left: auto; }
 }
 
+
+/* Contas das prefeituras: busca por nome com sugestões e selo do dado. */
+.busca-cidade { position: relative; }
+.busca-cidade > label { font-size: var(--fs-2); font-weight: 600; color: var(--tinta-2); }
+.busca-cidade input {
+  min-height: var(--toque);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--borda-controle);
+  border-radius: var(--raio);
+}
+.busca-cidade input::placeholder { color: var(--tinta-3); }
+.sugestoes {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--superficie);
+  border: 1px solid var(--borda-controle);
+  border-radius: var(--raio);
+  max-height: 20rem;
+  overflow-y: auto;
+}
+.sugestoes li { display: flex; align-items: baseline; gap: 6px; min-height: var(--toque); padding: 10px 12px; cursor: pointer; }
+.sugestoes li small { color: var(--tinta-2); font-size: var(--fs-1); }
+.sugestoes li[aria-selected="true"], .sugestoes li:hover { background: var(--recuo); }
+.sugestoes .sugestao-nada { color: var(--tinta-2); cursor: default; }
+.sugestoes .sugestao-nada:hover { background: none; }
+.selo-dado {
+  margin: 0 0 var(--e-3);
+  padding: var(--e-2) var(--e-3);
+  font-size: var(--fs-2);
+  background: var(--recuo);
+  border-left: 4px solid var(--borda-controle);
+  border-radius: var(--raio);
+  max-width: var(--prosa);
+}
+.selo-dado.aviso { background: var(--aviso-fundo); border-left-color: var(--aviso); }
+.numeros dd.detalhe { font-weight: 400; color: var(--tinta-2); }

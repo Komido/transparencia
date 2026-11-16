@@ -55,6 +55,7 @@
                 <li><a href="#viagens">Viagens a serviço e de ministros</a></li>
                 <li><a href="#contas">As contas fecham?</a></li>
                 <li><a href="#estados">Contas do seu estado</a></li>
+                <li><a href="#municipios">Contas da sua cidade</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
@@ -154,7 +155,7 @@
         <ul>
           <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR e dólar</span></a></li>
           <li><a href="#arrecadacao"><strong>Impostos</strong><span>quanto o governo arrecada e de onde vem</span></a></li>
-          <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida e estados</span></a></li>
+          <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida, estados e cidades</span></a></li>
           <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
         </ul>
       </nav>
@@ -699,6 +700,49 @@
             </div>
           </details>
           <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
+        </section>
+
+        <section id="municipios" class="bloco bloco-dados" aria-labelledby="municipios-titulo">
+          <p class="tema">Contas do governo</p>
+          <h2 id="municipios-titulo">De onde vem o dinheiro da sua cidade?</h2>
+          <p class="intro">A prefeitura paga escola, posto de saúde, coleta de lixo e obras com dois tipos de dinheiro: impostos que ela mesma cobra, como IPTU e ISS, e repasses da União e do estado. Em muitas cidades, quase tudo vem de repasses.</p>
+          <div class="filtros">
+            <div class="campo largo busca-cidade">
+              <label for="mun-busca">Cidade</label>
+              <input id="mun-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mun-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome da cidade">
+              <ul id="mun-sugestoes" class="sugestoes" role="listbox" aria-label="Cidades encontradas" hidden></ul>
+            </div>
+            <label class="campo"><span>Ano</span>
+              <select id="mun-ano"></select>
+            </label>
+          </div>
+          <p id="mun-vazio" class="resumo-vazio">Digite o nome de uma cidade para ver de onde vem o dinheiro da prefeitura. Estão aqui as 5.570 cidades do país.</p>
+          <div id="mun-detalhe" hidden>
+            <p id="mun-selo" class="selo-dado"></p>
+            <div class="resumo" data-campo="mun-resumo"></div>
+            <div id="mun-contas">
+              <h3>De onde veio cada R$ 100</h3>
+              <ul class="barras" id="mun-barras"></ul>
+              <h3>Comparada com outras cidades</h3>
+              <dl class="numeros" id="mun-compara"></dl>
+              <p class="nota" data-campo="mun-compara-nota"></p>
+            </div>
+          </div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Que dinheiro entra nessa conta?</h3>
+              <p>A receita corrente do ano: o dinheiro que entra para o dia a dia da prefeitura. Ficam de fora empréstimos, venda de imóveis e repasses feitos só para obras (as receitas de capital). Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
+              <h3>O que é cada repasse?</h3>
+              <p><strong>FPM:</strong> o Fundo de Participação dos Municípios. A União junta parte do Imposto de Renda e do IPI e divide entre as cidades; cidades pequenas recebem mais por morador. <strong>ICMS:</strong> um quarto do imposto estadual sobre mercadorias e serviços fica com as cidades, dividido principalmente pela atividade econômica de cada uma. <strong>IPVA:</strong> metade do imposto dos carros registrados na cidade fica com ela. <strong>FUNDEB:</strong> o fundo da educação básica. Parte do FPM e do ICMS de cada cidade vai para o fundo, que devolve de acordo com o número de alunos da rede. <strong>Outros repasses:</strong> o dinheiro do SUS, da assistência social, da merenda, a parte do imposto sobre terras rurais (ITR) e outros.</p>
+              <h3>Por que comparar com cidades do mesmo tamanho?</h3>
+              <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
+              <h3>O que quer dizer cada aviso?</h3>
+              <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
+              <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3, ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>.</p>
         </section>
 
         <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">

@@ -150,3 +150,36 @@ export async function carregarPortal(nome) {
   if (nome === 'ministerios' && !d.divida) falhar('ministérios: dívida');
   return d;
 }
+
+// Contas das prefeituras: resumo por estado gerado por
+// scripts/municipios_para_json.py (Tesouro, RREO Anexo 3 de cada prefeitura).
+const SITUACOES_PREFEITURA = ['ok', 'nao_fecha', 'sem_relatorio', 'erro', 'df'];
+
+export async function carregarIndiceMunicipios() {
+  const resposta = await fetch('dados/municipios/indice.json', { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar a lista de cidades (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2015 && a <= 2100)) falhar('prefeituras: anos');
+  if (!Array.isArray(d.campos) || !d.campos.every(ehTexto)) falhar('prefeituras: campos');
+  if (!Array.isArray(d.faixas) || !d.faixas.every((f) => f && ehTexto(f.rotulo) && (f.ate === null || Number.isInteger(f.ate)))) falhar('prefeituras: faixas');
+  if (!Array.isArray(d.cidades) || d.cidades.length < 20 || !d.cidades.every((c) => Array.isArray(c) && Number.isInteger(c[0])
+    && c[0] >= 1100000 && c[0] <= 5399999 && ehTexto(c[1]) && /^[A-Z]{2}$/.test(c[2]) && Number.isInteger(c[3]))) falhar('prefeituras: cidades');
+  return d;
+}
+
+export async function carregarMunicipiosUf(uf, nCampos) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('prefeituras: UF');
+  const resposta = await fetch(`dados/municipios/${uf}.json`, { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar as prefeituras de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || !Array.isArray(d.municipios)) falhar(`prefeituras de ${uf}`);
+  for (const m of d.municipios) {
+    if (!m || !Number.isInteger(m.c) || !ehTexto(m.n) || !Number.isInteger(m.p) || !m.a || typeof m.a !== 'object') falhar(`prefeitura de ${uf}`);
+    for (const r of Object.values(m.a)) {
+      if (!r || !SITUACOES_PREFEITURA.includes(r.s)) falhar(`situação de prefeitura de ${uf}`);
+      if (r.v != null && (!Array.isArray(r.v) || r.v.length !== nCampos || !r.v.every(ehNumeroOuNulo))) falhar(`valores de prefeitura de ${uf}`);
+      if (r.p != null && !Number.isInteger(r.p)) falhar(`população de prefeitura de ${uf}`);
+    }
+  }
+  return d;
+}
