@@ -1,0 +1,18 @@
+name: Teste de agendamento (temporário)
+
+# Só para descobrir por que as tarefas agendadas não disparam neste
+# repositório. Não lê nem grava nada: escreve uma linha no registro.
+# Será apagado ao fim do teste.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions: {}
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - run: echo "Agendamento disparou em $(date -u '+%Y-%m-%d %H:%M UTC')"
