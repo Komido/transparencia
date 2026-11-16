@@ -1,0 +1,131 @@
+name: Resumir as contas das prefeituras (Tesouro, SICONFI)
+
+# O Tesouro Nacional publica o Relatório Resumido da Execução Orçamentária de
+# cada prefeitura na API do SICONFI, uma prefeitura por pedido. Esta tarefa
+# pede o Anexo 3 (de onde vem a receita: impostos da cidade e repasses) do
+# ano completo de todas as prefeituras do país (scripts/municipios_para_json.py),
+# um estado por passo, e grava dados-fonte/municipios/UF.json com o SHA-256 de
+# cada resposta. No fim, monta os arquivos que o site lê em
+# site/dados/municipios/. Nada passa pelo banco.
+#
+# Os estados rodam no máximo dois por vez, com pausa entre pedidos, para não
+# exceder o limite do Tesouro. Cada estado grava só o próprio arquivo: se um
+# falhar, os outros não se perdem.
+#
+# Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), uma vez
+# por mês; ver supabase/migrations/20261116190000_disparo_municipios.sql.
+
+on:
+  workflow_dispatch:
+    inputs:
+      anos:
+        description: "Anos separados por vírgula (vazio: os dois últimos com relatório vencido)"
+        required: false
+        default: ""
+      ufs:
+        description: "Siglas separadas por espaço ou vírgula (vazio ou 'todas': o país todo)"
+        required: false
+        default: "todas"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prefeituras
+  cancel-in-progress: false
+
+jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    outputs:
+      ufs: ${{ steps.lista.outputs.ufs }}
+    steps:
+      - id: lista
+        env:
+          UFS: ${{ github.event.inputs.ufs }}
+        run: |
+          set -euo pipefail
+          todas="SP MG BA RS PR SC GO PI PB MA PE CE RN PA TO MT SE AL RO ES RJ MS AM AC AP RR DF"
+          if [ -z "${UFS:-}" ] || [ "$UFS" = "todas" ]; then lista="$todas"; else lista="${UFS//,/ }"; fi
+          for uf in $lista; do
+            case " $todas " in *" $uf "*) ;; *) echo "UF desconhecida: $uf"; exit 1 ;; esac
+          done
+          echo "ufs=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1].split()))' "$lista")" >> "$GITHUB_OUTPUT"
+
+  buscar:
+    needs: preparar
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      max-parallel: 2
+      fail-fast: false
+      matrix:
+        uf: ${{ fromJSON(needs.preparar.outputs.ufs) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Buscar as prefeituras do estado
+        env:
+          UF: ${{ matrix.uf }}
+          ANOS: ${{ github.event.inputs.anos }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -euo pipefail
+          if [ -n "${ANOS:-}" ]; then
+            [[ "$ANOS" =~ ^[0-9]{4}(,[0-9]{4})*$ ]] || { echo "Anos inválidos: $ANOS"; exit 1; }
+            python3 scripts/municipios_para_json.py --uf "$UF" --anos "$ANOS"
+          else
+            python3 scripts/municipios_para_json.py --uf "$UF"
+          fi
+
+      - name: Gravar o estado
+        env:
+          UF: ${{ matrix.uf }}
+        run: |
+          set -euo pipefail
+          arquivo="dados-fonte/municipios/${UF}.json"
+          if git diff --quiet -- "$arquivo" && [ -z "$(git ls-files --others --exclude-standard "$arquivo")" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$arquivo"
+          git commit -q -m "Atualiza contas das prefeituras (${UF})"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
+
+  montar:
+    needs: [preparar, buscar]
+    if: ${{ always() && needs.preparar.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pegar o que os estados gravaram
+        run: git pull --rebase --quiet
+
+      - name: Montar os arquivos do site
+        run: python3 scripts/municipios_para_json.py --montar
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/municipios \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/municipios)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/municipios
+          git commit -q -m "Atualiza resumo das contas das prefeituras"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
