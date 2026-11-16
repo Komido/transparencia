@@ -36,8 +36,11 @@ Saídas:
   site/dados/beneficios/indice.json    (meses disponíveis e totais do país)
 
 Uso:
-  python3 scripts/beneficios_para_json.py --buscar [--minutos 300] [--meses 2026-09,2025-09]
+  python3 scripts/beneficios_para_json.py --buscar [--minutos 300] [--max-meses 1] [--meses 2026-09,2025-09]
   python3 scripts/beneficios_para_json.py --montar
+
+Saída de --buscar: 0 quando gravou ao menos um mês; 3 quando não havia mês a
+buscar ou não havia tempo para um mês inteiro; 1 em erro.
 """
 
 import argparse
@@ -226,7 +229,11 @@ def gravar_json(caminho, dados, compacto=True):
     os.replace(temporario, caminho)
 
 
-def buscar(minutos, meses_pedidos):
+NADA_A_FAZER = 3
+
+
+def buscar(minutos, meses_pedidos, max_meses=None):
+    """Devolve quantos meses gravou."""
     chave_valor = os.environ.get("PORTAL_TRANSPARENCIA_CHAVE", "").strip()
     if not chave_valor:
         falhar("variável PORTAL_TRANSPARENCIA_CHAVE vazia")
@@ -251,8 +258,9 @@ def buscar(minutos, meses_pedidos):
         fila = [m for i, m in enumerate(fila) if m >= PRIMEIRO_MES and m not in fila[:i] and m not in feitos]
         if not fila:
             print("nenhum mês novo para buscar")
-            return
+            return 0
         cidades = lista_de_cidades()
+        gravados = 0
         estimativa = 2 * len(cidades) * INTERVALO / 60 * 1.15
         for mes in fila:
             restam = (limite - time.monotonic()) / 60
@@ -266,6 +274,10 @@ def buscar(minutos, meses_pedidos):
             dados, gasto = resultado
             estimativa = max(estimativa, gasto * 1.1)
             gravar_json(f"{FONTE}/{mes}.json", dados)
+            gravados += 1
+            if max_meses and gravados >= max_meses:
+                break
+        return gravados
     except ChaveRecusada as erro:
         falhar(f"o Portal recusou a chave ({erro}); confira o secret PORTAL_TRANSPARENCIA_CHAVE")
 
@@ -303,8 +315,8 @@ def montar():
               "totais": {m: {p: {"valor": todos[m]["totais"][p]["valor"], "qtd": todos[m]["totais"][p]["qtd"]}
                              for p in PROGRAMAS} for m in meses}}
     for uf, municipios in sorted(por_uf.items()):
-        gravar_json(f"{DESTINO}/{uf}.json", {"uf": uf, "campos": CAMPOS, "meses": no_site,
-                                             "municipios": municipios})
+        gravar_json(f"{DESTINO}/{uf}.json", {"uf": uf, "atualizado": indice["atualizado"], "campos": CAMPOS,
+                                             "meses": no_site, "municipios": municipios})
     gravar_json(f"{DESTINO}/indice.json", indice, compacto=False)
     print(f"montados {len(por_uf)} estados; meses no site {no_site[0]} a {no_site[-1]}; {len(meses)} meses gravados")
 
@@ -314,6 +326,7 @@ def main():
     p.add_argument("--buscar", action="store_true")
     p.add_argument("--montar", action="store_true")
     p.add_argument("--minutos", type=float, default=300)
+    p.add_argument("--max-meses", type=int, help="parar depois de gravar este número de meses")
     p.add_argument("--meses", help="meses AAAA-MM separados por vírgula (padrão: automático)")
     a = p.parse_args()
     if a.buscar:
@@ -322,7 +335,12 @@ def main():
             meses = [m.strip() for m in a.meses.split(",") if m.strip()]
             if any(len(m) != 7 or m[4] != "-" for m in meses):
                 falhar(f"meses inválidos: {a.meses}")
-        buscar(a.minutos, meses)
+        gravados = buscar(a.minutos, meses, a.max_meses)
+        if a.montar:
+            montar()
+        if not gravados:
+            sys.exit(NADA_A_FAZER)
+        return
     if a.montar:
         montar()
     if not (a.buscar or a.montar):

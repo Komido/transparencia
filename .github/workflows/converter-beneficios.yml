@@ -8,8 +8,7 @@ name: Resumir Bolsa Família e BPC por cidade (Portal da Transparência)
 # A API exige chave gratuita, guardada no secret PORTAL_TRANSPARENCIA_CHAVE.
 # O script faz no máximo cerca de 200 pedidos por minuto, metade do limite do
 # Portal, e para depois de 5 horas; o que faltar fica para a próxima execução.
-# Cada mês leva cerca de 1 hora. Os meses completos são gravados mesmo se um
-# mês depois falhar.
+# Cada mês leva cerca de 1 hora e é gravado no repositório assim que termina.
 #
 # Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), de
 # madrugada; ver supabase/migrations/20261117010000_disparo_beneficios.sql.
@@ -36,40 +35,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Buscar os meses que faltam
+      # Um mês por vez: busca, monta o site e grava no repositório, para que
+      # cada mês completo fique salvo mesmo se a execução parar depois.
+      - name: Buscar e gravar mês a mês
         env:
           PORTAL_TRANSPARENCIA_CHAVE: ${{ secrets.PORTAL_TRANSPARENCIA_CHAVE }}
           MESES: ${{ github.event.inputs.meses }}
           PYTHONUNBUFFERED: "1"
         run: |
-          set -euo pipefail
+          set -uo pipefail
           if [ -n "${MESES:-}" ]; then
             [[ "$MESES" =~ ^[0-9]{4}-[0-9]{2}(,[0-9]{4}-[0-9]{2})*$ ]] || { echo "Meses inválidos: $MESES"; exit 1; }
-            python3 scripts/beneficios_para_json.py --buscar --minutos 300 --meses "$MESES"
+            extra=(--meses "$MESES")
           else
-            python3 scripts/beneficios_para_json.py --buscar --minutos 300
-          fi
-
-      # Roda mesmo se a busca falhar no meio: os meses já completos ficam.
-      - name: Montar os arquivos do site
-        if: ${{ !cancelled() }}
-        run: python3 scripts/beneficios_para_json.py --montar
-
-      - name: Gravar se mudou
-        if: ${{ !cancelled() }}
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- dados-fonte/beneficios site/dados/beneficios \
-             && [ -z "$(git ls-files --others --exclude-standard dados-fonte/beneficios site/dados/beneficios)" ]; then
-            echo "Nada mudou."
-            exit 0
+            extra=()
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dados-fonte/beneficios site/dados/beneficios
-          git commit -q -m "Atualiza Bolsa Família e BPC por cidade"
-          for i in 1 2 3 4 5; do
-            git pull --rebase --quiet && git push --quiet && exit 0
-            sleep $((i * 5))
+          fim=$((SECONDS + 300 * 60))
+          while :; do
+            restam=$(( (fim - SECONDS) / 60 ))
+            python3 scripts/beneficios_para_json.py --buscar --montar --max-meses 1 --minutos "$restam" "${extra[@]}"
+            situacao=$?
+            if [ "$situacao" -eq 3 ]; then echo "Nada mais a buscar nesta execução."; break; fi
+            if [ "$situacao" -ne 0 ]; then exit "$situacao"; fi
+            git add dados-fonte/beneficios site/dados/beneficios
+            if git diff --cached --quiet; then echo "Nada mudou."; break; fi
+            git commit -q -m "Atualiza Bolsa Família e BPC por cidade"
+            enviado=0
+            for i in 1 2 3 4 5; do
+              if git pull --rebase --quiet && git push --quiet; then enviado=1; break; fi
+              sleep $((i * 5))
+            done
+            [ "$enviado" -eq 1 ] || exit 1
           done
-          exit 1
