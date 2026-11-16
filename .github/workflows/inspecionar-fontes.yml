@@ -28,38 +28,27 @@ jobs:
         run: |
           set -u
           mkdir -p /tmp/lei && cd /tmp/lei
-          curl -sSL --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o lei.html -w "%{http_code} %{size_download} bytes\n" \
+          curl -sSL --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o lei.html -w "%{http_code} %{size_download} bytes %{url_effective}\n" \
             "https://www.planalto.gov.br/ccivil_03/leis/l9250.htm"
+          file lei.html
           python3 - lei.html <<'PY2'
           import html, re, sys
           bruto = open(sys.argv[1], "rb").read()
-          for cod in ("utf-8", "cp1252"):
+          for cod in ("utf-8", "cp1252", "latin-1"):
               try:
-                  texto = bruto.decode(cod); break
+                  texto = bruto.decode(cod); print("codificação:", cod); break
               except UnicodeDecodeError:
                   continue
-          texto = html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"(?is)<(script|style).*?</\1>", " ", texto)))
-          linhas = [re.sub(r"\s+", " ", l).strip() for l in re.split(r"(?=Art\. ?\d)", texto)]
-          for l in linhas:
-              if l.startswith(("Art. 3", "Art. 4", "Art.3", "Art.4")) or re.search(r"10\.800|900,00", l):
-                  print(l[:700]); print("---")
+          titulo = re.search(r"(?is)<title>(.*?)</title>", texto)
+          print("título:", titulo.group(1).strip() if titulo else "-")
+          texto = re.sub(r"(?is)<(script|style).*?</\1>", " ", texto)
+          texto = html.unescape(re.sub(r"<[^>]+>", " ", texto)).replace("\xa0", " ")
+          texto = re.sub(r"\s+", " ", texto)
+          print("tamanho do texto:", len(texto))
+          for padrao in (r"Art\. 3", r"10\.800", r"900,00", r"isen"):
+              achados = [m.start() for m in re.finditer(padrao, texto)][:4]
+              print(f"== {padrao}: {len(achados)} ocorrências")
+              for k in achados:
+                  print("  ...", texto[max(0, k - 200):k + 400], "...")
           PY2
-
-      - name: Ipeadata, séries de arrecadação federal antes de 2000
-        continue-on-error: true
-        run: |
-          set -u
-          mkdir -p /tmp/ipea && cd /tmp/ipea
-          for termo in "Arrecadação" "receitas federais" "Receita Federal"; do
-            q=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1]))' "contains(SERNOME,'$termo')")
-            curl -sSL --max-time 120 -o meta.json -w "%{http_code} %{size_download} bytes\n" \
-              "http://www.ipeadata.gov.br/api/odata4/Metadados?\$filter=$q&\$select=SERCODIGO,SERNOME,FNTSIGLA,PERNOME,UNINOME,SERMINDATA,SERMAXDATA,SERSTATUS"
-            python3 -c "
-          import json
-          d = json.load(open('meta.json'))
-          for s in d.get('value', [])[:60]:
-              print(s.get('SERCODIGO'), '|', s.get('SERNOME'), '|', s.get('FNTSIGLA'), '|', s.get('PERNOME'), '|', s.get('UNINOME'), '|', (s.get('SERMINDATA') or '')[:10], 'a', (s.get('SERMAXDATA') or '')[:10], '|', s.get('SERSTATUS'))
-          " || head -c 400 meta.json
-            echo "==="
-          done
 
