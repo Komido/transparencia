@@ -56,6 +56,11 @@ export function validarPainel(d) {
   d.series = (d.series ?? []).filter((x) => ehTexto(x.id) && ehTexto(x.nome));
   d.avisos = Array.isArray(d.avisos) ? d.avisos.filter((a) => ehTexto(a.tipo)) : [];
   d.coletas = Array.isArray(d.coletas) ? d.coletas.filter((k) => ehTexto(k.id)) : [];
+  // Quando chegou o último número de cada série (bloco "O que chegou de novo").
+  const at = d.atualizacoes && typeof d.atualizacoes === 'object' ? d.atualizacoes : {};
+  d.atualizacoes = Object.fromEntries(Object.entries(at).filter(([, a]) => a && ehMes(a.periodo)
+    && typeof a.coletado_em === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(a.coletado_em)
+    && typeof a.primeira_carga === 'boolean'));
   return d;
 }
 
@@ -198,5 +203,15 @@ export async function carregarFolha() {
   const ir = d.ir;
   if (!ir || !faixasOk(ir.faixas, true) || typeof ir.dependente !== 'number' || typeof ir.desconto_simplificado !== 'number'
     || !ehLinkSeguro(ir.fonte)) falhar('tabela do IR');
+  return d;
+}
+
+// Próximas divulgações do IBGE (dados/agenda.json, scripts/agenda_ibge.py).
+export async function carregarAgenda() {
+  const resposta = await fetch('dados/agenda.json', { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar a agenda (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !Array.isArray(d.itens) || !d.itens.every((x) => x && ehData(x.data) && ehTexto(x.nome)
+    && typeof x.secao === 'string' && /^#[a-z-]+$/.test(x.secao))) falhar('agenda');
   return d;
 }

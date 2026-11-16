@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -1763,6 +1763,89 @@ async function montarDinheiro(ctx) {
       .filter((l) => l.slice(1, 5).some((v) => v !== '')),
   }));
   secao.hidden = false;
+}
+
+// ---------------------------------------------------------------------------
+// O que chegou de novo: o último número de cada indicador principal, do que
+// chegou mais recentemente para o mais antigo, com a data da coleta; e as
+// próximas divulgações do IBGE. Marca "novo" o que chegou nos últimos 7 dias
+// (a carga inicial do site não conta como novidade).
+const NOVIDADES = [
+  { id: 'ipca_var', nome: 'Inflação do mês (IPCA)', valor: (v) => f.porcentagem(v, 2), secao: '#hoje' },
+  { id: 'inpc_var', nome: 'Inflação das famílias de menor renda (INPC)', valor: (v) => f.porcentagem(v, 2), secao: '#salario' },
+  { id: 'desocupacao', nome: 'Desemprego', valor: (v) => f.porcentagem(v, 1), secao: '#hoje', trimestre: true },
+  { id: 'renda_trabalho', nome: 'Renda média de quem trabalha', valor: (v) => f.moeda(v, 0), secao: '#hoje', trimestre: true },
+  { id: 'arrecadacao_federal', nome: 'Arrecadação federal do mês', valor: null, secao: '#arrecadacao' },
+  { id: 'divida_bruta_pib', nome: 'Dívida do governo', valor: (v) => `${f.porcentagem(v, 1)} do PIB`, secao: '#contas' },
+  { id: 'dolar_ptax', nome: 'Dólar, média do mês', valor: (v) => f.moeda(v, 2), secao: '#dolar' },
+  { id: 'comb_gasolina', nome: 'Gasolina, preço médio do litro', valor: (v) => f.moeda(v, 2), secao: '#combustiveis' },
+  { id: 'comb_glp', nome: 'Botijão de gás (13 kg)', valor: (v) => f.moeda(v, 2), secao: '#combustiveis' },
+  { id: 'smn_dieese', nome: 'Salário necessário (DIEESE)', valor: (v) => f.moeda(v, 0), secao: '#orcamento' },
+  { id: 'juros_rotativo', nome: 'Juros do rotativo do cartão', valor: (v) => `${f.porcentagem(v, 2)} ao mês`, secao: '#dinheiro' },
+  { id: 'salario_minimo', nome: 'Salário mínimo em vigor', valor: (v) => f.moeda(v, 0), secao: '#salario', vigente: true },
+];
+
+async function montarNovidades(ctx) {
+  const { meses, s, d } = ctx;
+  const atual = d.atualizacoes;
+  const lista = $('#novidades-lista');
+  const agora = Date.now();
+  const itens = NOVIDADES.map((n, ordem) => ({ ...n, ordem, a: atual[n.id] })).filter((n) => n.a)
+    // O que veio da carga inicial do site não tem data de chegada que
+    // signifique algo para o leitor: vai depois, na ordem da lista.
+    .sort((x, y) => (x.a.primeira_carga - y.a.primeira_carga)
+      || (x.a.primeira_carga ? 0 : y.a.coletado_em.localeCompare(x.a.coletado_em)) || x.ordem - y.ordem);
+  lista.replaceChildren();
+  for (const n of itens) {
+    const i = meses.indexOf(n.a.periodo);
+    let texto;
+    if (n.id === 'arrecadacao_federal') {
+      texto = i >= 0 && ctx.total[i] != null ? f.reaisPorExtenso(ctx.total[i] * 1e6) : null;
+    } else if (n.vigente) {
+      const u = c.ultimoValor(meses, s[n.id]);
+      texto = u ? n.valor(u.valor) : null;
+      // Primeiro mês com o valor atual, contado para trás na série.
+      let k = meses.indexOf(u?.mes);
+      while (k > 0 && s[n.id][k - 1] === u.valor) k -= 1;
+      n.desde = k >= 0 ? meses[k] : null;
+    } else {
+      texto = i >= 0 && s[n.id]?.[i] != null ? n.valor(s[n.id][i]) : null;
+    }
+    if (!texto) continue;
+    const quando = new Date(n.a.coletado_em);
+    const novo = !n.a.primeira_carga && agora - quando.getTime() < 7 * 864e5;
+    const li = el('li', novo ? 'novo' : null, null, lista);
+    const a = el('a', null, null, li);
+    a.href = n.secao;
+    const topo = el('span', 'novidade-topo', null, a);
+    if (novo) el('span', 'novidade-marca', 'novo', topo);
+    el('span', 'novidade-nome', n.nome, topo);
+    el('span', 'novidade-valor', texto, topo);
+    const periodo = n.vigente ? (n.desde ? `em vigor desde ${f.mesLongo(n.desde)}` : 'em vigor') : n.trimestre ? `trimestre até ${f.mesLongo(n.a.periodo)}` : f.mesLongo(n.a.periodo);
+    const chegada = n.a.primeira_carga ? '' : ` · chegou ao site em ${f.dataDeTimestamp(n.a.coletado_em)}`;
+    el('span', 'novidade-quando', `${periodo}${chegada}`, a);
+  }
+
+  try {
+    const agenda = await carregarAgenda();
+    const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+    const proximas = agenda.itens.filter((x) => x.data >= hoje).slice(0, 6);
+    if (proximas.length) {
+      const al = $('#agenda-lista');
+      al.replaceChildren();
+      for (const x of proximas) {
+        const a = el('a', null, null, el('li', null, null, al));
+        a.href = x.secao;
+        const topo = el('span', 'novidade-topo', null, a);
+        el('span', 'novidade-data', f.dataCurta(x.data), topo);
+        el('span', 'novidade-nome', x.nome, topo);
+      }
+      $('#agenda-caixa').hidden = false;
+    }
+  } catch (erro) {
+    console.error(erro);
+  }
+  $('#novidades').hidden = !lista.children.length && $('#agenda-caixa').hidden;
 }
 
 async function montarCota(ctx) {
@@ -3670,7 +3753,7 @@ async function iniciar() {
       cidade.indice = [];
     }
     montarSeletoresDeCidade();
-    const etapas = [iniciarContador, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
+    const etapas = [iniciarContador, montarNovidades, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarCota, montarDinheiro,
       montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {

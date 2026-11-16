@@ -6,7 +6,7 @@ Fonte oficial: API de calendário do IBGE
 
 Fica só o que o site usa: IPCA, INPC e PNAD Contínua mensal (desemprego e
 renda). A data de divulgação vem como "DD/MM/AAAA HH:MM:SS"; o site mostra só
-o dia. O arquivo não guarda a data da busca, para só mudar quando a agenda
+o dia. IPCA e INPC saem juntos quase sempre; no mesmo dia, viram uma linha só. O arquivo não guarda a data da busca, para só mudar quando a agenda
 mudar.
 
 Uso: python3 scripts/agenda_ibge.py calendario.json site/dados/agenda.json
@@ -26,7 +26,7 @@ FONTE = "https://servicodados.ibge.gov.br/api/v3/calendario/"
 # Título exato no calendário -> (chave, nome para o leitor, seção do site).
 PRODUTOS = {
     "Índice Nacional de Preços ao Consumidor Amplo": ("ipca", "Inflação oficial (IPCA)", "#hoje"),
-    "Índice Nacional de Preços ao Consumidor": ("inpc", "Inflação das famílias de menor renda (INPC), usada no reajuste do salário mínimo", "#salario"),
+    "Índice Nacional de Preços ao Consumidor": ("inpc", "Inflação das famílias de menor renda (INPC)", "#salario"),
     "Pesquisa Nacional por Amostra de Domicílios Contínua Mensal": ("pnad", "Desemprego e renda de quem trabalha (PNAD Contínua)", "#hoje"),
 }
 
@@ -34,6 +34,19 @@ PRODUTOS = {
 def falhar(mensagem):
     print(f"ERRO: {mensagem}", file=sys.stderr)
     sys.exit(1)
+
+
+def juntar_inflacao(itens):
+    """IPCA e INPC no mesmo dia viram uma linha só."""
+    datas_inpc = {x["data"] for x in itens if x["produto"] == "inpc"}
+    saida = []
+    for x in itens:
+        if x["produto"] == "inpc" and any(y["produto"] == "ipca" and y["data"] == x["data"] for y in itens):
+            continue
+        if x["produto"] == "ipca" and x["data"] in datas_inpc:
+            x = {"data": x["data"], "produto": "inflacao", "nome": "Inflação do mês (IPCA e INPC)", "secao": "#hoje"}
+        saida.append(x)
+    return saida
 
 
 def main():
@@ -66,6 +79,7 @@ def main():
             unicos.append(x)
     if not any(x["produto"] == "ipca" for x in unicos):
         falhar("nenhuma divulgação do IPCA no período; calendário incompleto?")
+    unicos = juntar_inflacao(unicos)
     destino = sys.argv[2]
     os.makedirs(os.path.dirname(destino), exist_ok=True)
     with open(destino, "w", encoding="utf-8") as fh:

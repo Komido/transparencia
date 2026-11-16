@@ -9,14 +9,8 @@
   },
   {
    "data": "2026-12-11",
-   "produto": "inpc",
-   "nome": "Inflação das famílias de menor renda (INPC), usada no reajuste do salário mínimo",
-   "secao": "#salario"
-  },
-  {
-   "data": "2026-12-11",
-   "produto": "ipca",
-   "nome": "Inflação oficial (IPCA)",
+   "produto": "inflacao",
+   "nome": "Inflação do mês (IPCA e INPC)",
    "secao": "#hoje"
   },
   {
@@ -27,14 +21,8 @@
   },
   {
    "data": "2027-01-12",
-   "produto": "inpc",
-   "nome": "Inflação das famílias de menor renda (INPC), usada no reajuste do salário mínimo",
-   "secao": "#salario"
-  },
-  {
-   "data": "2027-01-12",
-   "produto": "ipca",
-   "nome": "Inflação oficial (IPCA)",
+   "produto": "inflacao",
+   "nome": "Inflação do mês (IPCA e INPC)",
    "secao": "#hoje"
   },
   {
