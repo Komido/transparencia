@@ -301,7 +301,7 @@ main { padding-bottom: var(--e-6); }
   .hoje-contexto { padding-top: 6px; }
   #hoje-lista { margin-top: var(--e-3); }
   .hoje-contexto .aviso-crise { margin-bottom: 0; }
-  .filtros.hoje-filtros { grid-template-columns: minmax(0, 22rem); margin-bottom: 0; }
+  .filtros.hoje-filtros { margin-bottom: 0; }
 }
 
 /* Como está o Brasil hoje: lista compacta */
@@ -1139,6 +1139,9 @@ td.num .detalhe { white-space: normal; }
 .compara-pior { color: var(--ruim); }
 .compara-neutro { color: var(--tinta-2); }
 .hoje-filtros { margin: var(--e-2) 0 var(--e-1); }
+@media (min-width: 720px) {
+  .filtros.hoje-filtros { grid-template-columns: minmax(0, 22rem); }
+}
 .hoje-valor, .comp-valor { white-space: normal; text-align: right; }
 
 /* Computador: listas e contas sem esticar ----------------------------------
@@ -1155,8 +1158,6 @@ td.num .detalhe { white-space: normal; }
 
   .orc-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-6); align-items: start; }
   .orc-painel { position: sticky; top: calc(var(--topo) + var(--e-4)); }
-  .orc-painel .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .orc-painel .filtros .largo { grid-column: 1 / -1; }
   .orc-contas > h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
   .orc-cobre { max-width: 46rem; }
 }
@@ -1200,5 +1201,21 @@ td.num .detalhe { white-space: normal; }
   }
   .indice a:hover { color: var(--tinta); text-decoration: underline; }
   .indice a[aria-current="true"] { color: var(--tinta); font-weight: 600; border-left-color: var(--tinta); }
+}
+
+/* Orçamento, de 720 px em diante: cidade e renda na largura toda (a renda
+   tem texto longo, "2 salários mínimos (R$ 3.242)"), adultos e crianças
+   lado a lado. */
+@media (min-width: 720px) {
+  .orc-painel .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 32rem; }
+  .orc-painel .filtros .largo { grid-column: 1 / -1; }
+}
+
+/* Listas em duas colunas: se o valor for longo (como "R$ 30 de cada R$ 100 ·
+   R$ 1,10 tri"), ele desce para a linha de baixo, alinhado à direita, em vez
+   de espremer o nome. */
+@media (min-width: 1024px) {
+  .barras:has(> li:nth-child(4)) .barra-nome { flex-basis: 14rem; }
+  .barras .barra-valor { margin-left: auto; }
 }
 
