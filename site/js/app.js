@@ -936,7 +936,10 @@ function preencherAnosPortal(sel, d) {
   sel.value = String([...d.anos].reverse().find((a) => anoFechado(d, a)) ?? d.anos[d.anos.length - 1]);
 }
 
-const nomeDoOrgao = (o, ano) => o.nomes[String(ano)] ?? Object.values(o.nomes).pop() ?? o.codigo;
+// O Portal usa o código -1, com o nome "Sem informação", para gasto sem órgão
+// identificado. O nome mostrado diz isso com clareza; o código fica igual.
+const nomeDoOrgao = (o, ano) => (o.codigo === '-1' ? 'Órgão não informado pelo Portal'
+  : o.nomes[String(ano)] ?? Object.values(o.nomes).pop() ?? o.codigo);
 
 // Lista de barras por órgão: os maiores e o resto somado em "outros".
 function barrasDeOrgaos(lista, itens, total, { explicar, maximo = 10 } = {}) {
