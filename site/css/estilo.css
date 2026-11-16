@@ -969,6 +969,7 @@ td.num .detalhe { white-space: normal; }
 .conta-nota { margin: var(--e-2) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }
 .orc-cobre { margin: var(--e-2) 0 var(--e-4); }
 .orc-cobre .comp-barra { background: var(--serie-1); border-radius: 0 5px 5px 0; }
+.orc-peso-comida { margin: 0 0 var(--e-4); max-width: var(--prosa); }
 
 /* Avisos ----------------------------------------------------------------- */
 

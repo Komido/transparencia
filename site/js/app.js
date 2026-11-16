@@ -2116,6 +2116,11 @@ function gastoDaPof(ctx, familia, chave, serieIpca, nomeDaInflacao) {
 }
 
 // grupo: a cor na barra da renda (luz, água e gás são as contas da casa).
+// Parte da comida no gasto das famílias de baixa renda na pesquisa de
+// orçamentos do DIEESE (São Paulo, 1994/95); é o divisor do salário
+// necessário (cesta × 3 ÷ 0,3571).
+const PARTE_COMIDA_DIEESE = 35.71;
+
 const ITENS_ORCAMENTO = [
   {
     id: 'comida', nome: 'Comida', grupo: 'comida',
@@ -2389,6 +2394,24 @@ function montarOrcamento(ctx) {
       caixaNec.replaceChildren();
       el('p', null, `Para ${pessoasTexto}, ${f.moeda(necFamilia, 0)} por mês (${f.numero(necFamilia / smNec.valor, 1)} salários mínimos, ${f.mesCurto(nec.mes)}), contando também transporte, saúde, educação, roupas, higiene, lazer e previdência.${cobre == null ? '' : ` A renda escolhida cobre ${f.porcentagem(cobre, 0)} disso.`}`, caixaNec);
       $('#orc-cobre-barra').style.width = `${Math.max(1, Math.min(100, cobre ?? 0))}%`;
+      // Peso da comida: a conta do DIEESE parte de que a comida é 35,71% do
+      // gasto da família. Não é meta, é a referência dele; ao lado, quanto a
+      // comida leva da renda escolhida.
+      const comida = res.itens.find((d) => d.id === 'comida');
+      const caixaComida = $('#orc-peso-comida');
+      caixaComida.hidden = !(r > 0 && comida?.valor != null);
+      if (!caixaComida.hidden) {
+        // Compara pelo número mostrado (sem casas), para "34%" não sair como
+        // "menos" ao lado de 35,71%.
+        const parte = Math.round((comida.valor / r) * 100);
+        const perto = Math.abs(parte - PARTE_COMIDA_DIEESE) <= 2;
+        let frase;
+        if (parte >= 100) frase = 'a comida sozinha já custa mais do que a renda inteira';
+        else if (perto) frase = `a comida leva ${f.porcentagem(parte, 0)} da renda, quase o mesmo`;
+        else if (parte > PARTE_COMIDA_DIEESE) frase = `só a comida já leva ${f.porcentagem(parte, 0)} da renda, mais do que isso`;
+        else frase = `a comida leva ${f.porcentagem(parte, 0)} da renda, menos do que isso`;
+        caixaComida.textContent = `A conta do DIEESE parte de que a comida é pouco mais de um terço (${f.porcentagem(PARTE_COMIDA_DIEESE, 2)}) do que uma família gasta, como era entre as famílias de renda mais baixa de São Paulo em 1994 e 1995. Com a renda escolhida, ${frase}.`;
+      }
       definir('orc-dieese-familia', familia.unidades === 3
         ? `Em ${f.mesLongo(nec.mes)}, o DIEESE calculou ${f.moeda(nec.valor, 0)} para 2 adultos e 2 crianças.`
         : `Em ${f.mesLongo(nec.mes)}, o DIEESE calculou ${f.moeda(nec.valor, 0)} para 2 adultos e 2 crianças (${f.numero(nec.valor / smNec.valor, 1)} salários mínimos). Para ${pessoasTexto}, o site aplica a mesma conta ao número de pessoas, com cada criança valendo meio adulto.`);
