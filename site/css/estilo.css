@@ -275,9 +275,33 @@ main { padding-bottom: var(--e-6); }
 }
 
 .inicio-grade { display: grid; gap: var(--e-3); }
-.inicio-lado { display: grid; gap: var(--e-3); align-content: start; }
+.inicio-grade > * { min-width: 0; }
+.abertura .carregando-aviso, .abertura .erro-carga { margin: var(--e-3) 0 0; }
+/* No computador: título e contador lado a lado; a lista do "hoje" na
+   largura toda, com o bolso e as contas do país em duas colunas; os
+   assuntos numa fileira embaixo. No celular fica na ordem do código. */
 @media (min-width: 1024px) {
-  .inicio-grade { grid-template-columns: 1.3fr 1fr; gap: var(--e-5); align-items: start; }
+  .inicio-grade {
+    grid-template-columns: minmax(0, 1fr) minmax(19rem, 22rem);
+    grid-template-areas: "abertura contador" "hoje hoje" "temas temas";
+    column-gap: var(--e-6);
+    row-gap: var(--e-5);
+    align-items: center;
+    padding-top: var(--e-5);
+  }
+  .abertura { grid-area: abertura; padding: 0; }
+  .contador { grid-area: contador; }
+  .hoje { grid-area: hoje; padding: var(--e-5) var(--e-6); }
+  .temas { grid-area: temas; align-self: start; }
+  .inicio-grade .temas h2 { margin-top: 0; }
+  .inicio-grade .temas ul { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* Cabeçalho e lista com as mesmas duas colunas: à esquerda o título e a
+     escolha; à direita o que está sendo comparado e o aviso de crise. */
+  .hoje-cabeca, #hoje-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-6); align-items: start; }
+  .hoje-contexto { padding-top: 6px; }
+  #hoje-lista { margin-top: var(--e-3); }
+  .hoje-contexto .aviso-crise { margin-bottom: 0; }
+  .filtros.hoje-filtros { grid-template-columns: minmax(0, 22rem); margin-bottom: 0; }
 }
 
 /* Como está o Brasil hoje: lista compacta */
@@ -997,7 +1021,7 @@ td.num .detalhe { white-space: normal; }
   margin: 0 0 var(--e-3);
 }
 .erro-carga p { margin: 0; }
-.falhou .bloco-dados, .falhou .inicio-grade { display: none; }
+.falhou .bloco-dados, .falhou .temas { display: none; }
 
 /* Rodapé ----------------------------------------------------------------- */
 
@@ -1115,3 +1139,24 @@ td.num .detalhe { white-space: normal; }
 .compara-neutro { color: var(--tinta-2); }
 .hoje-filtros { margin: var(--e-2) 0 var(--e-1); }
 .hoje-valor, .comp-valor { white-space: normal; text-align: right; }
+
+/* Computador: listas e contas sem esticar ----------------------------------
+   Em tela larga, nome e valor ficavam a um palmo de distância. Listas de
+   barras e o ranking de ministros viram duas colunas (a ordem segue de cima
+   para baixo, primeiro a da esquerda); a tabela dos estados e as contas do
+   orçamento ficam numa largura de leitura. */
+@media (min-width: 1024px) {
+  .barras:has(> li:nth-child(4)) { display: block; columns: 2; column-gap: var(--e-6); }
+  .barras:has(> li:nth-child(4)) > li { break-inside: avoid; margin-bottom: var(--e-3); }
+  .bloco > .ranking { display: block; columns: 2; column-gap: var(--e-6); padding-left: 0; }
+  .bloco > .ranking > li { break-inside: avoid; margin: 0 0 var(--e-2) 1.75rem; }
+  .tabela-rolagem:has(#tabela-estados) { max-width: 46rem; }
+
+  .orc-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-6); align-items: start; }
+  .orc-painel { position: sticky; top: calc(var(--topo) + var(--e-4)); }
+  .orc-painel .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .orc-painel .filtros .largo { grid-column: 1 / -1; }
+  .orc-contas > h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+  .orc-cobre { max-width: 46rem; }
+}
+

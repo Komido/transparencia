@@ -276,7 +276,7 @@ function montarComposicao(ctx) {
     const explica = t.TRIBUTOS[g.grupo]?.explica;
     if (explica) el('span', 'barra-explica', explica, nome);
     const pct = (g.soma / total) * 100;
-    el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.soma)}`, topo);
+    el('span', 'barra-valor', `${f.parteDoTotal(pct)} · ${f.reaisCompacto(g.soma)}`, topo);
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
     const barra = el('div', 'barra', null, trilho);
@@ -957,7 +957,7 @@ function barrasDeOrgaos(lista, itens, total, { explicar, maximo = 10 } = {}) {
     const explica = g.outros ? null : explicar?.(g);
     if (explica) el('span', 'barra-explica', explica, nome);
     const pct = total > 0 ? (g.valor / total) * 100 : 0;
-    el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.valor)}`, topo);
+    el('span', 'barra-valor', `${f.parteDoTotal(pct)} · ${f.reaisCompacto(g.valor)}`, topo);
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
     el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
@@ -1267,7 +1267,7 @@ function barrasDeGrupos(lista, grupos, valores) {
     const topo = el('div', 'barra-topo', null, li);
     el('span', 'barra-nome', g.nome, topo);
     const pct = total > 0 ? (g.valor / total) * 100 : 0;
-    el('span', 'barra-valor', `${f.porcentagem(pct, pct < 1 ? 1 : 0)} · ${f.reaisCompacto(g.valor)}`, topo);
+    el('span', 'barra-valor', `${f.parteDoTotal(pct)} · ${f.reaisCompacto(g.valor)}`, topo);
     const trilho = el('div', 'barra-trilho', null, li);
     trilho.setAttribute('aria-hidden', 'true');
     el('div', 'barra', null, trilho).style.width = `${Math.max(1, total > 0 ? (g.valor / total) * 100 : 0)}%`;
@@ -2852,11 +2852,14 @@ function montarResumo(ctx) {
   const desenharHoje = () => {
     const p = periodos.get(select.value);
     caixaHoje.replaceChildren();
+    // Duas colunas, que ficam lado a lado no computador: o bolso de um lado,
+    // as contas do país (e do estado) do outro.
+    const colunas = { bolso: el('div', 'hoje-coluna', null, caixaHoje), pais: el('div', 'hoje-coluna', null, caixaHoje) };
     for (const [grupo, titulo] of [['bolso', 'No seu bolso'], ['pais', 'Nas contas do país']]) {
       const doGrupo = itens.filter((it) => it.grupo === grupo);
       if (!doGrupo.length) continue;
-      el('p', 'hoje-grupo', titulo, caixaHoje);
-      const lista = el('ul', null, null, caixaHoje);
+      el('p', 'hoje-grupo', titulo, colunas[grupo]);
+      const lista = el('ul', null, null, colunas[grupo]);
       [...doGrupo].sort((a, b) => (ordem[a.situacao?.nivel] ?? 3) - (ordem[b.situacao?.nivel] ?? 3)).forEach((it) => {
         const comp = comparacao(it, p);
         const [palavra, classe] = palavraDe(comp?.r ?? null, it.neutro, comp?.sufixo);
@@ -2883,8 +2886,8 @@ function montarResumo(ctx) {
       const ind = (chave) => uf.indicadores?.[chave]?.[k] ?? null;
       const nivelLimite = { 'dentro do limite': ['bom', 'Dentro do limite'], 'perto do limite': ['medio', 'Perto do limite'], 'acima do limite': ['ruim', 'Acima do limite'] };
       const selo = (sit) => (sit ? { nivel: nivelLimite[sit][0], texto: nivelLimite[sit][1] } : null);
-      el('p', 'hoje-grupo', `Nas contas do estado (${uf.nome})`, caixaHoje);
-      const lista = el('ul', null, null, caixaHoje);
+      el('p', 'hoje-grupo', `Nas contas do estado (${uf.nome})`, colunas.pais);
+      const lista = el('ul', null, null, colunas.pais);
       const linhaEstado = (dados) => {
         const a = el('a', 'hoje-linha', null, el('li', 'hoje-item', null, lista));
         a.href = '#estados';
@@ -2902,7 +2905,7 @@ function montarResumo(ctx) {
           valor: f.moeda(fol, 0), selo: selo(situacao(fol, ind('pessoal_limite_pct'), ind('pessoal_alerta_pct'))) });
       }
     } else {
-      const pe = el('p', 'hoje-estado', 'Para ver também as contas do seu estado, ', caixaHoje);
+      const pe = el('p', 'hoje-estado', 'Para ver também as contas do seu estado, ', colunas.pais);
       const a = el('a', null, 'escolha o estado', pe);
       a.href = '#estados';
       pe.append('.');

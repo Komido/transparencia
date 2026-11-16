@@ -76,6 +76,13 @@ export function porcentagem(v, casas = 1, sinal = false) {
   return sinal && v > 0 ? `+${txt}` : txt;
 }
 
+// Fatia de um total, para listas de barras: sem casa decimal a partir de 1%,
+// com uma abaixo disso, e "menos de 0,1%" quando arredondar daria zero.
+export function parteDoTotal(pct) {
+  if (pct > 0 && pct < 0.05) return 'menos de 0,1%';
+  return porcentagem(pct, pct < 1 ? 1 : 0);
+}
+
 // '2026-09' -> 'set/2026'
 export function mesCurto(mes) {
   if (!mes) return SEM_DADO;

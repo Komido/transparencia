@@ -78,28 +78,33 @@
   </header>
 
   <main id="conteudo" class="conteiner carregando" aria-busy="true">
-    <div class="abertura">
-      <h1>A economia e as contas públicas do Brasil, em linguagem simples</h1>
-      <p>Só dados oficiais, com a mesma regra para todos os governos e partidos. <a href="metodologia.html">Como calculamos</a></p>
-    </div>
-
-    <p class="carregando-aviso" role="status">Carregando os dados…</p>
-    <div id="erro-carga" class="erro-carga" role="alert" hidden>
-      <p>Não foi possível carregar os dados agora. Pode ser uma falha passageira da conexão.</p>
-      <button type="button" class="botao" id="erro-recarregar">Tentar de novo</button>
-    </div>
-
     <div class="inicio-grade">
-      <section id="hoje" class="cartao hoje bloco-dados" aria-labelledby="hoje-titulo">
-        <h2 id="hoje-titulo">Como está o Brasil hoje?</h2>
-        <p class="sub">O número grande é dos últimos 12 meses, e o selo compara com a história dele. Toque num item para ver a comparação em detalhe.</p>
-        <div class="filtros hoje-filtros">
-          <label class="campo largo"><span>Comparar</span>
-            <select id="hoje-comparar"></select>
-          </label>
+      <div class="abertura">
+        <h1>A economia e as contas públicas do Brasil, em linguagem simples</h1>
+        <p>Só dados oficiais, com a mesma regra para todos os governos e partidos. <a href="metodologia.html">Como calculamos</a></p>
+        <p class="carregando-aviso" role="status">Carregando os dados…</p>
+        <div id="erro-carga" class="erro-carga" role="alert" hidden>
+          <p>Não foi possível carregar os dados agora. Pode ser uma falha passageira da conexão.</p>
+          <button type="button" class="botao" id="erro-recarregar">Tentar de novo</button>
         </div>
-        <p id="hoje-modo" class="hoje-modo"></p>
-        <p id="hoje-aviso" class="aviso-crise" role="note" hidden></p>
+      </div>
+
+      <section id="hoje" class="cartao hoje bloco-dados" aria-labelledby="hoje-titulo">
+        <div class="hoje-cabeca">
+          <div class="hoje-intro">
+            <h2 id="hoje-titulo">Como está o Brasil hoje?</h2>
+            <p class="sub">O número grande é dos últimos 12 meses, e o selo compara com a história dele. Toque num item para ver a comparação em detalhe.</p>
+            <div class="filtros hoje-filtros">
+              <label class="campo largo"><span>Comparar</span>
+                <select id="hoje-comparar"></select>
+              </label>
+            </div>
+          </div>
+          <div class="hoje-contexto">
+            <p id="hoje-modo" class="hoje-modo"></p>
+            <p id="hoje-aviso" class="aviso-crise" role="note" hidden></p>
+          </div>
+        </div>
         <div id="hoje-lista"></div>
         <details class="entenda">
           <summary>Entenda e baixe os dados</summary>
@@ -120,87 +125,92 @@
         <p class="fonte">Fontes: Banco Central (salário mínimo, contas do governo e dívida), DIEESE (cesta básica), IBGE (inflação, desemprego e renda), ANP (gasolina e gás) e Receita Federal (impostos). Cada item muda quando a sua fonte publica, em geral uma vez por mês.</p>
       </section>
 
-      <div class="inicio-lado">
-        <section id="contador" class="cartao contador bloco-dados" aria-labelledby="contador-titulo">
-          <h2 id="contador-titulo" class="contador-rotulo">Impostos federais arrecadados em <span data-campo="ano-atual">2026</span>, até agora</h2>
-          <p class="contador-curto" data-campo="contador-curto">&nbsp;</p>
-          <p class="contador-exato"><span data-campo="contador" aria-live="off"></span> <span class="contador-estimativa">estimativa ao vivo</span></p>
-          <details class="entenda entenda-compacto">
-            <summary>Entenda esse número</summary>
-            <div class="entenda-corpo">
-              <dl class="contador-partes">
-                <div>
-                  <dt>Já confirmado pela Receita Federal (<span data-campo="meses-confirmados">sem dado</span>)</dt>
-                  <dd data-campo="confirmado">sem dado</dd>
-                </div>
-                <div>
-                  <dt>Estimativa desde <span data-campo="inicio-estimativa">sem dado</span>, pela média dos últimos 12 meses</dt>
-                  <dd data-campo="estimado">sem dado</dd>
-                </div>
-              </dl>
-              <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS.</p>
-              <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#composicao">De onde vem o dinheiro</a>.</p>
-              <p class="fonte">Fonte: Receita Federal, que publica a arrecadação uma vez por mês, algumas semanas depois de o mês terminar. Último mês publicado: <span data-campo="arrec-ultimo">sem dado</span>.</p>
-            </div>
-          </details>
-        </section>
+      <section id="contador" class="cartao contador bloco-dados" aria-labelledby="contador-titulo">
+        <h2 id="contador-titulo" class="contador-rotulo">Impostos federais arrecadados em <span data-campo="ano-atual">2026</span>, até agora</h2>
+        <p class="contador-curto" data-campo="contador-curto">&nbsp;</p>
+        <p class="contador-exato"><span data-campo="contador" aria-live="off"></span> <span class="contador-estimativa">estimativa ao vivo</span></p>
+        <details class="entenda entenda-compacto">
+          <summary>Entenda esse número</summary>
+          <div class="entenda-corpo">
+            <dl class="contador-partes">
+              <div>
+                <dt>Já confirmado pela Receita Federal (<span data-campo="meses-confirmados">sem dado</span>)</dt>
+                <dd data-campo="confirmado">sem dado</dd>
+              </div>
+              <div>
+                <dt>Estimativa desde <span data-campo="inicio-estimativa">sem dado</span>, pela média dos últimos 12 meses</dt>
+                <dd data-campo="estimado">sem dado</dd>
+              </div>
+            </dl>
+            <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS.</p>
+            <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#composicao">De onde vem o dinheiro</a>.</p>
+            <p class="fonte">Fonte: Receita Federal, que publica a arrecadação uma vez por mês, algumas semanas depois de o mês terminar. Último mês publicado: <span data-campo="arrec-ultimo">sem dado</span>.</p>
+          </div>
+        </details>
+      </section>
 
-        <nav class="temas" aria-labelledby="temas-titulo">
-          <h2 id="temas-titulo">Escolha um assunto</h2>
-          <ul>
-            <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR e dólar</span></a></li>
-            <li><a href="#arrecadacao"><strong>Impostos</strong><span>quanto o governo arrecada e de onde vem</span></a></li>
-            <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida e estados</span></a></li>
-            <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
-          </ul>
-        </nav>
-      </div>
+      <nav class="temas" aria-labelledby="temas-titulo">
+        <h2 id="temas-titulo">Escolha um assunto</h2>
+        <ul>
+          <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR e dólar</span></a></li>
+          <li><a href="#arrecadacao"><strong>Impostos</strong><span>quanto o governo arrecada e de onde vem</span></a></li>
+          <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida e estados</span></a></li>
+          <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
+        </ul>
+      </nav>
     </div>
 
     <section id="orcamento" class="bloco bloco-dados" aria-labelledby="orcamento-titulo">
       <p class="tema">Seu bolso</p>
       <h2 id="orcamento-titulo">O salário dá para viver?</h2>
-      <div class="resumo orc-resumo" data-campo="orc-resumo"></div>
-      <div class="orc-barra" id="orc-barra" role="img"></div>
-      <ul class="orc-legenda" id="orc-legenda"></ul>
-      <div class="filtros">
-        <label class="campo largo"><span>Cidade</span>
-          <select id="orc-cidade" data-cidade></select>
-        </label>
-        <label class="campo largo"><span>Renda da casa</span>
-          <select id="orc-renda"></select>
-        </label>
-        <label class="campo largo" id="orc-renda-outra-caixa" hidden><span>Renda em reais</span>
-          <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
-        </label>
-        <label class="campo"><span>Adultos</span>
-          <select id="orc-adultos">
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-        </label>
-        <label class="campo"><span>Crianças</span>
-          <select id="orc-criancas">
-            <option value="0" selected>0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-        </label>
+      <!-- No computador, resultado e conta lado a lado: quem troca um valor vê a sobra mudar sem rolar a página. -->
+      <div class="orc-grade">
+        <div class="orc-painel">
+          <div class="resumo orc-resumo" data-campo="orc-resumo"></div>
+          <div class="orc-barra" id="orc-barra" role="img"></div>
+          <ul class="orc-legenda" id="orc-legenda"></ul>
+          <div class="filtros">
+            <label class="campo largo"><span>Cidade</span>
+              <select id="orc-cidade" data-cidade></select>
+            </label>
+            <label class="campo largo"><span>Renda da casa</span>
+              <select id="orc-renda"></select>
+            </label>
+            <label class="campo largo" id="orc-renda-outra-caixa" hidden><span>Renda em reais</span>
+              <input id="orc-renda-outra" type="number" inputmode="numeric" min="0" step="1">
+            </label>
+            <label class="campo"><span>Adultos</span>
+              <select id="orc-adultos">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+            <label class="campo"><span>Crianças</span>
+              <select id="orc-criancas">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="orc-contas">
+          <h3>O básico da casa, por mês</h3>
+          <p class="nota">São valores médios. Toque num valor para trocar pelo da sua casa.</p>
+          <ul class="orc-lista" id="orc-lista"></ul>
+          <dl class="conta">
+            <div><dt>Renda da casa</dt><dd data-campo="orc-renda-total">sem dado</dd><dd></dd></div>
+            <div><dt>Básico da casa</dt><dd data-campo="orc-total">sem dado</dd><dd data-campo="orc-total-parte"></dd></div>
+            <div class="conta-fim"><dt data-campo="orc-sobra-rotulo">Sobra</dt><dd data-campo="orc-sobra">sem dado</dd><dd data-campo="orc-sobra-parte"></dd></div>
+          </dl>
+          <p class="nota orc-fonte-curta">Aluguel, luz, água e gás: média das famílias com a mesma renda na pesquisa de orçamentos do IBGE, corrigida pela inflação de cada conta.</p>
+          <button type="button" class="botao" id="orc-restaurar" hidden>Voltar aos valores médios</button>
+        </div>
       </div>
-      <h3>O básico da casa, por mês</h3>
-      <p class="nota">São valores médios. Toque num valor para trocar pelo da sua casa.</p>
-      <ul class="orc-lista" id="orc-lista"></ul>
-      <dl class="conta">
-        <div><dt>Renda da casa</dt><dd data-campo="orc-renda-total">sem dado</dd><dd></dd></div>
-        <div><dt>Básico da casa</dt><dd data-campo="orc-total">sem dado</dd><dd data-campo="orc-total-parte"></dd></div>
-        <div class="conta-fim"><dt data-campo="orc-sobra-rotulo">Sobra</dt><dd data-campo="orc-sobra">sem dado</dd><dd data-campo="orc-sobra-parte"></dd></div>
-      </dl>
-      <p class="nota orc-fonte-curta">Aluguel, luz, água e gás: média das famílias com a mesma renda na pesquisa de orçamentos do IBGE, corrigida pela inflação de cada conta.</p>
-      <button type="button" class="botao" id="orc-restaurar" hidden>Voltar aos valores médios</button>
       <h3>Quanto o DIEESE diz que seria preciso?</h3>
       <div class="resumo" data-campo="orc-digno"></div>
       <div class="comp-trilho orc-cobre" aria-hidden="true"><div class="comp-barra" id="orc-cobre-barra"></div></div>
