@@ -7,8 +7,12 @@ name: Resumir o Portal da Transparência (cartão, despesa e viagens)
 # resumo em site/dados/portal/, com o SHA-256 de cada original em
 # dados-fonte/portal/origem.json. O site lê só o resumo; nada passa pelo banco.
 #
-# Toda segunda-feira: ano corrente e anterior. No dia 2 de cada mês e quando
-# rodada à mão: todos os anos, para pegar correções feitas depois.
+# Toda segunda-feira: ano corrente e anterior ("recentes"). No dia 2 de cada
+# mês e quando rodada à mão: todos os anos, para pegar correções feitas depois.
+#
+# Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), às segundas às 06:23 e no dia 2 às 06:41 de Brasília.
+# O agendamento do próprio GitHub (schedule) nunca disparou neste repositório;
+# ver supabase/migrations/20261116170000_disparo_github.sql.
 #
 # Uma parte por vez (viagens, cartão, ministérios), cada uma com seu tempo e
 # gravando o próprio resultado: se uma falhar ou passar do tempo, as outras
@@ -16,9 +20,6 @@ name: Resumir o Portal da Transparência (cartão, despesa e viagens)
 # pedidos do Portal.
 
 on:
-  schedule:
-    - cron: "23 9 * * 1" # 06:23 em Brasília
-    - cron: "41 9 2 * *"
   workflow_dispatch:
     inputs:
       periodo:
@@ -51,13 +52,12 @@ jobs:
 
       - name: Resumir
         env:
-          AGENDA: ${{ github.event.schedule }}
           PERIODO: ${{ github.event.inputs.periodo }}
           BASE: ${{ matrix.base }}
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
-          if [ "${AGENDA:-}" = "23 9 * * 1" ] || [ "${PERIODO:-}" = "recentes" ]; then
+          if [ "${PERIODO:-}" = "recentes" ]; then
             python3 scripts/portal_para_json.py --recentes --so "$BASE"
           else
             python3 scripts/portal_para_json.py --so "$BASE"

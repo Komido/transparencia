@@ -5,10 +5,12 @@ name: Atualizar dados do painel
 # mais um índice, para o site baixar só a cidade escolhida.
 # O visitante do site nunca acessa o Supabase: só baixa arquivos estáticos.
 # O commit só acontece quando o conteúdo dos dados muda (campo "versao").
+#
+# Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), todo dia às 08:23 de Brasília, depois da coleta das 06:41.
+# O agendamento do próprio GitHub (schedule) nunca disparou neste repositório;
+# ver supabase/migrations/20261116170000_disparo_github.sql.
 
 on:
-  schedule:
-    - cron: "23 11 * * *" # 08:23 em Brasília, depois da coleta das 06:41
   workflow_dispatch:
 
 permissions:

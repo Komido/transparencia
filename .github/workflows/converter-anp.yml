@@ -4,10 +4,12 @@ name: Converter preços de combustíveis da ANP
 # arquivos oficiais, converte para CSV (scripts/anp_para_csv.py) e grava em
 # dados-fonte/anp/, com o SHA-256 de cada original. O banco coleta esse CSV
 # depois, com as mesmas validações das outras fontes.
+#
+# Quem dispara é o agendador do banco (pg_cron, etl.disparar_github), todo dia às 05:53 de Brasília, antes da coleta das 06:41.
+# O agendamento do próprio GitHub (schedule) nunca disparou neste repositório;
+# ver supabase/migrations/20261116170000_disparo_github.sql.
 
 on:
-  schedule:
-    - cron: "53 8 * * *" # 05:53 em Brasília, antes da coleta das 06:41
   workflow_dispatch:
 
 permissions:
