@@ -52,6 +52,25 @@ const estado = { painel: null, ctx: null, indice: null, cidade: null, d: null, m
 const selAno = () => $('#mun-ano');
 const anoEscolhido = () => Number(selAno().value);
 const valorGrande = (v) => (v >= 1e6 ? f.reaisPorExtenso(v) : f.reaisCompacto(v));
+
+// Salário mínimo de um mês ("2026-09"), da série oficial do painel (Banco
+// Central, SGS 1619).
+function salarioMinimo(mes) {
+  const i = estado.ctx?.meses.indexOf(mes) ?? -1;
+  const v = i >= 0 ? estado.painel.mensal.series.salario_minimo?.[i] : null;
+  return v > 0 ? v : null;
+}
+
+// Pessoas com BPC no mês: cada benefício é de um salário mínimo, então o
+// valor pago dividido pelo mínimo dá o número de benefícios. A "quantidade
+// de beneficiados" da consulta do Portal conta só quem tem NIS: no arquivo
+// completo de setembro de 2026, 974.618 dos 6.620.994 benefícios do país
+// (15%) vinham sem NIS, e o valor por benefício dava R$ 1.621,05 com o
+// mínimo a R$ 1.621. Sem o mínimo do mês, fica a quantidade do Portal.
+function pessoasNoBpc(valor, qtdPortal, mes) {
+  const sm = salarioMinimo(mes);
+  return sm && valor > 0 ? Math.round(valor / sm) : qtdPortal;
+}
 const nomeDoEstado = (uf) => estado.painel?.estados_fiscal?.estados?.find((x) => x.sigla === uf)?.nome ?? uf;
 // "governo de Minas Gerais", "governo da Bahia", "governo do Distrito Federal".
 const governoDe = (uf) => `governo ${doEstado(uf, nomeDoEstado(uf))}`;
@@ -495,9 +514,10 @@ async function desenharBeneficios() {
   } else {
     resumo('cid-resumo-beneficios', null, null);
   }
-  if (bpcValor != null && bpcQtd) {
-    const det = [`${f.numero(bpcQtd)} pessoas`];
-    if (antes?.[3]) det.push(`Um ano antes: ${f.numero(antes[3])} pessoas`);
+  const bpcPessoas = bpcValor != null && bpcQtd ? pessoasNoBpc(bpcValor, bpcQtd, mesAtual) : null;
+  if (bpcPessoas) {
+    const det = [`${f.numero(bpcPessoas)} pessoas, um salário mínimo cada`];
+    if (antes?.[2] && antes[3]) det.push(`Um ano antes: ${f.numero(pessoasNoBpc(antes[2], antes[3], d.meses[iAnt]))} pessoas`);
     linha(`BPC em ${f.mesLongo(mesAtual)}`, bpcValor, det);
   }
   if (!dl.children.length) { semDado('Sem dado de Bolsa Família e BPC para esta cidade no último mês publicado.'); return; }
@@ -515,12 +535,9 @@ async function desenharBeneficios() {
   const aviso = mesAtual < REAJUSTE
     ? ' Os valores do Bolsa Família subiram 15,04% a partir de outubro de 2026; o mês mostrado aqui ainda é de antes do reajuste.'
     : (mesAnterior(mesAtual, 12) < REAJUSTE ? ' A comparação com um ano antes inclui o reajuste de 15,04% do Bolsa Família, pago desde outubro de 2026.' : '');
-  // BPC: o benefício é de um salário mínimo, mas o total do mês no Portal,
-  // dividido pelas pessoas, passa disso em quase todas as cidades (mediana de
-  // R$ 1.891 por pessoa em MG, setembro de 2026). A consulta por cidade não
-  // diz o motivo; o aviso fica até isso ser conferido no arquivo completo.
-  const avisoBpc = bpcValor != null && bpcQtd
-    ? ' No BPC, cada pessoa recebe um salário mínimo por mês. Em quase todas as cidades, o total que o Portal registra no mês, dividido pelo número de pessoas, passa disso; o Portal não informa o motivo da diferença.'
+  // Quando a contagem do Portal (só quem tem NIS) é menor, diz por quê.
+  const avisoBpc = bpcPessoas && bpcQtd < bpcPessoas
+    ? ` No BPC, o número de pessoas é o valor pago dividido pelo salário mínimo do mês, o valor de cada benefício. A consulta do Portal informa ${f.numero(bpcQtd)}, porque conta só quem tem NIS (o número do cadastro social); no arquivo completo, parte dos benefícios vem sem esse número.`
     : '';
   definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.${aviso}${avisoBpc}`);
   vazio.hidden = true;
@@ -575,10 +592,10 @@ registrarDownload('beneficios', () => {
   const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
   return {
     nome: `bolsa-familia-e-bpc-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-    cabecalhos: ['mes', 'codigo_ibge', 'cidade', 'uf', 'bolsa_familia_reais', 'bolsa_familia_familias', 'bpc_reais', 'bpc_pessoas'],
+    cabecalhos: ['mes', 'codigo_ibge', 'cidade', 'uf', 'bolsa_familia_reais', 'bolsa_familia_familias', 'bpc_reais', 'bpc_pessoas (valor ÷ salário mínimo do mês)', 'bpc_pessoas_com_nis (contagem do Portal)'],
     linhas: d ? d.meses.flatMap((mes, k) => Object.entries(d.municipios).map(([cod, serie]) => {
       const x = serie[k];
-      return [mes, cod, nomes.get(cod) ?? '', uf, x?.[0] ?? '', x?.[1] ?? '', x?.[2] ?? '', x?.[3] ?? ''];
+      return [mes, cod, nomes.get(cod) ?? '', uf, x?.[0] ?? '', x?.[1] ?? '', x?.[2] ?? '', x?.[2] != null && x?.[3] ? pessoasNoBpc(x[2], x[3], mes) : '', x?.[3] ?? ''];
     })) : [],
   };
 });

@@ -23,91 +23,19 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      # BPC: o arquivo mensal completo do Portal da Transparência, para
-      # entender por que o total do mês dividido pelas pessoas passa de um
-      # salário mínimo. Só totais vão para o registro: nenhum nome, CPF, NIS
-      # ou número de benefício é impresso.
-      - name: BPC, arquivo mensal completo (setembro de 2026)
+      # Portal da Transparência: o endereço de download das viagens (que
+      # redireciona para o arquivo) aceita a identificação simples do projeto,
+      # sem começo de navegador? Só os cabeçalhos, sem baixar o arquivo. O
+      # servidor de arquivos da CGU já aceitou (BPC, 17/11/2026).
+      - name: Portal da Transparência, identificação do projeto
         continue-on-error: true
         run: |
           set -u
-          mkdir -p /tmp/bpc && cd /tmp/bpc
           AGENTE="ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
           for url in \
-            "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/bpc/202609_BPC.zip" \
-            "https://portaldatransparencia.gov.br/download-de-dados/bpc/202609"; do
+            "https://portaldatransparencia.gov.br/download-de-dados/viagens/2026" \
+            "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/cpgf/202609_CPGF.zip" \
+            "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/despesas-execucao/202609_Despesas.zip"; do
             echo "=== $url"
-            curl -sSL --max-time 1500 -A "$AGENTE" -o bpc.zip -w "HTTP %{http_code} %{size_download} bytes, final %{url_effective}\n" "$url" || continue
-            if unzip -l bpc.zip > lista.txt 2>/dev/null; then cat lista.txt; break; fi
-            echo "não é zip:"; head -c 300 bpc.zip; echo
+            curl -sS -o /dev/null -D - --max-time 120 -A "$AGENTE" -r 0-1023 "$url" | grep -iE "^HTTP|^location|^content-type|^content-length|^content-range" || echo "falhou"
           done
-          [ -s lista.txt ] || exit 0
-          python3 - bpc.zip <<'PY'
-          import collections, csv, io, sys, zipfile
-          SM = 1621.0  # salário mínimo de 2026
-          z = zipfile.ZipFile(sys.argv[1])
-          nome = [n for n in z.namelist() if n.lower().endswith(".csv")][0]
-          print("arquivo:", nome)
-          f = io.TextIOWrapper(z.open(nome), encoding="latin-1", newline="")
-          r = csv.reader(f, delimiter=";")
-          cab = next(r)
-          print("colunas:", cab)
-          def col(*partes):
-              for i, c in enumerate(cab):
-                  if all(p in c.upper() for p in partes):
-                      return i
-              return None
-          i_comp, i_ref = col("COMPET"), col("REFER")
-          i_uf, i_mun = col("UF"), col("NOME MUN")
-          i_nis, i_ben, i_jud, i_val = col("NIS BENEF"), col("MERO BENEF"), col("JUDICIAL"), col("VALOR")
-          print("índices:", dict(comp=i_comp, ref=i_ref, uf=i_uf, mun=i_mun, nis=i_nis, ben=i_ben, jud=i_jud, val=i_val))
-          def valor(t):
-              t = t.strip()
-              return float(t.replace(".", "").replace(",", ".")) if "," in t else float(t or 0)
-          class Soma:
-              def __init__(s):
-                  s.linhas = 0; s.total = 0.0
-                  s.por_ref = collections.defaultdict(lambda: [0, 0.0])
-                  s.mesmo_mes = [0, 0.0]; s.outro_mes = [0, 0.0]
-                  s.faixa = collections.Counter(); s.faixa_valor = collections.Counter()
-                  s.valores = collections.Counter()
-                  s.por_beneficio = collections.Counter(); s.nis = set(); s.sem_nis = [0, 0.0]
-                  s.jud = collections.defaultdict(lambda: [0, 0.0])
-              def add(s, l):
-                  v = valor(l[i_val]); s.linhas += 1; s.total += v
-                  comp, ref = l[i_comp].strip(), (l[i_ref].strip() if i_ref is not None else "")
-                  s.por_ref[ref][0] += 1; s.por_ref[ref][1] += v
-                  alvo = s.mesmo_mes if (not ref or ref == comp) else s.outro_mes
-                  alvo[0] += 1; alvo[1] += v
-                  fx = "igual ao SM" if abs(v - SM) < 0.005 else ("menor que o SM" if v < SM else "maior que o SM")
-                  s.faixa[fx] += 1; s.faixa_valor[fx] += v
-                  s.valores[round(v, 2)] += 1
-                  if i_ben is not None: s.por_beneficio[l[i_ben].strip()] += 1
-                  nis = l[i_nis].strip() if i_nis is not None else ""
-                  if nis: s.nis.add(nis)
-                  else: s.sem_nis[0] += 1; s.sem_nis[1] += v
-                  if i_jud is not None:
-                      s.jud[l[i_jud].strip()][0] += 1; s.jud[l[i_jud].strip()][1] += v
-              def mostrar(s, titulo):
-                  print(f"\n##### {titulo}")
-                  print(f"linhas {s.linhas:,}; total R$ {s.total:,.2f}; total/SM = {s.total / SM:,.0f}")
-                  ben = s.por_beneficio
-                  mais = sum(1 for n in ben.values() if n > 1)
-                  print(f"benefícios distintos {len(ben):,}; com mais de uma linha {mais:,}; NIS distintos {len(s.nis):,}; linhas sem NIS {s.sem_nis[0]:,} (R$ {s.sem_nis[1]:,.2f})")
-                  if ben: print(f"total / benefícios distintos = R$ {s.total / len(ben):,.2f}; total / NIS distintos = R$ {s.total / max(1, len(s.nis)):,.2f}")
-                  print(f"mês de referência igual ao de competência: {s.mesmo_mes[0]:,} linhas, R$ {s.mesmo_mes[1]:,.2f}")
-                  print(f"mês de referência diferente: {s.outro_mes[0]:,} linhas, R$ {s.outro_mes[1]:,.2f}")
-                  print("meses de referência (10 maiores):", [(k, n, round(v, 2)) for k, (n, v) in sorted(s.por_ref.items(), key=lambda x: -x[1][1])[:10]])
-                  print("valor da parcela:", {k: (s.faixa[k], round(s.faixa_valor[k], 2)) for k in s.faixa})
-                  print("valores mais comuns:", s.valores.most_common(8))
-                  print("concedido judicialmente:", {k: (n, round(v, 2)) for k, (n, v) in s.jud.items()})
-          pais, alfenas = Soma(), Soma()
-          for l in r:
-              if len(l) < len(cab): continue
-              pais.add(l)
-              if l[i_uf].strip() == "MG" and l[i_mun].strip().upper() == "ALFENAS":
-                  alfenas.add(l)
-          pais.mostrar("País")
-          alfenas.mostrar("Alfenas (MG); na consulta por cidade: R$ 3.911.560,00 e 2.166 pessoas")
-          PY
-
