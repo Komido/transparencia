@@ -23,34 +23,41 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      # Emendas parlamentares: formato da API do Portal (com a chave) e o
-      # arquivo de download do Portal (só cabeçalhos).
-      - name: Portal da Transparência, emendas parlamentares
+      # Emendas parlamentares: o arquivo único do Portal (sem chave), colunas e
+      # como vem o lugar do gasto.
+      - name: Portal da Transparência, arquivo de emendas
         continue-on-error: true
-        env:
-          CHAVE: ${{ secrets.PORTAL_TRANSPARENCIA_CHAVE }}
         run: |
           set -u
-          api=https://api.portaldatransparencia.gov.br/api-de-dados
-          for q in "emendas?ano=2025&pagina=1" "emendas?ano=2025&pagina=2" "emendas?ano=2025&pagina=500" "emendas?ano=2025&pagina=2000"; do
-            echo "=== ${q}"
-            curl -sS --max-time 60 -o resp.json -w "HTTP %{http_code} %{size_download} bytes %{time_total}s\n" \
-              -H "accept: application/json" -H "chave-api-dados: ${CHAVE}" "$api/$q" || continue
-            python3 - resp.json <<'PY'
-          import json, sys
-          d = json.load(open(sys.argv[1]))
-          print("linhas na página:", len(d) if isinstance(d, list) else type(d))
-          if isinstance(d, list) and d:
-              print("campos:", sorted(d[0].keys()))
-              for x in d[:3]:
-                  print(json.dumps(x, ensure_ascii=False)[:900])
+          mkdir -p /tmp/em && cd /tmp/em
+          curl -sSL --max-time 600 -A "ArrecadometroBrasil/1.0 (dados publicos)" -o em.zip -w "HTTP %{http_code} %{size_download} bytes\n" \
+            "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/emendas-parlamentares/EmendasParlamentares.zip" || exit 0
+          unzip -l em.zip
+          python3 - em.zip <<'PY'
+          import collections, csv, io, sys, zipfile
+          z = zipfile.ZipFile(sys.argv[1])
+          for nome in z.namelist():
+              if not nome.lower().endswith(".csv"):
+                  continue
+              bruto = z.read(nome)
+              for cod in ("utf-8-sig", "latin-1"):
+                  try:
+                      texto = bruto.decode(cod); break
+                  except UnicodeDecodeError:
+                      continue
+              linhas = list(csv.DictReader(io.StringIO(texto), delimiter=";"))
+              print("===", nome, "codificação", cod, "linhas", len(linhas))
+              print("colunas:", list(linhas[0].keys()))
+              for l in linhas[:3]:
+                  print({k: v for k, v in l.items() if v})
+              for col in linhas[0].keys():
+                  c = collections.Counter(l[col] for l in linhas)
+                  if len(c) < 60:
+                      print(f"  {col}: {c.most_common(12)}")
+              ano = next((k for k in linhas[0] if "Ano" in k), None)
+              if ano:
+                  print("  por ano:", sorted(collections.Counter(l[ano] for l in linhas).items()))
           PY
-            sleep 2
-          done
-          echo "=== download do Portal (cabeçalhos)"
-          curl -sS -I -L --max-time 60 -A "ArrecadometroBrasil/1.0 (dados publicos)" \
-            "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO" \
-            | grep -i "^HTTP\|^location\|^content-length\|^content-type\|^last-modified" || true
 
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
         continue-on-error: true
