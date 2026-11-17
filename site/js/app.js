@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -1497,7 +1497,7 @@ function montarMunicipios(ctx) {
   const listaSug = $('#mun-sugestoes');
   const selAno = $('#mun-ano');
   if (!entrada || !listaSug || !selAno) return;
-  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), cidade: null, sugestoes: [], ativa: -1 };
+  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), emendas: new Map(), cidade: null, sugestoes: [], ativa: -1 };
 
   const carregarIndice = () => {
     if (!estado.carregando) {
@@ -1651,6 +1651,7 @@ function montarMunicipios(ctx) {
     selo.classList.toggle('aviso', situacao !== 'ok');
     const caixaContas = $('#mun-contas');
     desenharDespesas(r, m, d, ano, nome);
+    desenharEmendas(ano, r?.p || m?.p);
     if (!r?.v) {
       caixaContas.hidden = true;
       campo('mun-resumo').forEach((e) => e.replaceChildren());
@@ -1879,6 +1880,105 @@ function montarMunicipios(ctx) {
     definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.`);
     caixa.hidden = false;
   }
+
+  // Emendas parlamentares pagas à prefeitura: o ano escolhido e, se for
+  // outro, o ano em andamento. Valores em dinheiro de hoje (IPCA).
+  async function desenharEmendas(ano, moradores) {
+    const caixa = $('#mun-emendas');
+    const { codigo, nome, uf } = estado.cidade;
+    let d = estado.emendas.get(uf);
+    if (d === undefined) {
+      caixa.hidden = true;
+      try {
+        d = await carregarEmendasUf(uf);
+      } catch (erro) {
+        console.error(erro);
+        d = null;
+      }
+      estado.emendas.set(uf, d);
+    }
+    // A escolha mudou enquanto o arquivo carregava: o desenho seguinte cuida.
+    if (estado.cidade?.codigo !== codigo || Number(selAno.value) !== ano) return;
+    if (!d) {
+      caixa.hidden = true;
+      return;
+    }
+    $('#mun-baixar-emendas').hidden = false;
+    const daCidade = d.cidades[String(codigo).padStart(7, '0')] ?? {};
+    const emAndamento = Math.max(...d.anos);
+    const doAno = (a) => {
+      const x = daCidade[String(a)];
+      if (!x) return null;
+      const fator = fatorParaHoje(ctx, a) ?? 1;
+      return { pago: x[0] * fator, emendas: x[1], autores: x[2], maiores: x[3].map(([n, v]) => [n, v * fator]) };
+    };
+    const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'} de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}`;
+    const rotuloAno = (a) => (a === emAndamento ? `Pago em ${a} (ano em andamento)` : `Pago em ${a}`);
+    const dl = $('#mun-emendas-numeros');
+    dl.replaceChildren();
+    const linha = (rotulo, valor, detalhes) => {
+      const div = el('div', null, null, dl);
+      el('dt', null, rotulo, div);
+      el('dd', null, valor, div);
+      detalhes.forEach((t) => el('dd', 'detalhe', t, div));
+    };
+    const escolhido = d.anos.includes(ano) ? doAno(ano) : null;
+    if (!d.anos.includes(ano)) {
+      linha(`Pago em ${ano}`, 'sem dado', [`O site mostra as emendas de ${Math.min(...d.anos)} a ${emAndamento}.`]);
+    } else if (!escolhido) {
+      linha(rotuloAno(ano), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura neste ano.']);
+    } else {
+      const det = [quantas(escolhido)];
+      if (moradores) det.push(`${f.moeda(escolhido.pago / moradores, 0)} por morador`);
+      linha(rotuloAno(ano), escolhido.pago >= 1e6 ? f.reaisPorExtenso(escolhido.pago) : f.reaisCompacto(escolhido.pago), det);
+    }
+    const atual = ano !== emAndamento ? doAno(emAndamento) : null;
+    if (atual) linha(rotuloAno(emAndamento), atual.pago >= 1e6 ? f.reaisPorExtenso(atual.pago) : f.reaisCompacto(atual.pago), [quantas(atual)]);
+    else if (ano !== emAndamento) linha(rotuloAno(emAndamento), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura até agora.']);
+
+    // Quem mandou mais: no ano escolhido ou, sem ele, no ano em andamento.
+    const anoLista = escolhido ? ano : (atual ? emAndamento : null);
+    const lista = anoLista === ano ? escolhido : atual;
+    const titulo = campo('mun-emendas-autores-titulo')[0];
+    const barras = $('#mun-emendas-autores');
+    barras.replaceChildren();
+    titulo.hidden = barras.hidden = !lista;
+    const notas = [];
+    if (lista) {
+      titulo.textContent = `Quem mandou mais dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}`;
+      for (const [autor, valor] of lista.maiores) {
+        const pct = lista.pago > 0 ? (valor / lista.pago) * 100 : 0;
+        const li = el('li', null, null, barras);
+        const topo = el('div', 'barra-topo', null, li);
+        el('span', 'barra-nome', autor, topo);
+        el('span', 'barra-valor', `${f.reaisCompacto(valor)} · ${f.parteDoTotal(pct)}`, topo);
+        const trilho = el('div', 'barra-trilho', null, li);
+        trilho.setAttribute('aria-hidden', 'true');
+        el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+      }
+      if (lista.autores > lista.maiores.length) notas.push(`Aparecem os ${lista.maiores.length} que mais mandaram, de ${lista.autores} autores.`);
+      const nomes = lista.maiores.map(([a]) => a);
+      if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
+      if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
+    }
+    notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram. Atualização: ${f.dataCurta(d.atualizado)}.`);
+    definir('mun-emendas-nota', notas.join(' '));
+    caixa.hidden = false;
+  }
+
+  registrarDownload('emendas', () => {
+    const uf = estado.cidade?.uf;
+    const d = uf ? estado.emendas.get(uf) : null;
+    const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
+    return {
+      nome: `emendas-pagas-as-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
+      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'pago_reais_da_epoca', 'emendas', 'autores', 'maiores_autores (reais da época)', 'fator para dinheiro de hoje (IPCA)'],
+      linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).map(([cod, anos]) => {
+        const x = anos[String(a)];
+        return [a, cod, nomes.get(cod) ?? '', uf, x[0], x[1], x[2], x[3].map(([n, v]) => `${n}: ${v}`).join(' | '), arred(fatorParaHoje(ctx, a) ?? 1, 6)];
+      })) : [],
+    };
+  });
 
   registrarDownload('beneficios', () => {
     const uf = estado.cidade?.uf;

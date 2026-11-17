@@ -244,6 +244,34 @@ export async function carregarBeneficiosUf(uf) {
   return d;
 }
 
+// Emendas parlamentares pagas à prefeitura e aos fundos municipais, por ano
+// de pagamento (scripts/emendas_para_json.py).
+// cidades: { codigo IBGE: { ano: [pago, emendas, autores, [[autor, valor], ...]] } }
+const CAMPOS_EMENDAS = ['pago', 'emendas', 'autores', 'maiores_autores'];
+const ehAnoEmenda = (x) => Array.isArray(x) && x.length === 4 && Number.isFinite(x[0]) && x[0] >= 0
+  && Number.isInteger(x[1]) && x[1] > 0 && Number.isInteger(x[2]) && x[2] > 0 && x[2] <= x[1]
+  && Array.isArray(x[3]) && x[3].length <= 5
+  && x[3].every((a) => Array.isArray(a) && a.length === 2 && ehTexto(a[0]) && Number.isFinite(a[1]) && a[1] >= 0);
+export async function carregarEmendasUf(uf) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('emendas: UF');
+  const resposta = await fetch(`dados/emendas/${uf}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar as emendas de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || !ehData(d.atualizado) || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_EMENDAS)
+    || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
+    || !d.cidades || typeof d.cidades !== 'object') {
+    falhar(`emendas de ${uf}`);
+  }
+  for (const [cod, anos] of Object.entries(d.cidades)) {
+    if (!/^[0-9]{7}$/.test(cod) || !anos || typeof anos !== 'object'
+      || !Object.entries(anos).every(([a, x]) => d.anos.includes(Number(a)) && ehAnoEmenda(x))) {
+      falhar(`emendas da cidade ${cod}`);
+    }
+  }
+  return d;
+}
+
 // Prefeitos e governadores eleitos (TSE; scripts/governantes_para_json.py).
 // Cada eleito: [eleição, data, suplementar, nome, feminino, partido, vice].
 const CAMPOS_GOVERNANTES = ['eleicao', 'data', 'suplementar', 'nome', 'feminino', 'partido', 'vice'];

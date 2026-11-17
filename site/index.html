@@ -513,6 +513,14 @@
               <dl class="numeros empilhado" id="mun-despesas-compara"></dl>
               <p class="nota" data-campo="mun-despesas-nota"></p>
             </div>
+            <div id="mun-emendas" hidden>
+              <h3>Emendas parlamentares pagas à prefeitura</h3>
+              <p class="nota">Dinheiro do orçamento federal que deputados, senadores, bancadas e comissões do Congresso mandaram para a cidade.</p>
+              <dl class="numeros empilhado" id="mun-emendas-numeros"></dl>
+              <p class="ranking-titulo" data-campo="mun-emendas-autores-titulo" hidden></p>
+              <ul class="barras" id="mun-emendas-autores" hidden></ul>
+              <p class="nota" data-campo="mun-emendas-nota"></p>
+            </div>
             <div id="mun-beneficios" hidden>
               <h3>Dinheiro federal pago direto aos moradores</h3>
               <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
@@ -535,13 +543,16 @@
               <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
               <h3>Para onde vai o dinheiro da prefeitura?</h3>
               <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
+              <h3>Emendas parlamentares</h3>
+              <p>Todo ano, deputados e senadores indicam para onde vai uma parte do orçamento federal; cada indicação é uma emenda. O site soma só o que foi pago à prefeitura e aos fundos municipais (saúde, assistência social e outros), pelo ano em que o dinheiro foi pago. Emendas pagas a hospitais, entidades, ao governo do estado ou a órgãos federais que fazem obras na cidade não entram, porque o arquivo não diz em que cidade esse dinheiro foi usado. O autor pode ser um deputado, um senador, a bancada do estado (deputados e senadores do estado juntos) ou uma comissão do Congresso; os nomes estão como no arquivo do Portal, sem acentos. <strong>Relator Geral</strong> são as emendas do relator do orçamento, que o STF proibiu em dezembro de 2022; o que aparece depois disso é pagamento de compromisso antigo. Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
               <h3>Bolsa Família e BPC</h3>
               <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
               <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
+              <button type="button" class="botao" id="mun-baixar-emendas" data-baixar="emendas" hidden>Baixar planilha das emendas do estado</button>
               <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
             </div>
           </details>
-          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Emendas parlamentares: Portal da Transparência (CGU), pagamentos por favorecido. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
         </section>
 
         <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
