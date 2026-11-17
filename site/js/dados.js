@@ -243,3 +243,24 @@ export async function carregarBeneficiosUf(uf) {
   }
   return d;
 }
+
+// Prefeitos e governadores eleitos (TSE; scripts/governantes_para_json.py).
+// Cada eleito: [eleição, data, suplementar, nome, feminino, partido, vice].
+const CAMPOS_GOVERNANTES = ['eleicao', 'data', 'suplementar', 'nome', 'feminino', 'partido', 'vice'];
+const ehEleito = (x) => Array.isArray(x) && x.length === 7 && Number.isInteger(x[0]) && ehData(x[1])
+  && (x[2] === 0 || x[2] === 1) && ehTexto(x[3]) && (x[4] === 0 || x[4] === 1) && ehTexto(x[5]) && typeof x[6] === 'string';
+export async function carregarGovernantesUf(uf) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('governantes: UF');
+  const resposta = await fetch(`dados/governantes/${uf}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar os eleitos de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_GOVERNANTES) || !d.eleicoes || typeof d.eleicoes !== 'object'
+    || !Object.values(d.eleicoes).every((e) => e && ehTexto(e.cargo) && Number.isInteger(e.inicio) && Number.isInteger(e.fim))
+    || !Array.isArray(d.governadores) || !d.governadores.every(ehEleito)
+    || !d.prefeitos || typeof d.prefeitos !== 'object'
+    || !Object.entries(d.prefeitos).every(([cod, lst]) => /^[0-9]{7}$/.test(cod) && Array.isArray(lst) && lst.every(ehEleito))) {
+    falhar(`eleitos de ${uf}`);
+  }
+  return d;
+}

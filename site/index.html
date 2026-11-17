@@ -679,6 +679,11 @@
           <div class="resumo" data-campo="estados-resumo"></div>
 
           <div id="estados-detalhe">
+          <div id="estados-governo" class="governo" hidden>
+            <h3>Governadores eleitos</h3>
+            <ul class="governo-lista" id="estados-governo-lista"></ul>
+            <p class="nota">TSE, dados abertos. Partido da data da eleição. O TSE registra quem foi eleito: se o governador saiu e o vice assumiu, a troca não aparece aqui.</p>
+          </div>
           <h3>Dívida e folha de pagamento, ano a ano</h3>
           <div class="filtros">
             <fieldset class="campo largo">
@@ -753,6 +758,9 @@
             <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
             <p id="mun-selo" class="selo-dado"></p>
             <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
+            <div id="mun-governo" class="governo" hidden>
+              <ul class="governo-lista" id="mun-governo-lista"></ul>
+            </div>
             <div class="resumo" data-campo="mun-resumo"></div>
             <div id="mun-contas">
               <h3>De onde veio cada R$ 100</h3>
@@ -786,6 +794,8 @@
               <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
               <h3>O que quer dizer cada aviso?</h3>
               <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
+              <h3>Quem foi eleito?</h3>
+              <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
               <h3>Para onde vai o dinheiro?</h3>
               <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
               <h3>Bolsa Família e BPC</h3>

@@ -1333,3 +1333,7 @@ td.num .detalhe { white-space: normal; }
 .mun-cabeca span { color: var(--tinta-2); font-size: var(--fs-2); }
 #mun-outro-ano { margin: calc(-1 * var(--e-2)) 0 var(--e-3); }
 #mun-outro-ano .botao { margin: 0; }
+
+/* Quem foi eleito (TSE). */
+.governo-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; gap: 4px; font-size: var(--fs-2); max-width: var(--prosa); }
+.governo-mandato { color: var(--tinta-2); }

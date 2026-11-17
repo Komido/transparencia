@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -641,6 +641,46 @@ const REPASSE_PREFEITURAS = {
   itcd: '',
 };
 
+// Prefeitos e governadores eleitos (TSE), carregados uma vez por estado.
+const eleitosPorUf = new Map();
+function eleitosDe(uf) {
+  if (!eleitosPorUf.has(uf)) {
+    eleitosPorUf.set(uf, carregarGovernantesUf(uf).catch((erro) => { console.error(erro); return null; }));
+  }
+  return eleitosPorUf.get(uf);
+}
+
+function linhaEleito(lista, rotulo, x) {
+  const li = el('li', null, null, lista);
+  el('span', null, rotulo, li);
+  el('strong', null, x[3], li);
+  el('span', null, ` (${x[5]})${x[6] ? `, vice ${x[6]}` : ''}.`, li);
+}
+
+async function desenharGovernadores(uf) {
+  const caixa = $('#estados-governo');
+  const lista = $('#estados-governo-lista');
+  if (!caixa || !lista) return;
+  caixa.hidden = true;
+  if (!uf) return;
+  const d = await eleitosDe(uf);
+  if (!d || $('#estados-uf').value !== uf || !d.governadores.length) return;
+  lista.replaceChildren();
+  const anoAtual = new Date().getFullYear();
+  for (const x of d.governadores) {
+    const e = d.eleicoes[String(x[0])];
+    if (!e) continue;
+    // Emenda Constitucional 111/2021: a partir de 2027, governadores tomam posse em 6 de janeiro.
+    const posse = e.inicio > anoAtual && e.inicio >= 2027 ? `, posse em 6 de janeiro de ${e.inicio}` : '';
+    const quem = x[4] ? 'eleita' : 'eleito';
+    const rotulo = x[2]
+      ? `Eleição suplementar em ${f.dataCurta(x[1])} (mandato até ${e.fim}): `
+      : `${x[0]}, ${quem} para o mandato de ${e.inicio} a ${e.fim}${posse}: `;
+    linhaEleito(lista, rotulo, x);
+  }
+  caixa.hidden = !lista.children.length;
+}
+
 function montarEstados(ctx) {
   const bloco = ctx.d.estados_fiscal;
   if (!bloco?.anos?.length || !Array.isArray(bloco.estados) || !bloco.estados.length) { $('#estados').hidden = true; return; }
@@ -849,6 +889,7 @@ function montarEstados(ctx) {
     $('#estados-detalhe').hidden = !escolhido;
     if (escolhido) {
       desenharResumo(); desenharGrafico(); desenharReceita();
+      desenharGovernadores(selUf.value);
     } else {
       campo('estados-resumo').forEach((e) => e.replaceChildren(el('p', 'resumo-vazio',
         'Escolha um estado para ver a dívida, a folha de pagamento e os impostos do governo estadual e da capital. A tabela abaixo mostra todos os estados.')));
@@ -1578,6 +1619,7 @@ function montarMunicipios(ctx) {
       bt.textContent = `Ver as contas de ${outros[0]}`;
       bt.onclick = () => { selAno.value = String(outros[0]); desenhar(); };
     }
+    desenharGoverno();
     selo.textContent = SELO_PREFEITURA[situacao](ano, f.dataCurta(d?.atualizado))
       + (!r?.v && situacao !== 'df' && !outros.length ? ' Os outros anos também estão sem dado.' : '');
     selo.classList.toggle('aviso', situacao !== 'ok');
@@ -1661,6 +1703,29 @@ function montarMunicipios(ctx) {
       if (det.length) el('dd', 'detalhe', det.join(' · '), div);
     }
     definir('mun-compara-nota', `Mediana das cidades com contas conferidas em ${ano}: metade está acima e metade abaixo. Mesmo tamanho: ${faixas[iFaixa]?.rotulo ?? ''}${medFaixa.n ? ` (${f.numero(medFaixa.n)} cidades)` : ''}${medUf.n ? `; ${uf}: ${f.numero(medUf.n)} cidades` : ''}.`);
+  }
+
+  // Quem foi eleito para o mandato do ano das contas (TSE).
+  async function desenharGoverno() {
+    const caixa = $('#mun-governo');
+    const lista = $('#mun-governo-lista');
+    const { codigo, uf } = estado.cidade;
+    const ano = Number(selAno.value);
+    caixa.hidden = true;
+    const d = await eleitosDe(uf);
+    if (!d || estado.cidade?.codigo !== codigo || Number(selAno.value) !== ano) return;
+    const mandato = Object.entries(d.eleicoes).find(([, e]) => e.cargo === 'prefeito' && e.inicio <= ano && ano <= e.fim);
+    if (!mandato) return;
+    const [eleicao, e] = mandato;
+    const eleitos = (d.prefeitos[String(codigo).padStart(7, '0')] ?? []).filter((x) => String(x[0]) === eleicao);
+    if (!eleitos.length) return;
+    lista.replaceChildren();
+    el('li', 'governo-mandato', `As contas de ${ano} são do mandato de ${e.inicio} a ${e.fim}.`, lista);
+    for (const x of eleitos) {
+      const rotulo = x[2] ? `Eleição suplementar em ${f.dataCurta(x[1])}: ` : `${x[4] ? 'Prefeita eleita' : 'Prefeito eleito'} em ${eleicao}: `;
+      linhaEleito(lista, rotulo, x);
+    }
+    caixa.hidden = false;
   }
 
   // Para onde foi o dinheiro: despesa liquidada por área (RREO Anexo 2), em
