@@ -14,136 +14,81 @@ permissions:
 jobs:
   inspecionar:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
-      # Gastos das câmaras municipais e salário dos vereadores: o que os
-      # Tribunais de Contas de SP e MG publicam para baixar? Descoberta:
-      # lê o robots.txt de cada site e obedece, lista os links que falam de
-      # dados abertos, despesas, folha e câmaras, e segue só um nível dentro do
-      # mesmo site. Uma pausa de 1 segundo entre pedidos.
-      - name: Tribunais de Contas de SP e MG, o que existe sobre câmaras e vereadores
+      # Câmaras municipais paulistas no arquivo anual de despesas do TCE-SP:
+      # quais colunas existem, se dá para saber o que é cada pagamento
+      # (salário, diária, verba indenizatória) e quanto pesa o arquivo. Nomes
+      # de pessoas físicas aparecem só como iniciais no registro.
+      - name: TCE-SP, despesas de 2025, colunas e câmaras
         continue-on-error: true
         run: |
-          python3 - <<'PY'
-          import html.parser, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
-
-          AGENTE = "ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
-          PALAVRAS = re.compile(r"dado|abert|conjunto|despes|empenh|pagament|folha|pessoal|remunera|c[aâ]mara|legislat|vereador|api|csv|zip|json|xls|download|sicom|capmg|fiscaliz|dicion|layout|leiaute", re.I)
-          vistos = set()
-          robots = {}
-
-          class Pagina(html.parser.HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.links, self.scripts, self.titulo, self.texto = [], [], "", []
-                  self._a = None; self._t = []; self._titulo = False
-              def handle_starttag(self, tag, attrs):
-                  a = dict(attrs)
-                  if tag == "a" and a.get("href"): self._a = a["href"]; self._t = []
-                  if tag == "script" and a.get("src"): self.scripts.append(a["src"])
-                  if tag == "title": self._titulo = True
-              def handle_endtag(self, tag):
-                  if tag == "a" and self._a is not None:
-                      self.links.append((self._a, " ".join("".join(self._t).split())[:90])); self._a = None
-                  if tag == "title": self._titulo = False
-              def handle_data(self, d):
-                  if self._a is not None: self._t.append(d)
-                  if self._titulo: self.titulo += d
-                  if d.strip(): self.texto.append(d.strip())
-
-          def baixar(url, limite=5_000_000):
-              time.sleep(1)
-              pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "*/*"})
-              try:
-                  with urllib.request.urlopen(pedido, timeout=90) as r:
-                      return r.status, r.headers.get("Content-Type", ""), r.geturl(), r.read(limite)
-              except urllib.error.HTTPError as e:
-                  return e.code, e.headers.get("Content-Type", ""), url, e.read(20000)
-
-          def permitido(url):
-              p = urllib.parse.urlsplit(url); base = f"{p.scheme}://{p.netloc}"
-              if base not in robots:
-                  rp = urllib.robotparser.RobotFileParser()
-                  try:
-                      st, _, _, corpo = baixar(base + "/robots.txt", 200_000)
-                      linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
-                      print(f"\nrobots.txt de {p.netloc}: HTTP {st}" + ("".join("\n    " + l for l in linhas[:30]) if linhas else ""))
-                      rp.parse(linhas)
-                  except Exception as e:
-                      print(f"\nrobots.txt de {p.netloc}: erro {e!r}"); rp = None
-                  robots[base] = rp
-              rp = robots[base]
-              return rp is None or rp.can_fetch(AGENTE, url)
-
-          def ver(url, seguir=False, limite=5_000_000, maximo_links=70):
-              if url in vistos: return None
-              vistos.add(url)
-              if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite; pulado"); return None
-              try:
-                  st, tipo, final, corpo = baixar(url, limite)
-              except Exception as e:
-                  print(f"\n### {url}\n  erro: {e!r}"); return None
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              if "json" in tipo or corpo[:1] in (b"[", b"{"):
-                  try:
-                      d = json.loads(corpo.decode("utf-8-sig", "replace"))
-                      if isinstance(d, list):
-                          print(f"  lista com {len(d)} itens; primeiros: {json.dumps(d[:3], ensure_ascii=False)[:1200]}")
-                      else:
-                          print(f"  objeto: {json.dumps(d, ensure_ascii=False)[:1500]}")
-                      return d
-                  except Exception as e:
-                      print(f"  não é JSON válido ({e}); início: {corpo[:300]!r}"); return None
-              if "html" not in tipo:
-                  print(f"  início: {corpo[:400]!r}"); return None
-              p = Pagina(); p.feed(corpo.decode("utf-8", "replace"))
-              print(f"  título: {' '.join(p.titulo.split())[:120]}")
-              links = []
-              for href, texto in p.links:
-                  absoluto = urllib.parse.urljoin(final, href.strip())
-                  if absoluto.startswith("http") and (PALAVRAS.search(absoluto) or PALAVRAS.search(texto)) and absoluto not in [l for l, _ in links]:
-                      links.append((absoluto, texto))
-              print(f"  links no total: {len(p.links)}; ligados ao assunto: {len(links)}")
-              for l, t in links[:maximo_links]: print(f"    {t[:60]!r} -> {l}")
-              if len(p.links) < 8:
-                  print(f"  poucos links (página montada por script?). scripts: {p.scripts[:12]}")
-                  print(f"  texto: {' | '.join(p.texto)[:800]}")
-              if seguir:
-                  host = urllib.parse.urlsplit(final).netloc
-                  proximos = [l for l, _ in links if urllib.parse.urlsplit(l).netloc == host and not re.search(r"\.(zip|csv|xlsx?|pdf)(\?|$)", l, re.I)]
-                  for l in proximos[:12]: ver(l)
-              return None
-
-          print("=" * 70 + "\nTCE-SP (municípios paulistas, menos a capital)\n" + "=" * 70)
-          ver("https://transparencia.tce.sp.gov.br/", seguir=True)
-          for u in ("https://transparencia.tce.sp.gov.br/conjunto-de-dados", "https://transparencia.tce.sp.gov.br/api"):
-              ver(u, seguir=True)
-          municipios = ver("https://transparencia.tce.sp.gov.br/api/json/municipios")
-          if isinstance(municipios, list) and municipios and isinstance(municipios[0], dict):
-              chave = next((k for k in municipios[0] if "extenso" not in k), None)
-              alvo = next((m for m in municipios if "AMPARO" in json.dumps(m, ensure_ascii=False).upper()), municipios[0])
-              nome = alvo.get(chave) if chave else None
-              print(f"\n  teste de despesas com {alvo}")
-              if nome:
-                  d = ver(f"https://transparencia.tce.sp.gov.br/api/json/despesas/{nome}/2025/3", limite=60_000_000)
-                  if isinstance(d, list) and d and isinstance(d[0], dict):
-                      campos = list(d[0].keys()); print(f"  campos: {campos}")
-                      org = next((k for k in campos if "orgao" in k.lower() or "órgão" in k.lower()), None)
-                      if org:
-                          from collections import Counter
-                          print(f"  órgãos: {Counter(x.get(org) for x in d).most_common(15)}")
-                          cam = [x for x in d if "MARA" in str(x.get(org, "")).upper()]
-                          print(f"  linhas da câmara: {len(cam)}; exemplos:")
-                          for x in cam[:12]: print("    ", json.dumps(x, ensure_ascii=False)[:400])
-          ver("https://www.tce.sp.gov.br/camarasmunicipais", seguir=True)
-
-          print("\n" + "=" * 70 + "\nTCE-MG\n" + "=" * 70)
-          ver("https://dadosabertos.tce.mg.gov.br/", seguir=True)
-          ver("https://dadosabertos.tce.mg.gov.br/api/3/action/package_list")
-          ver("https://www.tce.mg.gov.br/", maximo_links=90)
-          ver("https://fiscalizandocomtce.tce.mg.gov.br/", seguir=True)
-          print(f"\npedidos feitos: {len(vistos) + len(robots)}")
+          set -u
+          mkdir -p /tmp/sp && cd /tmp/sp
+          AGENTE="ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
+          curl -sSL --max-time 1800 -A "$AGENTE" -o d.zip -w "despesas-2025.zip: HTTP %{http_code} %{size_download} bytes em %{time_total}s\n" \
+            "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip"
+          python3 - d.zip <<'PY'
+          import collections, csv, io, re, sys, time, zipfile
+          csv.field_size_limit(10_000_000)
+          z = zipfile.ZipFile(sys.argv[1])
+          for i in z.infolist(): print(f"  {i.filename}: {i.file_size / 1e6:.0f} MB descompactado, {i.compress_size / 1e6:.0f} MB compactado")
+          nome = max(z.infolist(), key=lambda i: i.file_size).filename
+          bruto = z.open(nome).read(300_000)
+          cod = "utf-8-sig"
+          try: bruto.decode(cod)
+          except UnicodeDecodeError: cod = "latin-1"
+          primeira = bruto.decode(cod, "replace").splitlines()[0]
+          sep = max(";,\t|", key=primeira.count)
+          print(f"arquivo {nome}, codificação {cod}, separador {sep!r}")
+          def esconder(linha):
+              d = dict(linha)
+              ident = " ".join(str(v) for k, v in d.items() if "fornecedor" in k.lower() or "credor" in k.lower())
+              if re.search(r"PESSOA F[IÍ]SICA|CPF", ident, re.I):
+                  for k in d:
+                      if re.search(r"nm_|nome|ds_despesa", k, re.I) and d[k]:
+                          d[k] = " ".join(p[0] + "." for p in str(d[k]).split())
+              return d
+          leitor = csv.DictReader(io.TextIOWrapper(z.open(nome), encoding=cod, newline="", errors="replace"), delimiter=sep)
+          cols = leitor.fieldnames
+          print(f"colunas ({len(cols)}): {cols}")
+          org = next((c for c in cols if "orgao" in c.lower()), None)
+          mun = next((c for c in cols if "municipio" in c.lower()), None)
+          val = next((c for c in cols if c.lower().startswith("vl_")), None)
+          tipo = next((c for c in cols if c.lower() in ("tp_despesa", "evento")), None)
+          forn = next((c for c in cols if "identificador" in c.lower() or "id_fornecedor" in c.lower()), None)
+          baixa = [c for c in cols if re.search(r"elemento|funcao|programa|acao|fonte|modalidade|tp_|evento|natureza|categoria|grupo|aplicacao", c, re.I)]
+          print(f"órgão={org} município={mun} valor={val} tipo={tipo} fornecedor={forn}; contadas: {baixa}")
+          def num(t):
+              t = (t or "").strip()
+              if "," in t: t = t.replace(".", "").replace(",", ".")
+              try: return float(t)
+              except ValueError: return 0.0
+          total = 0; cam = 0; inicio = time.time()
+          camaras = set(); por_tipo = collections.Counter(); valor_tipo = collections.Counter()
+          cont = {c: collections.Counter() for c in baixa}
+          pf_elem = collections.Counter(); exemplos = []
+          for l in leitor:
+              total += 1
+              if total <= 2: print("exemplo geral:", esconder(l))
+              o = (l.get(org) or "") if org else ""
+              if "MARA MUNICIPAL" not in o.upper(): continue
+              cam += 1; camaras.add(o)
+              t = l.get(tipo, "") if tipo else ""
+              por_tipo[t] += 1; valor_tipo[t] += num(l.get(val)) if val else 0
+              for c in baixa: cont[c][l.get(c)] += 1
+              elem = next((l[c] for c in cols if "elemento" in c.lower()), "")
+              if forn and re.search(r"F[IÍ]SICA|CPF", l.get(forn) or "", re.I): pf_elem[elem] += 1
+              if "AMPARO" in o.upper() and len(exemplos) < 25: exemplos.append(esconder(l))
+          print(f"\nlinhas: {total}; das câmaras: {cam}; câmaras distintas: {len(camaras)}; leitura em {time.time() - inicio:.0f}s")
+          print("tipo de lançamento nas câmaras (linhas, R$ bi):", [(k, n, round(valor_tipo[k] / 1e9, 2)) for k, n in por_tipo.most_common()])
+          for c in baixa:
+              print(f"\n{c} nas câmaras ({len(cont[c])} valores distintos):")
+              for v, n in cont[c].most_common(25): print(f"  {n:8d}  {v}")
+          print("\npagamentos a pessoa física nas câmaras, por elemento:")
+          for v, n in pf_elem.most_common(20): print(f"  {n:8d}  {v}")
+          print("\nCâmara de Amparo, exemplos (pessoas físicas só com iniciais):")
+          for x in exemplos: print("  ", x)
           PY
