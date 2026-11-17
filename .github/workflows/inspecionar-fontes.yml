@@ -56,6 +56,25 @@ jobs:
               autores[ano][r["Nome do Autor da Emenda"]] += v
               codigos[r["Nome do Autor da Emenda"]].add(r.get("Código do Autor da Emenda"))
           bi = lambda c: [(k, round(v / 1e9, 3)) for k, v in c.most_common()]
+          # Quem são os maiores recebedores fora de prefeituras e fundos municipais.
+          leitor = csv.DictReader(io.StringIO(z.read("EmendasParlamentares_PorFavorecido.csv").decode("latin-1")), delimiter=";")
+          olhar = {"Sociedade de Economia Mista", "Sociedade Empresária Limitada", "Empresa Pública", "Associação Privada"}
+          receb = collections.defaultdict(collections.Counter)
+          municip = collections.defaultdict(collections.Counter)
+          tipos = collections.defaultdict(collections.Counter)
+          for r in leitor:
+              if r["Ano/Mês"][:4] < "2023" or r["Natureza Jurídica"] not in olhar:
+                  continue
+              v = float((r["Valor Recebido"] or "0").replace(".", "").replace(",", "."))
+              k = (r["Natureza Jurídica"], r["Favorecido"], r["Código do Favorecido"])
+              receb[r["Natureza Jurídica"]][k[1:]] += v
+              municip[k][f'{r["Município Favorecido"]}/{r["UF Favorecido"]}'] += v
+              tipos[k][r["Tipo de Emenda"]] += v
+          for n in sorted(olhar):
+              print(f"== maiores recebedores: {n}")
+              for (fav, cod), v in receb[n].most_common(8):
+                  k = (n, fav, cod)
+                  print(f"   {fav} ({cod}): R$ {v / 1e9:.2f} bi; municípios {municip[k].most_common(3)}; tipos {[(t, round(x / 1e9, 2)) for t, x in tipos[k].most_common(3)]}")
           print("natureza jurídica (R$ bi, 2023 em diante):"); [print("  ", x) for x in bi(nat)]
           print("tipo favorecido:", bi(tipo))
           print("tipo de emenda:", bi(temenda))
