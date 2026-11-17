@@ -1,0 +1,49 @@
+name: Câmaras municipais de SP, em que gastaram (TCE-SP)
+
+# Baixa o arquivo anual de despesas dos municípios paulistas do Tribunal de
+# Contas de SP (mais de 2 GB por ano, em partes), soma os pagamentos de cada
+# câmara por tipo de despesa (scripts/camaras_sp_para_json.py) e grava
+# site/dados/camaras/SP.json. Sem nomes de pessoas. Só baixa de novo o ano
+# cujo arquivo mudou; quando nada mudou, termina em menos de um minuto. Uma
+# vez por mês, disparada pelo agendador do banco (pg_cron,
+# etl.disparar_github); ver supabase/migrations/20261117060000_disparo_camaras.sql.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: camaras
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Somar os gastos das câmaras
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/camaras_sp_para_json.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/camaras \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/camaras)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A site/dados/camaras
+          git commit -q -m "Atualiza gastos das câmaras municipais de SP"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
