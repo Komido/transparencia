@@ -218,29 +218,53 @@ def nome_legivel(texto):
     return " ".join(palavras)
 
 
-def cargos_da_cota():
-    """Nome (chave_nome) -> "Câmara · PT-MG" ou "Senado · PSD-MG", pelo ano
-    mais recente da cota em que o nome aparece."""
+ROTULO_CASA = {"camara": "Câmara", "senado": "Senado"}
+
+
+def parlamentares_da_cota():
+    """Nome (chave_nome) -> {nome, casa, partido, uf, ano}, pelo ano mais
+    recente da cota em que o nome aparece. Nome nas duas casas no mesmo ano
+    (quem passou da Câmara ao Senado): casa vazia."""
     achados = {}
     arquivos = sorted(f for f in os.listdir(COTA) if f[:4].isdigit() and f.endswith(".json"))
     for arq in arquivos:
         with open(os.path.join(COTA, arq), encoding="utf-8") as fh:
             d = json.load(fh)
-        vistos = collections.defaultdict(set)
-        for casa, rotulo in (("camara", "Câmara"), ("senado", "Senado")):
+        vistos = collections.defaultdict(list)
+        for casa in ROTULO_CASA:
             for p in (d.get(casa) or {}).get("parlamentares", []):
                 k = chave_nome(p.get("nome"))
-                partido, uf = (p.get("partido") or "").strip(), (p.get("uf") or "").strip()
+                uf = (p.get("uf") or "").strip()
                 if k and len(uf) == 2:
-                    vistos[k].add(f"{rotulo} · {partido}-{uf}" if partido else f"{rotulo} · {uf}")
+                    vistos[k].append({"nome": " ".join(str(p["nome"]).split()), "casa": casa,
+                                      "partido": (p.get("partido") or "").strip(), "uf": uf, "ano": int(arq[:4])})
         for k, v in vistos.items():
-            achados[k] = next(iter(v)) if len(v) == 1 else "Câmara ou Senado"
+            casas = {x["casa"] for x in v}
+            achados[k] = v[-1] if len(casas) == 1 else {**v[-1], "casa": ""}
     if len(achados) < 500:
         falhar(f"listas da cota com só {len(achados)} parlamentares")
     return achados
 
 
+def rotulo_da_cota(p):
+    if not p.get("casa"):
+        return "Câmara ou Senado"
+    return f"{ROTULO_CASA[p['casa']]} · {p['partido']}-{p['uf']}" if p["partido"] else f"{ROTULO_CASA[p['casa']]} · {p['uf']}"
+
+
 PREFIXOS = ("DEP ", "DEPUTADO ", "DEPUTADA ", "SEN ", "SENADOR ", "SENADORA ")
+
+
+def chave_do_parlamentar(bruto):
+    """Chave de um autor que é deputado ou senador; None para bancada,
+    comissão, relator e autor sem informação."""
+    k = chave_nome(bruto)
+    if not k or k in ("SEM INFORMACAO", "S/I") or k.startswith(("BANCADA ", "COM ", "COMISSAO ", "RELATOR")):
+        return None
+    for pre in PREFIXOS:
+        if k.startswith(pre):
+            return k[len(pre):]
+    return k
 
 
 def cargo_do_autor(bruto, cota):
@@ -253,11 +277,35 @@ def cargo_do_autor(bruto, cota):
         return "Comissão do Congresso"
     if k.startswith("RELATOR"):
         return "Relator do orçamento"
-    for pre in PREFIXOS:
-        if k.startswith(pre):
-            k = k[len(pre):]
-            break
-    return cota.get(k, "Câmara ou Senado")
+    p = cota.get(chave_do_parlamentar(bruto))
+    return rotulo_da_cota(p) if p else "Câmara ou Senado"
+
+
+# Para quem a emenda foi paga, na página de cada parlamentar.
+TIPOS_RECEBEDOR = ["prefeituras", "estados", "entidades", "banco", "outros"]
+ENTIDADES = {"Associação Privada", "Fundação Privada", "Organização Religiosa", "Organização Social (OS)",
+             "Serviço Social Autônomo", "Entidade Sindical"}
+
+
+def tipo_do_recebedor(natureza, cnpj):
+    if cnpj == CNPJ_BANCO_DO_BRASIL:
+        return 3
+    if natureza == "Município" or "Municipal" in natureza:
+        return 0
+    if "Estadual" in natureza or natureza == "Estado ou Distrito Federal":
+        return 1
+    if natureza in ENTIDADES:
+        return 2
+    return 4
+
+
+def slug(nome, uf=""):
+    """O mesmo endereço de site/js/endereco.js: sem acento, minúsculas."""
+    t = unicodedata.normalize("NFD", nome or "")
+    t = "".join(c for c in t if not unicodedata.combining(c)).lower()
+    t = "".join(c if c.isascii() and c.isalnum() else "-" for c in t)
+    t = "-".join(x for x in t.split("-") if x)
+    return f"{t}-{uf.lower()}" if uf else t
 
 
 def gravar_json(caminho, dados):
@@ -272,7 +320,7 @@ def gravar_json(caminho, dados):
 def main():
     mapa = municipios_ibge()
     por_cnpj = cnpjs_das_prefeituras(set(mapa.values()))
-    cota = cargos_da_cota()
+    cota = parlamentares_da_cota()
     z = zipfile.ZipFile(io.BytesIO(baixar(URL)))
     if ARQUIVO not in z.namelist():
         falhar(f"{ARQUIVO} não está no zip: {z.namelist()}")
@@ -287,13 +335,21 @@ def main():
     linhas = 0
     uteis = []
     pelo_banco = collections.defaultdict(float)
+    tipos_autor = collections.defaultdict(lambda: [0.0] * len(TIPOS_RECEBEDOR))
+    nome_do_autor = {}
     for n, l in enumerate(leitor, start=2):
         linhas += 1
         am = (l["Ano/Mês"] or "").strip()
         if len(am) != 6 or not am.isdigit() or not 2010 <= int(am[:4]) <= ano_atual or not 1 <= int(am[4:]) <= 12:
             falhar(f"linha {n}: ano/mês {am!r}")
-        if int(am[:4]) >= PRIMEIRO_ANO and "".join(c for c in l.get("Código do Favorecido") or "" if c.isdigit()) == CNPJ_BANCO_DO_BRASIL:
+        cnpj = "".join(c for c in l.get("Código do Favorecido") or "" if c.isdigit())
+        if int(am[:4]) >= PRIMEIRO_ANO and cnpj == CNPJ_BANCO_DO_BRASIL:
             pelo_banco[int(am[:4])] += numero(l["Valor Recebido"], f"linha {n}")
+        if int(am[:4]) >= ano_atual - 3:
+            kp = chave_do_parlamentar(l["Nome do Autor da Emenda"])
+            if kp:
+                tipos_autor[(kp, int(am[:4]))][tipo_do_recebedor((l["Natureza Jurídica"] or "").strip(), cnpj)] += numero(l["Valor Recebido"], f"linha {n}")
+                nome_do_autor.setdefault(kp, l["Nome do Autor da Emenda"])
         if int(am[:4]) >= PRIMEIRO_ANO and (l["Natureza Jurídica"] or "").strip() in NATUREZAS:
             uteis.append((n, l))
     if not 500000 <= linhas <= 3000000:
@@ -376,6 +432,7 @@ def main():
                  for a, x in sorted(autores[(cod, ano)].items(), key=lambda x: (-x[1], x[0])) if round(x) > 0]
         por_uf[uf].setdefault(cod, {})[str(ano)] = [round(v), len(emendas[(cod, ano)]), lista]
     hoje = dt.date.today().isoformat()
+    paginas = paginas_dos_parlamentares(cota, tipos_autor, nome_do_autor, autores, bruto_do_autor, anos, hoje)
     # Um arquivo por UF todas as vezes, mesmo sem cidade (o Distrito Federal
     # não tem prefeitura: o dinheiro vai ao governo do DF, que fica de fora),
     # para nunca sobrar arquivo de uma execução antiga.
@@ -386,11 +443,69 @@ def main():
             "campos": ["pago", "emendas", "autores"],
             "nomes": list(nomes_uf[uf]),
             "cargos": [cargo_do_autor(bruto_do_autor.get(n, n), cota) for n in nomes_uf[uf]],
+            "paginas": [paginas.get(chave_do_parlamentar(bruto_do_autor.get(n, n)), "") for n in nomes_uf[uf]],
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")
     rotulos = collections.Counter(cargo_do_autor(b, cota).split(" · ")[0] for b in bruto_do_autor.values())
     print("cargos dos autores:", rotulos.most_common())
+
+
+PARLAMENTARES = "site/dados/parlamentares"
+
+
+def paginas_dos_parlamentares(cota, tipos_autor, nome_do_autor, autores, bruto_do_autor, anos, hoje):
+    """Grava o índice e um arquivo por deputado ou senador com as emendas de
+    cada ano: o total por tipo de recebedor e as cidades (prefeitura e fundos
+    municipais). Entram todos os da cota desses anos e todos os autores
+    individuais de emenda. Devolve chave -> endereço (slug)."""
+    cidades = collections.defaultdict(lambda: collections.defaultdict(dict))  # chave -> ano -> cod -> valor
+    for (cod, ano), por_autor in autores.items():
+        if ano not in anos:
+            continue
+        for autor, valor in por_autor.items():
+            kp = chave_do_parlamentar(bruto_do_autor.get(autor, autor))
+            if kp and round(valor) > 0:
+                cidades[kp][ano][cod] = cidades[kp][ano].get(cod, 0) + valor
+    chaves = {k for k, p in cota.items() if p["ano"] >= min(anos)} | {k for (k, _) in tipos_autor}
+    usados, enderecos, indice = set(), {}, []
+    for k in sorted(chaves):
+        p = cota.get(k) or {"nome": nome_legivel(nome_do_autor.get(k, k)), "casa": "", "partido": "", "uf": ""}
+        base = slug(p["nome"], p["uf"])
+        endereco, n = base, 2
+        while endereco in usados:
+            endereco, n = f"{base}-{n}", n + 1
+        usados.add(endereco)
+        enderecos[k] = endereco
+        por_ano = {}
+        for ano in anos:
+            t = tipos_autor.get((k, ano))
+            c = cidades[k].get(ano, {})
+            if t is None and not c:
+                continue
+            t = t or [0.0] * len(TIPOS_RECEBEDOR)
+            por_ano[str(ano)] = {
+                "pago": round(sum(t)),
+                "tipos": [round(x) for x in t],
+                "cidades": [[cod, round(v)] for cod, v in sorted(c.items(), key=lambda x: (-x[1], x[0])) if round(v) > 0],
+            }
+        indice.append([endereco, p["nome"], p["casa"], p["partido"], p["uf"], sum(x["pago"] for x in por_ano.values())])
+        gravar_json(f"{PARLAMENTARES}/emendas/{endereco}.json", {
+            "endereco": endereco, "nome": p["nome"], "casa": p["casa"], "partido": p["partido"], "uf": p["uf"],
+            "atualizado": hoje, "fonte": URL, "tipos": TIPOS_RECEBEDOR, "anos": por_ano,
+        })
+    # Arquivo de quem saiu da lista não fica para trás.
+    for arq in os.listdir(f"{PARLAMENTARES}/emendas"):
+        if arq.endswith(".json") and arq[:-5] not in usados:
+            os.remove(f"{PARLAMENTARES}/emendas/{arq}")
+    indice.sort(key=lambda x: (chave_nome(x[1]), x[4]))
+    gravar_json(f"{PARLAMENTARES}/indice.json", {
+        "atualizado": hoje, "anos": anos, "campos": ["endereco", "nome", "casa", "partido", "uf", "emendas_pagas"],
+        "parlamentares": indice,
+    })
+    print(f"parlamentares: {len(indice)} páginas; com emendas: {sum(1 for x in indice if x[5] > 0)}; "
+          f"sem par na cota: {sum(1 for x in indice if not x[2])}")
+    return enderecos
 
 
 if __name__ == "__main__":
