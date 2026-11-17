@@ -1,0 +1,48 @@
+name: Votações e projetos de deputados e senadores (Câmara e Senado)
+
+# Baixa os arquivos anuais da Câmara e consulta os serviços do Senado
+# (scripts/congresso_para_json.py) e grava, para a página de cada
+# parlamentar, a lista oficial, as votações nominais do Plenário de cada ano,
+# o voto de cada um e os projetos que apresentou, em site/dados/parlamentares.
+# Nada passa pelo banco. Quem dispara é o agendador do banco (pg_cron,
+# etl.disparar_github).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: congresso
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Montar votações e projetos
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/congresso_para_json.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          caminhos="site/dados/parlamentares/oficiais.json site/dados/parlamentares/votacoes site/dados/parlamentares/camara site/dados/parlamentares/senado"
+          git add -A $caminhos
+          if git diff --cached --quiet; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Atualiza votações e projetos de deputados e senadores"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
