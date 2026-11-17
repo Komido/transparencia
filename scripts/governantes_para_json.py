@@ -127,8 +127,10 @@ def codigos_tse_ibge():
         vals = [v for v in vals if v]
         return vals and all(v.isdigit() and (tamanho is None or len(v) == tamanho) for v in vals)
 
-    tse = next((c for c in colunas if "TSE" in c.upper() and numericas(c)), None)
-    ibge = next((c for c in colunas if "IBGE" in c.upper() and numericas(c, 7)), None)
+    # Colunas conferidas em 17/11/2026: CD_UF_TSE, CD_UF_IBGE, SG_UF, NM_UF,
+    # CD_MUNICIPIO_TSE, NM_MUNICIPIO_TSE, CD_MUNICIPIO_IBGE, NM_MUNICIPIO_IBGE.
+    tse = "CD_MUNICIPIO_TSE" if "CD_MUNICIPIO_TSE" in colunas and numericas("CD_MUNICIPIO_TSE") else None
+    ibge = "CD_MUNICIPIO_IBGE" if "CD_MUNICIPIO_IBGE" in colunas and numericas("CD_MUNICIPIO_IBGE", 7) else None
     if not tse or not ibge:
         falhar(f"tabela de códigos: colunas do TSE e do IBGE não encontradas em {colunas}")
     print(f"tabela de códigos: TSE em {tse}, IBGE em {ibge}")
