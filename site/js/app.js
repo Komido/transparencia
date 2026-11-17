@@ -1562,7 +1562,24 @@ function montarMunicipios(ctx) {
     const selo = $('#mun-selo');
     // Sem registro do ano ou situação desconhecida: "sem dado", nunca "não entregou".
     const situacao = Object.hasOwn(SELO_PREFEITURA, r?.s) ? r.s : 'erro';
-    selo.textContent = SELO_PREFEITURA[situacao](ano, f.dataCurta(d?.atualizado));
+    // Cabeçalho com o que foi escolhido: muda a cada troca de cidade ou ano,
+    // para ficar claro que a escolha funcionou mesmo quando não há dado.
+    const cab = $('[data-campo="mun-cabeca"]');
+    cab.replaceChildren();
+    el('strong', null, `${nome} (${uf})`, cab);
+    const moradores = r?.p || m?.p;
+    el('span', null, `${moradores ? ` · ${f.numero(moradores)} moradores` : ''} · contas de ${ano}`, cab);
+    // Sem dado no ano escolhido: oferece o ano mais recente que tem.
+    const outros = (estado.indice.anos ?? []).filter((a) => a !== ano && m?.a[String(a)]?.v).sort((a, b) => b - a);
+    const caixaOutro = $('#mun-outro-ano');
+    caixaOutro.hidden = Boolean(r?.v) || !outros.length;
+    if (!caixaOutro.hidden) {
+      const bt = $('#mun-ver-ano');
+      bt.textContent = `Ver as contas de ${outros[0]}`;
+      bt.onclick = () => { selAno.value = String(outros[0]); desenhar(); };
+    }
+    selo.textContent = SELO_PREFEITURA[situacao](ano, f.dataCurta(d?.atualizado))
+      + (!r?.v && situacao !== 'df' && !outros.length ? ' Os outros anos também estão sem dado.' : '');
     selo.classList.toggle('aviso', situacao !== 'ok');
     const caixaContas = $('#mun-contas');
     desenharDespesas(r, m, d, ano, nome);

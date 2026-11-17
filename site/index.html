@@ -750,7 +750,9 @@
           </div>
           <p id="mun-vazio" class="resumo-vazio">Digite o nome de uma cidade para ver de onde vem o dinheiro da prefeitura. Estão aqui as 5.570 cidades do país.</p>
           <div id="mun-detalhe" hidden>
+            <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
             <p id="mun-selo" class="selo-dado"></p>
+            <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
             <div class="resumo" data-campo="mun-resumo"></div>
             <div id="mun-contas">
               <h3>De onde veio cada R$ 100</h3>
@@ -792,7 +794,7 @@
               <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
             </div>
           </details>
-          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3, ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
         </section>
 
         <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">

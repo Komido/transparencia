@@ -512,6 +512,12 @@ def montar():
             item = {"c": int(cod), "n": r["nome"], "p": r["pop"], "a": {}}
             for ano, reg in sorted(r["anos"].items()):
                 registro = {"s": reg["s"]}
+                # "sem_relatorio" da versão que só pedia o RREO completo (sem
+                # "tipo" e sem os dois SHA-256) não foi conferido no
+                # simplificado: no site vira "erro" (sem dado), não "não
+                # entregou".
+                if reg["s"] == "sem_relatorio" and "tipo" not in reg and not isinstance(reg.get("sha256"), list):
+                    registro["s"] = "erro"
                 if reg.get("pop"):
                     registro["p"] = reg["pop"]
                 if "v" in reg:

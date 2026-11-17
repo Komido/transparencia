@@ -1327,3 +1327,9 @@ td.num .detalhe { white-space: normal; }
 @media (min-width: 720px) {
   .numeros.empilhado { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
 }
+
+/* Contas da cidade: o que está escolhido. */
+.mun-cabeca { margin: var(--e-4) 0 var(--e-3); font-size: var(--fs-4); line-height: 1.3; }
+.mun-cabeca span { color: var(--tinta-2); font-size: var(--fs-2); }
+#mun-outro-ano { margin: calc(-1 * var(--e-2)) 0 var(--e-3); }
+#mun-outro-ano .botao { margin: 0; }

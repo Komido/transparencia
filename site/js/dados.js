@@ -227,6 +227,8 @@ const CAMPOS_BENEFICIOS = ['nbf_valor', 'nbf_qtd', 'bpc_valor', 'bpc_qtd'];
 export async function carregarBeneficiosUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('benefícios: UF');
   const resposta = await fetch(`dados/beneficios/${uf}.json`, { credentials: 'same-origin' });
+  // Sem arquivo ainda (antes da primeira coleta): sem dado, sem erro.
+  if (resposta.status === 404) return null;
   if (!resposta.ok) throw new Error(`Falha ao carregar os benefícios de ${uf} (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || d.uf !== uf || !Array.isArray(d.meses) || !d.meses.length || !d.meses.every(ehMes)
