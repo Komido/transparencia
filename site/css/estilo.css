@@ -1364,5 +1364,15 @@ td.num .detalhe { white-space: normal; }
 .votacoes .item-texto { font-size: var(--fs-2); color: var(--tinta); }
 .votacoes .item-detalhe { font-size: var(--fs-1); color: var(--tinta-2); }
 
-/* Vereadores eleitos: nomes em colunas, partido ao lado. */
-.vereadores-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: 4px var(--e-4); font-size: var(--fs-2); }
+/* Listas de pessoas (vereadores e outras): nome em cima, detalhe embaixo,
+   menor; em colunas quando cabem. */
+.pessoas-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: var(--e-3) var(--e-4); }
+.pessoas-lista li { display: grid; gap: 2px; min-width: 0; }
+.pessoa-nome { font-size: var(--fs-2); }
+.pessoa-detalhe { font-size: var(--fs-1); color: var(--tinta-2); }
+
+/* Contagem por partido: etiquetas com a sigla e o número. */
+.contagem-partidos { list-style: none; margin: 0 0 var(--e-4); padding: 0; display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.contagem-partidos li { display: inline-flex; align-items: baseline; gap: 6px; padding: 2px 10px; border: 1px solid var(--borda); border-radius: 999px; font-size: var(--fs-2); }
+.contagem-sigla { color: var(--tinta-2); }
+.contagem-numero { font-weight: 700; font-variant-numeric: tabular-nums; }

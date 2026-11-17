@@ -1853,14 +1853,26 @@ function montarMunicipios(ctx) {
     const lista = d.cidades[String(codigo).padStart(7, '0')];
     if (!lista?.length) return;
     definir('mun-vereadores-titulo', `Os ${lista.length} vereadores eleitos em ${d.eleicao} (mandato de ${d.inicio} a ${d.fim})`);
+    // Quantos de cada partido, do que elegeu mais para o que elegeu menos.
     const porPartido = new Map();
     lista.forEach((x) => porPartido.set(x[2], (porPartido.get(x[2]) ?? 0) + 1));
-    definir('mun-vereadores-partidos', `Por partido: ${[...porPartido].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([p, n]) => `${p} ${n}`).join(' · ')}.`);
+    const partidos = $('#mun-vereadores-partidos');
+    partidos.replaceChildren();
+    [...porPartido].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([sigla, n]) => {
+      const li = el('li', null, null, partidos);
+      li.title = d.partidos?.[sigla] ?? sigla;
+      el('span', 'contagem-sigla', sigla, li);
+      el('span', 'contagem-numero', String(n), li);
+    });
+    // Nome em cima, partido embaixo, como nas outras listas de pessoas.
     const ul = $('#mun-vereadores-lista');
     ul.replaceChildren();
     lista.forEach((x) => {
-      const li = el('li', null, x[0], ul);
-      el('span', 'partido', ` ${x[2]}`, li);
+      const li = el('li', null, null, ul);
+      el('span', 'pessoa-nome', x[0], li);
+      // Sigla e nome do partido; se forem iguais ("Republicanos"), só o nome.
+      const extenso = d.partidos?.[x[2]];
+      el('span', 'pessoa-detalhe', !extenso ? x[2] : semAcento(extenso) === semAcento(x[2]) ? extenso : `${x[2]} · ${extenso}`, li);
     });
     definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
     caixa.hidden = false;
