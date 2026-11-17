@@ -35,10 +35,27 @@ function cargo(p) {
 }
 
 const VOTO_TEXTO = { S: 'Sim', N: 'Não', A: 'Abstenção', O: 'Obstrução', V: 'Votou (voto secreto)', P: 'Presidiu a sessão' };
-// Motivos de quem não votou, como o Senado registra. Só os conferidos na
-// legenda do relatório oficial de votações nominais; os outros aparecem com o
-// código do Senado (a legenda completa está no relatório de cada senador).
-const AUSENCIA_SENADO = { NCom: 'não compareceu', 'P-NRV': 'presente, sem registrar voto', AP: 'atividade política ou cultural (art. 13 do Regimento)' };
+// Motivos de quem não votou, como o Senado registra, pela legenda do
+// relatório oficial de votações nominais de cada senador (conferida em
+// 17/11/2026 nos relatórios de 2023 a 2026 de quatro senadores; a legenda é
+// a mesma em todos). Missão, representação e Mercosul contam como presença.
+// Um código fora da lista aparece como o Senado escreve.
+const AUSENCIA_SENADO = {
+  NCom: 'não compareceu',
+  'P-NRV': 'presente, sem registrar voto',
+  'P-OD': 'presente, em obstrução declarada',
+  MIS: 'em missão oficial, conta como presente',
+  REP: 'representando o Senado, conta como presente',
+  MERC: 'no Parlamento do Mercosul, conta como presente',
+  AP: 'atividade política ou cultural (art. 13 do Regimento)',
+  LS: 'licença de saúde',
+  LP: 'licença particular',
+  LG: 'licença-gestante',
+  LA: 'licença por adoção',
+  LAP: 'licença-paternidade ou por adoção',
+  LC: 'licença para candidatura a presidente ou vice',
+  NA: 'motivo não informado pelo Senado',
+};
 const linkProposicao = (casa, id) => (casa === 'camara'
   ? `https://www.camara.leg.br/propostas-legislativas/${id}`
   : `https://www25.senado.leg.br/web/atividade/materias/-/materia/${id}`);
@@ -132,7 +149,7 @@ async function desenharVotacoes(ano) {
   encurtarLista(lista, $('#parl-votacoes-todas'), 8, { abrir: `Ver todas as ${f.numero(ordem.length)} propostas votadas`, fechar: 'Mostrar só as 8 mais recentes' });
   definir('parl-votos-nota', casa === 'camara'
     ? 'Fonte: Câmara dos Deputados, dados abertos. O arquivo da Câmara traz só quem votou: quem estava de licença, era ministro ou secretário, ou ainda não tinha assumido aparece como não tendo votado, sem o motivo.'
-    : 'Fonte: Senado Federal, dados abertos. Em votação secreta, o Senado registra só que o senador votou. Os códigos de ausência que não estão traduzidos aqui (como licenças e missões) têm a legenda no relatório oficial:');
+    : 'Fonte: Senado Federal, dados abertos. Em votação secreta, o Senado registra só que o senador votou. Os motivos de quem não votou seguem a legenda do relatório oficial:');
   const nota = campo('parl-votos-nota')[0];
   if (casa === 'senado' && estado.atv?.id) {
     nota.append(' ');
