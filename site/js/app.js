@@ -4443,6 +4443,8 @@ function montarPartidos() {
       feito = false;
     }
   };
+  // O arquivo é pequeno: a tabela é preenchida logo, mesmo fechada.
+  preencher();
   caixa.addEventListener('toggle', () => { if (caixa.open) preencher(); });
   // Quem chega pelo link "O que é cada sigla" encontra a tabela aberta.
   const abrir = () => { if (location.hash === '#partidos') { caixa.open = true; preencher(); } };

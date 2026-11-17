@@ -35,8 +35,10 @@ function cargo(p) {
 }
 
 const VOTO_TEXTO = { S: 'Sim', N: 'Não', A: 'Abstenção', O: 'Obstrução', V: 'Votou (voto secreto)', P: 'Presidiu a sessão' };
-// Motivos de quem não votou, como o Senado registra.
-const AUSENCIA_SENADO = { NCom: 'não compareceu', MIS: 'em missão oficial', LS: 'licença de saúde', LP: 'licença particular', 'P-NRV': 'presente, sem registrar voto' };
+// Motivos de quem não votou, como o Senado registra. Só os conferidos na
+// legenda do relatório oficial de votações nominais; os outros aparecem com o
+// código do Senado (a legenda completa está no relatório de cada senador).
+const AUSENCIA_SENADO = { NCom: 'não compareceu', 'P-NRV': 'presente, sem registrar voto', AP: 'atividade política ou cultural (art. 13 do Regimento)' };
 const linkProposicao = (casa, id) => (casa === 'camara'
   ? `https://www.camara.leg.br/propostas-legislativas/${id}`
   : `https://www25.senado.leg.br/web/atividade/materias/-/materia/${id}`);
@@ -98,30 +100,47 @@ async function desenharVotacoes(ano) {
     ]);
     resumo('parl-resumo-votacoes', `${f.numero(registrados.length)} de ${f.numero(meus.length)}`, 'votações em que registrou voto');
   }
-  const partes = [['S', 'Sim'], ['N', 'Não'], ['A', 'Abstenção'], ['O', 'Obstrução'], ['V', 'Voto secreto']].map(([c, t]) => [t, conta(c)]).filter(([, n]) => n > 0);
-  if (partes.length) linha('Como votou', partes.map(([t, n]) => `${t}: ${f.numero(n)}`).join(' · '), ['contagem das votações em que registrou voto']);
+  // Um número para cada tipo de voto registrado.
+  [['S', 'Votos sim'], ['N', 'Votos não'], ['A', 'Abstenções'], ['O', 'Obstruções'], ['V', 'Votos secretos']].forEach(([c, t]) => {
+    const n = conta(c);
+    if (n > 0) linha(t, f.numero(n), []);
+  });
 
-  // A lista: da votação mais recente para a mais antiga.
+  // A lista, agrupada por proposta (cada requerimento, destaque e emenda é
+  // uma votação): da proposta votada mais recentemente para a mais antiga.
   const iVoto = new Map(meus.map(([k, v]) => [k, v]));
-  const ordem = vot.votacoes.map((v, k) => [v, k]).filter(([, k]) => iVoto.has(k)).reverse();
+  const grupos = new Map();
+  vot.votacoes.forEach((v, k) => {
+    if (!iVoto.has(k)) return;
+    const chave = v[8] || v[2] || v[0];
+    if (!grupos.has(chave)) grupos.set(chave, { v, itens: [] });
+    grupos.get(chave).itens.push([v, iVoto.get(k)]);
+  });
+  const ordem = [...grupos.values()].reverse();
   campo('parl-votacoes-titulo')[0].hidden = !ordem.length;
-  ordem.forEach(([v, k]) => {
-    const cod = iVoto.get(k);
-    const voto = VOTO_TEXTO[cod] ?? (cod.startsWith('x:') ? `Não votou (${AUSENCIA_SENADO[cod.slice(2)] ?? cod.slice(2)})` : 'Outro registro');
-    const resultado = casa === 'camara' ? v[4] : [v[4], v[10]].filter(Boolean).join(' ');
-    const idProp = casa === 'camara' ? v[8] : v[8];
-    item(lista, {
-      titulo: v[2] || 'Votação',
-      href: idProp ? linkProposicao(casa, idProp) : null,
-      lado: voto,
-      texto: v[3],
-      detalhe: [f.dataCurta(v[1]), resultado].filter(Boolean).join(' · '),
+  ordem.forEach(({ v, itens }) => {
+    const li = item(lista, { titulo: v[2] || 'Votação', href: v[8] ? linkProposicao(casa, v[8]) : null, texto: v[3] });
+    const sub = el('ul', 'votos-da-proposta', null, li);
+    itens.reverse().forEach(([x, cod]) => {
+      const voto = VOTO_TEXTO[cod] ?? (cod.startsWith('x:') ? `Não votou (${AUSENCIA_SENADO[cod.slice(2)] ?? cod.slice(2)})` : 'Outro registro');
+      const resultado = casa === 'camara' ? x[4] : [x[4], x[10]].filter(Boolean).join(' ');
+      const s2 = el('li', null, null, sub);
+      el('span', 'item-detalhe', `${f.dataCurta(x[1])} · ${resultado}`, s2);
+      el('span', 'item-voto', voto, s2);
     });
   });
-  encurtarLista(lista, $('#parl-votacoes-todas'), 10, { abrir: `Ver todas as ${f.numero(ordem.length)} votações`, fechar: 'Mostrar só as 10 mais recentes' });
+  encurtarLista(lista, $('#parl-votacoes-todas'), 8, { abrir: `Ver todas as ${f.numero(ordem.length)} propostas votadas`, fechar: 'Mostrar só as 8 mais recentes' });
   definir('parl-votos-nota', casa === 'camara'
     ? 'Fonte: Câmara dos Deputados, dados abertos. O arquivo da Câmara traz só quem votou: quem estava de licença, era ministro ou secretário, ou ainda não tinha assumido aparece como não tendo votado, sem o motivo.'
-    : 'Fonte: Senado Federal, dados abertos. Em votação secreta, o Senado registra só que o senador votou.');
+    : 'Fonte: Senado Federal, dados abertos. Em votação secreta, o Senado registra só que o senador votou. Os códigos de ausência que não estão traduzidos aqui (como licenças e missões) têm a legenda no relatório oficial:');
+  const nota = campo('parl-votos-nota')[0];
+  if (casa === 'senado' && estado.atv?.id) {
+    nota.append(' ');
+    const a = el('a', null, `relatório de votações de ${estado.p[1]} em ${ano} (PDF do Senado)`, nota);
+    a.href = `https://legis.senado.leg.br/parlam-servicosweb/api/v1/relatorios/votacoes-nominais/ano/${ano}/parlamentar/${estado.atv.id}`;
+    a.rel = 'noopener';
+    nota.append('.');
+  }
 }
 
 function desenharProjetos(ano) {
@@ -268,8 +287,11 @@ async function desenharCota(ano) {
   const casa = cota[p[2]];
   const achado = (casa?.parlamentares ?? []).find((x) => semAcento(x.nome) === alvo && x.uf === p[4]);
   if (!achado) {
-    definir('parl-cota-nota', `Nenhum reembolso da cota em ${ano} nas listas oficiais.`);
-    resumo('parl-resumo-cota', f.moeda(0, 0), 'nenhum reembolso no ano');
+    // Ausência no arquivo não prova que não houve gasto (o nome pode estar
+    // escrito de outro jeito): o site diz só que não há registro.
+    const fonte = p[2] === 'senado' ? 'do Senado' : 'da Câmara';
+    definir('parl-cota-nota', `Sem registro de reembolso da cota em ${ano} no arquivo ${fonte} com este nome e estado.`);
+    resumo('parl-resumo-cota', 'sem registro', `no arquivo ${fonte}`);
     return;
   }
   resumo('parl-resumo-cota', f.reaisCompacto(achado.total), 'valor da época');
