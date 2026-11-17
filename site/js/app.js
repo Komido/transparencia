@@ -1870,9 +1870,9 @@ function montarMunicipios(ctx) {
     lista.forEach((x) => {
       const li = el('li', null, null, ul);
       el('span', 'pessoa-nome', x[0], li);
-      // Sigla e nome do partido; se forem iguais ("Republicanos"), só o nome.
-      const extenso = d.partidos?.[x[2]];
-      el('span', 'pessoa-detalhe', !extenso ? x[2] : semAcento(extenso) === semAcento(x[2]) ? extenso : `${x[2]} · ${extenso}`, li);
+      // Só a sigla, para caber numa linha; o nome está na tabela de siglas.
+      const sigla = el('span', 'pessoa-detalhe', x[2], li);
+      if (d.partidos?.[x[2]]) sigla.title = d.partidos[x[2]];
     });
     definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
     caixa.hidden = false;
@@ -4421,6 +4421,35 @@ async function iniciar() {
     requestAnimationFrame(reposicionarNaSecao);
   }
 }
+
+// Siglas dos partidos (dados/partidos.json, do TSE), em "Quem faz o quê".
+function montarPartidos() {
+  const caixa = $('#partidos-caixa');
+  if (!caixa) return;
+  let feito = false;
+  const preencher = async () => {
+    if (feito) return;
+    feito = true;
+    try {
+      const r = await fetch('/dados/partidos.json', { credentials: 'same-origin' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      const linhas = Object.entries(d.partidos ?? {})
+        .filter(([sigla, nome]) => typeof sigla === 'string' && typeof nome === 'string' && sigla.length <= 20 && nome.length <= 120)
+        .map(([sigla, nome]) => [sigla, nome]);
+      preencherTabela($('#tabela-partidos'), ['Sigla', 'Nome no TSE'], linhas, null, [1]);
+    } catch (erro) {
+      console.error(erro);
+      feito = false;
+    }
+  };
+  caixa.addEventListener('toggle', () => { if (caixa.open) preencher(); });
+  // Quem chega pelo link "O que é cada sigla" encontra a tabela aberta.
+  const abrir = () => { if (location.hash === '#partidos') { caixa.open = true; preencher(); } };
+  window.addEventListener('hashchange', abrir);
+  abrir();
+}
+montarPartidos();
 
 // Listas de barras em duas colunas (computador, regra no CSS): a ordem desce
 // pela coluna da esquerda e continua na da direita, com as linhas alinhadas.
