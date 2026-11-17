@@ -96,12 +96,20 @@ async function parlamentares(env, url) {
 
 const CASA = { camara: 'Câmara dos Deputados', senado: 'Senado' };
 
-export function textosDoParlamentar(p, endereco, origem) {
+const reais = (v) => (v >= 1e6
+  ? `R$ ${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(v / 1e6)} milhões`
+  : `R$ ${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(v)}`);
+
+// resumo: { pago, cidades, de, ate } das emendas, em valores da época.
+export function textosDoParlamentar(p, endereco, origem, resumo) {
   const sigla = p.uf ? ` (${p.partido ? `${p.partido}-` : ''}${p.uf})` : '';
+  const numeros = resumo && resumo.pago > 0
+    ? `De ${resumo.de} a ${resumo.ate}, as emendas individuais de ${p.nome} somaram ${reais(resumo.pago)} pagos (valores da época)${resumo.cidades ? `, para ${resumo.cidades} ${resumo.cidades === 1 ? 'cidade' : 'cidades'}` : ''}. `
+    : '';
   return {
-    titulo: `${p.nome}${sigla}: emendas parlamentares | Arrecadômetro Brasil`,
-    tituloCurto: `Emendas de ${p.nome}${sigla}`,
-    descricao: `Para onde ${p.nome}${CASA[p.casa] ? ` (${CASA[p.casa]})` : ''} mandou emendas parlamentares: quanto foi pago a cada ano, a que tipo de recebedor e quais cidades receberam, com dados oficiais.`,
+    titulo: `${p.nome}${sigla}: emendas e cota parlamentar · Arrecadômetro Brasil`,
+    tituloCurto: p.nome,
+    descricao: `${numeros}Para onde ${p.nome}${CASA[p.casa] ? ` (${CASA[p.casa]})` : ''} mandou emendas parlamentares, quais cidades receberam e quanto gastou da cota, com dados oficiais.`,
     endereco: `${origem}/parlamentar/${endereco}`,
   };
 }
@@ -149,7 +157,18 @@ async function paginaDoParlamentar(request, env, url) {
   const { porEndereco } = await parlamentares(env, url);
   const p = porEndereco.get(m[1]);
   if (!p) return naoAchou();
-  return reescrever(request, env, url, textosDoParlamentar(p, m[1], url.origin));
+  // Resumo das emendas para a descrição (buscadores e prévia ao compartilhar).
+  let resumo = null;
+  try {
+    const r = await env.ASSETS.fetch(new Request(new URL(`/dados/parlamentares/emendas/${m[1]}.json`, url)));
+    if (r.ok) {
+      const d = await r.json();
+      const anos = Object.keys(d.anos ?? {}).sort();
+      const cidades = new Set(anos.flatMap((a) => (d.anos[a].cidades ?? []).map((c) => c[0])));
+      resumo = { pago: anos.reduce((s, a) => s + (d.anos[a].pago ?? 0), 0), cidades: cidades.size, de: anos[0], ate: anos[anos.length - 1] };
+    }
+  } catch { /* sem o resumo, a descrição sai sem números */ }
+  return reescrever(request, env, url, textosDoParlamentar(p, m[1], url.origin, resumo), '/parlamentar');
 }
 
 async function paginaDaCidade(request, env, url) {
@@ -164,9 +183,10 @@ async function paginaDaCidade(request, env, url) {
   return reescrever(request, env, url, textosDaCidade(c, url.origin));
 }
 
-// A página inicial com título, descrição, manchete e endereço próprios.
-async function reescrever(request, env, url, t) {
-  const base = await env.ASSETS.fetch(new Request(new URL('/', url)));
+// Uma página do site (a inicial, ou parlamentar.html) com título, descrição,
+// manchete e endereço próprios.
+async function reescrever(request, env, url, t, modelo = '/') {
+  const base = await env.ASSETS.fetch(new Request(new URL(modelo, url)));
   if (!base.ok) return base;
   const pagina = new HTMLRewriter()
     .on('title', { element(e) { e.setInnerContent(t.titulo); } })

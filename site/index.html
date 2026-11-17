@@ -908,47 +908,22 @@
 
         <section id="parlamentares" class="bloco bloco-dados" aria-labelledby="parlamentares-titulo">
           <p class="tema">Congresso</p>
-          <h2 id="parlamentares-titulo">Para onde cada deputado e senador mandou emendas?</h2>
-          <p class="intro">Emenda é a parte do orçamento federal que cada parlamentar indica para onde vai. Aqui está o que foi pago, ano a ano, e quais cidades receberam.</p>
+          <h2 id="parlamentares-titulo">O que cada deputado e senador fez com o dinheiro?</h2>
+          <p class="intro">Cada deputado federal e senador tem uma página com as emendas que mandou (quanto foi pago, para quem e quais cidades receberam) e o gasto da cota parlamentar.</p>
           <div class="filtros">
             <div class="campo largo busca-cidade">
               <label for="parl-busca">Deputado ou senador</label>
               <input id="parl-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="parl-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome">
               <ul id="parl-sugestoes" class="sugestoes" role="listbox" aria-label="Parlamentares encontrados" hidden></ul>
             </div>
-            <label class="campo"><span>Ano</span>
-              <select id="parl-ano"></select>
-            </label>
           </div>
           <div id="parl-estado" hidden>
             <p class="ranking-titulo" data-campo="parl-estado-titulo"></p>
             <ul class="barras" id="parl-estado-lista"></ul>
             <button type="button" class="botao" id="parl-estado-todos" hidden></button>
           </div>
-          <p id="parl-vazio" class="resumo-vazio">Digite o nome de um deputado federal ou senador.</p>
-          <div id="parl-detalhe" hidden>
-            <p class="mun-cabeca" data-campo="parl-cabeca" aria-live="polite"></p>
-            <dl class="numeros empilhado" id="parl-numeros"></dl>
-            <h3 data-campo="parl-tipos-titulo">Para quem o dinheiro foi pago</h3>
-            <ul class="barras" id="parl-tipos"></ul>
-            <h3 data-campo="parl-cidades-titulo">Cidades que receberam</h3>
-            <ul class="barras" id="parl-cidades"></ul>
-            <button type="button" class="botao" id="parl-cidades-todas" hidden></button>
-            <p class="nota" data-campo="parl-nota"></p>
-          </div>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que entra nessa conta?</h3>
-              <p>As emendas individuais do parlamentar pagas no ano, para qualquer recebedor: prefeituras e fundos municipais, governos dos estados, entidades sem fins lucrativos (associações, fundações, santas casas) e outros. Emendas de bancada e de comissão são decididas em grupo e não entram na conta de ninguém. O ano é o do pagamento: uma emenda aprovada em um ano pode ser paga em outro.</p>
-              <h3>O que é "por meio do Banco do Brasil"?</h3>
-              <p>Parte das emendas aparece no arquivo oficial como paga ao Banco do Brasil, em Brasília, sem dizer qual prefeitura, estado ou entidade recebeu o dinheiro. Por isso, a lista de cidades pode ser menor que o total.</p>
-              <h3>Quem aparece aqui?</h3>
-              <p>Todos os deputados federais e senadores que usaram a cota parlamentar desde 2023 e todos os autores de emenda individual paga desde 2023. O partido e o estado são os do ano mais recente nas listas oficiais da Câmara e do Senado.</p>
-              <button type="button" class="botao" id="parl-baixar" data-baixar="parlamentar" hidden>Baixar planilha deste parlamentar</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Portal da Transparência (CGU), emendas parlamentares por favorecido; Câmara dos Deputados e Senado Federal, listas de parlamentares. Atualização: <span data-campo="parl-atualizado">sem dado</span>.</p>
+          <p id="parl-vazio" class="resumo-vazio">Digite o nome de um deputado federal ou senador. Escolhendo a sua cidade no alto da página, aparecem aqui os do seu estado.</p>
+          <p class="fonte">Fonte: Portal da Transparência (CGU), emendas parlamentares por favorecido; Câmara dos Deputados e Senado Federal. Atualização: <span data-campo="parl-atualizado">sem dado</span>.</p>
         </section>
 
         <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">

@@ -1347,3 +1347,9 @@ td.num .detalhe { white-space: normal; }
 .abertura .onde-sugestao p { font-size: var(--fs-2); }
 .onde-sugestao .botao { margin: var(--e-2) 0 0; }
 #municipios .filtros .botao { margin: 0; justify-content: center; }
+
+/* Páginas próprias (parlamentar): trilha de navegação e cabeçalho. */
+.trilha { margin: var(--e-4) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }
+.trilha a { color: var(--tinta-2); }
+.abertura .parl-cargo { margin-top: var(--e-1); font-size: var(--fs-3); }
+.pagina-propria .filtros { margin-top: var(--e-4); }
