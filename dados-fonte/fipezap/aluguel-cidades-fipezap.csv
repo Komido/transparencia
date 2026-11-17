@@ -56,6 +56,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Maceió,AL,56.1992
 2026-08,Maceió,AL,56.0334
 2026-09,Maceió,AL,56.629
+2026-10,Maceió,AL,57.5578
 2022-01,Manaus,AM,33.5921
 2022-02,Manaus,AM,34.1967
 2022-03,Manaus,AM,35.2112
@@ -113,6 +114,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Manaus,AM,53.0749
 2026-08,Manaus,AM,52.993
 2026-09,Manaus,AM,53.047
+2026-10,Manaus,AM,53.4099
 2014-01,Salvador,BA,24.2655
 2014-02,Salvador,BA,24.6931
 2014-03,Salvador,BA,25.4336
@@ -266,6 +268,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Salvador,BA,54.3538
 2026-08,Salvador,BA,54.9007
 2026-09,Salvador,BA,55.4019
+2026-10,Salvador,BA,55.4678
 2016-12,Fortaleza,CE,17.448
 2017-01,Fortaleza,CE,17.5788
 2017-02,Fortaleza,CE,17.668
@@ -384,6 +387,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Fortaleza,CE,41.6556
 2026-08,Fortaleza,CE,42.1595
 2026-09,Fortaleza,CE,42.2235
+2026-10,Fortaleza,CE,42.8498
 2014-01,Brasília,DF,25.6285
 2014-02,Brasília,DF,25.703
 2014-03,Brasília,DF,25.9828
@@ -537,6 +541,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Brasília,DF,54.5625
 2026-08,Brasília,DF,54.1295
 2026-09,Brasília,DF,53.8426
+2026-10,Brasília,DF,53.9076
 2022-01,Vitória,ES,31.7238
 2022-02,Vitória,ES,31.5102
 2022-03,Vitória,ES,32.1315
@@ -594,6 +599,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Vitória,ES,54.6929
 2026-08,Vitória,ES,56.8836
 2026-09,Vitória,ES,57.0593
+2026-10,Vitória,ES,56.6956
 2016-12,Goiânia,GO,16.4804
 2017-01,Goiânia,GO,16.5818
 2017-02,Goiânia,GO,16.5739
@@ -712,6 +718,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Goiânia,GO,43.2058
 2026-08,Goiânia,GO,43.3612
 2026-09,Goiânia,GO,43.8592
+2026-10,Goiânia,GO,44.2598
 2015-12,Belo Horizonte,MG,22.1988
 2016-01,Belo Horizonte,MG,22.1165
 2016-02,Belo Horizonte,MG,21.9833
@@ -842,6 +849,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Belo Horizonte,MG,50.138
 2026-08,Belo Horizonte,MG,50.3755
 2026-09,Belo Horizonte,MG,50.7761
+2026-10,Belo Horizonte,MG,51.2897
 2022-01,Campo Grande,MS,16.8027
 2022-02,Campo Grande,MS,17.8218
 2022-03,Campo Grande,MS,18.4714
@@ -899,6 +907,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Campo Grande,MS,31.5504
 2026-08,Campo Grande,MS,32.7636
 2026-09,Campo Grande,MS,32.9498
+2026-10,Campo Grande,MS,33.1523
 2022-01,João Pessoa,PB,27.8009
 2022-02,João Pessoa,PB,28.6745
 2022-03,João Pessoa,PB,29.2265
@@ -956,6 +965,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,João Pessoa,PB,51.6776
 2026-08,João Pessoa,PB,51.5909
 2026-09,João Pessoa,PB,51.8582
+2026-10,João Pessoa,PB,52.6168
 2015-12,Recife,PE,25.995
 2016-01,Recife,PE,26.0324
 2016-02,Recife,PE,26.206
@@ -1086,6 +1096,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Recife,PE,64.1112
 2026-08,Recife,PE,64.1861
 2026-09,Recife,PE,64.3918
+2026-10,Recife,PE,64.9404
 2014-01,Curitiba,PR,17.4073
 2014-02,Curitiba,PR,17.6071
 2014-03,Curitiba,PR,17.7082
@@ -1239,6 +1250,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Curitiba,PR,48.9083
 2026-08,Curitiba,PR,49.1142
 2026-09,Curitiba,PR,49.4422
+2026-10,Curitiba,PR,50.0071
 2016-12,Niterói,RJ,22.5628
 2017-01,Niterói,RJ,22.3306
 2017-02,Niterói,RJ,22.1218
@@ -1357,6 +1369,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Niterói,RJ,42.0439
 2026-08,Niterói,RJ,42.9098
 2026-09,Niterói,RJ,42.7031
+2026-10,Niterói,RJ,42.933
 2008-01,Rio de Janeiro,RJ,16.8304
 2008-02,Rio de Janeiro,RJ,16.6132
 2008-03,Rio de Janeiro,RJ,17.3002
@@ -1582,6 +1595,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Rio de Janeiro,RJ,60.7995
 2026-08,Rio de Janeiro,RJ,61.4043
 2026-09,Rio de Janeiro,RJ,61.8575
+2026-10,Rio de Janeiro,RJ,61.909
 2018-01,Pelotas,RS,15.2649
 2018-02,Pelotas,RS,15.421
 2018-03,Pelotas,RS,15.5663
@@ -1687,6 +1701,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Pelotas,RS,20.6834
 2026-08,Pelotas,RS,20.7269
 2026-09,Pelotas,RS,20.8761
+2026-10,Pelotas,RS,21.1177
 2014-01,Porto Alegre,RS,23.0438
 2014-02,Porto Alegre,RS,23.3914
 2014-03,Porto Alegre,RS,23.3057
@@ -1840,6 +1855,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Porto Alegre,RS,45.994
 2026-08,Porto Alegre,RS,46.4643
 2026-09,Porto Alegre,RS,46.7791
+2026-10,Porto Alegre,RS,47.1096
 2016-12,Florianópolis,SC,21.6228
 2017-01,Florianópolis,SC,21.841
 2017-02,Florianópolis,SC,21.9033
@@ -1958,6 +1974,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Florianópolis,SC,60.8416
 2026-08,Florianópolis,SC,61.1891
 2026-09,Florianópolis,SC,61.812
+2026-10,Florianópolis,SC,62.1917
 2018-01,Joinville,SC,16.0211
 2018-02,Joinville,SC,16.1203
 2018-03,Joinville,SC,16.2381
@@ -2063,6 +2080,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Joinville,SC,37.8001
 2026-08,Joinville,SC,38.3374
 2026-09,Joinville,SC,38.532
+2026-10,Joinville,SC,38.4673
 2018-01,São José,SC,15.2779
 2018-02,São José,SC,15.1879
 2018-03,São José,SC,15.2264
@@ -2168,6 +2186,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,São José,SC,43.3097
 2026-08,São José,SC,43.767
 2026-09,São José,SC,44.298
+2026-10,São José,SC,45.0093
 2018-01,Barueri,SP,31.6014
 2018-02,Barueri,SP,31.9412
 2018-03,Barueri,SP,32.0883
@@ -2273,6 +2292,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Barueri,SP,72.0026
 2026-08,Barueri,SP,71.9231
 2026-09,Barueri,SP,71.9635
+2026-10,Barueri,SP,72.3611
 2014-01,Campinas,SP,21.39
 2014-02,Campinas,SP,21.7252
 2014-03,Campinas,SP,21.7794
@@ -2426,6 +2446,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Campinas,SP,55.5194
 2026-08,Campinas,SP,56.2059
 2026-09,Campinas,SP,56.5967
+2026-10,Campinas,SP,56.677
 2018-01,Guarulhos,SP,20.7513
 2018-02,Guarulhos,SP,20.7443
 2018-03,Guarulhos,SP,20.8834
@@ -2531,6 +2552,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Guarulhos,SP,42.7213
 2026-08,Guarulhos,SP,42.8138
 2026-09,Guarulhos,SP,43.0031
+2026-10,Guarulhos,SP,42.8248
 2018-01,Praia Grande,SP,21.8545
 2018-02,Praia Grande,SP,21.822
 2018-03,Praia Grande,SP,21.956
@@ -2636,6 +2658,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Praia Grande,SP,46.8814
 2026-08,Praia Grande,SP,46.933
 2026-09,Praia Grande,SP,47.3011
+2026-10,Praia Grande,SP,47.5655
 2018-01,Ribeirão Preto,SP,16.5389
 2018-02,Ribeirão Preto,SP,16.5802
 2018-03,Ribeirão Preto,SP,16.5832
@@ -2741,6 +2764,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Ribeirão Preto,SP,34.4787
 2026-08,Ribeirão Preto,SP,35.0097
 2026-09,Ribeirão Preto,SP,35.276
+2026-10,Ribeirão Preto,SP,35.5684
 2018-01,Santo André,SP,21.2944
 2018-02,Santo André,SP,21.3362
 2018-03,Santo André,SP,21.3009
@@ -2846,6 +2870,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Santo André,SP,44.2715
 2026-08,Santo André,SP,44.1878
 2026-09,Santo André,SP,44.4064
+2026-10,Santo André,SP,44.437
 2014-01,Santos,SP,29.3167
 2014-02,Santos,SP,29.6301
 2014-03,Santos,SP,30.0563
@@ -2999,6 +3024,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,Santos,SP,59.967
 2026-08,Santos,SP,60.3023
 2026-09,Santos,SP,60.3925
+2026-10,Santos,SP,60.6876
 2014-01,São Bernardo do Campo,SP,18.1827
 2014-02,São Bernardo do Campo,SP,18.4705
 2014-03,São Bernardo do Campo,SP,18.6825
@@ -3152,6 +3178,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,São Bernardo do Campo,SP,40.2054
 2026-08,São Bernardo do Campo,SP,40.2299
 2026-09,São Bernardo do Campo,SP,40.2827
+2026-10,São Bernardo do Campo,SP,40.5642
 2018-01,São José do Rio Preto,SP,13.2293
 2018-02,São José do Rio Preto,SP,13.1932
 2018-03,São José do Rio Preto,SP,13.247
@@ -3257,6 +3284,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,São José do Rio Preto,SP,29.2296
 2026-08,São José do Rio Preto,SP,29.4998
 2026-09,São José do Rio Preto,SP,29.7669
+2026-10,São José do Rio Preto,SP,29.9952
 2018-01,São José dos Campos,SP,19.0317
 2018-02,São José dos Campos,SP,19.0347
 2018-03,São José dos Campos,SP,19.0801
@@ -3362,6 +3390,7 @@ mes,cidade,uf,aluguel_m2
 2026-07,São José dos Campos,SP,50.1396
 2026-08,São José dos Campos,SP,49.6321
 2026-09,São José dos Campos,SP,49.4277
+2026-10,São José dos Campos,SP,49.3682
 2008-01,São Paulo,SP,18.6281
 2008-02,São Paulo,SP,19.0973
 2008-03,São Paulo,SP,19.7595
@@ -3587,3 +3616,4 @@ mes,cidade,uf,aluguel_m2
 2026-07,São Paulo,SP,65.1772
 2026-08,São Paulo,SP,65.3636
 2026-09,São Paulo,SP,65.779
+2026-10,São Paulo,SP,66.1553
