@@ -14,171 +14,105 @@ permissions:
 jobs:
   inspecionar:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      # Outros Tribunais de Contas: o que publicam para baixar sobre despesas
-      # dos municípios e das câmaras (para estender o que existe de SP)? Descoberta:
-      # lê o robots.txt de cada site e obedece, lista os links que falam de
-      # dados abertos, despesas, folha e câmaras, e segue só um nível dentro do
-      # mesmo site. Uma pausa de 1 segundo entre pedidos.
-      - name: Outros Tribunais de Contas, segunda rodada (RS, CE, PE e PR)
+      # TCE-RS: o arquivo anual "Despesa orçamentária por empenhos" (todos os
+      # municípios) tem valor pago, código da cidade e um jeito seguro de achar
+      # a Câmara? Só leitura. O robots.txt do portal proíbe /api/ e pede 10
+      # segundos entre pedidos: são poucos pedidos, todos fora de /api/, com
+      # 10 segundos de intervalo. Nomes de pessoas não vão para o registro.
+      - name: TCE-RS, colunas do arquivo de empenhos de 2025 e tabelas de apoio
         continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
           python3 - <<'PY'
-          import html.parser, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
-
+          import collections, csv, html.parser, io, os, re, time, urllib.parse, urllib.request, urllib.robotparser, zipfile
           AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
-          PALAVRAS = re.compile(r"dado|abert|conjunto|despes|empenh|pagament|folha|pessoal|remunera|c[aâ]mara|legislat|vereador|api|csv|zip|json|xls|download|sicom|capmg|fiscaliz|dicion|layout|leiaute", re.I)
-          vistos = set()
-          robots = {}
+          BASE = "https://dados.tce.rs.gov.br"
+          rp = urllib.robotparser.RobotFileParser()
+          ultimo = [0.0]
+          def pedir(url, cab=None, tempo=300):
+              espera = 10 - (time.time() - ultimo[0])
+              if espera > 0: time.sleep(espera)
+              ultimo[0] = time.time()
+              if url.startswith(BASE) and not rp.can_fetch(AGENTE, url):
+                  raise SystemExit(f"robots.txt não permite {url}")
+              return urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": AGENTE, **(cab or {})}), timeout=tempo)
+          with pedir(BASE + "/robots.txt") as r:
+              linhas = r.read().decode("utf-8", "replace").splitlines()
+          rp.parse(linhas)
+          print("robots.txt:", [l for l in linhas if l.strip() and not l.startswith("#")][:12], "| crawl-delay:", rp.crawl_delay(AGENTE))
 
-          class Pagina(html.parser.HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.links, self.scripts, self.titulo, self.texto = [], [], "", []
-                  self._a = None; self._t = []; self._titulo = False
+          class Links(html.parser.HTMLParser):
+              def __init__(self): super().__init__(); self.links = []
               def handle_starttag(self, tag, attrs):
                   a = dict(attrs)
-                  if tag == "a" and a.get("href"): self._a = a["href"]; self._t = []
-                  if tag == "script" and a.get("src"): self.scripts.append(a["src"])
-                  if tag == "title": self._titulo = True
-              def handle_endtag(self, tag):
-                  if tag == "a" and self._a is not None:
-                      self.links.append((self._a, " ".join("".join(self._t).split())[:90])); self._a = None
-                  if tag == "title": self._titulo = False
-              def handle_data(self, d):
-                  if self._a is not None: self._t.append(d)
-                  if self._titulo: self.titulo += d
-                  if d.strip(): self.texto.append(d.strip())
+                  if tag == "a" and a.get("href"): self.links.append(a["href"])
+          def recursos(conjunto):
+              with pedir(f"{BASE}/dataset/{conjunto}") as r:
+                  p = Links(); p.feed(r.read().decode("utf-8", "replace"))
+              return sorted({urllib.parse.urljoin(BASE, h) for h in p.links if re.search(r"/dados/.+\.(csv|zip|7z|json|xml)", h)})
 
-          atraso = {}
-          def baixar(url, limite=5_000_000):
-              time.sleep(atraso.get(urllib.parse.urlsplit(url).netloc, 2))
-              pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "*/*"})
-              try:
-                  with urllib.request.urlopen(pedido, timeout=90) as r:
-                      return r.status, r.headers.get("Content-Type", ""), r.geturl(), r.read(limite)
-              except urllib.error.HTTPError as e:
-                  return e.code, e.headers.get("Content-Type", ""), url, e.read(20000)
+          # Tabelas de apoio: tipos de unidade orçamentária e elementos de despesa.
+          for conjunto in ("tipos-de-unidade-orcamentaria", "elemento-de-despesa"):
+              urls = recursos(conjunto)
+              print(f"\n{conjunto}: {urls}")
+              csvs = [u for u in urls if u.endswith(".csv")]
+              if csvs:
+                  with pedir(csvs[0]) as r:
+                      t = r.read(400_000)
+                  try: texto = t.decode("utf-8-sig")
+                  except UnicodeDecodeError: texto = t.decode("latin-1")
+                  ls = texto.splitlines()
+                  print(f"  {len(ls)} linhas lidas; primeiras:")
+                  for l in ls[:40 if conjunto.startswith("tipos") else 8]: print("   ", l[:200])
 
-          def permitido(url):
-              p = urllib.parse.urlsplit(url); base = f"{p.scheme}://{p.netloc}"
-              if base not in robots:
-                  rp = urllib.robotparser.RobotFileParser()
-                  try:
-                      st, _, _, corpo = baixar(base + "/robots.txt", 200_000)
-                      linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
-                      print(f"\nrobots.txt de {p.netloc}: HTTP {st}" + ("".join("\n    " + l for l in linhas[:30]) if linhas else ""))
-                      rp.parse(linhas)
-                      # Respeita o Crawl-Delay e trata qualquer bloco "User-agent: *"
-                      # com "Disallow: /" como proibição total (o leitor do Python
-                      # só olha o primeiro bloco).
-                      atraso[p.netloc] = max(2, float(rp.crawl_delay(AGENTE) or 0))
-                      grupo, proibe = None, False
-                      for l in linhas:
-                          k, _, v = l.split("#")[0].partition(":")
-                          k, v = k.strip().lower(), v.strip()
-                          if k == "user-agent": grupo = v
-                          elif k == "disallow" and grupo == "*" and v == "/": proibe = True
-                      if proibe:
-                          print("    (um bloco para todos os robôs proíbe o site inteiro: nada será lido)")
-                          robots[base] = "proibido"
-                          return False
-                  except Exception as e:
-                      print(f"\nrobots.txt de {p.netloc}: erro {e!r}"); rp = None
-                  robots[base] = rp
-              rp = robots[base]
-              if rp == "proibido": return False
-              return rp is None or rp.can_fetch(AGENTE, url)
-
-          def ver(url, seguir=False, limite=5_000_000, maximo_links=70):
-              if url in vistos: return None
-              vistos.add(url)
-              if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite; pulado"); return None
-              try:
-                  st, tipo, final, corpo = baixar(url, limite)
-              except Exception as e:
-                  print(f"\n### {url}\n  erro: {e!r}"); return None
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              if "json" in tipo or corpo[:1] in (b"[", b"{"):
-                  try:
-                      d = json.loads(corpo.decode("utf-8-sig", "replace"))
-                      if isinstance(d, list):
-                          print(f"  lista com {len(d)} itens; primeiros: {json.dumps(d[:3], ensure_ascii=False)[:1200]}")
-                      else:
-                          print(f"  objeto: {json.dumps(d, ensure_ascii=False)[:1500]}")
-                      return d
-                  except Exception as e:
-                      print(f"  não é JSON válido ({e}); início: {corpo[:300]!r}"); return None
-              if "html" not in tipo:
-                  print(f"  início: {corpo[:400]!r}"); return None
-              p = Pagina(); p.feed(corpo.decode("utf-8", "replace"))
-              print(f"  título: {' '.join(p.titulo.split())[:120]}")
-              links = []
-              for href, texto in p.links:
-                  absoluto = urllib.parse.urljoin(final, href.strip())
-                  if absoluto.startswith("http") and (PALAVRAS.search(absoluto) or PALAVRAS.search(texto)) and absoluto not in [l for l, _ in links]:
-                      links.append((absoluto, texto))
-              print(f"  links no total: {len(p.links)}; ligados ao assunto: {len(links)}")
-              for l, t in links[:maximo_links]: print(f"    {t[:60]!r} -> {l}")
-              if len(p.links) < 8:
-                  print(f"  poucos links (página montada por script?). scripts: {p.scripts[:12]}")
-                  print(f"  texto: {' | '.join(p.texto)[:800]}")
-              if seguir:
-                  host = urllib.parse.urlsplit(final).netloc
-                  proximos = [l for l, _ in links if urllib.parse.urlsplit(l).netloc == host and not re.search(r"\.(zip|csv|xlsx?|pdf)(\?|$)", l, re.I)]
-                  for l in proximos[:12]: ver(l)
-              return None
-
-          def ckan(base, termos):
-              for t in termos:
-                  d = ver(f"{base}/api/3/action/package_search?q={urllib.parse.quote(t)}&rows=15", limite=8_000_000)
-                  if not isinstance(d, dict) or not d.get("success"): continue
-                  print(f"  CKAN {base}, busca {t!r}: {d['result'].get('count')} conjuntos")
-                  for p in d["result"].get("results", []):
-                      print(f"    conjunto {p.get('name')!r}: {p.get('title')!r}")
-                      for r in p.get("resources", [])[:8]:
-                          print(f"      {r.get('format')!s:6} {r.get('size')!s:>12}  {r.get('name')!r}  {r.get('url')}")
-
-          def estado(titulo, raizes, base_ckan=None, termos=("despesa", "empenho", "pagamento")):
-              print("\n" + "=" * 70 + f"\n{titulo}\n" + "=" * 70)
-              for u in raizes: ver(u, seguir=True, maximo_links=50)
-              if base_ckan: ckan(base_ckan, termos)
-
-          def texto(url, n=3000):
-              """Texto da página (sem menus longos), para ler documentação."""
-              if url in vistos or not permitido(url): return
-              vistos.add(url)
-              try:
-                  st, tipo, final, corpo = baixar(url)
-              except Exception as e:
-                  print(f"\n### {url}\n  erro: {e!r}"); return
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes")
-              if "html" in tipo:
-                  pg = Pagina(); pg.feed(corpo.decode("utf-8", "replace"))
-                  print("  " + " | ".join(pg.texto)[:n])
-                  ligados = [(urllib.parse.urljoin(final, h), t) for h, t in pg.links if PALAVRAS.search(h + " " + t)]
-                  for l, t in ligados[:25]: print(f"    {t[:60]!r} -> {l}")
-              else:
-                  print(f"  início: {corpo[:n]!r}")
-
-          print("=" * 70 + "\nTCE-RS: conjuntos consolidados de despesa e conjuntos do Legislativo (só HTML; a API é proibida no robots.txt)\n" + "=" * 70)
-          ver("https://dados.tce.rs.gov.br/dataset?q=%22Despesa+or%C3%A7ament%C3%A1ria+por+empenhos%22&tags=Consolidado&sort=score+desc%2C+metadata_modified+desc", seguir=True, maximo_links=40)
-          ver("https://dados.tce.rs.gov.br/dataset?tags=Municipal&tags=Legislativo", maximo_links=40)
-
-          print("\n" + "=" * 70 + "\nTCE-CE: documentação da API\n" + "=" * 70)
-          for d in ("38/notas_empenhos", "5/notas_pagamentos", "3/despesa_elemento_projeto", "7/orgaos", "75/unidades_gestoras"):
-              texto(f"https://api.tce.ce.gov.br/index.php/doc/{d}")
-          texto("https://api-dados-abertos.tce.ce.gov.br/sim")
-
-          print("\n" + "=" * 70 + "\nTCE-PE: documentação da API\n" + "=" * 70)
-          for i in (16, 24, 76):
-              texto(f"https://sistemas.tce.pe.gov.br/DadosAbertos/Exemplo!detalhar?dadosAbertos.id={i}")
-
-          print("\n" + "=" * 70 + "\nTCE-PR: download de dados do PIT\n" + "=" * 70)
-          texto("https://pit.tce.pr.gov.br/Dados/DadosConsulta/Consulta")
-          print(f"\npedidos feitos: {len(vistos) + len(robots)}")
+          # Arquivo anual de 2025.
+          urls = recursos("despesa-orcamentaria-por-empenhos-2025")
+          print(f"\nempenhos 2025: {urls}")
+          url = next(u for u in urls if u.endswith(".csv.zip"))
+          with pedir(url, tempo=60) as r:
+              tamanho = int(r.headers.get("Content-Length") or 0)
+              print(f"  {url}: {tamanho / 1e6:.0f} MB, Last-Modified {r.headers.get('Last-Modified')}, Accept-Ranges {r.headers.get('Accept-Ranges')}")
+              destino = "/tmp/rs.zip"
+              inicio = time.time()
+              with open(destino, "wb") as fh:
+                  while True:
+                      b = r.read(1 << 20)
+                      if not b: break
+                      fh.write(b)
+          print(f"  baixado em {(time.time() - inicio) / 60:.1f} min: {os.path.getsize(destino) / 1e6:.0f} MB")
+          z = zipfile.ZipFile(destino)
+          for i in z.infolist(): print(f"  dentro do zip: {i.filename}, {i.file_size / 1e6:.0f} MB")
+          nome = max(z.infolist(), key=lambda i: i.file_size).filename
+          bruto = z.open(nome).read(200_000)
+          try: bruto.decode("utf-8-sig"); cod = "utf-8-sig"
+          except UnicodeDecodeError: cod = "latin-1"
+          primeira = bruto.decode(cod, "replace").splitlines()[0]
+          sep = max(";,\t|", key=primeira.count)
+          leitor = csv.DictReader(io.TextIOWrapper(z.open(nome), encoding=cod, newline="", errors="replace"), delimiter=sep)
+          cols = leitor.fieldnames
+          print(f"  codificação {cod}, separador {sep!r}, {len(cols)} colunas: {cols}")
+          pessoal = [c for c in cols if re.search(r"nome|credor|cpf|cnpj|favorecido|historico|hist", c, re.I)]
+          print(f"  colunas que podem ter dados de pessoas (não impressas nos exemplos): {pessoal}")
+          poucos = collections.defaultdict(collections.Counter)
+          linhas = 0
+          camaras = collections.Counter()
+          for l in leitor:
+              linhas += 1
+              if linhas <= 3: print("  exemplo:", {k: v for k, v in l.items() if k not in pessoal})
+              for c in cols:
+                  if c in pessoal: continue
+                  if len(poucos[c]) < 400 or l[c] in poucos[c]: poucos[c][l[c]] += 1
+              for c in cols:
+                  if c not in pessoal and re.search(r"C[AÂ]MARA|LEGISLATIV", l[c] or "", re.I): camaras[c] += 1
+          print(f"\n  linhas: {linhas}")
+          for c in cols:
+              if c in pessoal: continue
+              n = len(poucos[c])
+              print(f"  {c}: {n}{'+' if n >= 400 else ''} valores; mais comuns: {poucos[c].most_common(12)}")
+          print(f"  colunas onde aparece 'câmara' ou 'legislativo': {camaras.most_common()}")
           PY
