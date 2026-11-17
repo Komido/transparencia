@@ -1360,7 +1360,7 @@ function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
 // pessoa usa a busca: a lista de nomes primeiro, depois o estado escolhido.
 // ---------------------------------------------------------------------------
 // Sua cidade: a busca no alto da página leva à página da cidade
-// (/cidade/nome-uf: cidade.html e js/cidade.js). A cidade guardada de outra
+// (/nome-uf, como /alfenas-mg: cidade.html e js/cidade.js). A cidade guardada de outra
 // visita aparece em destaque, e o estado e os deputados da página seguem ela.
 // ---------------------------------------------------------------------------
 

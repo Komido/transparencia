@@ -37,7 +37,7 @@ Cloudflare Pages (site estático)
 supabase/migrations/   esquema, coleta, validação e painel (na ordem em que foram aplicados)
 site/                  site estático publicado na Cloudflare
   index.html           página inicial: busca da cidade, seu estado, Brasil, Congresso
-  cidade.html          página de cada cidade (/cidade/nome-uf), com js/cidade.js
+  cidade.html          página de cada cidade (/nome-uf, como /alfenas-mg), com js/cidade.js
   parlamentar.html     página de cada deputado e senador, com js/parlamentar.js
   metodologia.html     regras de cálculo
   js/calculos.js       todas as contas, as mesmas para todos
@@ -49,7 +49,7 @@ site/                  site estático publicado na Cloudflare
 
 ## Publicação na Cloudflare (gratuito)
 
-O site é publicado como Worker com arquivos estáticos, configurado em `wrangler.jsonc`. O único código no servidor é `worker/index.js`, e os arquivos do site não passam por ele. Ele responde só nestes endereços: `/api/onde` (a cidade e o estado prováveis de quem acessa, pelo que a Cloudflare já informa do endereço IP em `request.cf`, sem guardar nada), `/cidade/nome-uf` (a página própria de cada uma das 5.570 cidades, `site/cidade.html` com `site/js/cidade.js`, com título, descrição, manchete e endereço canônico da cidade, para buscadores e compartilhamento; os números são montados no navegador), `/parlamentar/nome-uf` (a página própria de cada deputado e senador, `site/parlamentar.html`, com nome e resumo das emendas no título e na descrição), `/sitemap.xml` e `/robots.txt`. No plano gratuito são até 100 mil execuções por dia; acima disso, só esses endereços param até a meia-noite (UTC). Para testar localmente: `npx wrangler dev`. O Worker `arrecadometro-brasil` está ligado a este repositório pelo Workers Builds: cada push na branch de produção, inclusive os commits diários de dados do GitHub Actions, publica o site de novo.
+O site é publicado como Worker com arquivos estáticos, configurado em `wrangler.jsonc`. O único código no servidor é `worker/index.js`, e os arquivos do site não passam por ele. Ele responde só nestes endereços: `/api/onde` (a cidade e o estado prováveis de quem acessa, pelo que a Cloudflare já informa do endereço IP em `request.cf`, sem guardar nada), `/nome-uf`, como `/alfenas-mg` (a página própria de cada uma das 5.570 cidades; o endereço antigo `/cidade/nome-uf` redireciona para ele; `site/cidade.html` com `site/js/cidade.js`, com título, descrição, manchete e endereço canônico da cidade, para buscadores e compartilhamento; os números são montados no navegador), `/parlamentar/nome-uf` (a página própria de cada deputado e senador, `site/parlamentar.html`, com nome e resumo das emendas no título e na descrição), `/sitemap.xml` e `/robots.txt`. No plano gratuito são até 100 mil execuções por dia; acima disso, só esses endereços param até a meia-noite (UTC). Para testar localmente: `npx wrangler dev`. O Worker `arrecadometro-brasil` está ligado a este repositório pelo Workers Builds: cada push na branch de produção, inclusive os commits diários de dados do GitHub Actions, publica o site de novo.
 
 Para recriar do zero:
 

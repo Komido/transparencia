@@ -6,10 +6,12 @@
 //                    própria Cloudflare já sabe do endereço IP (request.cf),
 //                    para o site perguntar "Você está em ...?". Nada é
 //                    guardado nem registrado, e nada vai para outro serviço.
-//   /cidade/nome-uf  a página de cada cidade (cidade.html), com título,
-//                    descrição, manchete e endereço da cidade, para que ela
-//                    possa ser encontrada em buscadores e compartilhada.
-//                    Os números são montados no navegador (js/cidade.js).
+//   /nome-uf         a página de cada cidade (cidade.html), como /alfenas-mg,
+//                    com título, descrição, manchete e endereço da cidade,
+//                    para que ela possa ser encontrada em buscadores e
+//                    compartilhada. Os números são montados no navegador
+//                    (js/cidade.js). O endereço antigo /cidade/nome-uf leva
+//                    ao novo.
 //   /parlamentar/nome-uf  o mesmo, para cada deputado e senador
 //                    (parlamentar.html).
 //   /sitemap.xml     a lista das páginas, para os buscadores.
@@ -121,7 +123,7 @@ export function textosDaCidade(c, origem) {
     titulo: `${lugar}: contas da prefeitura, emendas e Bolsa Família | Arrecadômetro Brasil`,
     tituloCurto: `O dinheiro público de ${lugar}`,
     descricao: `Quanto a prefeitura de ${lugar} recebe e gasta, as emendas parlamentares pagas a ela, o Bolsa Família e o BPC na cidade e quem foi eleito, com dados oficiais e em linguagem simples.`,
-    endereco: `${origem}/cidade/${slugDaCidade(c.nome, c.uf)}`,
+    endereco: `${origem}/${slugDaCidade(c.nome, c.uf)}`,
   };
 }
 
@@ -177,8 +179,9 @@ async function paginaDaCidade(request, env, url) {
   if (url.pathname === '/cidade/') return Response.redirect(`${url.origin}/cidade${url.search}`, 301);
   const slug = slugDoCaminho(url.pathname.toLowerCase());
   if (!slug) return naoEncontrada();
-  // Um endereço só por cidade: sem barra no fim e em minúsculas.
-  const certo = `/cidade/${slug}`;
+  // Um endereço só por cidade: /nome-uf, sem barra no fim e em minúsculas.
+  // O antigo /cidade/nome-uf também cai aqui.
+  const certo = `/${slug}`;
   if (url.pathname !== certo) return Response.redirect(`${url.origin}${certo}${url.search}`, 301);
   const { porSlug } = await cidades(env, url);
   const c = porSlug.get(slug);
@@ -219,7 +222,7 @@ async function mapaDoSite(env, url) {
   try {
     deputados = [...(await parlamentares(env, url)).porEndereco.keys()].map((e) => `${url.origin}/parlamentar/${e}`);
   } catch { /* sem a lista de parlamentares, o mapa sai só com as cidades */ }
-  const enderecos = [`${url.origin}/`, `${url.origin}/metodologia.html`, ...[...porSlug.keys()].map((s) => `${url.origin}/cidade/${s}`), ...deputados];
+  const enderecos = [`${url.origin}/`, `${url.origin}/metodologia.html`, ...[...porSlug.keys()].map((s) => `${url.origin}/${s}`), ...deputados];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
     enderecos.map((e) => `<url><loc>${escapar(e)}</loc>${quando}</url>`).join('\n')}\n</urlset>\n`;
   return new Response(xml, { headers: comCabecalhos({ 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' }) });
@@ -248,7 +251,7 @@ export default {
       return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } });
     }
     if (url.pathname === '/api/onde') return new Response(JSON.stringify(onde(request.cf)), { headers: CABECALHOS_API });
-    if (url.pathname.toLowerCase().startsWith('/cidade/')) return paginaDaCidade(request, env, url);
+    if (url.pathname.toLowerCase().startsWith('/cidade/') || slugDoCaminho(url.pathname.toLowerCase())) return paginaDaCidade(request, env, url);
     if (url.pathname.toLowerCase().startsWith('/parlamentar/')) return paginaDoParlamentar(request, env, url);
     if (url.pathname === '/sitemap.xml') return mapaDoSite(env, url);
     if (url.pathname === '/robots.txt') return regrasParaBuscadores(url);

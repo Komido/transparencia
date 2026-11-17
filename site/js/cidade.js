@@ -1,4 +1,4 @@
-// Página de cada cidade: /cidade/nome-uf (o Worker entrega cidade.html com o
+// Página de cada cidade: /nome-uf, como /alfenas-mg (o Worker entrega cidade.html com o
 // título e a manchete da cidade). Quem foi eleito, receitas e gastos da
 // prefeitura, emendas, Bolsa Família e BPC e o governo do estado, com links
 // para o resto do site.
