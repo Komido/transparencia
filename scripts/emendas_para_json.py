@@ -21,10 +21,14 @@ jurídica "Município" ou "Fundo Público da Administração Direta Municipal"):
 associações e pessoas ficam fora (estar sediado na cidade não quer dizer que
 o dinheiro foi para a cidade). O ano é o do pagamento.
 
-O arquivo traz o nome do município, não o código; a ligação com o código do
-IBGE é pelo nome e pela UF, sem acento e sem diferença de maiúsculas, com a
-lista de municípios do IBGE, os nomes da tabela oficial de códigos do TSE e
-uma lista curta de grafias antigas conferidas no IBGE. Se mais de 0,5% do
+O arquivo traz o nome do município e o CNPJ de quem recebeu, não o código
+do IBGE. Pagamento à prefeitura é ligado à cidade pelo CNPJ, com a lista de
+entes do Tesouro (SICONFI), que traz o CNPJ e o código do IBGE de cada
+prefeitura. Pagamento a fundo municipal (que tem CNPJ próprio) é ligado pelo
+nome do município e pela UF, sem acento e sem diferença de maiúsculas, com a
+lista de municípios do IBGE, os nomes da tabela oficial de códigos do TSE,
+uma lista curta de grafias antigas conferidas no IBGE e os nomes que o
+próprio arquivo usa nos pagamentos já ligados pelo CNPJ. Se mais de 0,5% do
 valor ficar sem cidade, o script falha sem gravar.
 
 Saídas:
@@ -47,11 +51,12 @@ import zipfile
 
 URL = "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/emendas-parlamentares/EmendasParlamentares.zip"
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado"
+SICONFI_ENTES = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/entes"
 AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
 DESTINO = "site/dados/emendas"
 ARQUIVO = "EmendasParlamentares_PorFavorecido.csv"
-COLUNAS = ["Código da Emenda", "Nome do Autor da Emenda", "Tipo de Emenda", "Ano/Mês", "Natureza Jurídica",
-           "UF Favorecido", "Município Favorecido", "Valor Recebido"]
+COLUNAS = ["Código da Emenda", "Nome do Autor da Emenda", "Tipo de Emenda", "Ano/Mês", "Código do Favorecido",
+           "Natureza Jurídica", "UF Favorecido", "Município Favorecido", "Valor Recebido"]
 NATUREZAS = {"Município", "Fundo Público da Administração Direta Municipal"}
 PRIMEIRO_ANO = 2019
 MAX_AUTORES = 5
@@ -125,8 +130,8 @@ NOMES_ANTIGOS = {
     ("FLORINIA", "SP"): "3516101",                   # Florínea
     ("SANTA TERESINHA", "BA"): "2928505",            # Santa Terezinha (a única "Santa Te..." da BA)
 }
-# Ficam sem cidade (não confirmados nem no IBGE nem no TSE): "Augusto Severo"
-# (RN) e "Seridó" (PB), R$ 20,8 milhões desde 2019 em 17/11/2026.
+# Sem confirmação no IBGE nem no TSE em 17/11/2026: "Augusto Severo" (RN) e
+# "Seridó" (PB), R$ 20,8 milhões desde 2019; ficam a cargo da ligação pelo CNPJ.
 # Segunda fonte de nomes: a tabela oficial de códigos do TSE, que traz o nome
 # usado pelo TSE (às vezes o antigo) ao lado do código do IBGE.
 TSE_IBGE = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
@@ -161,6 +166,23 @@ def municipios_ibge():
     return mapa
 
 
+def cnpjs_das_prefeituras(codigos):
+    """CNPJ (só dígitos) -> código do IBGE de cada prefeitura, pelo Tesouro."""
+    d = json.loads(baixar(SICONFI_ENTES))
+    mapa = {}
+    for e in d.get("items", []):
+        if e.get("esfera") != "M":
+            continue
+        cnpj = "".join(c for c in str(e.get("cnpj") or "") if c.isdigit())
+        cod = str(e.get("cod_ibge") or "")
+        if len(cnpj) == 14 and cod in codigos:
+            mapa[cnpj] = cod
+    if not 5500 <= len(mapa) <= 5580:
+        falhar(f"lista de entes do Tesouro com {len(mapa)} prefeituras com CNPJ")
+    print(f"prefeituras com CNPJ no Tesouro: {len(mapa)}")
+    return mapa
+
+
 MINUSCULAS = {"da", "das", "de", "do", "dos", "e"}
 
 
@@ -190,6 +212,7 @@ def gravar_json(caminho, dados):
 
 def main():
     mapa = municipios_ibge()
+    por_cnpj = cnpjs_das_prefeituras(set(mapa.values()))
     z = zipfile.ZipFile(io.BytesIO(baixar(URL)))
     if ARQUIVO not in z.namelist():
         falhar(f"{ARQUIVO} não está no zip: {z.namelist()}")
@@ -198,23 +221,54 @@ def main():
     if faltam:
         falhar(f"colunas ausentes: {faltam}")
     ano_atual = dt.date.today().year
-    pago = collections.defaultdict(float)
-    emendas = collections.defaultdict(set)
-    autores = collections.defaultdict(lambda: collections.defaultdict(float))
-    total_ano = collections.defaultdict(float)
-    sem_cidade = collections.defaultdict(float)
+    # Primeiro guarda só as linhas que interessam; o nome do município que o
+    # arquivo usa nos pagamentos à prefeitura (ligados pelo CNPJ) também
+    # serve para os fundos municipais da mesma cidade.
     linhas = 0
+    uteis = []
     for n, l in enumerate(leitor, start=2):
         linhas += 1
         am = (l["Ano/Mês"] or "").strip()
         if len(am) != 6 or not am.isdigit() or not 2010 <= int(am[:4]) <= ano_atual or not 1 <= int(am[4:]) <= 12:
             falhar(f"linha {n}: ano/mês {am!r}")
-        ano = int(am[:4])
-        if ano < PRIMEIRO_ANO or (l["Natureza Jurídica"] or "").strip() not in NATUREZAS:
+        if int(am[:4]) >= PRIMEIRO_ANO and (l["Natureza Jurídica"] or "").strip() in NATUREZAS:
+            uteis.append((n, l))
+    if not 500000 <= linhas <= 3000000:
+        falhar(f"{linhas} linhas no arquivo; esperado perto de 835 mil")
+    aprendidos = collections.defaultdict(set)
+    divergentes = collections.Counter()
+    for _, l in uteis:
+        if l["Natureza Jurídica"].strip() != "Município":
             continue
+        cod = por_cnpj.get("".join(c for c in l["Código do Favorecido"] or "" if c.isdigit()))
+        if not cod:
+            continue
+        chave = (chave_nome(l["Município Favorecido"]), (l["UF Favorecido"] or "").strip())
+        aprendidos[chave].add(cod)
+        if chave in mapa and mapa[chave] != cod:
+            divergentes[(chave, mapa[chave], cod)] += 1
+    if divergentes:
+        print("nome e CNPJ apontam cidades diferentes (vale o CNPJ):", divergentes.most_common(10))
+    novos = {k: next(iter(v)) for k, v in aprendidos.items() if len(v) == 1 and k not in mapa}
+    print(f"nomes ligados pelo CNPJ que não estavam nas listas: {sorted(novos.items())}")
+    autores_por_codigo = collections.defaultdict(set)
+    pago = collections.defaultdict(float)
+    emendas = collections.defaultdict(set)
+    autores = collections.defaultdict(lambda: collections.defaultdict(float))
+    total_ano = collections.defaultdict(float)
+    sem_cidade = collections.defaultdict(float)
+    pelo_cnpj = 0.0
+    for n, l in uteis:
+        ano = int(l["Ano/Mês"].strip()[:4])
         valor = numero(l["Valor Recebido"], f"linha {n}")
         uf = (l["UF Favorecido"] or "").strip()
-        cod = mapa.get((chave_nome(l["Município Favorecido"]), uf))
+        chave_mun = (chave_nome(l["Município Favorecido"]), uf)
+        cod = None
+        if l["Natureza Jurídica"].strip() == "Município":
+            cod = por_cnpj.get("".join(c for c in l["Código do Favorecido"] or "" if c.isdigit()))
+            if cod:
+                pelo_cnpj += valor
+        cod = cod or mapa.get(chave_mun) or novos.get(chave_mun)
         total_ano[ano] += valor
         if not cod:
             sem_cidade[(l["Município Favorecido"], uf)] += valor
@@ -224,11 +278,13 @@ def main():
         emendas[chave].add(l["Código da Emenda"])
         autor = nome_legivel(l["Nome do Autor da Emenda"]) or "Sem informação"
         autores[chave][autor] += valor
-    if not 500000 <= linhas <= 3000000:
-        falhar(f"{linhas} linhas no arquivo; esperado perto de 835 mil")
+        autores_por_codigo[l["Código da Emenda"]].add(autor)
     total = sum(total_ano.values())
     fora = sum(sem_cidade.values())
     print(f"pago a prefeituras e fundos municipais desde {PRIMEIRO_ANO}: R$ {total / 1e9:.2f} bi; sem cidade: R$ {fora / 1e6:.1f} mi")
+    print(f"ligado pelo CNPJ da prefeitura: R$ {pelo_cnpj / 1e9:.2f} bi")
+    varios = {c: sorted(a) for c, a in autores_por_codigo.items() if len(a) > 1}
+    print(f"códigos de emenda com mais de um autor: {len(varios)} de {len(autores_por_codigo)}; exemplos: {list(varios.items())[:12]}")
     for ano in sorted(total_ano):
         print(f"  {ano}: R$ {total_ano[ano] / 1e9:.2f} bi")
     if sem_cidade:
