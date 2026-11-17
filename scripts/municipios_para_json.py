@@ -31,6 +31,21 @@ FPM, do ICMS, do IPVA e do ITR, FUNDEB e outros). Contas conferidas em
 16/11/2026 nos relatórios de 2025 de São Paulo e de Angico (TO), em que as
 partes somam exatamente o total.
 
+Despesas: Anexo 2 do mesmo relatório (despesa por função), coluna "DESPESAS
+LIQUIDADAS ATÉ O BIMESTRE (d)" do 6º bimestre, que é o ano inteiro; só a
+parte "exceto intra-orçamentárias", para não contar duas vezes o dinheiro que
+a prefeitura passa para ela mesma (por exemplo, para o próprio fundo de
+aposentadoria). As linhas das funções vêm todas com o mesmo cod_conta
+(RREO2TotalDespesas) e são reconhecidas pelo nome da função (Portaria 42/1999
+do antigo Ministério do Orçamento e Gestão). Conferido em 16/11/2026 em São
+Paulo (RREO) e Monte Carmelo (RREO Simplificado), 2025: a soma das funções
+bate com a linha "DESPESAS (EXCETO INTRA-ORÇAMENTÁRIAS) (I)". O Anexo 2 é
+pedido com o mesmo tipo de relatório em que veio o Anexo 3.
+
+Situação das despesas ("ds"): ok, nao_fecha (soma das funções diferente do
+total), formato (sem a coluna ou sem o total), sem_anexo (o Anexo 3 veio e o
+2 não) e erro.
+
 Situação de cada prefeitura em cada ano ("s"):
   ok             relatório entregue e as partes somam o total (tolerância de
                  R$ 1 ou 0,1%)
@@ -53,6 +68,8 @@ Saídas:
 Uso:
   python3 scripts/municipios_para_json.py --uf SP [--anos 2024,2025]
       busca as prefeituras do estado e grava dados-fonte/municipios/SP.json
+  python3 scripts/municipios_para_json.py --uf SP --so-despesas
+      busca só o Anexo 2 das prefeituras que já têm o Anexo 3 gravado
   python3 scripts/municipios_para_json.py --montar
       monta os arquivos do site a partir de todos os dados-fonte, sem baixar
 
@@ -104,6 +121,36 @@ CONTAS = {
 }
 CAMPOS_SITE = ["receita", "tributos", "iptu", "iss", "itbi", "irrf", "outros_tributos",
                "transferencias", "fpm", "icms", "ipva", "itr", "fundeb", "rcl"]
+
+COLUNA_DESPESA = "DESPESAS LIQUIDADAS ATÉ O BIMESTRE (d)"
+ROTULO_DESPESA = "Exceto Intra"  # parte do rótulo "Total das Despesas Exceto Intra-Orçamentárias"
+TOTAL_DESPESA = "DESPESAS (EXCETO INTRA-ORÇAMENTÁRIAS) (I)"
+# As 28 funções de governo e a reserva de contingência (Portaria 42/1999).
+FUNCOES = ["Legislativa", "Judiciária", "Essencial à Justiça", "Administração", "Defesa Nacional",
+           "Segurança Pública", "Relações Exteriores", "Assistência Social", "Previdência Social", "Saúde",
+           "Trabalho", "Educação", "Cultura", "Direitos da Cidadania", "Urbanismo", "Habitação", "Saneamento",
+           "Gestão Ambiental", "Ciência e Tecnologia", "Agricultura", "Organização Agrária", "Indústria",
+           "Comércio e Serviços", "Comunicações", "Energia", "Transporte", "Desporto e Lazer",
+           "Encargos Especiais", "Reserva de Contingência"]
+# Grupos que o site mostra, na ordem do vetor "d" do arquivo do site. O que
+# não está em nenhum grupo vai para "outras".
+GRUPOS_DESPESA = [
+    ("saude", ["Saúde"]),
+    ("educacao", ["Educação"]),
+    ("urbanismo", ["Urbanismo"]),
+    ("administracao", ["Administração"]),
+    ("previdencia", ["Previdência Social"]),
+    ("assistencia", ["Assistência Social"]),
+    ("saneamento", ["Saneamento"]),
+    ("transporte", ["Transporte"]),
+    ("encargos", ["Encargos Especiais"]),
+    ("camara", ["Legislativa"]),
+    ("seguranca", ["Segurança Pública"]),
+    ("cultura_esporte", ["Cultura", "Desporto e Lazer"]),
+    ("habitacao", ["Habitação"]),
+    ("outras", None),
+]
+CAMPOS_DESPESA = [g for g, _ in GRUPOS_DESPESA]
 
 # Faixas de população do IBGE, para comparar cidades do mesmo tamanho.
 FAIXAS = [(5_000, "até 5 mil habitantes"), (10_000, "de 5 mil a 10 mil"), (20_000, "de 10 mil a 20 mil"),
@@ -203,11 +250,66 @@ TIPOS = {"completo": "RREO", "simplificado": "RREO Simplificado"}
 LIMITE_SIMPLIFICADO = 50_000  # LRF, art. 63
 
 
-def url_rreo(ano, cod, tipo="completo"):
+def url_rreo(ano, cod, tipo="completo", anexo="RREO-Anexo 03"):
     q = urllib.parse.urlencode({"an_exercicio": ano, "nr_periodo": 6, "co_tipo_demonstrativo": TIPOS[tipo],
-                                "no_anexo": "RREO-Anexo 03", "co_esfera": "M", "id_ente": cod},
+                                "no_anexo": anexo, "co_esfera": "M", "id_ente": cod},
                                quote_via=urllib.parse.quote)
     return f"{API}/rreo?{q}"
+
+
+def resumir_despesas(itens):
+    """Despesa liquidada do ano por função e a situação ("ds")."""
+    if not itens:
+        return {"ds": "sem_anexo"}
+    linhas = [i for i in itens if i.get("coluna") == COLUNA_DESPESA and ROTULO_DESPESA in (i.get("rotulo") or "")]
+    if not linhas:
+        return {"ds": "formato", "dmotivo": f"sem a coluna {COLUNA_DESPESA}"}
+    total = [i for i in linhas if (i.get("conta") or "").strip() == TOTAL_DESPESA]
+    if len(total) != 1:
+        return {"ds": "formato", "dmotivo": f"{len(total)} linhas de total"}
+    por_funcao = {}
+    for i in linhas:
+        nome = (i.get("conta") or "").strip()
+        if nome not in FUNCOES:
+            continue
+        if nome in por_funcao:
+            return {"ds": "nao_fecha", "dmotivo": f"função repetida: {nome}"}
+        valor = i.get("valor")
+        por_funcao[nome] = float(valor) if valor is not None else 0.0
+    valor_total = float(total[0].get("valor") or 0)
+    soma = sum(por_funcao.values())
+    saida = {"funcoes": {k: round(v, 2) for k, v in por_funcao.items() if v}, "dtotal": round(valor_total, 2)}
+    if valor_total <= 0:
+        saida.update(ds="nao_fecha", dmotivo="despesa total zerada")
+    elif abs(soma - valor_total) > max(1.0, 0.001 * valor_total):
+        saida.update(ds="nao_fecha", dmotivo=f"funções somam {soma:.2f}, total {valor_total:.2f}")
+    else:
+        saida["ds"] = "ok"
+    return saida
+
+
+def buscar_despesas(ano, cod, tipo):
+    """Resumo das despesas, ou {"ds": "erro"} se o pedido falhar."""
+    resposta = pedir(url_rreo(ano, cod, tipo, "RREO-Anexo 02"))
+    if resposta is None:
+        return {"ds": "erro"}
+    dados, sha = resposta
+    resumo = resumir_despesas(dados.get("items") or [])
+    resumo["dsha256"] = sha
+    return resumo
+
+
+def grupos_de_despesa(funcoes):
+    """Vetor do site: soma das funções de cada grupo; o resto em "outras"."""
+    usados = set()
+    saida = []
+    for _, nomes in GRUPOS_DESPESA:
+        if nomes is None:
+            saida.append(sum(v for k, v in funcoes.items() if k not in usados))
+        else:
+            usados.update(nomes)
+            saida.append(sum(funcoes.get(k, 0.0) for k in nomes))
+    return saida
 
 
 def ordem_dos_tipos(anterior, pop):
@@ -265,7 +367,7 @@ def gravar_json(caminho, dados, indentar=False):
     os.replace(temporario, caminho)
 
 
-def buscar_uf(uf, anos):
+def buscar_uf(uf, anos, so_despesas=False):
     municipios = {c: m for c, m in lista_de_entes().items() if m["uf"] == uf}
     if not municipios:
         falhar(f"nenhum município na lista de entes para {uf}")
@@ -282,6 +384,15 @@ def buscar_uf(uf, anos):
                 registro["anos"][str(ano)] = {"s": "df"}
                 continue
             total += 1
+            if so_despesas:
+                reg = registro["anos"].get(str(ano))
+                if reg and reg.get("tipo") in TIPOS:
+                    for k in ("ds", "dmotivo", "funcoes", "dtotal", "dsha256"):
+                        reg.pop(k, None)
+                    reg.update(buscar_despesas(ano, cod, reg["tipo"]))
+                    if reg["ds"] == "erro":
+                        erros += 1
+                continue
             ordem = ordem_dos_tipos(registro["anos"].get(str(ano), {}).get("tipo"), m["pop"])
             resumo = buscar_relatorio(ano, cod, ordem)
             if resumo is None:
@@ -293,6 +404,8 @@ def buscar_uf(uf, anos):
                                      and not isinstance(antes_ano.get("sha256"), list)):
                     registro["anos"][str(ano)] = {"s": "erro"}
                 continue
+            if resumo.get("tipo") in TIPOS:
+                resumo.update(buscar_despesas(ano, cod, resumo["tipo"]))
             registro["anos"][str(ano)] = resumo
         saida["municipios"][str(cod)] = registro
         if n % 25 == 0 or n == len(municipios):
@@ -306,6 +419,14 @@ def buscar_uf(uf, anos):
             situacoes[(ano, s)] = situacoes.get((ano, s), 0) + 1
     for (ano, s), q in sorted(situacoes.items()):
         print(f"{uf} {ano}: {q} {s}")
+    despesas = {}
+    for r in saida["municipios"].values():
+        for ano in anos:
+            ds = r["anos"].get(str(ano), {}).get("ds")
+            if ds:
+                despesas[(ano, ds)] = despesas.get((ano, ds), 0) + 1
+    for (ano, ds), q in sorted(despesas.items()):
+        print(f"{uf} {ano} despesas: {q} {ds}")
     gravar_json(caminho, saida, indentar=True)
 
 
@@ -323,6 +444,18 @@ def indicadores(reg_ano):
         return None
     return {"receita_hab": v["receita"] / pop, "tributos_hab": v["tributos"] / pop,
             "repasses_pct": 100 * v["transferencias"] / v["receita"]}
+
+
+def indicadores_despesa(reg_ano, pop):
+    """Por morador: despesa total, saúde e educação. Só com despesas "ok"."""
+    if reg_ano.get("ds") != "ok" or not pop or pop <= 0:
+        return None
+    f = reg_ano.get("funcoes") or {}
+    total = reg_ano.get("dtotal") or 0
+    if total <= 0:
+        return None
+    return {"despesa_hab": total / pop, "saude_hab": f.get("Saúde", 0.0) / pop,
+            "educacao_hab": f.get("Educação", 0.0) / pop}
 
 
 def mediana(valores):
@@ -347,11 +480,14 @@ def montar():
                 ind = indicadores(reg)
                 if not ind:
                     continue
-                f = faixa_de(reg.get("pop") or r["pop"])
+                pop = reg.get("pop") or r["pop"]
+                ind.update(indicadores_despesa(reg, pop) or {})
+                f = faixa_de(pop)
                 for k, x in ind.items():
                     nacional.setdefault((ano, f, k), []).append(x)
                     estadual.setdefault((uf, ano, k), []).append(x)
     indice = {"atualizado": dt.date.today().isoformat(), "anos": anos, "campos": CAMPOS_SITE,
+              "campos_despesa": CAMPOS_DESPESA,
               "faixas": [{"ate": teto, "rotulo": rotulo} for teto, rotulo in FAIXAS],
               "medianas": {}, "cidades": []}
     for (ano, f, k), xs in nacional.items():
@@ -359,14 +495,19 @@ def montar():
         m[k] = mediana(xs)
         if k == "receita_hab":
             m["n"] = len(xs)
+        if k == "despesa_hab":
+            m["nd"] = len(xs)
     for uf, d in sorted(por_uf.items()):
         site = {"uf": uf, "atualizado": d.get("atualizado"), "anos": anos, "campos": CAMPOS_SITE,
+                "campos_despesa": CAMPOS_DESPESA,
                 "medianas": {}, "municipios": []}
         for (u, ano, k), xs in estadual.items():
             if u == uf:
                 site["medianas"].setdefault(ano, {})[k] = mediana(xs)
                 if k == "receita_hab":
                     site["medianas"][ano]["n"] = len(xs)
+                if k == "despesa_hab":
+                    site["medianas"][ano]["nd"] = len(xs)
         for cod, r in sorted(d["municipios"].items(), key=lambda x: x[1]["nome"]):
             item = {"c": int(cod), "n": r["nome"], "p": r["pop"], "a": {}}
             for ano, reg in sorted(r["anos"].items()):
@@ -377,6 +518,12 @@ def montar():
                     registro["v"] = [round(reg["v"][c]) for c in CAMPOS_SITE]
                 if reg.get("motivo"):
                     registro["m"] = reg["motivo"]
+                if reg.get("ds"):
+                    registro["ds"] = reg["ds"]
+                if reg.get("funcoes") is not None and reg.get("ds") in ("ok", "nao_fecha"):
+                    registro["d"] = [round(x) for x in grupos_de_despesa(reg["funcoes"])]
+                if reg.get("dmotivo"):
+                    registro["dm"] = reg["dmotivo"]
                 item["a"][ano] = registro
             site["municipios"].append(item)
             indice["cidades"].append([int(cod), r["nome"], uf, r["pop"]])
@@ -391,6 +538,7 @@ def main():
     p.add_argument("--uf", choices=UFS)
     p.add_argument("--anos", help="anos separados por vírgula; padrão: os dois últimos com relatório vencido")
     p.add_argument("--montar", action="store_true")
+    p.add_argument("--so-despesas", action="store_true", help="só o Anexo 2, para quem já tem o Anexo 3")
     a = p.parse_args()
     if a.montar:
         montar()
@@ -401,7 +549,7 @@ def main():
     if any(not 2015 <= x <= dt.date.today().year for x in anos):
         falhar(f"anos fora do intervalo: {anos}")
     print(f"{a.uf}: anos {anos}", flush=True)
-    buscar_uf(a.uf, anos)
+    buscar_uf(a.uf, anos, so_despesas=a.so_despesas)
 
 
 if __name__ == "__main__":

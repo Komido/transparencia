@@ -1423,6 +1423,31 @@ const SELO_PREFEITURA = {
   df: () => 'Brasília não tem prefeitura. Os impostos que nas outras cidades são da prefeitura, como IPTU e ISS, são cobrados pelo governo do Distrito Federal e aparecem em "Como estão as contas do seu estado?".',
 };
 
+// Áreas de despesa das prefeituras, na ordem de campos_despesa do índice.
+const AREAS_PREFEITURA = {
+  saude: ['Saúde', 'postos, hospitais, remédios e vacinas'],
+  educacao: ['Educação', 'creches, escolas, merenda e transporte escolar'],
+  urbanismo: ['Ruas, praças e iluminação', 'obras e serviços urbanos'],
+  administracao: ['Administração da prefeitura', 'pessoal administrativo, prédios e sistemas'],
+  previdencia: ['Aposentadorias dos servidores', 'de quem trabalhou na prefeitura'],
+  assistencia: ['Assistência social', 'apoio a famílias, crianças e idosos'],
+  saneamento: ['Saneamento', 'água, esgoto e drenagem'],
+  transporte: ['Transporte', 'estradas, ônibus e terminais'],
+  encargos: ['Dívidas e outros encargos', 'juros e parcelas de empréstimos e outros'],
+  camara: ['Câmara de Vereadores', 'vereadores e funcionamento da Câmara'],
+  seguranca: ['Segurança', 'guarda municipal e defesa civil'],
+  cultura_esporte: ['Cultura, esporte e lazer', null],
+  habitacao: ['Moradia', 'habitação popular'],
+  outras: ['Outras áreas', 'agricultura, meio ambiente, trabalho, turismo e outras'],
+};
+
+const SELO_DESPESA = {
+  nao_fecha: 'A soma das áreas não bate com o total do relatório. Os números aparecem como a prefeitura entregou.',
+  formato: 'O relatório de despesas veio sem as linhas que o site usa para conferir a conta. Sem dado.',
+  sem_anexo: 'A prefeitura entregou as receitas, mas o relatório veio sem as despesas por área. Sem dado.',
+  erro: 'Não foi possível buscar as despesas desta prefeitura na última atualização. Sem dado.',
+};
+
 function montarMunicipios(ctx) {
   const entrada = $('#mun-busca');
   const listaSug = $('#mun-sugestoes');
@@ -1501,7 +1526,7 @@ function montarMunicipios(ctx) {
     entrada.value = `${c[1]} (${c[2]})`;
     estado.cidade = { codigo: c[0], nome: c[1], uf: c[2] };
     try {
-      if (!estado.porUf.has(c[2])) estado.porUf.set(c[2], await carregarMunicipiosUf(c[2], estado.indice.campos.length));
+      if (!estado.porUf.has(c[2])) estado.porUf.set(c[2], await carregarMunicipiosUf(c[2], estado.indice.campos.length, estado.indice.campos_despesa?.length ?? 0));
     } catch (erro) {
       console.error(erro);
       $('#mun-vazio').textContent = `Não foi possível carregar as cidades de ${c[2]} agora. Tente de novo mais tarde.`;
@@ -1540,6 +1565,7 @@ function montarMunicipios(ctx) {
     selo.textContent = SELO_PREFEITURA[situacao](ano, f.dataCurta(d?.atualizado));
     selo.classList.toggle('aviso', situacao !== 'ok');
     const caixaContas = $('#mun-contas');
+    desenharDespesas(r, m, d, ano, nome);
     if (!r?.v) {
       caixaContas.hidden = true;
       campo('mun-resumo').forEach((e) => e.replaceChildren());
@@ -1620,6 +1646,72 @@ function montarMunicipios(ctx) {
     definir('mun-compara-nota', `Mediana das cidades com contas conferidas em ${ano}: metade está acima e metade abaixo. Mesmo tamanho: ${faixas[iFaixa]?.rotulo ?? ''}${medFaixa.n ? ` (${f.numero(medFaixa.n)} cidades)` : ''}${medUf.n ? `; ${uf}: ${f.numero(medUf.n)} cidades` : ''}.`);
   }
 
+  // Para onde foi o dinheiro: despesa liquidada por área (RREO Anexo 2), em
+  // dinheiro de hoje, e comparação por morador com cidades parecidas.
+  function desenharDespesas(r, m, d, ano, nome) {
+    const caixa = $('#mun-despesas');
+    const campos = estado.indice.campos_despesa;
+    caixa.hidden = true;
+    if (!campos || !r?.ds) return;
+    const selo = $('#mun-despesas-selo');
+    const lista = $('#mun-despesas-barras');
+    const compara = $('#mun-despesas-compara');
+    lista.replaceChildren();
+    compara.replaceChildren();
+    definir('mun-despesas-nota', '');
+    selo.hidden = r.ds === 'ok';
+    selo.textContent = SELO_DESPESA[r.ds] ?? '';
+    caixa.hidden = false;
+    const total = r.d ? r.d.reduce((a, x) => a + (x ?? 0), 0) : 0;
+    if (!r.d || total <= 0) {
+      definir('mun-despesas-titulo', `Para onde foi o dinheiro em ${ano}`);
+      return;
+    }
+    const fator = fatorParaHoje(ctx, ano) ?? 1;
+    const hoje = (x) => x * fator;
+    const pop = r.p || m.p;
+    definir('mun-despesas-titulo', `Para onde foi o dinheiro: de cada R$ 100 gastos em ${ano}`);
+    const itens = campos.map((k, i) => ({ k, valor: r.d[i] ?? 0 }))
+      .filter((x) => x.valor > 0 && AREAS_PREFEITURA[x.k])
+      .sort((a, b) => (a.k === 'outras') - (b.k === 'outras') || b.valor - a.valor);
+    for (const x of itens) {
+      const [rotulo, explica] = AREAS_PREFEITURA[x.k];
+      const pct = (x.valor / total) * 100;
+      const li = el('li', null, null, lista);
+      const topo = el('div', 'barra-topo', null, li);
+      const nomeEl = el('span', 'barra-nome', rotulo, topo);
+      if (explica) el('span', 'barra-explica', explica, nomeEl);
+      el('span', 'barra-valor', `${f.parteDoTotal(pct)} · ${f.reaisCompacto(hoje(x.valor))}`, topo);
+      const trilho = el('div', 'barra-trilho', null, li);
+      trilho.setAttribute('aria-hidden', 'true');
+      el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+    }
+    if (r.ds !== 'ok' || !pop) {
+      definir('mun-despesas-nota', `Total gasto em ${ano}: ${f.reaisPorExtenso(hoje(total))} (em dinheiro de hoje).`);
+      return;
+    }
+    const faixas = estado.indice.faixas;
+    const iFaixa = faixas.findIndex((x) => x.ate == null || pop <= x.ate);
+    const medFaixa = estado.indice.medianas[String(ano)]?.[String(iFaixa)] ?? {};
+    const medUf = d.medianas?.[String(ano)] ?? {};
+    const valor = (k) => r.d[campos.indexOf(k)] ?? 0;
+    const linhas = [
+      ['Gasto por morador no ano', total / pop, 'despesa_hab'],
+      ['Saúde por morador', valor('saude') / pop, 'saude_hab'],
+      ['Educação por morador', valor('educacao') / pop, 'educacao_hab'],
+    ];
+    for (const [rotulo, v, chave] of linhas) {
+      const div = el('div', null, null, compara);
+      el('dt', null, rotulo, div);
+      el('dd', null, f.moeda(hoje(v), 0), div);
+      const det = [];
+      if (medFaixa[chave] != null) det.push(`cidades do mesmo tamanho: ${f.moeda(hoje(medFaixa[chave]), 0)}`);
+      if (medUf[chave] != null) det.push(`cidades de ${d.uf}: ${f.moeda(hoje(medUf[chave]), 0)}`);
+      if (det.length) el('dd', 'detalhe', det.join(' · '), div);
+    }
+    definir('mun-despesas-nota', `${nome} gastou ${f.reaisPorExtenso(hoje(total))} em ${ano}, em dinheiro de hoje. Mediana das cidades com despesas conferidas no mesmo ano${medFaixa.nd ? ` (${f.numero(medFaixa.nd)} do mesmo tamanho)` : ''}.`);
+  }
+
   // Bolsa Família e BPC da cidade: último mês publicado e o mesmo mês do ano
   // anterior. Não depende do ano escolhido nem do relatório da prefeitura.
   async function desenharBeneficios() {
@@ -1698,13 +1790,16 @@ function montarMunicipios(ctx) {
     const uf = estado.cidade?.uf;
     const d = uf ? estado.porUf.get(uf) : null;
     const campos = estado.indice?.campos ?? [];
+    const camposDespesa = estado.indice?.campos_despesa ?? [];
     const anos = estado.indice?.anos ?? [];
     return {
       nome: `contas-das-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'situacao', 'populacao', ...campos.map((k) => `${k} (R$ da época)`), 'fator para dinheiro de hoje (IPCA)'],
+      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'situacao', 'populacao', ...campos.map((k) => `${k} (R$ da época)`),
+        'situacao_despesas', ...camposDespesa.map((k) => `despesa_${k} (R$ da época)`), 'fator para dinheiro de hoje (IPCA)'],
       linhas: d ? anos.flatMap((ano) => d.municipios.map((m) => {
         const r = m.a[String(ano)];
-        return [ano, m.c, m.n, uf, r?.s ?? 'sem_dado', r?.p ?? m.p, ...campos.map((_, i) => r?.v?.[i] ?? ''), arred(fatorParaHoje(ctx, ano) ?? 1, 6)];
+        return [ano, m.c, m.n, uf, r?.s ?? 'sem_dado', r?.p ?? m.p, ...campos.map((_, i) => r?.v?.[i] ?? ''),
+          r?.ds ?? '', ...camposDespesa.map((_, i) => r?.d?.[i] ?? ''), arred(fatorParaHoje(ctx, ano) ?? 1, 6)];
       })) : [],
     };
   });

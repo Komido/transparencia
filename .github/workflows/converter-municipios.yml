@@ -2,8 +2,9 @@ name: Resumir as contas das prefeituras (Tesouro, SICONFI)
 
 # O Tesouro Nacional publica o Relatório Resumido da Execução Orçamentária de
 # cada prefeitura na API do SICONFI, uma prefeitura por pedido. Esta tarefa
-# pede o Anexo 3 (de onde vem a receita: impostos da cidade e repasses) do
-# ano completo de todas as prefeituras do país (scripts/municipios_para_json.py),
+# pede o Anexo 3 (de onde vem a receita: impostos da cidade e repasses) e o
+# Anexo 2 (despesa por área) do ano completo de todas as prefeituras do país
+# (scripts/municipios_para_json.py),
 # um estado por passo, e grava dados-fonte/municipios/UF.json com o SHA-256 de
 # cada resposta. No fim, monta os arquivos que o site lê em
 # site/dados/municipios/. Nada passa pelo banco.
@@ -27,6 +28,10 @@ on:
         description: "Siglas separadas por espaço ou vírgula (vazio ou 'todas': o país todo)"
         required: false
         default: "todas"
+      modo:
+        description: "tudo (receitas e despesas) ou despesas (só o Anexo 2, para quem já tem o Anexo 3)"
+        required: false
+        default: "tudo"
 
 permissions:
   contents: write
@@ -69,15 +74,21 @@ jobs:
         env:
           UF: ${{ matrix.uf }}
           ANOS: ${{ github.event.inputs.anos }}
+          MODO: ${{ github.event.inputs.modo }}
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
+          extra=()
+          case "${MODO:-tudo}" in
+            tudo|"") ;;
+            despesas) extra+=(--so-despesas) ;;
+            *) echo "Modo inválido: $MODO"; exit 1 ;;
+          esac
           if [ -n "${ANOS:-}" ]; then
             [[ "$ANOS" =~ ^[0-9]{4}(,[0-9]{4})*$ ]] || { echo "Anos inválidos: $ANOS"; exit 1; }
-            python3 scripts/municipios_para_json.py --uf "$UF" --anos "$ANOS"
-          else
-            python3 scripts/municipios_para_json.py --uf "$UF"
+            extra+=(--anos "$ANOS")
           fi
+          python3 scripts/municipios_para_json.py --uf "$UF" "${extra[@]}"
 
       - name: Gravar o estado
         env:
