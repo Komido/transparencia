@@ -1986,6 +1986,17 @@ function montarMunicipios(ctx) {
       return;
     }
     $('#mun-baixar-emendas').hidden = false;
+    // Brasília não tem prefeitura: o que vai para a cidade é pago ao governo
+    // do Distrito Federal, que fica fora desta conta.
+    if (uf === 'DF') {
+      $('#mun-emendas-numeros').replaceChildren();
+      campo('mun-emendas-autores-titulo')[0].hidden = true;
+      $('#mun-emendas-autores').hidden = true;
+      $('#mun-emendas-todos').hidden = true;
+      definir('mun-emendas-nota', 'Brasília não tem prefeitura: as emendas para a cidade são pagas ao governo do Distrito Federal, que não entra nesta conta, feita só com o que é pago a prefeituras e fundos municipais.');
+      caixa.hidden = false;
+      return;
+    }
     const daCidade = d.cidades[String(codigo).padStart(7, '0')] ?? {};
     const emAndamento = Math.max(...d.anos);
     const doAno = (a) => {

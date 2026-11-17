@@ -376,7 +376,11 @@ def main():
                  for a, x in sorted(autores[(cod, ano)].items(), key=lambda x: (-x[1], x[0])) if round(x) > 0]
         por_uf[uf].setdefault(cod, {})[str(ano)] = [round(v), len(emendas[(cod, ano)]), lista]
     hoje = dt.date.today().isoformat()
-    for uf, cidades in sorted(por_uf.items()):
+    # Um arquivo por UF todas as vezes, mesmo sem cidade (o Distrito Federal
+    # não tem prefeitura: o dinheiro vai ao governo do DF, que fica de fora),
+    # para nunca sobrar arquivo de uma execução antiga.
+    for uf in sorted({u for (_, u) in mapa}):
+        cidades = por_uf.get(uf, {})
         gravar_json(f"{DESTINO}/{uf}.json", {
             "uf": uf, "atualizado": hoje, "fonte": URL, "anos": anos,
             "campos": ["pago", "emendas", "autores"],
