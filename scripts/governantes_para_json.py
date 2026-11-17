@@ -15,10 +15,11 @@ DS_SIT_TOT_TURNO "ELEITO". Em 2024 eram 5.568 prefeitos eleitos; em 2020,
 5.601, porque o arquivo inclui as eleições suplementares feitas depois de
 cassações. Em 2022 e 2026, 27 governadores.
 
-Partido: o TSE regrava os arquivos antigos com o nome atual do partido (um
-prefeito eleito em 2020 pelo DEM ou pelo PSL aparece como União Brasil,
-criado da fusão dos dois em 2022). O site mostra o partido como o TSE
-publica e avisa isso.
+Partido: o arquivo traz o partido com o nome da data da eleição (em 2020,
+469 prefeitos eleitos pelo DEM e 91 pelo PSL; "União" só aparece nas
+eleições suplementares de 2023 e 2024, depois da fusão dos dois). O nome de
+hoje de partidos que se fundiram, foram incorporados ou mudaram de nome
+precisa de uma tabela à parte, com fonte oficial.
 
 O arquivo registra quem foi eleito, não quem governou: se o titular morreu,
 renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não
