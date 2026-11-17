@@ -1,0 +1,28 @@
+{
+ "atualizado": "2026-11-17",
+ "fonte": "https://api.portaldatransparencia.gov.br/api-de-dados",
+ "campos": [
+  "nbf_valor",
+  "nbf_qtd",
+  "bpc_valor",
+  "bpc_qtd"
+ ],
+ "meses": [
+  "2026-09"
+ ],
+ "todos_os_meses": [
+  "2026-09"
+ ],
+ "totais": {
+  "2026-09": {
+   "nbf": {
+    "valor": 12659797511.0,
+    "qtd": 18652890
+   },
+   "bpc": {
+    "valor": 10732941132.37,
+    "qtd": 5643579
+   }
+  }
+ }
+}
