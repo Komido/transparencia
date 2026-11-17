@@ -95,6 +95,28 @@ def chave_nome(nome):
     return " ".join(t.split())
 
 
+# Nomes do Portal diferentes do nome do IBGE (grafia antiga ou município que
+# mudou de nome), cada um conferido na lista de municípios do IBGE em
+# 17/11/2026, com o código.
+NOMES_ANTIGOS = {
+    ("SAO LUIZ", "RR"): "1400605",                   # São Luiz do Anauá
+    ("EMBU", "SP"): "3515004",                       # Embu das Artes
+    ("SANTA ISABEL DO PARA", "PA"): "1506500",       # Santa Izabel do Pará
+    ("ACU", "RN"): "2400208",                        # Assú
+    ("PRESIDENTE JUSCELINO", "RN"): "2410306",       # Serra Caiada
+    ("SANTO ANTONIO DO LEVERGER", "MT"): "5107800",  # Santo Antônio de Leverger
+    ("SANTANA DO LIVRAMENTO", "RS"): "4317103",      # Sant'Ana do Livramento
+    ("ITAPAGE", "CE"): "2306306",                    # Itapajé
+    ("ELDORADO DOS CARAJAS", "PA"): "1502954",       # Eldorado do Carajás
+    ("IGUARACI", "PE"): "2606903",                   # Iguaracy
+    ("FORTALEZA DO TABOCAO", "TO"): "1708254",       # Tabocão
+    ("GRACHO CARDOSO", "SE"): "2802601",             # Graccho Cardoso
+    ("BARAO DE MONTE ALTO", "MG"): "3105509",        # Barão do Monte Alto
+    ("SAO LUIS DO PARAITINGA", "SP"): "3550001",     # São Luiz do Paraitinga
+    ("POXOREO", "MT"): "5107008",                    # Poxoréu
+}
+
+
 def municipios_ibge():
     d = json.loads(baixar(IBGE))
     mapa = {}
@@ -105,6 +127,11 @@ def municipios_ibge():
         mapa[(chave_nome(m.get("municipio-nome")), uf)] = cod
     if not 5560 <= len(mapa) <= 5580:
         falhar(f"lista do IBGE com {len(mapa)} municípios")
+    codigos = set(mapa.values())
+    for chave, cod in NOMES_ANTIGOS.items():
+        if cod not in codigos:
+            falhar(f"código {cod} de {chave} não está na lista do IBGE")
+        mapa.setdefault(chave, cod)
     return mapa
 
 
