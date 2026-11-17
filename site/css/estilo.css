@@ -1358,6 +1358,9 @@ a.botao { text-decoration: none; }
 /* Listas de links da página da cidade (o estado e o Brasil). */
 .links-lista { margin: var(--e-3) 0 0; padding-left: 1.25rem; display: grid; gap: var(--e-2); max-width: var(--prosa); }
 .links-lista a { font-weight: 600; }
+/* Páginas próprias (cidade, parlamentar, Entenda): parágrafos e listas de
+   texto na largura de leitura, também no computador. */
+.pagina-propria .bloco > p, .pagina-propria .bloco > .lista-simples { max-width: var(--prosa); }
 
 /* Páginas próprias (parlamentar): trilha de navegação e cabeçalho. */
 .trilha { margin: var(--e-4) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }

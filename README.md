@@ -39,6 +39,7 @@ site/                  site estático publicado na Cloudflare
   index.html           página inicial: busca da cidade, seu estado, Brasil, Congresso
   cidade.html          página de cada cidade (/nome-uf, como /alfenas-mg), com js/cidade.js
   parlamentar.html     página de cada deputado e senador, com js/parlamentar.js
+  entenda.html         explicações em linguagem simples: quem faz o quê, repasses, emendas, Bolsa Família, BPC, partidos
   metodologia.html     regras de cálculo
   js/calculos.js       todas as contas, as mesmas para todos
   js/graficos.js       gráficos SVG sem bibliotecas externas

@@ -222,7 +222,7 @@ async function mapaDoSite(env, url) {
   try {
     deputados = [...(await parlamentares(env, url)).porEndereco.keys()].map((e) => `${url.origin}/parlamentar/${e}`);
   } catch { /* sem a lista de parlamentares, o mapa sai só com as cidades */ }
-  const enderecos = [`${url.origin}/`, `${url.origin}/metodologia.html`, ...[...porSlug.keys()].map((s) => `${url.origin}/${s}`), ...deputados];
+  const enderecos = [`${url.origin}/`, `${url.origin}/entenda`, `${url.origin}/metodologia`, ...[...porSlug.keys()].map((s) => `${url.origin}/${s}`), ...deputados];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
     enderecos.map((e) => `<url><loc>${escapar(e)}</loc>${quando}</url>`).join('\n')}\n</urlset>\n`;
   return new Response(xml, { headers: comCabecalhos({ 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' }) });

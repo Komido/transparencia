@@ -508,7 +508,21 @@ async function desenharBeneficios() {
     const total = ultimos.reduce((a, x, k) => a + (x[0] + x[2]) * (fatorMesParaHoje(ctx, meses12[k]) ?? 1), 0);
     linha('Os dois, nos últimos 12 meses', total, [`De ${f.mesLongo(meses12[0])} a ${f.mesLongo(meses12[11])}, em dinheiro de hoje`]);
   }
-  definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.`);
+  // Reajuste de 15,04% do Bolsa Família (Decreto 13.120/2026), pago a partir
+  // da folha de outubro de 2026: avisa enquanto o último mês é anterior e
+  // enquanto a comparação com um ano antes atravessa o reajuste.
+  const REAJUSTE = '2026-10';
+  const aviso = mesAtual < REAJUSTE
+    ? ' Os valores do Bolsa Família subiram 15,04% a partir de outubro de 2026; o mês mostrado aqui ainda é de antes do reajuste.'
+    : (mesAnterior(mesAtual, 12) < REAJUSTE ? ' A comparação com um ano antes inclui o reajuste de 15,04% do Bolsa Família, pago desde outubro de 2026.' : '');
+  // BPC: o benefício é de um salário mínimo, mas o total do mês no Portal,
+  // dividido pelas pessoas, passa disso em quase todas as cidades (mediana de
+  // R$ 1.891 por pessoa em MG, setembro de 2026). A consulta por cidade não
+  // diz o motivo; o aviso fica até isso ser conferido no arquivo completo.
+  const avisoBpc = bpcValor != null && bpcQtd
+    ? ' No BPC, cada pessoa recebe um salário mínimo por mês. Em quase todas as cidades, o total que o Portal registra no mês, dividido pelo número de pessoas, passa disso; o Portal não informa o motivo da diferença.'
+    : '';
+  definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.${aviso}${avisoBpc}`);
   vazio.hidden = true;
   caixa.hidden = false;
 }

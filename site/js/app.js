@@ -3719,36 +3719,10 @@ async function iniciar() {
   }
 }
 
-// Siglas dos partidos (dados/partidos.json, do TSE), em "Quem faz o quê".
-function montarPartidos() {
-  const caixa = $('#partidos-caixa');
-  if (!caixa) return;
-  let feito = false;
-  const preencher = async () => {
-    if (feito) return;
-    feito = true;
-    try {
-      const r = await fetch('/dados/partidos.json', { credentials: 'same-origin' });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d = await r.json();
-      const linhas = Object.entries(d.partidos ?? {})
-        .filter(([sigla, nome]) => typeof sigla === 'string' && typeof nome === 'string' && sigla.length <= 20 && nome.length <= 120)
-        .map(([sigla, nome]) => [sigla, nome]);
-      preencherTabela($('#tabela-partidos'), ['Sigla', 'Nome no TSE'], linhas, null, [1]);
-    } catch (erro) {
-      console.error(erro);
-      feito = false;
-    }
-  };
-  // O arquivo é pequeno: a tabela é preenchida logo, mesmo fechada.
-  preencher();
-  caixa.addEventListener('toggle', () => { if (caixa.open) preencher(); });
-  // Quem chega pelo link "O que é cada sigla" encontra a tabela aberta.
-  const abrir = () => { if (location.hash === '#partidos') { caixa.open = true; preencher(); } };
-  window.addEventListener('hashchange', abrir);
-  abrir();
-}
-montarPartidos();
+// "Quem faz o quê" e as siglas dos partidos foram para a página Entenda:
+// os links antigos (/#quem-faz, /#partidos) vão para lá.
+const MUDOU_PARA_ENTENDA = { '#quem-faz': '#quem-faz', '#quem-faz-congresso': '#emendas', '#partidos': '#partidos' };
+if (MUDOU_PARA_ENTENDA[location.hash]) location.replace(`/entenda${MUDOU_PARA_ENTENDA[location.hash]}`);
 
 iniciarNavegacao();
 iniciar();
