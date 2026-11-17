@@ -23,8 +23,9 @@ o dinheiro foi para a cidade). O ano é o do pagamento.
 
 O arquivo traz o nome do município, não o código; a ligação com o código do
 IBGE é pelo nome e pela UF, sem acento e sem diferença de maiúsculas, com a
-lista de municípios do IBGE. Se mais de 0,5% do valor ficar sem cidade, o
-script falha sem gravar.
+lista de municípios do IBGE, os nomes da tabela oficial de códigos do TSE e
+uma lista curta de grafias antigas conferidas no IBGE. Se mais de 0,5% do
+valor ficar sem cidade, o script falha sem gravar.
 
 Saídas:
   site/dados/emendas/UF.json   por cidade e ano: valor pago à prefeitura,
@@ -114,7 +115,18 @@ NOMES_ANTIGOS = {
     ("BARAO DE MONTE ALTO", "MG"): "3105509",        # Barão do Monte Alto
     ("SAO LUIS DO PARAITINGA", "SP"): "3550001",     # São Luiz do Paraitinga
     ("POXOREO", "MT"): "5107008",                    # Poxoréu
+    ("MUQUEM DE SAO FRANCISCO", "BA"): "2922250",    # Muquém do São Francisco
+    ("BRASOPOLIS", "MG"): "3108909",                 # Brazópolis
+    ("DONA EUSEBIA", "MG"): "3122900",               # Dona Euzébia
+    ("SAO THOME DAS LETRAS", "MG"): "3165206",       # São Tomé das Letras
+    ("TRAJANO DE MORAIS", "RJ"): "3305901",          # Trajano de Moraes
+    ("ARES", "RN"): "2401206",                       # Arez
+    ("AMPARO DE SAO FRANCISCO", "SE"): "2800100",    # Amparo do São Francisco
+    ("FLORINIA", "SP"): "3516101",                   # Florínea
 }
+# Segunda fonte de nomes: a tabela oficial de códigos do TSE, que traz o nome
+# usado pelo TSE (às vezes o antigo) ao lado do código do IBGE.
+TSE_IBGE = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
 
 
 def municipios_ibge():
@@ -128,6 +140,17 @@ def municipios_ibge():
     if not 5560 <= len(mapa) <= 5580:
         falhar(f"lista do IBGE com {len(mapa)} municípios")
     codigos = set(mapa.values())
+    z = zipfile.ZipFile(io.BytesIO(baixar(TSE_IBGE)))
+    nome_csv = next((n for n in z.namelist() if n.lower().endswith(".csv")), None)
+    if not nome_csv:
+        falhar("tabela do TSE sem CSV")
+    acrescentados = 0
+    for l in csv.DictReader(io.StringIO(z.read(nome_csv).decode("latin-1")), delimiter=";"):
+        cod, uf, nome = (l.get("CD_MUNICIPIO_IBGE") or "").strip(), (l.get("SG_UF") or "").strip(), l.get("NM_MUNICIPIO_TSE")
+        if cod in codigos and (chave_nome(nome), uf) not in mapa:
+            mapa[(chave_nome(nome), uf)] = cod
+            acrescentados += 1
+    print(f"nomes do TSE acrescentados: {acrescentados}")
     for chave, cod in NOMES_ANTIGOS.items():
         if cod not in codigos:
             falhar(f"código {cod} de {chave} não está na lista do IBGE")
