@@ -23,77 +23,74 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      # Emendas parlamentares por autor: os tipos de recebedor (natureza
-      # jurídica) e se os nomes dos autores batem com os da cota parlamentar.
-      - name: Portal da Transparência, emendas por autor e recebedor
+      # Câmara e Senado: arquivos de votações, votos, projetos e autores, para
+      # a página de cada parlamentar.
+      - name: Câmara dos Deputados, arquivos anuais
         continue-on-error: true
         run: |
           set -u
-          mkdir -p /tmp/em && cd /tmp/em
-          curl -sSL --max-time 600 -A "ArrecadometroBrasil/1.0 (dados publicos)" -o em.zip -w "HTTP %{http_code} %{size_download} bytes\n" \
-            "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/emendas-parlamentares/EmendasParlamentares.zip" || exit 0
-          python3 - em.zip "$GITHUB_WORKSPACE/site/dados/cota" <<'PY'
-          import collections, csv, io, json, sys, unicodedata, zipfile
-          def chave(n):
-              t = unicodedata.normalize("NFKD", n or "")
-              t = "".join(c for c in t if not unicodedata.combining(c)).upper()
-              for c in "'`´-.":
-                  t = t.replace(c, " ")
-              return " ".join(t.split())
-          z = zipfile.ZipFile(sys.argv[1])
-          leitor = csv.DictReader(io.StringIO(z.read("EmendasParlamentares_PorFavorecido.csv").decode("latin-1")), delimiter=";")
-          nat, tipo, temenda = collections.Counter(), collections.Counter(), collections.Counter()
-          autores = collections.defaultdict(collections.Counter)
-          codigos = collections.defaultdict(set)
-          for r in leitor:
-              ano = r["Ano/Mês"][:4]
-              if ano < "2023":
-                  continue
-              v = float((r["Valor Recebido"] or "0").replace(".", "").replace(",", "."))
-              nat[r["Natureza Jurídica"]] += v
-              tipo[r["Tipo Favorecido"]] += v
-              temenda[r["Tipo de Emenda"]] += v
-              autores[ano][r["Nome do Autor da Emenda"]] += v
-              codigos[r["Nome do Autor da Emenda"]].add(r.get("Código do Autor da Emenda"))
-          bi = lambda c: [(k, round(v / 1e9, 3)) for k, v in c.most_common()]
-          # Quem são os maiores recebedores fora de prefeituras e fundos municipais.
-          leitor = csv.DictReader(io.StringIO(z.read("EmendasParlamentares_PorFavorecido.csv").decode("latin-1")), delimiter=";")
-          olhar = {"Sociedade de Economia Mista", "Sociedade Empresária Limitada", "Empresa Pública", "Associação Privada"}
-          receb = collections.defaultdict(collections.Counter)
-          municip = collections.defaultdict(collections.Counter)
-          tipos = collections.defaultdict(collections.Counter)
-          for r in leitor:
-              if r["Ano/Mês"][:4] < "2023" or r["Natureza Jurídica"] not in olhar:
-                  continue
-              v = float((r["Valor Recebido"] or "0").replace(".", "").replace(",", "."))
-              k = (r["Natureza Jurídica"], r["Favorecido"], r["Código do Favorecido"])
-              receb[r["Natureza Jurídica"]][k[1:]] += v
-              municip[k][f'{r["Município Favorecido"]}/{r["UF Favorecido"]}'] += v
-              tipos[k][r["Tipo de Emenda"]] += v
-          for n in sorted(olhar):
-              print(f"== maiores recebedores: {n}")
-              for (fav, cod), v in receb[n].most_common(8):
-                  k = (n, fav, cod)
-                  print(f"   {fav} ({cod}): R$ {v / 1e9:.2f} bi; municípios {municip[k].most_common(3)}; tipos {[(t, round(x / 1e9, 2)) for t, x in tipos[k].most_common(3)]}")
-          print("natureza jurídica (R$ bi, 2023 em diante):"); [print("  ", x) for x in bi(nat)]
-          print("tipo favorecido:", bi(tipo))
-          print("tipo de emenda:", bi(temenda))
-          print("autores com mais de um código:", [(a, sorted(c)) for a, c in codigos.items() if len(c) > 1][:20])
-          for ano in sorted(autores):
-              try:
-                  cota = json.load(open(f"{sys.argv[2]}/{ano}.json"))
-              except OSError:
-                  continue
-              nomes = collections.defaultdict(list)
-              for casa in ("camara", "senado"):
-                  for p in cota[casa]["parlamentares"]:
-                      nomes[chave(p["nome"])].append((casa, p["id"], p["uf"]))
-              total = sum(autores[ano].values())
-              ligados = {a: v for a, v in autores[ano].items() if chave(a) in nomes}
-              repetidos = [(a, nomes[chave(a)]) for a in ligados if len(nomes[chave(a)]) > 1]
-              fora = sorted(((a, v) for a, v in autores[ano].items() if a not in ligados), key=lambda x: -x[1])
-              print(f"== {ano}: {len(autores[ano])} autores, R$ {total / 1e9:.2f} bi; ligados à cota: {len(ligados)} autores, R$ {sum(ligados.values()) / 1e9:.2f} bi")
-              print("   nome igual a mais de um parlamentar:", repetidos)
-              print("   maiores sem ligação:", [(a, round(v / 1e6, 1)) for a, v in fora[:45]])
+          mkdir -p /tmp/cam && cd /tmp/cam
+          base="https://dadosabertos.camara.leg.br/arquivos"
+          for nome in "deputados/csv/deputados.csv" \
+                      "votacoes/csv/votacoes-2025.csv" \
+                      "votacoesVotos/csv/votacoesVotos-2025.csv" \
+                      "votacoesProposicoes/csv/votacoesProposicoes-2025.csv" \
+                      "votacoesObjetos/csv/votacoesObjetos-2025.csv" \
+                      "proposicoes/csv/proposicoes-2025.csv" \
+                      "proposicoesAutores/csv/proposicoesAutores-2025.csv"; do
+            arq=$(basename "$nome")
+            echo "=== $nome"
+            curl -sSL --max-time 300 -A "ArrecadometroBrasil/1.0 (dados publicos)" -o "$arq" -w "HTTP %{http_code} %{size_download} bytes\n" "$base/$nome" || continue
+            python3 - "$arq" <<'PY'
+          import collections, csv, sys
+          csv.field_size_limit(10**8)
+          with open(sys.argv[1], encoding="utf-8-sig", errors="replace") as fh:
+              leitor = csv.DictReader(fh, delimiter=";")
+              linhas = list(leitor)
+          print("linhas", len(linhas), "colunas", leitor.fieldnames)
+          for l in linhas[:2]:
+              print({k: (v[:120] if v else v) for k, v in l.items() if v})
+          for col in ("siglaOrgao", "voto", "siglaTipo", "tipoAutor", "codTipoAutor", "aprovacao", "descricaoTipo"):
+              if leitor.fieldnames and col in leitor.fieldnames:
+                  print(f"  {col}:", collections.Counter(l[col] for l in linhas).most_common(15))
           PY
+          done
 
+      - name: Senado Federal, votações e senadores
+        continue-on-error: true
+        run: |
+          set -u
+          mkdir -p /tmp/sen && cd /tmp/sen
+          for url in \
+            "https://legis.senado.leg.br/dadosabertos/plenario/lista/votacao/20250301/20250331.json" \
+            "https://legis.senado.leg.br/dadosabertos/votacao?dataInicio=2025-03-01&dataFim=2025-03-31" \
+            "https://legis.senado.leg.br/dadosabertos/votacao.json?dataInicio=2025-03-01&dataFim=2025-03-31" \
+            "https://legis.senado.leg.br/dadosabertos/senador/lista/legislatura/57.json" \
+            "https://legis.senado.leg.br/dadosabertos/senador/5012/autorias.json" \
+            "https://legis.senado.leg.br/dadosabertos/processo?codigoParlamentarAutor=5012&dataApresentacaoInicio=2025-01-01" \
+            "https://legis.senado.leg.br/dadosabertos/senador/5012/votacoes.json?ano=2025"; do
+            echo "=== $url"
+            curl -sSL --max-time 120 -A "ArrecadometroBrasil/1.0 (dados publicos)" -H "Accept: application/json" -o r.json -w "HTTP %{http_code} %{size_download} bytes %{content_type}\n" "$url" || continue
+            python3 - r.json <<'PY'
+          import json, sys
+          bruto = open(sys.argv[1], "rb").read()
+          try:
+              d = json.loads(bruto)
+          except Exception as erro:
+              print("não é JSON:", erro, bruto[:300]); raise SystemExit
+          def mostrar(x, nivel=0, chave="raiz"):
+              if nivel > 5:
+                  return
+              if isinstance(x, dict):
+                  print("  " * nivel + f"{chave}: dict {list(x)[:14]}")
+                  for k, v in list(x.items())[:6]:
+                      mostrar(v, nivel + 1, k)
+              elif isinstance(x, list):
+                  print("  " * nivel + f"{chave}: lista de {len(x)}")
+                  if x:
+                      mostrar(x[0], nivel + 1, "[0]")
+              else:
+                  print("  " * nivel + f"{chave}: {str(x)[:100]}")
+          mostrar(d)
+          PY
+          done
