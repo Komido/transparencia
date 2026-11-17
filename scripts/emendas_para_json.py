@@ -123,7 +123,10 @@ NOMES_ANTIGOS = {
     ("ARES", "RN"): "2401206",                       # Arez
     ("AMPARO DE SAO FRANCISCO", "SE"): "2800100",    # Amparo do São Francisco
     ("FLORINIA", "SP"): "3516101",                   # Florínea
+    ("SANTA TERESINHA", "BA"): "2928505",            # Santa Terezinha (a única "Santa Te..." da BA)
 }
+# Ficam sem cidade (não confirmados nem no IBGE nem no TSE): "Augusto Severo"
+# (RN) e "Seridó" (PB), R$ 20,8 milhões desde 2019 em 17/11/2026.
 # Segunda fonte de nomes: a tabela oficial de códigos do TSE, que traz o nome
 # usado pelo TSE (às vezes o antigo) ao lado do código do IBGE.
 TSE_IBGE = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
@@ -156,6 +159,24 @@ def municipios_ibge():
             falhar(f"código {cod} de {chave} não está na lista do IBGE")
         mapa.setdefault(chave, cod)
     return mapa
+
+
+MINUSCULAS = {"da", "das", "de", "do", "dos", "e"}
+
+
+def nome_legivel(texto):
+    """'COM. DA SAUDE' -> 'Comissão da Saude'; 'BANCADA DE MINAS GERAIS' ->
+    'Bancada de Minas Gerais'. A grafia (acentos) fica como na fonte."""
+    t = " ".join((texto or "").split())
+    if not t or t.upper() in ("SEM INFORMAÇÃO", "SEM INFORMACAO", "S/I"):
+        return "Sem informação"
+    if t.upper().startswith("COM. "):
+        t = "COMISSÃO " + t[5:]
+    palavras = []
+    for i, p in enumerate(t.split(" ")):
+        b = p.lower()
+        palavras.append(b if i and b in MINUSCULAS else "-".join(x[:1].upper() + x[1:] for x in b.split("-")))
+    return " ".join(palavras)
 
 
 def gravar_json(caminho, dados):
@@ -201,7 +222,7 @@ def main():
         chave = (cod, ano)
         pago[chave] += valor
         emendas[chave].add(l["Código da Emenda"])
-        autor = (l["Nome do Autor da Emenda"] or "").strip() or "Sem informação"
+        autor = nome_legivel(l["Nome do Autor da Emenda"]) or "Sem informação"
         autores[chave][autor] += valor
     if not 500000 <= linhas <= 3000000:
         falhar(f"{linhas} linhas no arquivo; esperado perto de 835 mil")
@@ -214,10 +235,13 @@ def main():
         print("sem cidade (maiores):", sorted(sem_cidade.items(), key=lambda x: -x[1])[:15])
     if total <= 0 or fora > MAXIMO_SEM_CIDADE * total:
         falhar(f"R$ {fora:,.2f} sem cidade, mais de {MAXIMO_SEM_CIDADE:.1%} do total")
-    anos = list(range(PRIMEIRO_ANO, ano_atual + 1))
+    # No site, os últimos quatro anos (o ano das contas e o atual cabem).
+    anos = list(range(ano_atual - 3, ano_atual + 1))
     por_uf = collections.defaultdict(dict)
     uf_do_codigo = {cod: uf for (_, uf), cod in mapa.items()}
     for (cod, ano), v in pago.items():
+        if ano not in anos:
+            continue
         lista = sorted(autores[(cod, ano)].items(), key=lambda x: -x[1])
         topo = [[a, round(x)] for a, x in lista[:MAX_AUTORES] if x > 0]
         por_uf[uf_do_codigo[cod]].setdefault(cod, {})[str(ano)] = [round(v), len(emendas[(cod, ano)]), len(lista), topo]
