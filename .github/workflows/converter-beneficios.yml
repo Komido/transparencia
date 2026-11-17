@@ -52,11 +52,17 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Uma execução que esperou na fila começa da versão do momento em que
+          # foi pedida; pega o que a anterior gravou, para não buscar de novo
+          # o mesmo mês e colidir na hora de gravar.
+          git pull --rebase --quiet
           fim=$((SECONDS + 300 * 60))
           while :; do
             restam=$(( (fim - SECONDS) / 60 ))
-            python3 scripts/beneficios_para_json.py --buscar --montar --max-meses 1 --minutos "$restam" "${extra[@]}"
-            situacao=$?
+            # O GitHub roda o passo com "bash -e": o código 3 (nada a fazer)
+            # precisa ser capturado aqui, senão encerra o passo como erro.
+            situacao=0
+            python3 scripts/beneficios_para_json.py --buscar --montar --max-meses 1 --minutos "$restam" "${extra[@]}" || situacao=$?
             if [ "$situacao" -eq 3 ]; then echo "Nada mais a buscar nesta execução."; break; fi
             if [ "$situacao" -ne 0 ]; then exit "$situacao"; fi
             git add dados-fonte/beneficios site/dados/beneficios
