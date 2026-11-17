@@ -1347,7 +1347,17 @@ td.num .detalhe { white-space: normal; }
 .onde-sugestao { margin-top: var(--e-3); padding: var(--e-3) var(--e-4); background: var(--recuo); border-radius: var(--raio); }
 .abertura .onde-sugestao p { font-size: var(--fs-2); }
 .onde-sugestao .botao { margin: var(--e-2) 0 0; }
-#municipios .filtros .botao { margin: 0; justify-content: center; }
+a.botao { text-decoration: none; }
+/* Cidade guardada: atalho acima da busca (início); na página da cidade, o
+   botão para marcar a cidade como a da pessoa. */
+.minha-cidade { margin: 0 0 var(--e-4); }
+.abertura #minha-cidade p { margin: 0; font-size: var(--fs-3); font-weight: 600; }
+#cid-guardar-caixa { margin: var(--e-3) 0 0; }
+#cid-guardar-caixa .botao { margin: 0; }
+#cid-guardar-caixa .nota { margin: var(--e-1) 0 0; }
+/* Listas de links da página da cidade (o estado e o Brasil). */
+.links-lista { margin: var(--e-3) 0 0; padding-left: 1.25rem; display: grid; gap: var(--e-2); max-width: var(--prosa); }
+.links-lista a { font-weight: 600; }
 
 /* Páginas próprias (parlamentar): trilha de navegação e cabeçalho. */
 .trilha { margin: var(--e-4) 0 0; font-size: var(--fs-2); color: var(--tinta-2); }

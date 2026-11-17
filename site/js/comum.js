@@ -34,7 +34,57 @@ export function fatorParaHoje(ctx, ano) {
   return doAno.length && ref ? ref / (doAno.reduce((a, v) => a + v, 0) / doAno.length) : null;
 }
 
+// Fator para trazer um mês para o dinheiro de hoje (IPCA). Mês depois do
+// último IPCA publicado: 1.
+export function fatorMesParaHoje(ctx, mes) {
+  const { meses, ipca } = ctx;
+  const u = c.ultimoIndice(ipca);
+  const i = meses.indexOf(mes);
+  if (u < 0) return null;
+  if (i < 0 || i >= u) return i < 0 && mes < meses[0] ? null : 1;
+  return ipca[i] ? ipca[u] / ipca[i] : null;
+}
+
+// "2026-03" menos 12 meses -> "2025-03".
+export function mesAnterior(mes, n) {
+  const [a, m] = mes.split('-').map(Number);
+  const total = a * 12 + (m - 1) - n;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+}
+
 export const arred = (v, casas) => (v == null ? null : Math.round(v * 10 ** casas) / 10 ** casas);
+
+// Resumos em tópicos: uma frase por item, mais fácil de achar cada número.
+// A frase termina em ". " seguido de maiúscula; "R$ 1.621" não quebra.
+export function definirTopicos(nome, texto) {
+  const partes = texto.trim().split(/\.\s+(?=[A-ZÀ-Ý])/);
+  const frases = partes.map((fr, i) => (i < partes.length - 1 ? `${fr}.` : fr)).filter((fr) => fr.trim());
+  campo(nome).forEach((e) => {
+    // Uma frase só é a resposta da seção: parágrafo, sem marcador.
+    if (frases.length === 1) {
+      e.replaceChildren(el('p', 'resposta', frases[0]));
+      return;
+    }
+    const lista = document.createElement('ul');
+    frases.forEach((fr) => el('li', null, fr, lista));
+    e.replaceChildren(lista);
+  });
+}
+
+// A cidade da pessoa (código IBGE), guardada no navegador. Só uma escolha
+// feita por ela muda o valor: abrir o link de outra cidade não muda.
+const CHAVE_MUNICIPIO = 'arrecadometro-municipio';
+
+export function lerMunicipioGuardado() {
+  try {
+    const v = localStorage.getItem(CHAVE_MUNICIPIO);
+    return /^[0-9]{7}$/.test(v ?? '') ? v : null;
+  } catch { return null; }
+}
+
+export function guardarMunicipio(codigo) {
+  try { localStorage.setItem(CHAVE_MUNICIPIO, codigo); } catch { /* sem armazenamento: vale só nesta visita */ }
+}
 
 // Planilhas: cada botão com data-baixar="chave" chama a função registrada.
 const planilhas = new Map();
@@ -142,3 +192,19 @@ export function montarBusca({ entrada, lista, prefixo, itens, texto, rotulo, vaz
   });
   entrada.addEventListener('blur', () => setTimeout(fechar, 100));
 }
+
+// Listas de barras em duas colunas (computador, regra no CSS): a ordem desce
+// pela coluna da esquerda e continua na da direita, com as linhas alinhadas.
+// A grade precisa saber quantas linhas há; conta só os itens visíveis.
+function alinharBarras(ul) {
+  const n = [...ul.children].filter((li) => !li.hidden).length;
+  ul.style.setProperty('--linhas', String(Math.max(1, Math.ceil(n / 2))));
+}
+new MutationObserver((mudancas) => {
+  const listas = new Set();
+  for (const m of mudancas) {
+    const ul = m.target.closest?.('ul.barras');
+    if (ul) listas.add(ul);
+  }
+  listas.forEach(alinharBarras);
+}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });

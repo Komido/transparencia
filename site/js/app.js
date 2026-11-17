@@ -1,11 +1,12 @@
 import * as c from './calculos.js';
 import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
-import { slugDaCidade, caminhoDaCidade, slugDoCaminho } from './endereco.js';
-import { montarBusca as montarBuscaComum, barra as barraComum, encurtarLista as encurtarListaComum } from './comum.js';
+import { caminhoDaCidade } from './endereco.js';
+import { montarBusca as montarBuscaComum, barra as barraComum, encurtarLista as encurtarListaComum, semAcento, lerMunicipioGuardado, guardarMunicipio } from './comum.js';
 import * as t from './textos.js';
+import { situacao, resumoDoEstado, listaDeItens, eleitosDe, listaDeGovernadores } from './estado.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde, carregarIndiceParlamentares, carregarVereadoresUf } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarFolha, carregarAgenda, buscarOnde, carregarIndiceParlamentares } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -613,28 +614,9 @@ function montarContas(ctx) {
 // Contas dos estados (Relatório de Gestão Fiscal do Poder Executivo)
 // ---------------------------------------------------------------------------
 
-// Situação diante dos limites da lei, em palavras simples. "Perto do limite"
-// começa no nível de alerta da lei (90% do limite). Os limites da folha vêm do
-// relatório de cada estado (49% ou 48,6%); o da dívida é o da lei, igual para
-// todos.
-function situacao(valor, limite, alerta) {
-  if (valor == null || limite == null) return null;
-  if (valor > limite) return 'acima do limite';
-  if (alerta != null && valor > alerta) return 'perto do limite';
-  return 'dentro do limite';
-}
-
 // Lista com rótulo em negrito no começo de cada item: [{ rotulo, texto }].
 function definirItens(nome, itens) {
-  campo(nome).forEach((e) => {
-    const lista = document.createElement('ul');
-    itens.forEach(({ rotulo, texto }) => {
-      const li = el('li', null, null, lista);
-      if (rotulo) el('strong', null, `${rotulo}: `, li);
-      li.append(document.createTextNode(texto));
-    });
-    e.replaceChildren(lista);
-  });
+  campo(nome).forEach((e) => { e.replaceChildren(listaDeItens(itens)); });
 }
 
 const REPASSE_PREFEITURAS = {
@@ -642,22 +624,6 @@ const REPASSE_PREFEITURAS = {
   ipva: 'Metade fica com a prefeitura onde o veículo é registrado.',
   itcd: '',
 };
-
-// Prefeitos e governadores eleitos (TSE), carregados uma vez por estado.
-const eleitosPorUf = new Map();
-function eleitosDe(uf) {
-  if (!eleitosPorUf.has(uf)) {
-    eleitosPorUf.set(uf, carregarGovernantesUf(uf).catch((erro) => { console.error(erro); return null; }));
-  }
-  return eleitosPorUf.get(uf);
-}
-
-function linhaEleito(lista, rotulo, x) {
-  const li = el('li', null, null, lista);
-  el('span', null, rotulo, li);
-  el('strong', null, x[3], li);
-  el('span', null, ` (${x[5]})${x[6] ? `, vice ${x[6]}` : ''}.`, li);
-}
 
 async function desenharGovernadores(uf) {
   const caixa = $('#estados-governo');
@@ -668,18 +634,7 @@ async function desenharGovernadores(uf) {
   const d = await eleitosDe(uf);
   if (!d || $('#estados-uf').value !== uf || !d.governadores.length) return;
   lista.replaceChildren();
-  const anoAtual = new Date().getFullYear();
-  for (const x of d.governadores) {
-    const e = d.eleicoes[String(x[0])];
-    if (!e) continue;
-    // Emenda Constitucional 111/2021: a partir de 2027, governadores tomam posse em 6 de janeiro.
-    const posse = e.inicio > anoAtual && e.inicio >= 2027 ? `, posse em 6 de janeiro de ${e.inicio}` : '';
-    const quem = x[4] ? 'eleita' : 'eleito';
-    const rotulo = x[2]
-      ? `Eleição suplementar em ${f.dataCurta(x[1])} (mandato até ${e.fim}): `
-      : `${x[0]}, ${quem} para o mandato de ${e.inicio} a ${e.fim}${posse}: `;
-    linhaEleito(lista, rotulo, x);
-  }
+  listaDeGovernadores(lista, d);
   caixa.hidden = !lista.children.length;
 }
 
@@ -694,7 +649,6 @@ function montarEstados(ctx) {
   // limite, para que "R$ 49" não pareça igual ao limite de R$ 49.
   const porCemReais = (v, ...referencias) => f.moeda(v, referencias.some((r) => r != null && Math.abs(v - r) < 1) ? 2 : 0);
   const limiteReais = (v) => f.moeda(v, Number.isInteger(v) ? 0 : 2);
-  const fraseSituacao = { 'acima do limite': 'Está acima do limite.', 'perto do limite': 'Está perto do limite.', 'dentro do limite': 'Está dentro do limite.' };
 
   // Seletor de estado: em ordem alfabética; começa no estado da cidade
   // escolhida, se houver.
@@ -724,54 +678,7 @@ function montarEstados(ctx) {
   const quemCobra = (capital) => (ehBrasilia(capital) ? 'o governo do Distrito Federal' : `a prefeitura de ${capital.nome}`);
 
   // Resumo: dívida, folha e impostos, uma frase curta cada -----------------
-  const desenharResumo = () => {
-    const uf = estadoAtual();
-    const itens = [];
-    const kDiv = c.ultimoIndice(uf.indicadores?.dcl_rcl_pct ?? []);
-    if (kDiv >= 0) {
-      const v = ind(uf, 'dcl_rcl_pct', kDiv);
-      const sit = situacao(v, limiteDivida, alertaDivida);
-      itens.push({
-        rotulo: 'Dívida',
-        texto: v < 0
-          ? `em ${anos[kDiv]}, o governo tinha mais dinheiro em caixa do que dívidas. ${fraseSituacao[sit]}`
-          : `em ${anos[kDiv]}, o governo devia ${porCemReais(v, limiteDivida, alertaDivida)} para cada R$ 100 que entraram no ano. `
-            + `A lei permite até ${limiteReais(limiteDivida)}. ${fraseSituacao[sit]}`,
-      });
-    }
-    const kPes = c.ultimoIndice(uf.indicadores?.pessoal_rcl_pct ?? []);
-    if (kPes >= 0) {
-      const v = ind(uf, 'pessoal_rcl_pct', kPes);
-      const limite = ind(uf, 'pessoal_limite_pct', kPes);
-      const alerta = ind(uf, 'pessoal_alerta_pct', kPes);
-      const sit = situacao(v, limite, alerta);
-      itens.push({
-        rotulo: 'Folha de pagamento',
-        texto: `em ${anos[kPes]}, de cada R$ 100 que entraram, o governo gastou ${porCemReais(v, limite, alerta)} com salários e aposentadorias de servidores.`
-          + (limite != null ? ` A lei permite até ${limiteReais(limite)}. ${fraseSituacao[sit]}` : ''),
-      });
-    }
-    const doze = temReceita ? rec.estados.find((x) => x.sigla === uf.sigla)?.doze_meses : null;
-    if (doze?.icms != null && doze.ipva != null && doze.itcd != null && rec.doze_meses_ate) {
-      const total = doze.icms + doze.ipva + doze.itcd;
-      itens.push({
-        rotulo: 'Impostos',
-        texto: `nos 12 meses até ${f.mesLongo(rec.doze_meses_ate)}, ${uf.sigla === 'DF' ? 'o Distrito Federal' : 'o estado'} arrecadou ${f.reaisPorExtenso(total)}. `
-          + `O ICMS, imposto embutido no preço das mercadorias, respondeu por ${f.porcentagem((doze.icms / total) * 100, 0)} disso.`,
-      });
-    }
-    const capital = capitalDe(uf);
-    const dozeCap = capital?.doze_meses;
-    if (dozeCap?.iss != null && dozeCap.iptu != null && dozeCap.itbi != null && capital.ultimo_mes) {
-      const total = dozeCap.iss + dozeCap.iptu + dozeCap.itbi;
-      itens.push({
-        rotulo: ehBrasilia(capital) ? 'Impostos de Brasília' : `Prefeitura de ${capital.nome}`,
-        texto: `nos 12 meses até ${f.mesLongo(capital.ultimo_mes)}, ${ehBrasilia(capital) ? 'o governo do Distrito Federal arrecadou' : 'arrecadou'} ${f.reaisPorExtenso(total)} com ISS, IPTU e ITBI. `
-          + `O ISS, imposto sobre serviços, respondeu por ${f.porcentagem((dozeCap.iss / total) * 100, 0)} disso.`,
-      });
-    }
-    definirItens('estados-resumo', itens);
-  };
+  const desenharResumo = () => { definirItens('estados-resumo', resumoDoEstado(ctx.d, estadoAtual().sigla)); };
 
   // Dívida e folha, ano a ano ---------------------------------------------
   let grafico = null;
@@ -983,23 +890,6 @@ function fatorParaHoje(ctx, ano) {
   const ref = ipca[c.ultimoIndice(ipca)];
   const doAno = meses.map((m, i) => (c.anoDe(m) === ano ? ipca[i] : null)).filter((v) => v != null);
   return doAno.length && ref ? ref / (doAno.reduce((a, v) => a + v, 0) / doAno.length) : null;
-}
-
-// Fator para trazer um mês para o dinheiro de hoje (IPCA). Mês depois do
-// último IPCA publicado: 1.
-function fatorMesParaHoje(ctx, mes) {
-  const { meses, ipca } = ctx;
-  const u = c.ultimoIndice(ipca);
-  const i = meses.indexOf(mes);
-  if (u < 0) return null;
-  if (i < 0 || i >= u) return i < 0 && mes < meses[0] ? null : 1;
-  return ipca[i] ? ipca[u] / ipca[i] : null;
-}
-
-function mesAnterior(mes, n) {
-  const [a, m] = mes.split('-').map(Number);
-  const total = a * 12 + (m - 1) - n;
-  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
 }
 
 const anoFechado = (d, ano) => (d.ate_mes[String(ano)] ?? 0) >= 12 && ano < new Date().getFullYear();
@@ -1468,709 +1358,125 @@ function desenharRanking(casa, nomes, base, medias, fr, nomeUf) {
 // cidades (impostos da própria cidade e repasses), comparada com cidades do
 // mesmo tamanho e do mesmo estado. Os arquivos são carregados só quando a
 // pessoa usa a busca: a lista de nomes primeiro, depois o estado escolhido.
-const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-  .replace(/[^a-z0-9]+/g, ' ').trim();
+// ---------------------------------------------------------------------------
+// Sua cidade: a busca no alto da página leva à página da cidade
+// (/cidade/nome-uf: cidade.html e js/cidade.js). A cidade guardada de outra
+// visita aparece em destaque, e o estado e os deputados da página seguem ela.
+// ---------------------------------------------------------------------------
 
-const SELO_PREFEITURA = {
-  ok: (ano) => `Contas de ${ano} entregues ao Tesouro e conferidas: as partes somam o total do relatório.`,
-  nao_fecha: (ano) => `A prefeitura entregou as contas de ${ano}, mas a soma das partes não bate com o total do relatório. Os números aparecem como foram entregues.`,
-  sem_relatorio: (ano, data) => `A prefeitura não entregou ao Tesouro o relatório do ano completo de ${ano} (conferido em ${data}). Sem dado: o site não estima.`,
-  formato: (ano) => `A prefeitura entregou o relatório de ${ano}, mas ele veio sem as linhas que o site usa para conferir a conta. Sem dado, para não mostrar número errado.`,
-  erro: (ano) => `Não foi possível buscar as contas de ${ano} desta prefeitura na última atualização. Sem dado.`,
-  df: () => 'Brasília não tem prefeitura. Os impostos que nas outras cidades são da prefeitura, como IPTU e ISS, são cobrados pelo governo do Distrito Federal e aparecem em "Contas do governo do estado".',
-};
-
-// Áreas de despesa das prefeituras, na ordem de campos_despesa do índice.
-const AREAS_PREFEITURA = {
-  saude: ['Saúde', 'postos, hospitais, remédios e vacinas'],
-  educacao: ['Educação', 'creches, escolas, merenda e transporte escolar'],
-  urbanismo: ['Ruas, praças e iluminação', 'obras e serviços urbanos'],
-  administracao: ['Administração da prefeitura', 'pessoal administrativo, prédios e sistemas'],
-  previdencia: ['Aposentadorias dos servidores', 'de quem trabalhou na prefeitura'],
-  assistencia: ['Assistência social', 'apoio a famílias, crianças e idosos'],
-  saneamento: ['Saneamento', 'água, esgoto e drenagem'],
-  transporte: ['Transporte', 'estradas, ônibus e terminais'],
-  encargos: ['Dívidas e outros encargos', 'juros e parcelas de empréstimos e outros'],
-  camara: ['Câmara de Vereadores', 'vereadores e funcionamento da Câmara'],
-  seguranca: ['Segurança', 'guarda municipal e defesa civil'],
-  cultura_esporte: ['Cultura, esporte e lazer', null],
-  habitacao: ['Moradia', 'habitação popular'],
-  outras: ['Outras áreas', 'agricultura, meio ambiente, trabalho, turismo e outras'],
-};
-
-const SELO_DESPESA = {
-  nao_fecha: 'A soma das áreas não bate com o total do relatório. Os números aparecem como a prefeitura entregou.',
-  formato: 'O relatório de despesas veio sem as linhas que o site usa para conferir a conta. Sem dado.',
-  sem_anexo: 'A prefeitura entregou as receitas, mas o relatório veio sem as despesas por área. Sem dado.',
-  erro: 'Não foi possível buscar as despesas desta prefeitura na última atualização. Sem dado.',
-};
-
-function montarMunicipios(ctx) {
+function montarEntradaDaCidade(ctx) {
   const entrada = $('#mun-busca');
   const listaSug = $('#mun-sugestoes');
-  const selAno = $('#mun-ano');
-  if (!entrada || !listaSug || !selAno) return;
-  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), emendas: new Map(), vereadores: new Map(), cidade: null, sugestoes: [], ativa: -1 };
-
-  const carregarIndice = () => {
-    if (!estado.carregando) {
-      estado.carregando = carregarIndiceMunicipios().then((d) => {
-        estado.indice = d;
-        estado.nomes = d.cidades.map((c) => semAcento(`${c[1]} ${c[2]}`));
-        selAno.replaceChildren();
-        [...d.anos].reverse().forEach((ano) => { el('option', null, String(ano), selAno).value = String(ano); });
-        definir('mun-atualizado', f.dataCurta(d.atualizado));
-        return d;
-      }).catch((erro) => {
-        console.error(erro);
-        $('#mun-vazio').textContent = 'Não foi possível carregar a lista de cidades agora. Tente de novo mais tarde.';
-        estado.carregando = null;
-        throw erro;
-      });
+  if (!entrada || !listaSug) return;
+  let indice = null;
+  let carregando = null;
+  const carregar = () => {
+    if (!carregando) {
+      carregando = carregarIndiceMunicipios().then((d) => { indice = d; return d; })
+        .catch((erro) => { console.error(erro); carregando = null; throw erro; });
     }
-    return estado.carregando;
+    return carregando;
   };
-
-  const fecharSugestoes = () => {
-    listaSug.hidden = true;
-    entrada.setAttribute('aria-expanded', 'false');
-    entrada.removeAttribute('aria-activedescendant');
-    estado.ativa = -1;
+  // Escolher uma cidade aqui é escolher a cidade da pessoa: fica guardada.
+  const ir = (c) => {
+    guardarMunicipio(String(c[0]).padStart(7, '0'));
+    location.href = caminhoDaCidade(c[1], c[2]);
   };
-
-  const marcarAtiva = (i) => {
-    estado.ativa = i;
-    [...listaSug.children].forEach((li, k) => li.setAttribute('aria-selected', k === i ? 'true' : 'false'));
-    if (i >= 0) {
-      entrada.setAttribute('aria-activedescendant', `mun-op-${i}`);
-      listaSug.children[i]?.scrollIntoView({ block: 'nearest' });
-    } else entrada.removeAttribute('aria-activedescendant');
-  };
-
-  const sugerir = () => {
-    const q = semAcento(entrada.value);
-    if (!estado.indice || q.length < 2) { fecharSugestoes(); return; }
-    // Primeiro os nomes que começam com o que foi digitado; depois os que contêm.
-    const comeca = [];
-    const contem = [];
-    estado.nomes.forEach((n, i) => {
-      if (n.startsWith(q)) comeca.push(i);
-      else if (n.includes(` ${q}`) || (q.length >= 4 && n.includes(q))) contem.push(i);
-    });
-    // Com estado provável (endereço de internet ou cidade escolhida antes),
-    // as cidades dele vêm primeiro em cada grupo.
-    const ufPreferida = estado.cidade?.uf ?? estado.ufProvavel;
-    if (ufPreferida) {
-      const peso = (i) => (estado.indice.cidades[i][2] === ufPreferida ? 0 : 1);
-      comeca.sort((a, b) => peso(a) - peso(b));
-      contem.sort((a, b) => peso(a) - peso(b));
+  // Com estado provável (cidade guardada ou endereço de internet), as cidades
+  // dele vêm primeiro nas sugestões. A lista ordenada é guardada por estado.
+  let ufPreferida = null;
+  const ordenadas = new Map();
+  const itens = () => {
+    if (!indice) return null;
+    if (!ufPreferida) return indice.cidades;
+    if (!ordenadas.has(ufPreferida)) {
+      ordenadas.set(ufPreferida, [...indice.cidades.filter((c) => c[2] === ufPreferida), ...indice.cidades.filter((c) => c[2] !== ufPreferida)]);
     }
-    const achados = [...comeca, ...contem].slice(0, 8);
-    estado.sugestoes = achados.map((i) => estado.indice.cidades[i]);
-    listaSug.replaceChildren();
-    if (!achados.length) {
-      const li = el('li', 'sugestao-nada', 'Nenhuma cidade com esse nome', listaSug);
-      li.setAttribute('role', 'option');
-      li.setAttribute('aria-disabled', 'true');
-    }
-    estado.sugestoes.forEach((c, k) => {
-      const li = el('li', null, c[1], listaSug);
-      li.id = `mun-op-${k}`;
-      li.setAttribute('role', 'option');
-      li.setAttribute('aria-selected', 'false');
-      el('small', null, ` ${c[2]}`, li);
-      li.addEventListener('mousedown', (ev) => { ev.preventDefault(); escolher(c, { rolar: true }); });
-    });
-    listaSug.hidden = false;
-    entrada.setAttribute('aria-expanded', 'true');
-    marcarAtiva(-1);
+    return ordenadas.get(ufPreferida);
   };
-
-  // rolar: escolha feita agora pela pessoa (a página desce até a cidade).
-  // link: a escolha vai para o endereço da página.
-  const escolher = async (c, { rolar = false, link = true } = {}) => {
-    fecharSugestoes();
-    entrada.value = `${c[1]} (${c[2]})`;
-    estado.cidade = { codigo: c[0], nome: c[1], uf: c[2] };
-    $('#onde-sugestao').hidden = true;
-    $('#mun-trocar').textContent = 'Trocar cidade';
-    const codigo7 = String(c[0]).padStart(7, '0');
-    // Só a escolha feita pela pessoa vira "a cidade dela". Abrir um link de
-    // outra cidade mostra essa cidade, mas não troca a guardada.
-    if (rolar) guardarMunicipio(codigo7);
-    mudarLugar({ codigo: codigo7, nome: c[1], uf: c[2] }, { pelaPessoa: rolar });
-    if (rolar) $('#municipios').scrollIntoView({ block: 'start' });
-    try {
-      if (!estado.porUf.has(c[2])) estado.porUf.set(c[2], await carregarMunicipiosUf(c[2], estado.indice.campos.length, estado.indice.campos_despesa?.length ?? 0));
-    } catch (erro) {
-      console.error(erro);
-      $('#mun-vazio').textContent = `Não foi possível carregar as cidades de ${c[2]} agora. Tente de novo mais tarde.`;
-      $('#mun-vazio').hidden = false;
-      $('#mun-detalhe').hidden = true;
-      return;
-    }
-    $('#mun-baixar').hidden = false;
-    desenhar();
-    desenharBeneficios();
-    desenharVereadores();
-    if (link) guardarNoEndereco();
-  };
-
-  // Trocar ou escolher a cidade: volta à busca no alto da página.
-  $('#mun-trocar').addEventListener('click', () => {
-    entrada.scrollIntoView({ block: 'center' });
-    entrada.focus({ preventScroll: true });
-    entrada.select();
+  montarBuscaComum({
+    entrada,
+    lista: listaSug,
+    prefixo: 'mun-op',
+    itens,
+    texto: (c) => `${c[1]} ${c[2]}`,
+    rotulo: (c) => [c[1], c[2]],
+    vazio: 'Nenhuma cidade com esse nome',
+    aoFocar: () => carregar().catch(() => {}),
+    aoEscolher: ir,
   });
 
-  // Sugestão pelo endereço de internet, só quando não há cidade no link nem
-  // guardada de outra visita. É uma pergunta: a pessoa confirma ou digita.
-  const sugerirPeloIp = async () => {
+  // Links "Contas da prefeitura" (menu, assuntos e textos): com cidade
+  // guardada, vão para a página dela; sem, para a busca.
+  const apontarLinks = (c) => {
+    document.querySelectorAll('a[data-sua-cidade], a[href="#municipios"]').forEach((a) => {
+      a.dataset.suaCidade = '';
+      a.href = caminhoDaCidade(c[1], c[2]);
+    });
+  };
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a[href="#municipios"]');
+    if (!a) return;
+    ev.preventDefault();
+    $('#secoes')?.removeAttribute('open');
+    entrada.scrollIntoView({ block: 'center' });
+    entrada.focus({ preventScroll: true });
+  });
+
+  // Link antigo ?cidade=CODIGO_IBGE: vai para a página da cidade.
+  const pedido = new URLSearchParams(location.search);
+  const codigoPedido = /^[0-9]{7}$/.test(pedido.get('cidade') ?? '') ? Number(pedido.get('cidade')) : null;
+  if (codigoPedido) {
+    carregar().then((d) => {
+      const c = d.cidades.find((x) => x[0] === codigoPedido);
+      if (c) location.replace(`${caminhoDaCidade(c[1], c[2])}${/^\d{4}$/.test(pedido.get('ano') ?? '') ? `?ano=${pedido.get('ano')}` : ''}`);
+    }).catch(() => {});
+    return;
+  }
+
+  // Cidade guardada de outra visita: atalho para a página dela; o estado e
+  // os deputados da página inicial passam a ser os dela.
+  const guardada = lerMunicipioGuardado();
+  if (guardada) {
+    carregar().then((d) => {
+      const c = d.cidades.find((x) => x[0] === Number(guardada));
+      if (!c) { sugerirPeloIp(); return; }
+      ufPreferida = c[2];
+      definir('minha-cidade-texto', `Sua cidade: ${c[1]} (${c[2]})`);
+      const link = $('#minha-cidade-link');
+      link.textContent = `Ver as contas de ${c[1]}`;
+      link.href = caminhoDaCidade(c[1], c[2]);
+      $('#minha-cidade').hidden = false;
+      $('label[for="mun-busca"]').textContent = 'Ver outra cidade';
+      apontarLinks(c);
+      mudarLugar({ codigo: guardada, nome: c[1], uf: c[2] });
+    }).catch(() => {});
+    return;
+  }
+  sugerirPeloIp();
+
+  // Sugestão pelo endereço de internet, só sem cidade guardada. É uma
+  // pergunta: a pessoa confirma ou digita.
+  async function sugerirPeloIp() {
     const onde = await buscarOnde();
-    if (!onde || estado.cidade) return;
+    if (!onde?.uf) return;
     let d;
-    try {
-      d = await carregarIndice();
-    } catch {
-      return;
-    }
-    if (estado.cidade) return;
-    estado.ufProvavel = onde.uf;
+    try { d = await carregar(); } catch { return; }
+    ufPreferida = onde.uf;
     const c = onde.cidade ? d.cidades.find((x) => x[2] === onde.uf && semAcento(x[1]) === semAcento(onde.cidade)) : null;
     const nomeUf = ctx.d.estados_fiscal?.estados?.find((x) => x.sigla === onde.uf)?.nome ?? onde.uf;
     const bt = $('#onde-sim');
     if (c) {
       definir('onde-texto', `Pelo seu endereço de internet, você parece estar em ${c[1]} (${c[2]}). É só uma estimativa, e o site não guarda essa informação.`);
       bt.textContent = `Ver ${c[1]}`;
-      bt.onclick = () => escolher(c, { rolar: true });
+      bt.onclick = () => ir(c);
       bt.hidden = false;
     } else {
       definir('onde-texto', `Pelo seu endereço de internet, seu estado parece ser ${nomeUf}: as cidades de lá aparecem primeiro na busca. É só uma estimativa, e o site não guarda essa informação.`);
       bt.hidden = true;
     }
     $('#onde-sugestao').hidden = false;
-  };
-
-  entrada.addEventListener('focus', () => { carregarIndice().catch(() => {}); });
-  entrada.addEventListener('input', () => { carregarIndice().then(sugerir).catch(() => {}); });
-  entrada.addEventListener('keydown', (ev) => {
-    const n = estado.sugestoes.length;
-    if (ev.key === 'ArrowDown' && n) { ev.preventDefault(); if (listaSug.hidden) sugerir(); marcarAtiva((estado.ativa + 1) % n); }
-    else if (ev.key === 'ArrowUp' && n) { ev.preventDefault(); marcarAtiva((estado.ativa - 1 + n) % n); }
-    else if (ev.key === 'Enter' && !listaSug.hidden && n) { ev.preventDefault(); escolher(estado.sugestoes[Math.max(0, estado.ativa)], { rolar: true }); }
-    else if (ev.key === 'Escape') fecharSugestoes();
-  });
-  entrada.addEventListener('blur', () => setTimeout(fecharSugestoes, 100));
-  selAno.addEventListener('change', () => { if (estado.cidade) { desenhar(); guardarNoEndereco(); } });
-
-  // Endereço de cada cidade: /cidade/nome-uf (montado pelo Worker com o
-  // título da cidade), com ?ano=AAAA. O link antigo ?cidade=CODIGO_IBGE
-  // continua abrindo a cidade. A escolha feita na página vai para o
-  // endereço, para poder ser compartilhada, e o título e a manchete mudam.
-  const guardarNoEndereco = () => {
-    if (!estado.cidade) return;
-    const { nome, uf } = estado.cidade;
-    const p = new URLSearchParams(location.search);
-    p.delete('cidade');
-    p.set('ano', selAno.value);
-    history.replaceState(null, '', `${caminhoDaCidade(nome, uf)}?${p}#municipios`);
-    document.title = `${nome} (${uf}): contas da prefeitura, emendas e Bolsa Família | Arrecadômetro Brasil`;
-    const h1 = $('.abertura h1');
-    if (h1) h1.textContent = `O dinheiro público de ${nome} (${uf})`;
-  };
-  // Ao abrir: a cidade do endereço (/cidade/nome-uf ou ?cidade=); sem ela,
-  // a guardada de outra visita; sem nenhuma das duas, a sugestão pelo
-  // endereço de internet.
-  const pedido = new URLSearchParams(location.search);
-  const slugPedido = slugDoCaminho(location.pathname);
-  const codigoPedido = !slugPedido && /^[0-9]{7}$/.test(pedido.get('cidade') ?? '') ? pedido.get('cidade') : null;
-  const codigoGuardado = slugPedido || codigoPedido ? null : lerMunicipioGuardado();
-  if (slugPedido || codigoPedido || codigoGuardado) {
-    carregarIndice().then((d) => {
-      const c = slugPedido
-        ? d.cidades.find((x) => slugDaCidade(x[1], x[2]) === slugPedido)
-        : d.cidades.find((x) => x[0] === Number(codigoPedido ?? codigoGuardado));
-      if (!c) return slugPedido || codigoPedido ? null : sugerirPeloIp();
-      const ano = pedido.get('ano');
-      // A cidade do link abre depois do salto do navegador para #municipios:
-      // volta à seção. A guardada abre sem mexer na rolagem nem no endereço.
-      const doEndereco = Boolean(slugPedido || codigoPedido);
-      if (doEndereco && ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
-      return escolher(c, { link: doEndereco }).then(() => { if (doEndereco) reposicionarNaSecao(); });
-    }).catch(() => {});
-  } else {
-    sugerirPeloIp().catch(() => {});
   }
-
-  function desenhar() {
-    const { codigo, nome, uf } = estado.cidade;
-    const d = estado.porUf.get(uf);
-    const m = d?.municipios.find((x) => x.c === codigo);
-    const ano = Number(selAno.value);
-    const r = m?.a[String(ano)];
-    $('#mun-vazio').hidden = true;
-    $('#mun-detalhe').hidden = false;
-    const selo = $('#mun-selo');
-    // Sem registro do ano ou situação desconhecida: "sem dado", nunca "não entregou".
-    const situacao = Object.hasOwn(SELO_PREFEITURA, r?.s) ? r.s : 'erro';
-    // Cabeçalho com o que foi escolhido: muda a cada troca de cidade ou ano,
-    // para ficar claro que a escolha funcionou mesmo quando não há dado.
-    const cab = $('[data-campo="mun-cabeca"]');
-    cab.replaceChildren();
-    el('strong', null, `${nome} (${uf})`, cab);
-    const moradores = r?.p || m?.p;
-    el('span', null, `${moradores ? ` · ${f.numero(moradores)} moradores` : ''} · contas de ${ano}`, cab);
-    // Sem dado no ano escolhido: oferece o ano mais recente que tem.
-    const outros = (estado.indice.anos ?? []).filter((a) => a !== ano && m?.a[String(a)]?.v).sort((a, b) => b - a);
-    const caixaOutro = $('#mun-outro-ano');
-    caixaOutro.hidden = Boolean(r?.v) || !outros.length;
-    if (!caixaOutro.hidden) {
-      const bt = $('#mun-ver-ano');
-      bt.textContent = `Ver as contas de ${outros[0]}`;
-      bt.onclick = () => { selAno.value = String(outros[0]); desenhar(); };
-    }
-    desenharGoverno();
-    selo.textContent = SELO_PREFEITURA[situacao](ano, f.dataCurta(d?.atualizado))
-      + (!r?.v && situacao !== 'df' && !outros.length ? ' Os outros anos também estão sem dado.' : '');
-    selo.classList.toggle('aviso', situacao !== 'ok');
-    const caixaContas = $('#mun-contas');
-    desenharDespesas(r, m, d, ano, nome);
-    desenharEmendas(ano, r?.p || m?.p);
-    if (!r?.v) {
-      caixaContas.hidden = true;
-      campo('mun-resumo').forEach((e) => e.replaceChildren());
-      return;
-    }
-    caixaContas.hidden = false;
-    const campos = estado.indice.campos;
-    const v = Object.fromEntries(campos.map((k, i) => [k, r.v[i]]));
-    const fator = fatorParaHoje(ctx, ano) ?? 1;
-    const pop = r.p || m.p;
-    const receita = v.receita;
-    const parte = (x) => (receita > 0 ? (x / receita) * 100 : null);
-    const outrosRepasses = v.transferencias - v.fpm - v.icms - v.ipva - v.fundeb;
-    const outrasReceitas = receita - v.tributos - v.transferencias;
-    const hoje = (x) => x * fator;
-
-    // Resposta em tópicos.
-    const porCem = (x) => Math.round(parte(x));
-    const topicos = [
-      `Em ${ano}, a prefeitura de ${nome} (${uf}) recebeu ${f.reaisPorExtenso(hoje(receita))}, ou ${f.moeda(hoje(receita) / pop, 0)} por morador (em dinheiro de hoje).`,
-      `De cada R$ 100, R$ ${porCem(v.tributos)} vieram de impostos e taxas cobrados pela própria cidade e R$ ${porCem(v.transferencias)} de repasses da União e do estado${porCem(outrasReceitas) >= 1 ? `; R$ ${porCem(outrasReceitas)}, de outras receitas` : ''}.`,
-    ];
-    const anterior = m.a[String(ano - 1)];
-    const fatorAnt = fatorParaHoje(ctx, ano - 1);
-    if (anterior?.s === 'ok' && anterior.v && fatorAnt) {
-      const recAnt = anterior.v[campos.indexOf('receita')] * fatorAnt;
-      const varia = ((hoje(receita) - recAnt) / recAnt) * 100;
-      topicos.push(Math.abs(varia) < 0.5
-        ? `Descontada a inflação, a receita ficou igual à de ${ano - 1}.`
-        : `Descontada a inflação, a receita foi ${f.porcentagem(Math.abs(varia), 0)} ${varia > 0 ? 'maior' : 'menor'} que em ${ano - 1}.`);
-    }
-    definirTopicos('mun-resumo', topicos.join(' '));
-
-    // De onde veio cada R$ 100: ordem fixa, impostos da cidade primeiro.
-    const itens = [
-      { nome: 'Impostos e taxas da cidade', explica: `IPTU ${f.reaisCompacto(hoje(v.iptu))} · ISS ${f.reaisCompacto(hoje(v.iss))} · ITBI ${f.reaisCompacto(hoje(v.itbi))} · IR dos servidores ${f.reaisCompacto(hoje(v.irrf))}`, valor: v.tributos },
-      { nome: 'FPM (repasse da União)', explica: 'parte do Imposto de Renda e do IPI dividida entre as cidades', valor: v.fpm },
-      { nome: 'ICMS (parte do imposto do estado)', explica: 'um quarto do ICMS fica com as cidades', valor: v.icms },
-      { nome: 'FUNDEB (educação)', explica: 'fundo da educação básica, pelo número de alunos', valor: v.fundeb },
-      { nome: 'IPVA (parte do imposto dos carros)', explica: 'metade do IPVA dos carros da cidade', valor: v.ipva },
-      { nome: 'Outros repasses', explica: 'SUS, assistência social, merenda, ITR e outros', valor: outrosRepasses },
-      { nome: 'Outras receitas da prefeitura', explica: 'aplicações financeiras, serviços e contribuições', valor: outrasReceitas },
-    ].filter((x) => x.valor > 0);
-    const lista = $('#mun-barras');
-    lista.replaceChildren();
-    for (const x of itens) {
-      const li = el('li', null, null, lista);
-      const topo = el('div', 'barra-topo', null, li);
-      const nomeEl = el('span', 'barra-nome', x.nome, topo);
-      el('span', 'barra-explica', x.explica, nomeEl);
-      el('span', 'barra-valor', `${f.parteDoTotal(parte(x.valor))} · ${f.reaisCompacto(hoje(x.valor))}`, topo);
-      const trilho = el('div', 'barra-trilho', null, li);
-      trilho.setAttribute('aria-hidden', 'true');
-      el('div', 'barra', null, trilho).style.width = `${Math.max(1, parte(x.valor))}%`;
-    }
-
-    // Comparação com a mediana das cidades do mesmo tamanho e do estado.
-    const faixas = estado.indice.faixas;
-    const iFaixa = faixas.findIndex((x) => x.ate == null || pop <= x.ate);
-    const medFaixa = estado.indice.medianas[String(ano)]?.[String(iFaixa)] ?? {};
-    const medUf = d.medianas?.[String(ano)] ?? {};
-    const compara = $('#mun-compara');
-    compara.replaceChildren();
-    const linhas = [
-      ['Receita por morador', hoje(receita) / pop, (x) => f.moeda(hoje(x), 0), 'receita_hab'],
-      ['Impostos da própria cidade, por morador', hoje(v.tributos) / pop, (x) => f.moeda(hoje(x), 0), 'tributos_hab'],
-      ['Parte que vem de repasses', parte(v.transferencias), (x) => f.porcentagem(x, 0), 'repasses_pct'],
-    ];
-    for (const [rotulo, valor, fmt, chave] of linhas) {
-      const div = el('div', null, null, compara);
-      el('dt', null, rotulo, div);
-      el('dd', null, chave === 'repasses_pct' ? f.porcentagem(valor, 0) : f.moeda(valor, 0), div);
-      const det = [];
-      if (medFaixa[chave] != null) det.push(`cidades do mesmo tamanho: ${fmt(medFaixa[chave])}`);
-      if (medUf[chave] != null) det.push(`cidades de ${uf}: ${fmt(medUf[chave])}`);
-      if (det.length) el('dd', 'detalhe', det.join(' · '), div);
-    }
-    definir('mun-compara-nota', `Mediana das cidades com contas conferidas em ${ano}: metade está acima e metade abaixo. Mesmo tamanho: ${faixas[iFaixa]?.rotulo ?? ''}${medFaixa.n ? ` (${f.numero(medFaixa.n)} cidades)` : ''}${medUf.n ? `; ${uf}: ${f.numero(medUf.n)} cidades` : ''}.`);
-  }
-
-  // Quem foi eleito para o mandato do ano das contas (TSE).
-  async function desenharGoverno() {
-    const caixa = $('#mun-governo');
-    const lista = $('#mun-governo-lista');
-    const { codigo, uf } = estado.cidade;
-    const ano = Number(selAno.value);
-    caixa.hidden = true;
-    const d = await eleitosDe(uf);
-    if (!d || estado.cidade?.codigo !== codigo || Number(selAno.value) !== ano) return;
-    const mandato = Object.entries(d.eleicoes).find(([, e]) => e.cargo === 'prefeito' && e.inicio <= ano && ano <= e.fim);
-    if (!mandato) return;
-    const [eleicao, e] = mandato;
-    const eleitos = (d.prefeitos[String(codigo).padStart(7, '0')] ?? []).filter((x) => String(x[0]) === eleicao);
-    if (!eleitos.length) return;
-    lista.replaceChildren();
-    el('li', 'governo-mandato', `As contas de ${ano} são do mandato de ${e.inicio} a ${e.fim}.`, lista);
-    for (const x of eleitos) {
-      const rotulo = x[2] ? `Eleição suplementar em ${f.dataCurta(x[1])}: ` : `${x[4] ? 'Prefeita eleita' : 'Prefeito eleito'} em ${eleicao}: `;
-      linhaEleito(lista, rotulo, x);
-    }
-    caixa.hidden = false;
-  }
-
-  // Vereadores eleitos na última eleição municipal, com o partido.
-  async function desenharVereadores() {
-    const caixa = $('#mun-vereadores');
-    const { codigo, nome, uf } = estado.cidade;
-    caixa.hidden = true;
-    let d = estado.vereadores.get(uf);
-    if (d === undefined) {
-      try { d = await carregarVereadoresUf(uf); } catch (erro) { console.error(erro); d = null; }
-      estado.vereadores.set(uf, d);
-    }
-    if (!d || estado.cidade?.codigo !== codigo) return;
-    const lista = d.cidades[String(codigo).padStart(7, '0')];
-    if (!lista?.length) return;
-    definir('mun-vereadores-titulo', `Os ${lista.length} vereadores eleitos em ${d.eleicao} (mandato de ${d.inicio} a ${d.fim})`);
-    // Quantos de cada partido, do que elegeu mais para o que elegeu menos.
-    const porPartido = new Map();
-    lista.forEach((x) => porPartido.set(x[2], (porPartido.get(x[2]) ?? 0) + 1));
-    const partidos = $('#mun-vereadores-partidos');
-    partidos.replaceChildren();
-    [...porPartido].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([sigla, n]) => {
-      const li = el('li', null, null, partidos);
-      li.title = d.partidos?.[sigla] ?? sigla;
-      el('span', 'contagem-sigla', sigla, li);
-      el('span', 'contagem-numero', String(n), li);
-    });
-    // Nome em cima, partido embaixo, como nas outras listas de pessoas.
-    const ul = $('#mun-vereadores-lista');
-    ul.replaceChildren();
-    lista.forEach((x) => {
-      const li = el('li', null, null, ul);
-      el('span', 'pessoa-nome', x[0], li);
-      // Só a sigla, para caber numa linha; o nome está na tabela de siglas.
-      const sigla = el('span', 'pessoa-detalhe', x[2], li);
-      if (d.partidos?.[x[2]]) sigla.title = d.partidos[x[2]];
-    });
-    definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
-    caixa.hidden = false;
-  }
-
-  // Para onde foi o dinheiro: despesa liquidada por área (RREO Anexo 2), em
-  // dinheiro de hoje, e comparação por morador com cidades parecidas.
-  function desenharDespesas(r, m, d, ano, nome) {
-    const caixa = $('#mun-despesas');
-    const campos = estado.indice.campos_despesa;
-    caixa.hidden = true;
-    if (!campos || !r?.ds) return;
-    const selo = $('#mun-despesas-selo');
-    const lista = $('#mun-despesas-barras');
-    const compara = $('#mun-despesas-compara');
-    lista.replaceChildren();
-    compara.replaceChildren();
-    definir('mun-despesas-nota', '');
-    selo.hidden = r.ds === 'ok';
-    selo.textContent = SELO_DESPESA[r.ds] ?? '';
-    caixa.hidden = false;
-    const total = r.d ? r.d.reduce((a, x) => a + (x ?? 0), 0) : 0;
-    if (!r.d || total <= 0) {
-      definir('mun-despesas-titulo', `Gastos da prefeitura em ${ano}`);
-      return;
-    }
-    const fator = fatorParaHoje(ctx, ano) ?? 1;
-    const hoje = (x) => x * fator;
-    const pop = r.p || m.p;
-    definir('mun-despesas-titulo', `Gastos da prefeitura: de cada R$ 100 em ${ano}`);
-    const itens = campos.map((k, i) => ({ k, valor: r.d[i] ?? 0 }))
-      .filter((x) => x.valor > 0 && AREAS_PREFEITURA[x.k])
-      .sort((a, b) => (a.k === 'outras') - (b.k === 'outras') || b.valor - a.valor);
-    for (const x of itens) {
-      const [rotulo, explica] = AREAS_PREFEITURA[x.k];
-      const pct = (x.valor / total) * 100;
-      const li = el('li', null, null, lista);
-      const topo = el('div', 'barra-topo', null, li);
-      const nomeEl = el('span', 'barra-nome', rotulo, topo);
-      if (explica) el('span', 'barra-explica', explica, nomeEl);
-      el('span', 'barra-valor', `${f.parteDoTotal(pct)} · ${f.reaisCompacto(hoje(x.valor))}`, topo);
-      const trilho = el('div', 'barra-trilho', null, li);
-      trilho.setAttribute('aria-hidden', 'true');
-      el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
-    }
-    if (r.ds !== 'ok' || !pop) {
-      definir('mun-despesas-nota', `Total gasto em ${ano}: ${f.reaisPorExtenso(hoje(total))} (em dinheiro de hoje).`);
-      return;
-    }
-    const faixas = estado.indice.faixas;
-    const iFaixa = faixas.findIndex((x) => x.ate == null || pop <= x.ate);
-    const medFaixa = estado.indice.medianas[String(ano)]?.[String(iFaixa)] ?? {};
-    const medUf = d.medianas?.[String(ano)] ?? {};
-    const valor = (k) => r.d[campos.indexOf(k)] ?? 0;
-    const linhas = [
-      ['Gasto por morador no ano', total / pop, 'despesa_hab'],
-      ['Saúde por morador', valor('saude') / pop, 'saude_hab'],
-      ['Educação por morador', valor('educacao') / pop, 'educacao_hab'],
-    ];
-    for (const [rotulo, v, chave] of linhas) {
-      const div = el('div', null, null, compara);
-      el('dt', null, rotulo, div);
-      el('dd', null, f.moeda(hoje(v), 0), div);
-      const det = [];
-      if (medFaixa[chave] != null) det.push(`cidades do mesmo tamanho: ${f.moeda(hoje(medFaixa[chave]), 0)}`);
-      if (medUf[chave] != null) det.push(`cidades de ${d.uf}: ${f.moeda(hoje(medUf[chave]), 0)}`);
-      if (det.length) el('dd', 'detalhe', det.join(' · '), div);
-    }
-    definir('mun-despesas-nota', `${nome} gastou ${f.reaisPorExtenso(hoje(total))} em ${ano}, em dinheiro de hoje. Mediana das cidades com despesas conferidas no mesmo ano${medFaixa.nd ? ` (${f.numero(medFaixa.nd)} do mesmo tamanho)` : ''}.`);
-  }
-
-  // Bolsa Família e BPC da cidade: último mês publicado e o mesmo mês do ano
-  // anterior. Não depende do ano escolhido nem do relatório da prefeitura.
-  async function desenharBeneficios() {
-    const caixa = $('#mun-beneficios');
-    const { codigo, nome, uf } = estado.cidade;
-    caixa.hidden = true;
-    let d = estado.beneficios.get(uf);
-    if (d === undefined) {
-      try {
-        d = await carregarBeneficiosUf(uf);
-      } catch (erro) {
-        console.error(erro);
-        d = null;
-      }
-      estado.beneficios.set(uf, d);
-    }
-    if (!d || estado.cidade?.codigo !== codigo) return;
-    $('#mun-baixar-beneficios').hidden = false;
-    const serie = d.municipios[String(codigo).padStart(7, '0')];
-    const iUlt = d.meses.length - 1;
-    const atual = serie?.[iUlt];
-    if (!atual) return;
-    const mesAtual = d.meses[iUlt];
-    const iAnt = d.meses.indexOf(mesAnterior(mesAtual, 12));
-    const antes = iAnt >= 0 ? serie[iAnt] : null;
-    const fatorAnt = iAnt >= 0 ? fatorMesParaHoje(ctx, d.meses[iAnt]) : null;
-    const dl = $('#mun-beneficios-numeros');
-    dl.replaceChildren();
-    // Uma informação por linha; valores arredondados ("R$ 839 mil").
-    const linha = (rotulo, valor, detalhes) => {
-      const div = el('div', null, null, dl);
-      el('dt', null, rotulo, div);
-      el('dd', null, valor >= 1e6 ? f.reaisPorExtenso(valor) : f.reaisCompacto(valor), div);
-      detalhes.forEach((t) => el('dd', 'detalhe', t, div));
-    };
-    const [bfValor, bfQtd, bpcValor, bpcQtd] = atual;
-    if (bfValor != null && bfQtd) {
-      const det = [`${f.numero(bfQtd)} famílias, média de ${f.moeda(bfValor / bfQtd, 0)} por família`];
-      if (antes?.[0] != null && antes[1] && fatorAnt) {
-        det.push(`Um ano antes: ${f.numero(antes[1])} famílias, média de ${f.moeda((antes[0] * fatorAnt) / antes[1], 0)} (em dinheiro de hoje)`);
-      }
-      linha(`Bolsa Família em ${f.mesLongo(mesAtual)}`, bfValor, det);
-    }
-    if (bpcValor != null && bpcQtd) {
-      const det = [`${f.numero(bpcQtd)} pessoas`];
-      if (antes?.[3]) det.push(`Um ano antes: ${f.numero(antes[3])} pessoas`);
-      linha(`BPC em ${f.mesLongo(mesAtual)}`, bpcValor, det);
-    }
-    if (!dl.children.length) return;
-    // Soma dos últimos 12 meses, só se a cidade tiver os 12.
-    const ultimos = serie.slice(-12);
-    if (d.meses.length >= 12 && ultimos.length === 12 && ultimos.every((x) => x && x[0] != null && x[2] != null)) {
-      const meses12 = d.meses.slice(-12);
-      const total = ultimos.reduce((a, x, k) => a + (x[0] + x[2]) * (fatorMesParaHoje(ctx, meses12[k]) ?? 1), 0);
-      linha('Os dois, nos últimos 12 meses', total, [`De ${f.mesLongo(meses12[0])} a ${f.mesLongo(meses12[11])}, em dinheiro de hoje`]);
-    }
-    definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.`);
-    caixa.hidden = false;
-  }
-
-  // Emendas parlamentares pagas à prefeitura: o ano escolhido e, se for
-  // outro, o ano em andamento. Valores em dinheiro de hoje (IPCA).
-  async function desenharEmendas(ano, moradores) {
-    const caixa = $('#mun-emendas');
-    const { codigo, nome, uf } = estado.cidade;
-    let d = estado.emendas.get(uf);
-    if (d === undefined) {
-      caixa.hidden = true;
-      try {
-        d = await carregarEmendasUf(uf);
-      } catch (erro) {
-        console.error(erro);
-        d = null;
-      }
-      estado.emendas.set(uf, d);
-    }
-    // A escolha mudou enquanto o arquivo carregava: o desenho seguinte cuida.
-    if (estado.cidade?.codigo !== codigo || Number(selAno.value) !== ano) return;
-    if (!d) {
-      caixa.hidden = true;
-      return;
-    }
-    $('#mun-baixar-emendas').hidden = false;
-    // Brasília não tem prefeitura: o que vai para a cidade é pago ao governo
-    // do Distrito Federal, que fica fora desta conta.
-    if (uf === 'DF') {
-      $('#mun-emendas-numeros').replaceChildren();
-      campo('mun-emendas-autores-titulo')[0].hidden = true;
-      $('#mun-emendas-autores').hidden = true;
-      $('#mun-emendas-todos').hidden = true;
-      definir('mun-emendas-nota', 'Brasília não tem prefeitura: as emendas para a cidade são pagas ao governo do Distrito Federal, que não entra nesta conta, feita só com o que é pago a prefeituras e fundos municipais.');
-      caixa.hidden = false;
-      return;
-    }
-    const daCidade = d.cidades[String(codigo).padStart(7, '0')] ?? {};
-    const emAndamento = Math.max(...d.anos);
-    const doAno = (a) => {
-      const x = daCidade[String(a)];
-      if (!x || !(x[0] > 0)) return null;
-      const fator = fatorParaHoje(ctx, a) ?? 1;
-      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '', d.paginas?.[i] ?? '']);
-      return { pago: x[0] * fator, emendas: x[1], autores: lista.length, lista };
-    };
-    const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'}${x.autores ? ` de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}` : ''}`;
-    const rotuloAno = (a) => (a === emAndamento ? `Pago em ${a} (ano em andamento)` : `Pago em ${a}`);
-    const dl = $('#mun-emendas-numeros');
-    dl.replaceChildren();
-    const linha = (rotulo, valor, detalhes) => {
-      const div = el('div', null, null, dl);
-      el('dt', null, rotulo, div);
-      el('dd', null, valor, div);
-      detalhes.forEach((t) => el('dd', 'detalhe', t, div));
-    };
-    const escolhido = d.anos.includes(ano) ? doAno(ano) : null;
-    if (!d.anos.includes(ano)) {
-      linha(`Pago em ${ano}`, 'sem dado', [`O site mostra as emendas de ${Math.min(...d.anos)} a ${emAndamento}.`]);
-    } else if (!escolhido) {
-      linha(rotuloAno(ano), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura neste ano.']);
-    } else {
-      const det = [quantas(escolhido)];
-      if (moradores) det.push(`${f.moeda(escolhido.pago / moradores, 0)} por morador`);
-      linha(rotuloAno(ano), escolhido.pago >= 1e6 ? f.reaisPorExtenso(escolhido.pago) : f.reaisCompacto(escolhido.pago), det);
-    }
-    const atual = ano !== emAndamento ? doAno(emAndamento) : null;
-    if (atual) linha(rotuloAno(emAndamento), atual.pago >= 1e6 ? f.reaisPorExtenso(atual.pago) : f.reaisCompacto(atual.pago), [quantas(atual)]);
-    else if (ano !== emAndamento) linha(rotuloAno(emAndamento), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura até agora.']);
-
-    // Quem mandou mais: no ano escolhido ou, sem ele, no ano em andamento.
-    const anoLista = escolhido ? ano : (atual ? emAndamento : null);
-    const lista = anoLista === ano ? escolhido : atual;
-    const titulo = campo('mun-emendas-autores-titulo')[0];
-    const barras = $('#mun-emendas-autores');
-    const botaoTodos = $('#mun-emendas-todos');
-    barras.replaceChildren();
-    titulo.hidden = barras.hidden = !lista?.lista.length;
-    botaoTodos.hidden = true;
-    const notas = [];
-    if (lista?.lista.length) {
-      titulo.textContent = `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
-      // Todos os autores; os 6 primeiros aparecem logo, o resto com o botão.
-      const VISIVEIS = 6;
-      lista.lista.forEach(([autor, valor, cargo, pagina], k) => {
-        const pct = lista.pago > 0 ? (valor / lista.pago) * 100 : 0;
-        const li = el('li', null, null, barras);
-        li.hidden = k >= VISIVEIS;
-        const topo = el('div', 'barra-topo', null, li);
-        const nomeEl = el('span', 'barra-nome', null, topo);
-        if (pagina) el('a', null, autor, nomeEl).href = `/parlamentar/${pagina}`;
-        else nomeEl.textContent = autor;
-        if (cargo) el('span', 'barra-explica', cargo, nomeEl);
-        // Entre 1 e 10 milhões, com uma casa: "R$ 1,4 mi", não "R$ 1 mi".
-        const valorCurto = valor >= 1e6 && valor < 1e7 ? `R$\u00A0${f.numero(valor / 1e6, 1)} mi` : f.reaisCompacto(valor);
-        el('span', 'barra-valor', `${valorCurto} · ${f.parteDoTotal(pct)}`, topo);
-        const trilho = el('div', 'barra-trilho', null, li);
-        trilho.setAttribute('aria-hidden', 'true');
-        el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
-      });
-      if (lista.lista.length > VISIVEIS) {
-        let aberto = false;
-        const rotular = () => {
-          botaoTodos.textContent = aberto ? `Mostrar só os ${VISIVEIS} maiores` : `Ver todos os ${f.numero(lista.lista.length)} autores`;
-          botaoTodos.setAttribute('aria-expanded', String(aberto));
-        };
-        botaoTodos.onclick = () => {
-          aberto = !aberto;
-          [...barras.children].forEach((li, k) => { li.hidden = !aberto && k >= VISIVEIS; });
-          rotular();
-          if (!aberto) titulo.scrollIntoView({ block: 'nearest' });
-        };
-        rotular();
-        botaoTodos.hidden = false;
-      }
-      const nomes = lista.lista.map(([a]) => a);
-      if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
-      if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
-    }
-    notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram. Parte das emendas é paga por meio do Banco do Brasil, e o arquivo oficial não diz para qual cidade foi; esse dinheiro também não entra, então o valor real pode ser maior. Atualização: ${f.dataCurta(d.atualizado)}.`);
-    definir('mun-emendas-nota', notas.join(' '));
-    caixa.hidden = false;
-  }
-
-  registrarDownload('emendas', () => {
-    const uf = estado.cidade?.uf;
-    const d = uf ? estado.emendas.get(uf) : null;
-    const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
-    return {
-      nome: `emendas-pagas-as-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'autor', 'pago_reais_da_epoca', 'emendas_da_cidade_no_ano', 'fator para dinheiro de hoje (IPCA)'],
-      // Uma linha por cidade, ano e autor.
-      linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).flatMap(([cod, anos]) => {
-        const x = anos[String(a)];
-        return x[2].map(([i, v]) => [a, cod, nomes.get(cod) ?? '', uf, d.nomes[i], v, x[1], arred(fatorParaHoje(ctx, a) ?? 1, 6)]);
-      })) : [],
-    };
-  });
-
-  registrarDownload('beneficios', () => {
-    const uf = estado.cidade?.uf;
-    const d = uf ? estado.beneficios.get(uf) : null;
-    const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
-    return {
-      nome: `bolsa-familia-e-bpc-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-      cabecalhos: ['mes', 'codigo_ibge', 'cidade', 'uf', 'bolsa_familia_reais', 'bolsa_familia_familias', 'bpc_reais', 'bpc_pessoas'],
-      linhas: d ? d.meses.flatMap((mes, k) => Object.entries(d.municipios).map(([cod, serie]) => {
-        const x = serie[k];
-        return [mes, cod, nomes.get(cod) ?? '', uf, x?.[0] ?? '', x?.[1] ?? '', x?.[2] ?? '', x?.[3] ?? ''];
-      })) : [],
-    };
-  });
-
-  registrarDownload('municipios', () => {
-    const uf = estado.cidade?.uf;
-    const d = uf ? estado.porUf.get(uf) : null;
-    const campos = estado.indice?.campos ?? [];
-    const camposDespesa = estado.indice?.campos_despesa ?? [];
-    const anos = estado.indice?.anos ?? [];
-    return {
-      nome: `contas-das-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'situacao', 'populacao', ...campos.map((k) => `${k} (R$ da época)`),
-        'situacao_despesas', ...camposDespesa.map((k) => `despesa_${k} (R$ da época)`), 'fator para dinheiro de hoje (IPCA)'],
-      linhas: d ? anos.flatMap((ano) => d.municipios.map((m) => {
-        const r = m.a[String(ano)];
-        return [ano, m.c, m.n, uf, r?.s ?? 'sem_dado', r?.p ?? m.p, ...campos.map((_, i) => r?.v?.[i] ?? ''),
-          r?.ds ?? '', ...camposDespesa.map((_, i) => r?.d?.[i] ?? ''), arred(fatorParaHoje(ctx, ano) ?? 1, 6)];
-      })) : [],
-    };
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -2210,10 +1516,12 @@ function montarParlamentares() {
     aoEscolher: (x) => { location.href = `/parlamentar/${x[0]}`; },
   });
 
-  // Os deputados federais e senadores do estado da cidade escolhida.
+  // Os deputados federais e senadores do estado pedido no link (?uf=MG,
+  // vindo da página da cidade) ou, sem ele, do estado da cidade guardada.
+  const ufDoLink = /^[A-Z]{2}$/.test(new URLSearchParams(location.search).get('uf') ?? '') ? new URLSearchParams(location.search).get('uf') : null;
   function desenharEstado() {
     const caixa = $('#parl-estado');
-    const uf = lugar.municipio?.uf;
+    const uf = ufDoLink ?? lugar.municipio?.uf;
     if (!uf || !indice) { caixa.hidden = true; return; }
     const doEstado = indice.parlamentares.filter((p) => p[4] === uf && p[2]).sort((a, b) => b[5] - a[5]);
     if (!doEstado.length) { caixa.hidden = true; return; }
@@ -2228,6 +1536,7 @@ function montarParlamentares() {
     caixa.hidden = false;
   }
   aoMudarLugar(() => { carregar().then(desenharEstado).catch(() => {}); });
+  if (ufDoLink) carregar().then(desenharEstado).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -3132,7 +2441,6 @@ const aoMudarCidade = (fn) => { cidade.ouvintes.push(fn); };
 // Cidade escolhida no alto da página, entre as 5.570 ({ codigo, nome, uf }).
 // O estado segue essa escolha; as seções por capital também, quando ela é
 // uma capital. Fica guardada no navegador, como a capital.
-const CHAVE_MUNICIPIO = 'arrecadometro-municipio';
 const lugar = { municipio: null, ouvintes: [] };
 const aoMudarLugar = (fn) => { lugar.ouvintes.push(fn); };
 
@@ -3141,17 +2449,6 @@ function mudarLugar(municipio, opcoes = { pelaPessoa: false }) {
   lugar.ouvintes.forEach((fn) => {
     try { fn(municipio, opcoes); } catch (erro) { console.error(erro); }
   });
-}
-
-function lerMunicipioGuardado() {
-  try {
-    const v = localStorage.getItem(CHAVE_MUNICIPIO);
-    return /^[0-9]{7}$/.test(v ?? '') ? v : null;
-  } catch { return null; }
-}
-
-function guardarMunicipio(codigo) {
-  try { localStorage.setItem(CHAVE_MUNICIPIO, codigo); } catch { /* sem armazenamento: vale só nesta visita */ }
 }
 
 function lerCidadeGuardada() {
@@ -4397,7 +3694,7 @@ async function iniciar() {
       if (ehCapital && cidade.codigo !== m.codigo && (pelaPessoa || !lerCidadeGuardada())) escolherCidade(m.codigo);
     });
     const etapas = [iniciarContador, montarNovidades, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarParlamentares, montarCota, montarDinheiro,
+      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarEntradaDaCidade, montarParlamentares, montarCota, montarDinheiro,
       montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {
@@ -4452,22 +3749,6 @@ function montarPartidos() {
   abrir();
 }
 montarPartidos();
-
-// Listas de barras em duas colunas (computador, regra no CSS): a ordem desce
-// pela coluna da esquerda e continua na da direita, com as linhas alinhadas.
-// A grade precisa saber quantas linhas há; conta só os itens visíveis.
-function alinharBarras(ul) {
-  const n = [...ul.children].filter((li) => !li.hidden).length;
-  ul.style.setProperty('--linhas', String(Math.max(1, Math.ceil(n / 2))));
-}
-new MutationObserver((mudancas) => {
-  const listas = new Set();
-  for (const m of mudancas) {
-    const ul = m.target.closest?.('ul.barras');
-    if (ul) listas.add(ul);
-  }
-  listas.forEach(alinharBarras);
-}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
 
 iniciarNavegacao();
 iniciar();

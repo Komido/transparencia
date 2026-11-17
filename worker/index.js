@@ -6,11 +6,12 @@
 //                    própria Cloudflare já sabe do endereço IP (request.cf),
 //                    para o site perguntar "Você está em ...?". Nada é
 //                    guardado nem registrado, e nada vai para outro serviço.
-//   /cidade/nome-uf  a página de cada cidade: a mesma página inicial, com
-//                    título, descrição e endereço da cidade, para que ela
+//   /cidade/nome-uf  a página de cada cidade (cidade.html), com título,
+//                    descrição, manchete e endereço da cidade, para que ela
 //                    possa ser encontrada em buscadores e compartilhada.
-//                    Os números continuam sendo montados no navegador.
-//   /parlamentar/nome-uf  o mesmo, para cada deputado e senador.
+//                    Os números são montados no navegador (js/cidade.js).
+//   /parlamentar/nome-uf  o mesmo, para cada deputado e senador
+//                    (parlamentar.html).
 //   /sitemap.xml     a lista das páginas, para os buscadores.
 //   /robots.txt      as regras para os buscadores.
 //
@@ -172,6 +173,8 @@ async function paginaDoParlamentar(request, env, url) {
 }
 
 async function paginaDaCidade(request, env, url) {
+  // /cidade/ sem nome: a página de busca de cidade (cidade.html sozinha).
+  if (url.pathname === '/cidade/') return Response.redirect(`${url.origin}/cidade${url.search}`, 301);
   const slug = slugDoCaminho(url.pathname.toLowerCase());
   if (!slug) return naoEncontrada();
   // Um endereço só por cidade: sem barra no fim e em minúsculas.
@@ -180,12 +183,12 @@ async function paginaDaCidade(request, env, url) {
   const { porSlug } = await cidades(env, url);
   const c = porSlug.get(slug);
   if (!c) return naoEncontrada();
-  return reescrever(request, env, url, textosDaCidade(c, url.origin));
+  return reescrever(request, env, url, textosDaCidade(c, url.origin), '/cidade');
 }
 
-// Uma página do site (a inicial, ou parlamentar.html) com título, descrição,
-// manchete e endereço próprios.
-async function reescrever(request, env, url, t, modelo = '/') {
+// Uma página do site (cidade.html ou parlamentar.html) com título,
+// descrição, manchete e endereço próprios.
+async function reescrever(request, env, url, t, modelo) {
   const base = await env.ASSETS.fetch(new Request(new URL(modelo, url)));
   if (!base.ok) return base;
   const pagina = new HTMLRewriter()
