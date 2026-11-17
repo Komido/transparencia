@@ -54,7 +54,7 @@ import unicodedata
 import urllib.request
 import zipfile
 
-AGENTE = "Mozilla/5.0 (X11; Linux x86_64) ArrecadometroBrasil/1.0"
+AGENTE = "ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
 BASE = "https://portaldatransparencia.gov.br/download-de-dados"
 # Os arquivos mensais ficam no servidor de arquivos da CGU, para onde o Portal
 # redireciona. Pedir direto evita o limite de pedidos do Portal (em 15/11/2026,
