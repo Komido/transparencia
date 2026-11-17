@@ -1363,3 +1363,6 @@ td.num .detalhe { white-space: normal; }
 .votacoes .item-voto { font-weight: 700; white-space: nowrap; }
 .votacoes .item-texto { font-size: var(--fs-2); color: var(--tinta); }
 .votacoes .item-detalhe { font-size: var(--fs-1); color: var(--tinta-2); }
+
+/* Vereadores eleitos: nomes em colunas, partido ao lado. */
+.vereadores-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: 4px var(--e-4); font-size: var(--fs-2); }

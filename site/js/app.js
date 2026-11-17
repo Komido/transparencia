@@ -5,7 +5,7 @@ import { slugDaCidade, caminhoDaCidade, slugDoCaminho } from './endereco.js';
 import { montarBusca as montarBuscaComum, barra as barraComum, encurtarLista as encurtarListaComum } from './comum.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde, carregarIndiceParlamentares } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde, carregarIndiceParlamentares, carregarVereadoresUf } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -1510,7 +1510,7 @@ function montarMunicipios(ctx) {
   const listaSug = $('#mun-sugestoes');
   const selAno = $('#mun-ano');
   if (!entrada || !listaSug || !selAno) return;
-  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), emendas: new Map(), cidade: null, sugestoes: [], ativa: -1 };
+  const estado = { indice: null, carregando: null, porUf: new Map(), beneficios: new Map(), emendas: new Map(), vereadores: new Map(), cidade: null, sugestoes: [], ativa: -1 };
 
   const carregarIndice = () => {
     if (!estado.carregando) {
@@ -1612,6 +1612,7 @@ function montarMunicipios(ctx) {
     $('#mun-baixar').hidden = false;
     desenhar();
     desenharBeneficios();
+    desenharVereadores();
     if (link) guardarNoEndereco();
   };
 
@@ -1835,6 +1836,33 @@ function montarMunicipios(ctx) {
       const rotulo = x[2] ? `Eleição suplementar em ${f.dataCurta(x[1])}: ` : `${x[4] ? 'Prefeita eleita' : 'Prefeito eleito'} em ${eleicao}: `;
       linhaEleito(lista, rotulo, x);
     }
+    caixa.hidden = false;
+  }
+
+  // Vereadores eleitos na última eleição municipal, com o partido.
+  async function desenharVereadores() {
+    const caixa = $('#mun-vereadores');
+    const { codigo, nome, uf } = estado.cidade;
+    caixa.hidden = true;
+    let d = estado.vereadores.get(uf);
+    if (d === undefined) {
+      try { d = await carregarVereadoresUf(uf); } catch (erro) { console.error(erro); d = null; }
+      estado.vereadores.set(uf, d);
+    }
+    if (!d || estado.cidade?.codigo !== codigo) return;
+    const lista = d.cidades[String(codigo).padStart(7, '0')];
+    if (!lista?.length) return;
+    definir('mun-vereadores-titulo', `Os ${lista.length} vereadores eleitos em ${d.eleicao} (mandato de ${d.inicio} a ${d.fim})`);
+    const porPartido = new Map();
+    lista.forEach((x) => porPartido.set(x[2], (porPartido.get(x[2]) ?? 0) + 1));
+    definir('mun-vereadores-partidos', `Por partido: ${[...porPartido].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([p, n]) => `${p} ${n}`).join(' · ')}.`);
+    const ul = $('#mun-vereadores-lista');
+    ul.replaceChildren();
+    lista.forEach((x) => {
+      const li = el('li', null, x[0], ul);
+      el('span', 'partido', ` ${x[2]}`, li);
+    });
+    definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) é publicado pela Câmara Municipal de ${nome}, cada uma do seu jeito; não há uma base nacional com isso.`);
     caixa.hidden = false;
   }
 

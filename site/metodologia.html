@@ -294,6 +294,21 @@
           <li><strong>Inflação:</strong> valores de emenda corrigidos pelo IPCA para dinheiro de hoje, pela média do ano do pagamento. A cota aparece no valor da época.</li>
         </ul>
 
+        <h2 id="votacoes">Votações e projetos de cada deputado e senador</h2>
+        <p>Na página de cada parlamentar aparecem as votações nominais do Plenário (em quantas votou e como votou) e os projetos que apresentou, desde 2023, começo da legislatura atual.</p>
+        <ul>
+          <li><strong>Fontes:</strong> Câmara dos Deputados, arquivos anuais dos dados abertos (deputados, votações, votos, proposições e autores); Senado Federal, serviços de dados abertos de votações (com o voto de cada senador ou o motivo de não ter votado), de processos por autor e de senadores em exercício. Atualizado uma vez por semana.</li>
+          <li><strong>Votações:</strong> só as nominais do Plenário, em que o voto de cada um fica registrado; as simbólicas, sem registro individual, não entram. Na Câmara, "votou em X de Y" conta as votações nominais do ano; o arquivo traz só quem votou, então quem estava de licença, era ministro ou secretário, ou ainda não tinha assumido conta como não tendo votado, sem o motivo. Obstrução conta como voto registrado, porque é uma posição declarada. "Artigo 17" (quem presidia a sessão, que não vota) aparece como "presidiu a sessão". No Senado, cada votação traz todos os senadores em exercício, e a conta é sobre essas votações, com o motivo de quem não votou; em votação secreta, o Senado registra só que o senador votou.</li>
+          <li><strong>Projetos:</strong> projetos de lei (PL), de lei complementar (PLP), de decreto legislativo (PDL) e propostas de emenda à Constituição (PEC) apresentados no ano, com quem assinou primeiro como autor principal e os demais como coautores. Requerimentos, indicações e emendas ficam de fora. Quantidade não mede qualidade: o site mostra a lista completa, com o link oficial, sem ranking.</li>
+          <li><strong>Identificação:</strong> pelo código oficial de cada parlamentar na Câmara ou no Senado; o partido e o estado são os do registro mais recente. A ligação com as emendas, que trazem só o nome, é pelo nome e, se houver dois iguais, pelo estado.</li>
+        </ul>
+
+        <h2 id="vereadores">Vereadores eleitos</h2>
+        <ul>
+          <li><strong>Fonte:</strong> o mesmo arquivo de candidatos do TSE usado para os prefeitos. Entram os eleitos por quociente partidário e por média na eleição de 2024 (mandato de 2025 a 2028), com o nome de urna e o partido na data da eleição, ligados ao código do IBGE pela tabela oficial do TSE.</li>
+          <li><strong>Limites:</strong> o TSE registra quem foi eleito, não quem está no cargo hoje; se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) é publicado por cada Câmara Municipal, do seu jeito; não há base nacional com isso.</li>
+        </ul>
+
         <h2 id="dinheiro">Salário líquido, juros e inflação</h2>
         <ul>
           <li><strong>Salário líquido:</strong> tabelas oficiais do ano, gravadas em <a href="dados/folha.json">dados/folha.json</a> e conferidas nas páginas do INSS e da Receita Federal (data no arquivo). INSS do empregado progressivo por faixa, até o teto. Imposto de Renda pela tabela mensal sobre o salário menos a dedução maior entre o INSS mais R$ 189,59 por dependente e o desconto simplificado de R$ 607,20; depois, a redução da Lei 15.270/2025, calculada sobre o salário bruto: até R$ 5.000 o imposto zera; de R$ 5.000,01 a R$ 7.350, a redução é R$ 978,62 − 0,133145 × salário. Conferido com o exemplo da Receita: salário de R$ 6.000, INSS de R$ 641,51, redução de R$ 179,75 e imposto de R$ 385,10. Se o ano mudar e o arquivo não for atualizado, a página avisa.</li>

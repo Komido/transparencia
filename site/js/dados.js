@@ -374,6 +374,24 @@ export function carregarVotacoesAno(casa, ano) {
   return cacheVotacoes.get(chave);
 }
 
+// Vereadores eleitos (TSE; scripts/governantes_para_json.py).
+// cidades: { codigo IBGE: [[nome, feminino, partido, eleito_por], ...] }
+const CAMPOS_VEREADORES = ['nome', 'feminino', 'partido', 'eleito_por'];
+export async function carregarVereadoresUf(uf) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('vereadores: UF');
+  const resposta = await fetch(`/dados/vereadores/${uf}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar os vereadores de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || !Number.isInteger(d.eleicao) || !Number.isInteger(d.inicio) || !Number.isInteger(d.fim)
+    || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_VEREADORES) || !d.cidades || typeof d.cidades !== 'object'
+    || !Object.entries(d.cidades).every(([cod, l]) => /^[0-9]{7}$/.test(cod) && Array.isArray(l) && l.every((x) => Array.isArray(x)
+      && x.length === 4 && ehTexto(x[0]) && (x[1] === 0 || x[1] === 1) && ehTexto(x[2]) && ['qp', 'media'].includes(x[3])))) {
+    falhar(`vereadores de ${uf}`);
+  }
+  return d;
+}
+
 // Prefeitos e governadores eleitos (TSE; scripts/governantes_para_json.py).
 // Cada eleito: [eleição, data, suplementar, nome, feminino, partido, vice].
 const CAMPOS_GOVERNANTES = ['eleicao', 'data', 'suplementar', 'nome', 'feminino', 'partido', 'vice'];
