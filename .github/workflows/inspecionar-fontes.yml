@@ -18,87 +18,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Câmaras municipais paulistas no arquivo anual de despesas do TCE-SP:
-      # quais colunas existem, se dá para saber o que é cada pagamento
-      # (salário, diária, verba indenizatória) e quanto pesa o arquivo. Nomes
-      # de pessoas físicas aparecem só como iniciais no registro.
-      - name: TCE-SP, despesas de 2025 (começo do arquivo), colunas e câmaras
+      # Salário dos vereadores nas câmaras paulistas: em que elementos de
+      # despesa do grupo "pessoal" ele aparece em 2024 e em 2025? Conta valores
+      # por elemento e os lançamentos cujo histórico fala em subsídio ou
+      # vereador. Sem nomes no registro.
+      - name: TCE-SP, elementos de pessoal nas câmaras, 2024 e 2025
         continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
         run: |
-          set -u
-          mkdir -p /tmp/sp && cd /tmp/sp
-          AGENTE="ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
-          # O arquivo de 2025 tem mais de 1 GB compactado e a primeira tentativa
-          # caiu depois de 22 minutos. Aqui só os primeiros 150 MB, lidos em
-          # fluxo (sem guardar o arquivo), bastam para ver colunas e exemplos.
-          curl -sSI --http1.1 -A "$AGENTE" "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip" | grep -i -E "^(HTTP|content-length|last-modified|accept-ranges)" || true
-          curl -sSL --http1.1 --max-time 900 -A "$AGENTE" --range 0-150000000 \
-            "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip" -o parte.zip || echo "curl terminou com erro $? (a parte baixada ainda serve)"
-          ls -l parte.zip
-          python3 - parte.zip <<'PY'
-          import collections, csv, io, re, struct, sys, time, zlib
-          csv.field_size_limit(10_000_000)
-          bruto = open(sys.argv[1], "rb").read()
-          assert bruto[:4] == b"PK\x03\x04", bruto[:4]
-          metodo, = struct.unpack("<H", bruto[8:10]); n_nome, n_extra = struct.unpack("<HH", bruto[26:30])
-          nome = bruto[30:30 + n_nome].decode("cp437")
-          print(f"primeiro arquivo dentro do zip: {nome}, método {metodo}")
-          d = zlib.decompressobj(-15)
-          texto = d.decompress(bruto[30 + n_nome + n_extra:], 700_000_000) if metodo == 8 else bruto[30 + n_nome + n_extra:]
-          print(f"descompactado da parte baixada: {len(texto) / 1e6:.0f} MB")
-          texto = texto[: texto.rfind(b"\n") + 1]
-          cod = "utf-8-sig"
-          try: texto[:300_000].decode(cod)
-          except UnicodeDecodeError: cod = "latin-1"
-          primeira = texto[:5000].decode(cod, "replace").splitlines()[0]
-          sep = max(";,\t|", key=primeira.count)
-          print(f"codificação {cod}, separador {sep!r}")
-          def esconder(linha):
-              d = dict(linha)
-              ident = " ".join(str(v) for k, v in d.items() if "fornecedor" in k.lower() or "credor" in k.lower())
-              if re.search(r"PESSOA F[IÍ]SICA|CPF", ident, re.I):
-                  for k in d:
-                      if re.search(r"nm_|nome|ds_despesa", k, re.I) and d[k]:
-                          d[k] = " ".join(p[0] + "." for p in str(d[k]).split())
-              return d
-          leitor = csv.DictReader(io.StringIO(texto.decode(cod, "replace")), delimiter=sep)
-          cols = leitor.fieldnames
-          print(f"colunas ({len(cols)}): {cols}")
-          org = next((c for c in cols if "orgao" in c.lower()), None)
-          mun = next((c for c in cols if "municipio" in c.lower()), None)
-          val = next((c for c in cols if c.lower().startswith("vl_")), None)
-          tipo = next((c for c in cols if c.lower() in ("tp_despesa", "evento")), None)
-          forn = next((c for c in cols if "identificador" in c.lower() or "id_fornecedor" in c.lower()), None)
-          baixa = [c for c in cols if re.search(r"elemento|funcao|programa|acao|fonte|modalidade|tp_|evento|natureza|categoria|grupo|aplicacao", c, re.I)]
-          print(f"órgão={org} município={mun} valor={val} tipo={tipo} fornecedor={forn}; contadas: {baixa}")
-          def num(t):
-              t = (t or "").strip()
-              if "," in t: t = t.replace(".", "").replace(",", ".")
-              try: return float(t)
-              except ValueError: return 0.0
-          total = 0; cam = 0; inicio = time.time()
-          camaras = set(); por_tipo = collections.Counter(); valor_tipo = collections.Counter()
-          cont = {c: collections.Counter() for c in baixa}
-          pf_elem = collections.Counter(); exemplos = []
-          for l in leitor:
-              total += 1
-              if total <= 2: print("exemplo geral:", esconder(l))
-              o = (l.get(org) or "") if org else ""
-              if "MARA MUNICIPAL" not in o.upper(): continue
-              cam += 1; camaras.add(o)
-              t = l.get(tipo, "") if tipo else ""
-              por_tipo[t] += 1; valor_tipo[t] += num(l.get(val)) if val else 0
-              for c in baixa: cont[c][l.get(c)] += 1
-              elem = next((l[c] for c in cols if "elemento" in c.lower()), "")
-              if forn and re.search(r"F[IÍ]SICA|CPF", l.get(forn) or "", re.I): pf_elem[elem] += 1
-              if "AMPARO" in o.upper() and len(exemplos) < 25: exemplos.append(esconder(l))
-          print(f"\nlinhas: {total}; das câmaras: {cam}; câmaras distintas: {len(camaras)}; leitura em {time.time() - inicio:.0f}s")
-          print("tipo de lançamento nas câmaras (linhas, R$ bi):", [(k, n, round(valor_tipo[k] / 1e9, 2)) for k, n in por_tipo.most_common()])
-          for c in baixa:
-              print(f"\n{c} nas câmaras ({len(cont[c])} valores distintos):")
-              for v, n in cont[c].most_common(25): print(f"  {n:8d}  {v}")
-          print("\npagamentos a pessoa física nas câmaras, por elemento:")
-          for v, n in pf_elem.most_common(20): print(f"  {n:8d}  {v}")
-          print("\nCâmara de Amparo, exemplos (pessoas físicas só com iniciais):")
-          for x in exemplos: print("  ", x)
+          python3 - <<'PY'
+          import collections, csv, io, os, sys, zipfile
+          sys.path.insert(0, "scripts")
+          import camaras_sp_para_json as m
+          for ano in (2024, 2025):
+              url = m.ARQUIVO.format(ano=ano)
+              tam, mod, _ = m.cabecalho(url)
+              cam = f"/tmp/d{ano}.zip"
+              m.baixar_em_partes(url, cam, tam)
+              z = zipfile.ZipFile(cam)
+              nome = [x for x in z.infolist() if x.filename.lower().endswith(".csv")][0]
+              soma = collections.Counter(); pf = collections.Counter(); hist = collections.Counter()
+              camaras = collections.defaultdict(set); campinas = collections.Counter()
+              with z.open(nome) as b:
+                  r = csv.reader(io.TextIOWrapper(b, encoding="latin-1", newline=""), delimiter=";")
+                  cab = next(r); I = {c: cab.index(c) for c in cab}
+                  for l in r:
+                      if l[I["tp_despesa"]] != "Valor Pago": continue
+                      o = m.sem_acento(l[I["ds_orgao"]])
+                      if not ("CAMARA" in o or "LEGISLATIV" in o or "VEREADOR" in o) or "PREFEITURA" in o: continue
+                      e = l[I["ds_elemento"]].strip()
+                      if not e.startswith("319"): continue
+                      v = m.numero(l[I["vl_despesa"]])
+                      soma[e] += v; camaras[e].add(l[I["codigo_municipio_ibge"]])
+                      if "FISICA" in m.sem_acento(l[I["tp_identificador_despesa"]]): pf[e] += v
+                      h = m.sem_acento(l[I["historico_despesa"]])
+                      if "SUBSIDIO" in h or "VEREADOR" in h or "EDIS" in h: hist[e] += v
+                      if l[I["codigo_municipio_ibge"]].strip() == "3509502": campinas[e] += v
+              print(f"\n{ano}: grupo pessoal nas câmaras, por elemento (R$ mi pago | a pessoa física | histórico fala em subsídio/vereador | câmaras)")
+              for e, v in soma.most_common(30):
+                  print(f"  {v / 1e6:9.1f} | {pf[e] / 1e6:8.1f} | {hist[e] / 1e6:8.1f} | {len(camaras[e]):4d} | {e}")
+              print(f"  Campinas {ano}: " + "; ".join(f"{e[:8]} {v / 1e6:.2f}" for e, v in campinas.most_common(10)))
+              os.remove(cam)
           PY
+
