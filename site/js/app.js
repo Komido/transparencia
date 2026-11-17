@@ -1862,7 +1862,7 @@ function montarMunicipios(ctx) {
       const li = el('li', null, x[0], ul);
       el('span', 'partido', ` ${x[2]}`, li);
     });
-    definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) é publicado pela Câmara Municipal de ${nome}, cada uma do seu jeito; não há uma base nacional com isso.`);
+    definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
     caixa.hidden = false;
   }
 
