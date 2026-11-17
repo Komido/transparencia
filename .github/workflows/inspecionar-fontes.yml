@@ -38,7 +38,7 @@ jobs:
               espera = 10 - (time.time() - ultimo[0])
               if espera > 0: time.sleep(espera)
               ultimo[0] = time.time()
-              if url.startswith(BASE) and not rp.can_fetch(AGENTE, url):
+              if url.startswith(BASE) and url != BASE + "/robots.txt" and not rp.can_fetch(AGENTE, url):
                   raise SystemExit(f"robots.txt não permite {url}")
               return urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": AGENTE, **(cab or {})}), timeout=tempo)
           with pedir(BASE + "/robots.txt") as r:
