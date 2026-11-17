@@ -33,8 +33,9 @@ valor ficar sem cidade, o script falha sem gravar.
 
 Saídas:
   site/dados/emendas/UF.json   por cidade e ano: valor pago à prefeitura,
-                               número de emendas, número de autores e os
-                               autores que mais mandaram (até 5)
+                               número de emendas e todos os autores, do que
+                               mais mandou ao que menos mandou; os nomes
+                               ficam uma vez só, na lista "nomes" do arquivo
 """
 
 import collections
@@ -59,7 +60,6 @@ COLUNAS = ["Código da Emenda", "Nome do Autor da Emenda", "Tipo de Emenda", "An
            "Natureza Jurídica", "UF Favorecido", "Município Favorecido", "Valor Recebido"]
 NATUREZAS = {"Município", "Fundo Público da Administração Direta Municipal"}
 PRIMEIRO_ANO = 2019
-MAX_AUTORES = 5
 MAXIMO_SEM_CIDADE = 0.005
 
 
@@ -299,18 +299,24 @@ def main():
     # No site, os últimos quatro anos (o ano das contas e o atual cabem).
     anos = list(range(ano_atual - 3, ano_atual + 1))
     por_uf = collections.defaultdict(dict)
+    nomes_uf = collections.defaultdict(dict)  # uf -> {nome: índice}
     uf_do_codigo = {cod: uf for (_, uf), cod in mapa.items()}
-    for (cod, ano), v in pago.items():
+    for (cod, ano), v in sorted(pago.items()):
         if ano not in anos:
             continue
-        lista = sorted(autores[(cod, ano)].items(), key=lambda x: -x[1])
-        topo = [[a, round(x)] for a, x in lista[:MAX_AUTORES] if x > 0]
-        por_uf[uf_do_codigo[cod]].setdefault(cod, {})[str(ano)] = [round(v), len(emendas[(cod, ano)]), len(lista), topo]
+        uf = uf_do_codigo[cod]
+        indice = nomes_uf[uf]
+        # Todos os autores, do que mais mandou ao que menos mandou; valor
+        # zero ou negativo (estorno) fica de fora da lista, não da soma.
+        lista = [[indice.setdefault(a, len(indice)), round(x)]
+                 for a, x in sorted(autores[(cod, ano)].items(), key=lambda x: (-x[1], x[0])) if round(x) > 0]
+        por_uf[uf].setdefault(cod, {})[str(ano)] = [round(v), len(emendas[(cod, ano)]), lista]
     hoje = dt.date.today().isoformat()
     for uf, cidades in sorted(por_uf.items()):
         gravar_json(f"{DESTINO}/{uf}.json", {
             "uf": uf, "atualizado": hoje, "fonte": URL, "anos": anos,
-            "campos": ["pago", "emendas", "autores", "maiores_autores"],
+            "campos": ["pago", "emendas", "autores"],
+            "nomes": list(nomes_uf[uf]),
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")
