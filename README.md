@@ -47,7 +47,7 @@ site/                  site estático publicado na Cloudflare
 
 ## Publicação na Cloudflare (gratuito)
 
-O site é publicado como Worker com arquivos estáticos (sem código no servidor), configurado em `wrangler.jsonc`. O Worker `arrecadometro-brasil` está ligado a este repositório pelo Workers Builds: cada push na branch de produção, inclusive os commits diários de dados do GitHub Actions, publica o site de novo.
+O site é publicado como Worker com arquivos estáticos, configurado em `wrangler.jsonc`. O único código no servidor é `worker/index.js`, que responde em `/api/onde` a cidade e o estado prováveis de quem acessa, pelo que a Cloudflare já informa do endereço IP (`request.cf`), sem guardar nada; os arquivos do site não passam por ele. O Worker `arrecadometro-brasil` está ligado a este repositório pelo Workers Builds: cada push na branch de produção, inclusive os commits diários de dados do GitHub Actions, publica o site de novo.
 
 Para recriar do zero:
 
@@ -69,6 +69,7 @@ Abra http://localhost:8000. Os cabeçalhos de segurança de `site/_headers` só 
 ## Segurança
 
 - O site não usa cookies, login, rastreamento nem recursos de terceiros. A CSP só permite arquivos do próprio domínio.
+- A sugestão de cidade usa a estimativa de local que a Cloudflare faz do endereço IP de cada acesso; o Worker devolve só país, estado e cidade e não registra nada. A cidade escolhida fica guardada só no navegador do visitante (`localStorage`).
 - O navegador nunca acessa o Supabase. A chave pública que aparece no workflow é pública por definição: ela só consegue chamar `public.painel()`. Os papéis `anon` e `authenticated` não têm acesso a nenhum esquema de dados, coleta ou auditoria (testado).
 - Cadastros de usuário estão bloqueados por um gatilho em `auth.users`, porque o projeto não tem login. Testado pela API pública: a tentativa é recusada e o banco continua sem usuários.
 - Todo texto vindo dos dados entra na página com `textContent`, e links só são aceitos se forem `https`.

@@ -3,7 +3,7 @@ import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -703,7 +703,10 @@ function montarEstados(ctx) {
   el('option', null, 'Escolha o estado', selUf).value = '';
   estados.forEach((uf) => { el('option', null, uf.nome, selUf).value = uf.sigla; });
   let escolhidoPelaPessoa = false;
-  const ufDaCidade = () => (cidade.dados?.uf && estados.some((x) => x.sigla === cidade.dados.uf) ? cidade.dados.uf : null);
+  const ufDaCidade = () => {
+    const uf = lugar.municipio?.uf ?? cidade.dados?.uf;
+    return uf && estados.some((x) => x.sigla === uf) ? uf : null;
+  };
   selUf.value = ufDaCidade() ?? '';
 
   const rec = ctx.d.estados_receita;
@@ -904,6 +907,14 @@ function montarEstados(ctx) {
   aoMudarCidade(() => {
     const sigla = ufDaCidade();
     if (sigla && !escolhidoPelaPessoa && sigla !== selUf.value) { selUf.value = sigla; desenharTudo(); }
+  });
+  // Cidade escolhida no alto da página: o estado passa a ser o dela. Uma
+  // escolha feita agora vale mais que um estado escolhido antes; a cidade
+  // guardada de outra visita não passa por cima de um estado pedido no link.
+  aoMudarLugar((m, { pelaPessoa }) => {
+    if (!m?.uf || !estados.some((x) => x.sigla === m.uf) || (escolhidoPelaPessoa && !pelaPessoa)) return;
+    escolhidoPelaPessoa = false;
+    if (selUf.value !== m.uf) { selUf.value = m.uf; desenharTudo(); }
   });
   desenharTudo();
 
@@ -1544,6 +1555,14 @@ function montarMunicipios(ctx) {
       if (n.startsWith(q)) comeca.push(i);
       else if (n.includes(` ${q}`) || (q.length >= 4 && n.includes(q))) contem.push(i);
     });
+    // Com estado provável (endereço de internet ou cidade escolhida antes),
+    // as cidades dele vêm primeiro em cada grupo.
+    const ufPreferida = estado.cidade?.uf ?? estado.ufProvavel;
+    if (ufPreferida) {
+      const peso = (i) => (estado.indice.cidades[i][2] === ufPreferida ? 0 : 1);
+      comeca.sort((a, b) => peso(a) - peso(b));
+      contem.sort((a, b) => peso(a) - peso(b));
+    }
     const achados = [...comeca, ...contem].slice(0, 8);
     estado.sugestoes = achados.map((i) => estado.indice.cidades[i]);
     listaSug.replaceChildren();
@@ -1558,17 +1577,25 @@ function montarMunicipios(ctx) {
       li.setAttribute('role', 'option');
       li.setAttribute('aria-selected', 'false');
       el('small', null, ` ${c[2]}`, li);
-      li.addEventListener('mousedown', (ev) => { ev.preventDefault(); escolher(c); });
+      li.addEventListener('mousedown', (ev) => { ev.preventDefault(); escolher(c, { rolar: true }); });
     });
     listaSug.hidden = false;
     entrada.setAttribute('aria-expanded', 'true');
     marcarAtiva(-1);
   };
 
-  const escolher = async (c) => {
+  // rolar: escolha feita agora pela pessoa (a página desce até a cidade).
+  // link: a escolha vai para o endereço da página.
+  const escolher = async (c, { rolar = false, link = true } = {}) => {
     fecharSugestoes();
     entrada.value = `${c[1]} (${c[2]})`;
     estado.cidade = { codigo: c[0], nome: c[1], uf: c[2] };
+    $('#onde-sugestao').hidden = true;
+    $('#mun-trocar').textContent = 'Trocar cidade';
+    const codigo7 = String(c[0]).padStart(7, '0');
+    guardarMunicipio(codigo7);
+    mudarLugar({ codigo: codigo7, nome: c[1], uf: c[2] }, { pelaPessoa: rolar });
+    if (rolar) $('#municipios').scrollIntoView({ block: 'start' });
     try {
       if (!estado.porUf.has(c[2])) estado.porUf.set(c[2], await carregarMunicipiosUf(c[2], estado.indice.campos.length, estado.indice.campos_despesa?.length ?? 0));
     } catch (erro) {
@@ -1581,7 +1608,42 @@ function montarMunicipios(ctx) {
     $('#mun-baixar').hidden = false;
     desenhar();
     desenharBeneficios();
-    guardarNoEndereco();
+    if (link) guardarNoEndereco();
+  };
+
+  // Trocar ou escolher a cidade: volta à busca no alto da página.
+  $('#mun-trocar').addEventListener('click', () => {
+    entrada.scrollIntoView({ block: 'center' });
+    entrada.focus({ preventScroll: true });
+    entrada.select();
+  });
+
+  // Sugestão pelo endereço de internet, só quando não há cidade no link nem
+  // guardada de outra visita. É uma pergunta: a pessoa confirma ou digita.
+  const sugerirPeloIp = async () => {
+    const onde = await buscarOnde();
+    if (!onde || estado.cidade) return;
+    let d;
+    try {
+      d = await carregarIndice();
+    } catch {
+      return;
+    }
+    if (estado.cidade) return;
+    estado.ufProvavel = onde.uf;
+    const c = onde.cidade ? d.cidades.find((x) => x[2] === onde.uf && semAcento(x[1]) === semAcento(onde.cidade)) : null;
+    const nomeUf = ctx.d.estados_fiscal?.estados?.find((x) => x.sigla === onde.uf)?.nome ?? onde.uf;
+    const bt = $('#onde-sim');
+    if (c) {
+      definir('onde-texto', `Pelo seu endereço de internet, você parece estar em ${c[1]} (${c[2]}). É só uma estimativa, e o site não guarda essa informação.`);
+      bt.textContent = `Ver ${c[1]}`;
+      bt.onclick = () => escolher(c, { rolar: true });
+      bt.hidden = false;
+    } else {
+      definir('onde-texto', `Pelo seu endereço de internet, seu estado parece ser ${nomeUf}: as cidades de lá aparecem primeiro na busca. É só uma estimativa, e o site não guarda essa informação.`);
+      bt.hidden = true;
+    }
+    $('#onde-sugestao').hidden = false;
   };
 
   entrada.addEventListener('focus', () => { carregarIndice().catch(() => {}); });
@@ -1590,7 +1652,7 @@ function montarMunicipios(ctx) {
     const n = estado.sugestoes.length;
     if (ev.key === 'ArrowDown' && n) { ev.preventDefault(); if (listaSug.hidden) sugerir(); marcarAtiva((estado.ativa + 1) % n); }
     else if (ev.key === 'ArrowUp' && n) { ev.preventDefault(); marcarAtiva((estado.ativa - 1 + n) % n); }
-    else if (ev.key === 'Enter' && !listaSug.hidden && n) { ev.preventDefault(); escolher(estado.sugestoes[Math.max(0, estado.ativa)]); }
+    else if (ev.key === 'Enter' && !listaSug.hidden && n) { ev.preventDefault(); escolher(estado.sugestoes[Math.max(0, estado.ativa)], { rolar: true }); }
     else if (ev.key === 'Escape') fecharSugestoes();
   });
   entrada.addEventListener('blur', () => setTimeout(fecharSugestoes, 100));
@@ -1606,16 +1668,23 @@ function montarMunicipios(ctx) {
     p.set('ano', selAno.value);
     history.replaceState(null, '', `${location.pathname}?${p}#municipios`);
   };
+  // Ao abrir: a cidade do link; sem ela, a guardada de outra visita; sem
+  // nenhuma das duas, a sugestão pelo endereço de internet.
   const pedido = new URLSearchParams(location.search);
-  if (/^[0-9]{7}$/.test(pedido.get('cidade') ?? '')) {
+  const codigoPedido = /^[0-9]{7}$/.test(pedido.get('cidade') ?? '') ? pedido.get('cidade') : null;
+  const codigoGuardado = codigoPedido ? null : lerMunicipioGuardado();
+  if (codigoPedido || codigoGuardado) {
     carregarIndice().then((d) => {
-      const c = d.cidades.find((x) => x[0] === Number(pedido.get('cidade')));
-      if (!c) return;
+      const c = d.cidades.find((x) => x[0] === Number(codigoPedido ?? codigoGuardado));
+      if (!c) return codigoPedido ? null : sugerirPeloIp();
       const ano = pedido.get('ano');
-      if (ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
-      // A cidade abre depois do salto do navegador para #municipios: volta à seção.
-      return escolher(c).then(() => reposicionarNaSecao());
+      if (codigoPedido && ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
+      // A cidade do link abre depois do salto do navegador para #municipios:
+      // volta à seção. A guardada abre sem mexer na rolagem nem no endereço.
+      return escolher(c, { link: Boolean(codigoPedido) }).then(() => { if (codigoPedido) reposicionarNaSecao(); });
     }).catch(() => {});
+  } else {
+    sugerirPeloIp().catch(() => {});
   }
 
   function desenhar() {
@@ -2912,6 +2981,31 @@ const cidade = { indice: [], codigo: null, dados: null, cache: new Map(), ouvint
 
 const aoMudarCidade = (fn) => { cidade.ouvintes.push(fn); };
 
+// Cidade escolhida no alto da página, entre as 5.570 ({ codigo, nome, uf }).
+// O estado segue essa escolha; as seções por capital também, quando ela é
+// uma capital. Fica guardada no navegador, como a capital.
+const CHAVE_MUNICIPIO = 'arrecadometro-municipio';
+const lugar = { municipio: null, ouvintes: [] };
+const aoMudarLugar = (fn) => { lugar.ouvintes.push(fn); };
+
+function mudarLugar(municipio, opcoes = { pelaPessoa: false }) {
+  lugar.municipio = municipio;
+  lugar.ouvintes.forEach((fn) => {
+    try { fn(municipio, opcoes); } catch (erro) { console.error(erro); }
+  });
+}
+
+function lerMunicipioGuardado() {
+  try {
+    const v = localStorage.getItem(CHAVE_MUNICIPIO);
+    return /^[0-9]{7}$/.test(v ?? '') ? v : null;
+  } catch { return null; }
+}
+
+function guardarMunicipio(codigo) {
+  try { localStorage.setItem(CHAVE_MUNICIPIO, codigo); } catch { /* sem armazenamento: vale só nesta visita */ }
+}
+
 function lerCidadeGuardada() {
   try { return localStorage.getItem(CHAVE_CIDADE); } catch { return null; }
 }
@@ -4150,6 +4244,10 @@ async function iniciar() {
       cidade.indice = [];
     }
     montarSeletoresDeCidade();
+    aoMudarLugar((m, { pelaPessoa }) => {
+      const ehCapital = m && cidade.indice.some((x) => x.codigo === m.codigo);
+      if (ehCapital && cidade.codigo !== m.codigo && (pelaPessoa || !lerCidadeGuardada())) escolherCidade(m.codigo);
+    });
     const etapas = [iniciarContador, montarNovidades, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
       montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarCota, montarDinheiro,
       montarDolar, montarIR, montarAvisos, montarFontes];

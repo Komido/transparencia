@@ -244,6 +244,21 @@ export async function carregarBeneficiosUf(uf) {
   return d;
 }
 
+// Cidade e estado prováveis de quem acessa, pelo endereço de internet
+// (worker/index.js, em /api/onde). Fora da Cloudflare (no computador de quem
+// desenvolve, por exemplo) ou sem resposta válida: null, sem erro.
+export async function buscarOnde() {
+  try {
+    const resposta = await fetch('api/onde', { credentials: 'same-origin', cache: 'no-store' });
+    if (!resposta.ok) return null;
+    const d = await resposta.json();
+    if (!d || d.pais !== 'BR' || !/^[A-Z]{2}$/.test(d.uf ?? '')) return null;
+    return { uf: d.uf, cidade: typeof d.cidade === 'string' && d.cidade.length <= 80 ? d.cidade : null };
+  } catch {
+    return null;
+  }
+}
+
 // Emendas parlamentares pagas à prefeitura e aos fundos municipais, por ano
 // de pagamento (scripts/emendas_para_json.py).
 // cidades: { codigo IBGE: { ano: [pago, emendas, autores, [[autor, valor], ...]] } }

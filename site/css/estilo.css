@@ -277,24 +277,20 @@ main { padding-bottom: var(--e-6); }
 .inicio-grade { display: grid; gap: var(--e-3); }
 .inicio-grade > * { min-width: 0; }
 .abertura .carregando-aviso, .abertura .erro-carga { margin: var(--e-3) 0 0; }
-/* No computador: título e contador lado a lado; a lista do "hoje" na
-   largura toda, com o bolso e as contas do país em duas colunas; os
-   assuntos numa fileira embaixo. No celular fica na ordem do código. */
+/* No computador: a abertura com a escolha da cidade à esquerda e os
+   assuntos à direita. No celular fica na ordem do código. */
 @media (min-width: 1024px) {
   .inicio-grade {
-    grid-template-columns: minmax(0, 1fr) minmax(19rem, 22rem);
-    grid-template-areas: "abertura contador" "hoje hoje" "temas temas";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "abertura temas";
     column-gap: var(--e-6);
-    row-gap: var(--e-5);
-    align-items: center;
+    align-items: start;
     padding-top: var(--e-5);
   }
   .abertura { grid-area: abertura; padding: 0; }
-  .contador { grid-area: contador; }
-  .hoje { grid-area: hoje; padding: var(--e-5) var(--e-6); }
+  .hoje { padding: var(--e-5) var(--e-6); }
   .temas { grid-area: temas; align-self: start; }
   .inicio-grade .temas h2 { margin-top: 0; }
-  .inicio-grade .temas ul { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* Cabeçalho e lista com as mesmas duas colunas: à esquerda o título e a
      escolha; à direita o que está sendo comparado e o aviso de crise. */
   .hoje-cabeca, #hoje-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--e-6); align-items: start; }
@@ -1337,3 +1333,13 @@ td.num .detalhe { white-space: normal; }
 /* Quem foi eleito (TSE). */
 .governo-lista { list-style: none; margin: 0 0 var(--e-3); padding: 0; display: grid; gap: 4px; font-size: var(--fs-2); max-width: var(--prosa); }
 .governo-mandato { color: var(--tinta-2); }
+
+/* Escolha da cidade na abertura: o primeiro passo do site. */
+.escolha-cidade { margin: var(--e-4) 0 0; max-width: 32rem; }
+.escolha-cidade .busca-cidade { display: grid; gap: var(--e-1); }
+.escolha-cidade .busca-cidade > label { font-size: var(--fs-3); color: var(--tinta); }
+.escolha-cidade .busca-cidade input { min-height: 3rem; font-size: 1.0625rem; }
+.onde-sugestao { margin-top: var(--e-3); padding: var(--e-3) var(--e-4); background: var(--recuo); border-radius: var(--raio); }
+.abertura .onde-sugestao p { font-size: var(--fs-2); }
+.onde-sugestao .botao { margin: var(--e-2) 0 0; }
+#municipios .filtros .botao { margin: 0; justify-content: center; }

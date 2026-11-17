@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Arrecadômetro Brasil</title>
-  <meta name="description" content="A economia e as contas públicas do Brasil em linguagem simples: salário, preços, combustíveis, impostos, gastos do governo, contas dos estados e cota parlamentar, com dados oficiais.">
+  <meta name="description" content="O dinheiro público da sua cidade, do seu estado e do Brasil em linguagem simples: contas e gastos de todas as prefeituras, emendas parlamentares, Bolsa Família, contas dos estados, impostos, salário e preços, com dados oficiais.">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1c1c1b" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -23,9 +23,22 @@
         <nav class="secoes-painel" aria-label="Seções do site">
           <div class="conteiner secoes-grade">
             <div class="secoes-grupo">
-              <p class="secoes-titulo">Começo</p>
+              <p class="secoes-titulo">Sua cidade</p>
+              <ul>
+                <li><a href="#municipios">Contas da prefeitura</a></li>
+              </ul>
+            </div>
+            <div class="secoes-grupo">
+              <p class="secoes-titulo">Seu estado</p>
+              <ul>
+                <li><a href="#estados">Contas do governo do estado</a></li>
+              </ul>
+            </div>
+            <div class="secoes-grupo">
+              <p class="secoes-titulo">Brasil hoje</p>
               <ul>
                 <li><a href="#hoje">Como está o Brasil hoje</a></li>
+                <li><a href="#contador">Impostos federais do ano, ao vivo</a></li>
                 <li><a href="#novidades">O que chegou de novo</a></li>
               </ul>
             </div>
@@ -39,18 +52,6 @@
                 <li><a href="#ir">Imposto de Renda</a></li>
                 <li><a href="#dinheiro">Salário líquido, juros e inflação</a></li>
                 <li><a href="#dolar">Dólar</a></li>
-              </ul>
-            </div>
-            <div class="secoes-grupo">
-              <p class="secoes-titulo">Sua cidade</p>
-              <ul>
-                <li><a href="#municipios">Contas da prefeitura</a></li>
-              </ul>
-            </div>
-            <div class="secoes-grupo">
-              <p class="secoes-titulo">Seu estado</p>
-              <ul>
-                <li><a href="#estados">Contas do governo do estado</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
@@ -94,8 +95,19 @@
   <main id="conteudo" class="conteiner carregando" aria-busy="true">
     <div class="inicio-grade">
       <div class="abertura">
-        <h1>A economia e as contas públicas do Brasil, em linguagem simples</h1>
-        <p>Só dados oficiais, com a mesma regra para todos os governos e partidos. <a href="metodologia.html">Como calculamos</a></p>
+        <h1>O dinheiro público da sua cidade, do seu estado e do Brasil</h1>
+        <p>Em linguagem simples, só com dados oficiais e a mesma regra para todos os governos e partidos. <a href="metodologia.html">Como calculamos</a></p>
+        <div class="escolha-cidade">
+          <div class="campo busca-cidade">
+            <label for="mun-busca">Qual é a sua cidade?</label>
+            <input id="mun-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mun-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome da cidade">
+            <ul id="mun-sugestoes" class="sugestoes" role="listbox" aria-label="Cidades encontradas" hidden></ul>
+          </div>
+          <div id="onde-sugestao" class="onde-sugestao" hidden>
+            <p data-campo="onde-texto"></p>
+            <button type="button" class="botao" id="onde-sim" hidden></button>
+          </div>
+        </div>
         <p class="carregando-aviso" role="status">Carregando os dados…</p>
         <div id="erro-carga" class="erro-carga" role="alert" hidden>
           <p>Não foi possível carregar os dados agora. Pode ser uma falha passageira da conexão.</p>
@@ -103,75 +115,15 @@
         </div>
       </div>
 
-      <section id="hoje" class="cartao hoje bloco-dados" aria-labelledby="hoje-titulo">
-        <div class="hoje-cabeca">
-          <div class="hoje-intro">
-            <h2 id="hoje-titulo">Como está o Brasil hoje?</h2>
-            <p class="sub">O número grande é dos últimos 12 meses, e o selo compara com a história dele. Toque num item para ver a comparação em detalhe.</p>
-            <div class="filtros hoje-filtros">
-              <label class="campo largo"><span>Comparar</span>
-                <select id="hoje-comparar"></select>
-              </label>
-            </div>
-          </div>
-          <div class="hoje-contexto">
-            <p id="hoje-modo" class="hoje-modo"></p>
-            <p id="hoje-aviso" class="aviso-crise" role="note" hidden></p>
-          </div>
-        </div>
-        <div id="hoje-lista"></div>
-        <details class="entenda">
-          <summary>Entenda e baixe os dados</summary>
-          <div class="entenda-corpo">
-            <h3>Como o site decide se está bom ou ruim?</h3>
-            <p>Cada item é comparado com a própria história: os últimos 12 meses contra cada ano completo desde o começo da pesquisa. Está bom quando hoje é melhor do que em pelo menos dois terços desses anos; ruim quando é melhor em no máximo um terço; na média no resto. A inflação é comparada com a meta oficial.</p>
-            <p>Os itens ficam em dois grupos: o bolso das pessoas e as contas do país. Os dois contam: uma melhora no bolso com as contas do governo piorando pode não durar, porque déficit e dívida maiores viram mais juros, mais imposto ou menos serviço depois.</p>
-            <p>Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e isso é opinião. Os impostos aparecem sem nota: mais arrecadação pode significar mais serviços ou mais peso no bolso. O dólar fica de fora: dólar caro prejudica quem compra importados e ajuda quem exporta.</p>
-            <h3>Como os governos são comparados?</h3>
-            <p>O padrão compara o governo atual, do primeiro mês até o último publicado, com o governo anterior nos mesmos meses de mandato (o primeiro mês de um com o primeiro do outro, e assim por diante). Assim os dois têm o mesmo tempo para mostrar resultado. Salário, preços, desemprego e renda entram pela média do período. Contas do governo, juros e impostos somam todos os meses do período e dividem pelo que o país produziu nesses meses. A dívida entra por quanto subiu ou caiu do começo ao fim do período, porque o tamanho dela no começo é herança do governo de antes.</p>
-            <p>Na lista também dá para comparar os últimos 12 meses com o último ano de cada governo que já terminou (como ele entregou o país) ou com qualquer ano. O ano conta para quem governou a maior parte dele (em 2016, por exemplo, para Temer), com a mesma regra para todos.</p>
-            <h3>Por que aparece um aviso de crise?</h3>
-            <p>Quando um dos períodos comparados inclui uma recessão ou a pandemia, aparece um aviso. As recessões são as datadas pelo Comitê de Datação de Ciclos Econômicos (CODACE) da FGV; a pandemia vai da declaração da emergência de saúde pelo Ministério da Saúde, em fevereiro de 2020, até o fim dela, em maio de 2022. O aviso só informa: os números não mudam.</p>
-            <p>O resultado depende também da economia mundial e do Congresso. Os números mostram o que aconteceu, não o mérito de quem governou.</p>
-            <button type="button" class="botao" data-baixar="resumo">Baixar planilha com os dados</button>
-          </div>
-        </details>
-        <p class="fonte">Fontes: Banco Central (salário mínimo, contas do governo e dívida), DIEESE (cesta básica), IBGE (inflação, desemprego e renda), ANP (gasolina e gás) e Receita Federal (impostos). Cada item muda quando a sua fonte publica, em geral uma vez por mês.</p>
-      </section>
-
-      <section id="contador" class="cartao contador bloco-dados" aria-labelledby="contador-titulo">
-        <h2 id="contador-titulo" class="contador-rotulo">Impostos federais arrecadados em <span data-campo="ano-atual">2026</span>, até agora</h2>
-        <p class="contador-curto" data-campo="contador-curto">&nbsp;</p>
-        <p class="contador-exato"><span data-campo="contador" aria-live="off"></span> <span class="contador-estimativa">estimativa ao vivo</span></p>
-        <details class="entenda entenda-compacto">
-          <summary>Entenda esse número</summary>
-          <div class="entenda-corpo">
-            <dl class="contador-partes">
-              <div>
-                <dt>Já confirmado pela Receita Federal (<span data-campo="meses-confirmados">sem dado</span>)</dt>
-                <dd data-campo="confirmado">sem dado</dd>
-              </div>
-              <div>
-                <dt>Estimativa desde <span data-campo="inicio-estimativa">sem dado</span>, pela média dos últimos 12 meses</dt>
-                <dd data-campo="estimado">sem dado</dd>
-              </div>
-            </dl>
-            <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS.</p>
-            <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#estados">Contas do governo do estado</a> e <a href="#municipios">Contas da prefeitura</a>.</p>
-            <p class="fonte">Fonte: Receita Federal, que publica a arrecadação uma vez por mês, algumas semanas depois de o mês terminar. Último mês publicado: <span data-campo="arrec-ultimo">sem dado</span>.</p>
-          </div>
-        </details>
-      </section>
-
       <nav class="temas" aria-labelledby="temas-titulo">
         <h2 id="temas-titulo">Escolha um assunto</h2>
         <ul>
-          <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR, juros e dólar</span></a></li>
-          <li><a href="#municipios"><strong>Sua cidade</strong><span>receitas e gastos da prefeitura, quem foi eleito, Bolsa Família</span></a></li>
+          <li><a href="#municipios"><strong>Sua cidade</strong><span>receitas e gastos da prefeitura, emendas, Bolsa Família e quem foi eleito</span></a></li>
           <li><a href="#estados"><strong>Seu estado</strong><span>dívida, folha de pagamento, impostos e governadores</span></a></li>
+          <li><a href="#hoje"><strong>Brasil hoje</strong><span>inflação, desemprego, renda, impostos e as contas do país</span></a></li>
+          <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR, juros e dólar</span></a></li>
           <li><a href="#arrecadacao"><strong>Governo federal</strong><span>impostos, gastos, ministérios, cartão corporativo e viagens</span></a></li>
           <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
-          <li><a href="#quem-faz"><strong>Entenda</strong><span>quem faz o quê: prefeito, governador, presidente e o Congresso</span></a></li>
         </ul>
       </nav>
     </div>
@@ -181,8 +133,215 @@
     <div class="corpo">
       <nav class="indice" id="indice" aria-label="Nesta página" hidden></nav>
       <div class="corpo-secoes">
+        <section id="municipios" class="bloco bloco-dados" aria-labelledby="municipios-titulo">
+          <p class="tema">Sua cidade</p>
+          <h2 id="municipios-titulo">As contas da prefeitura da sua cidade</h2>
+          <p class="intro">De onde vem e para onde vai o dinheiro da prefeitura, quem foi eleito e quanto o governo federal paga direto aos moradores.</p>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="mun-ano"></select>
+            </label>
+            <button type="button" class="botao" id="mun-trocar">Escolher cidade</button>
+          </div>
+          <p id="mun-vazio" class="resumo-vazio">Escolha a sua cidade no alto da página. Estão aqui as 5.570 cidades do país.</p>
+          <div id="mun-detalhe" hidden>
+            <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
+            <p id="mun-selo" class="selo-dado"></p>
+            <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
+            <div id="mun-governo" class="governo" hidden>
+              <ul class="governo-lista" id="mun-governo-lista"></ul>
+            </div>
+            <div class="resumo" data-campo="mun-resumo"></div>
+            <div id="mun-contas">
+              <h3>Receitas da prefeitura: de onde veio cada R$ 100</h3>
+              <ul class="barras" id="mun-barras"></ul>
+              <h3>Comparada com outras cidades</h3>
+              <dl class="numeros" id="mun-compara"></dl>
+              <p class="nota" data-campo="mun-compara-nota"></p>
+            </div>
+            <div id="mun-despesas" hidden>
+              <h3 data-campo="mun-despesas-titulo">Gastos da prefeitura</h3>
+              <p id="mun-despesas-selo" class="selo-dado aviso" hidden></p>
+              <ul class="barras" id="mun-despesas-barras"></ul>
+              <dl class="numeros empilhado" id="mun-despesas-compara"></dl>
+              <p class="nota" data-campo="mun-despesas-nota"></p>
+            </div>
+            <div id="mun-emendas" hidden>
+              <h3>Emendas parlamentares pagas à prefeitura</h3>
+              <p class="nota">Dinheiro do orçamento federal que deputados, senadores, bancadas e comissões do Congresso mandaram para a cidade.</p>
+              <dl class="numeros empilhado" id="mun-emendas-numeros"></dl>
+              <p class="ranking-titulo" data-campo="mun-emendas-autores-titulo" hidden></p>
+              <ul class="barras" id="mun-emendas-autores" hidden></ul>
+              <p class="nota" data-campo="mun-emendas-nota"></p>
+            </div>
+            <div id="mun-beneficios" hidden>
+              <h3>Dinheiro federal pago direto aos moradores</h3>
+              <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
+              <dl class="numeros empilhado" id="mun-beneficios-numeros"></dl>
+              <p class="nota" data-campo="mun-beneficios-nota"></p>
+            </div>
+          </div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Que dinheiro entra nessa conta?</h3>
+              <p>A receita corrente do ano: o dinheiro que entra para o dia a dia da prefeitura. Ficam de fora empréstimos, venda de imóveis e repasses feitos só para obras (as receitas de capital). Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
+              <h3>O que é cada repasse?</h3>
+              <p><strong>FPM:</strong> o Fundo de Participação dos Municípios. A União junta parte do Imposto de Renda e do IPI e divide entre as cidades; cidades pequenas recebem mais por morador. <strong>ICMS:</strong> um quarto do imposto estadual sobre mercadorias e serviços fica com as cidades, dividido principalmente pela atividade econômica de cada uma. <strong>IPVA:</strong> metade do imposto dos carros registrados na cidade fica com ela. <strong>FUNDEB:</strong> o fundo da educação básica. Parte do FPM e do ICMS de cada cidade vai para o fundo, que devolve de acordo com o número de alunos da rede. <strong>Outros repasses:</strong> o dinheiro do SUS, da assistência social, da merenda, a parte do imposto sobre terras rurais (ITR) e outros.</p>
+              <h3>Por que comparar com cidades do mesmo tamanho?</h3>
+              <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
+              <h3>O que quer dizer cada aviso?</h3>
+              <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
+              <h3>Quem foi eleito?</h3>
+              <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
+              <h3>Para onde vai o dinheiro da prefeitura?</h3>
+              <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
+              <h3>Emendas parlamentares</h3>
+              <p>Todo ano, deputados e senadores indicam para onde vai uma parte do orçamento federal; cada indicação é uma emenda. O site soma só o que foi pago à prefeitura e aos fundos municipais (saúde, assistência social e outros), pelo ano em que o dinheiro foi pago. Emendas pagas a hospitais, entidades, ao governo do estado ou a órgãos federais que fazem obras na cidade não entram, porque o arquivo não diz em que cidade esse dinheiro foi usado. O autor pode ser um deputado, um senador, a bancada do estado (deputados e senadores do estado juntos) ou uma comissão do Congresso; os nomes estão como no arquivo do Portal, sem acentos. <strong>Relator Geral</strong> são as emendas do relator do orçamento, que o STF proibiu em dezembro de 2022; o que aparece depois disso é pagamento de compromisso antigo. Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
+              <h3>Bolsa Família e BPC</h3>
+              <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
+              <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
+              <button type="button" class="botao" id="mun-baixar-emendas" data-baixar="emendas" hidden>Baixar planilha das emendas do estado</button>
+              <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Emendas parlamentares: Portal da Transparência (CGU), pagamentos por favorecido. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
+        </section>
+
+        <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
+          <p class="tema">Seu estado</p>
+          <h2 id="estados-titulo">Como estão as contas do governo do seu estado?</h2>
+          <div class="filtros">
+            <label class="campo largo"><span>Estado</span>
+              <select id="estados-uf"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="estados-resumo"></div>
+
+          <div id="estados-detalhe">
+          <div id="estados-governo" class="governo" hidden>
+            <h3>Governadores eleitos</h3>
+            <ul class="governo-lista" id="estados-governo-lista"></ul>
+            <p class="nota">TSE, dados abertos. Partido da data da eleição. O TSE registra quem foi eleito: se o governador saiu e o vice assumiu, a troca não aparece aqui.</p>
+          </div>
+          <h3>Dívida e folha de pagamento, ano a ano</h3>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
+                <label><input type="radio" name="estados-visao" value="pessoal"><span>Folha de pagamento</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <p class="nota" data-campo="estados-explicacao"></p>
+          <div id="grafico-estados"></div>
+
+          <div id="estados-receita-caixa">
+            <h3>Impostos do estado e da capital, ano a ano</h3>
+            <div class="filtros">
+              <label class="campo largo"><span>Imposto</span>
+                <select id="estados-tributo"></select>
+              </label>
+            </div>
+            <p class="nota" data-campo="estados-receita-explicacao"></p>
+            <div id="grafico-estados-receita"></div>
+          </div>
+          </div>
+
+          <h3>Todos os estados</h3>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="estados-ano"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="estados-todos"></div>
+          <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que conta como "o que entra" no ano?</h3>
+              <p>É a receita corrente líquida: impostos, repasses da União e outras receitas do dia a dia, menos a parte que o estado é obrigado a repassar às prefeituras e outras deduções da lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para os limites. A dívida já desconta o dinheiro que o estado tem em caixa.</p>
+              <h3>O que acontece perto ou acima do limite?</h3>
+              <p>"Perto do limite" quer dizer acima de 90% dele. Nesse ponto, o tribunal de contas avisa o governo.</p>
+              <p>Folha de pagamento: acima de 95% do limite (o "limite prudencial", R$ 46,55 de cada R$ 100 na maioria dos estados), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem oito meses para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima tem até 2032 para voltar aos poucos (Lei Complementar 178).</p>
+              <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem um ano para voltar. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
+              <h3>O que é cada imposto?</h3>
+              <p>Do estado: ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet, e vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
+              <p>Da prefeitura: ISS é o imposto sobre serviços, do salão de beleza ao hospital e ao banco, e também vem embutido no preço. IPTU é o imposto anual sobre casas, apartamentos e terrenos na cidade. ITBI é o imposto pago na compra de um imóvel. Em Brasília, quem cobra esses três é o governo do Distrito Federal.</p>
+              <p>Os valores são o total arrecadado. Um quarto do ICMS e metade do IPVA do estado vão depois para as prefeituras. Com a reforma tributária, ICMS e ISS vão ser substituídos aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
+              <h3>De onde vêm os números?</h3>
+              <p>Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
+              <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
+              <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos de estados e capitais</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
+        </section>
+
+        <section id="hoje" class="bloco hoje bloco-dados" aria-labelledby="hoje-titulo">
+          <p class="tema">Brasil hoje</p>
+          <div class="hoje-cabeca">
+            <div class="hoje-intro">
+              <h2 id="hoje-titulo">Como está o Brasil hoje?</h2>
+              <p class="sub">O número grande é dos últimos 12 meses, e o selo compara com a história dele. Toque num item para ver a comparação em detalhe.</p>
+              <div class="filtros hoje-filtros">
+                <label class="campo largo"><span>Comparar</span>
+                  <select id="hoje-comparar"></select>
+                </label>
+              </div>
+            </div>
+            <div class="hoje-contexto">
+              <p id="hoje-modo" class="hoje-modo"></p>
+              <p id="hoje-aviso" class="aviso-crise" role="note" hidden></p>
+            </div>
+          </div>
+          <div id="hoje-lista"></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Como o site decide se está bom ou ruim?</h3>
+              <p>Cada item é comparado com a própria história: os últimos 12 meses contra cada ano completo desde o começo da pesquisa. Está bom quando hoje é melhor do que em pelo menos dois terços desses anos; ruim quando é melhor em no máximo um terço; na média no resto. A inflação é comparada com a meta oficial.</p>
+              <p>Os itens ficam em dois grupos: o bolso das pessoas e as contas do país. Os dois contam: uma melhora no bolso com as contas do governo piorando pode não durar, porque déficit e dívida maiores viram mais juros, mais imposto ou menos serviço depois.</p>
+              <p>Não existe nota única, porque juntar os itens exigiria decidir quanto vale cada um, e isso é opinião. Os impostos aparecem sem nota: mais arrecadação pode significar mais serviços ou mais peso no bolso. O dólar fica de fora: dólar caro prejudica quem compra importados e ajuda quem exporta.</p>
+              <h3>Como os governos são comparados?</h3>
+              <p>O padrão compara o governo atual, do primeiro mês até o último publicado, com o governo anterior nos mesmos meses de mandato (o primeiro mês de um com o primeiro do outro, e assim por diante). Assim os dois têm o mesmo tempo para mostrar resultado. Salário, preços, desemprego e renda entram pela média do período. Contas do governo, juros e impostos somam todos os meses do período e dividem pelo que o país produziu nesses meses. A dívida entra por quanto subiu ou caiu do começo ao fim do período, porque o tamanho dela no começo é herança do governo de antes.</p>
+              <p>Na lista também dá para comparar os últimos 12 meses com o último ano de cada governo que já terminou (como ele entregou o país) ou com qualquer ano. O ano conta para quem governou a maior parte dele (em 2016, por exemplo, para Temer), com a mesma regra para todos.</p>
+              <h3>Por que aparece um aviso de crise?</h3>
+              <p>Quando um dos períodos comparados inclui uma recessão ou a pandemia, aparece um aviso. As recessões são as datadas pelo Comitê de Datação de Ciclos Econômicos (CODACE) da FGV; a pandemia vai da declaração da emergência de saúde pelo Ministério da Saúde, em fevereiro de 2020, até o fim dela, em maio de 2022. O aviso só informa: os números não mudam.</p>
+              <p>O resultado depende também da economia mundial e do Congresso. Os números mostram o que aconteceu, não o mérito de quem governou.</p>
+              <button type="button" class="botao" data-baixar="resumo">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: Banco Central (salário mínimo, contas do governo e dívida), DIEESE (cesta básica), IBGE (inflação, desemprego e renda), ANP (gasolina e gás) e Receita Federal (impostos). Cada item muda quando a sua fonte publica, em geral uma vez por mês.</p>
+        </section>
+
+        <section id="contador" class="bloco contador bloco-dados" aria-labelledby="contador-titulo">
+          <h2 id="contador-titulo" class="contador-rotulo">Impostos federais arrecadados em <span data-campo="ano-atual">2026</span>, até agora</h2>
+          <p class="contador-curto" data-campo="contador-curto">&nbsp;</p>
+          <p class="contador-exato"><span data-campo="contador" aria-live="off"></span> <span class="contador-estimativa">estimativa ao vivo</span></p>
+          <details class="entenda entenda-compacto">
+            <summary>Entenda esse número</summary>
+            <div class="entenda-corpo">
+              <dl class="contador-partes">
+                <div>
+                  <dt>Já confirmado pela Receita Federal (<span data-campo="meses-confirmados">sem dado</span>)</dt>
+                  <dd data-campo="confirmado">sem dado</dd>
+                </div>
+                <div>
+                  <dt>Estimativa desde <span data-campo="inicio-estimativa">sem dado</span>, pela média dos últimos 12 meses</dt>
+                  <dd data-campo="estimado">sem dado</dd>
+                </div>
+              </dl>
+              <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS.</p>
+              <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#estados">Contas do governo do estado</a> e <a href="#municipios">Contas da prefeitura</a>.</p>
+              <p class="fonte">Fonte: Receita Federal, que publica a arrecadação uma vez por mês, algumas semanas depois de o mês terminar. Último mês publicado: <span data-campo="arrec-ultimo">sem dado</span>.</p>
+            </div>
+          </details>
+        </section>
+
         <section id="novidades" class="bloco bloco-dados" aria-labelledby="novidades-titulo">
-          <p class="tema">Começo</p>
+          <p class="tema">Brasil hoje</p>
           <h2 id="novidades-titulo">O que chegou de novo</h2>
           <p class="intro">O último número de cada fonte oficial. O que chegou nos últimos 7 dias vem primeiro, marcado como novo.</p>
           <ul class="novidades" id="novidades-lista"></ul>
@@ -474,156 +633,6 @@
             </div>
           </details>
           <p class="fonte">Fontes: dólar comercial, venda, média mensal (Banco Central, SGS 3698), IPCA (IBGE) e inflação dos EUA (U.S. Bureau of Labor Statistics). O dólar muda todo dia, mas o site usa a média de cada mês, que fecha no fim do mês.</p>
-        </section>
-
-        <section id="municipios" class="bloco bloco-dados" aria-labelledby="municipios-titulo">
-          <p class="tema">Sua cidade</p>
-          <h2 id="municipios-titulo">As contas da prefeitura da sua cidade</h2>
-          <p class="intro">De onde vem e para onde vai o dinheiro da prefeitura, quem foi eleito e quanto o governo federal paga direto aos moradores.</p>
-          <div class="filtros">
-            <div class="campo largo busca-cidade">
-              <label for="mun-busca">Cidade</label>
-              <input id="mun-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mun-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome da cidade">
-              <ul id="mun-sugestoes" class="sugestoes" role="listbox" aria-label="Cidades encontradas" hidden></ul>
-            </div>
-            <label class="campo"><span>Ano</span>
-              <select id="mun-ano"></select>
-            </label>
-          </div>
-          <p id="mun-vazio" class="resumo-vazio">Digite o nome de uma cidade para ver de onde vem o dinheiro da prefeitura. Estão aqui as 5.570 cidades do país.</p>
-          <div id="mun-detalhe" hidden>
-            <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
-            <p id="mun-selo" class="selo-dado"></p>
-            <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
-            <div id="mun-governo" class="governo" hidden>
-              <ul class="governo-lista" id="mun-governo-lista"></ul>
-            </div>
-            <div class="resumo" data-campo="mun-resumo"></div>
-            <div id="mun-contas">
-              <h3>Receitas da prefeitura: de onde veio cada R$ 100</h3>
-              <ul class="barras" id="mun-barras"></ul>
-              <h3>Comparada com outras cidades</h3>
-              <dl class="numeros" id="mun-compara"></dl>
-              <p class="nota" data-campo="mun-compara-nota"></p>
-            </div>
-            <div id="mun-despesas" hidden>
-              <h3 data-campo="mun-despesas-titulo">Gastos da prefeitura</h3>
-              <p id="mun-despesas-selo" class="selo-dado aviso" hidden></p>
-              <ul class="barras" id="mun-despesas-barras"></ul>
-              <dl class="numeros empilhado" id="mun-despesas-compara"></dl>
-              <p class="nota" data-campo="mun-despesas-nota"></p>
-            </div>
-            <div id="mun-emendas" hidden>
-              <h3>Emendas parlamentares pagas à prefeitura</h3>
-              <p class="nota">Dinheiro do orçamento federal que deputados, senadores, bancadas e comissões do Congresso mandaram para a cidade.</p>
-              <dl class="numeros empilhado" id="mun-emendas-numeros"></dl>
-              <p class="ranking-titulo" data-campo="mun-emendas-autores-titulo" hidden></p>
-              <ul class="barras" id="mun-emendas-autores" hidden></ul>
-              <p class="nota" data-campo="mun-emendas-nota"></p>
-            </div>
-            <div id="mun-beneficios" hidden>
-              <h3>Dinheiro federal pago direto aos moradores</h3>
-              <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
-              <dl class="numeros empilhado" id="mun-beneficios-numeros"></dl>
-              <p class="nota" data-campo="mun-beneficios-nota"></p>
-            </div>
-          </div>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>Que dinheiro entra nessa conta?</h3>
-              <p>A receita corrente do ano: o dinheiro que entra para o dia a dia da prefeitura. Ficam de fora empréstimos, venda de imóveis e repasses feitos só para obras (as receitas de capital). Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
-              <h3>O que é cada repasse?</h3>
-              <p><strong>FPM:</strong> o Fundo de Participação dos Municípios. A União junta parte do Imposto de Renda e do IPI e divide entre as cidades; cidades pequenas recebem mais por morador. <strong>ICMS:</strong> um quarto do imposto estadual sobre mercadorias e serviços fica com as cidades, dividido principalmente pela atividade econômica de cada uma. <strong>IPVA:</strong> metade do imposto dos carros registrados na cidade fica com ela. <strong>FUNDEB:</strong> o fundo da educação básica. Parte do FPM e do ICMS de cada cidade vai para o fundo, que devolve de acordo com o número de alunos da rede. <strong>Outros repasses:</strong> o dinheiro do SUS, da assistência social, da merenda, a parte do imposto sobre terras rurais (ITR) e outros.</p>
-              <h3>Por que comparar com cidades do mesmo tamanho?</h3>
-              <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
-              <h3>O que quer dizer cada aviso?</h3>
-              <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
-              <h3>Quem foi eleito?</h3>
-              <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
-              <h3>Para onde vai o dinheiro da prefeitura?</h3>
-              <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
-              <h3>Emendas parlamentares</h3>
-              <p>Todo ano, deputados e senadores indicam para onde vai uma parte do orçamento federal; cada indicação é uma emenda. O site soma só o que foi pago à prefeitura e aos fundos municipais (saúde, assistência social e outros), pelo ano em que o dinheiro foi pago. Emendas pagas a hospitais, entidades, ao governo do estado ou a órgãos federais que fazem obras na cidade não entram, porque o arquivo não diz em que cidade esse dinheiro foi usado. O autor pode ser um deputado, um senador, a bancada do estado (deputados e senadores do estado juntos) ou uma comissão do Congresso; os nomes estão como no arquivo do Portal, sem acentos. <strong>Relator Geral</strong> são as emendas do relator do orçamento, que o STF proibiu em dezembro de 2022; o que aparece depois disso é pagamento de compromisso antigo. Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
-              <h3>Bolsa Família e BPC</h3>
-              <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
-              <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
-              <button type="button" class="botao" id="mun-baixar-emendas" data-baixar="emendas" hidden>Baixar planilha das emendas do estado</button>
-              <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Emendas parlamentares: Portal da Transparência (CGU), pagamentos por favorecido. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
-        </section>
-
-        <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
-          <p class="tema">Seu estado</p>
-          <h2 id="estados-titulo">Como estão as contas do governo do seu estado?</h2>
-          <div class="filtros">
-            <label class="campo largo"><span>Estado</span>
-              <select id="estados-uf"></select>
-            </label>
-          </div>
-          <div class="resumo" data-campo="estados-resumo"></div>
-
-          <div id="estados-detalhe">
-          <div id="estados-governo" class="governo" hidden>
-            <h3>Governadores eleitos</h3>
-            <ul class="governo-lista" id="estados-governo-lista"></ul>
-            <p class="nota">TSE, dados abertos. Partido da data da eleição. O TSE registra quem foi eleito: se o governador saiu e o vice assumiu, a troca não aparece aqui.</p>
-          </div>
-          <h3>Dívida e folha de pagamento, ano a ano</h3>
-          <div class="filtros">
-            <fieldset class="campo largo">
-              <legend>Mostrar</legend>
-              <div class="segmentos">
-                <label><input type="radio" name="estados-visao" value="divida" checked><span>Dívida</span></label>
-                <label><input type="radio" name="estados-visao" value="pessoal"><span>Folha de pagamento</span></label>
-              </div>
-            </fieldset>
-          </div>
-          <p class="nota" data-campo="estados-explicacao"></p>
-          <div id="grafico-estados"></div>
-
-          <div id="estados-receita-caixa">
-            <h3>Impostos do estado e da capital, ano a ano</h3>
-            <div class="filtros">
-              <label class="campo largo"><span>Imposto</span>
-                <select id="estados-tributo"></select>
-              </label>
-            </div>
-            <p class="nota" data-campo="estados-receita-explicacao"></p>
-            <div id="grafico-estados-receita"></div>
-          </div>
-          </div>
-
-          <h3>Todos os estados</h3>
-          <div class="filtros">
-            <label class="campo"><span>Ano</span>
-              <select id="estados-ano"></select>
-            </label>
-          </div>
-          <div class="resumo" data-campo="estados-todos"></div>
-          <div class="tabela-rolagem"><table id="tabela-estados"></table></div>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que conta como "o que entra" no ano?</h3>
-              <p>É a receita corrente líquida: impostos, repasses da União e outras receitas do dia a dia, menos a parte que o estado é obrigado a repassar às prefeituras e outras deduções da lei. A Lei de Responsabilidade Fiscal usa essa receita como régua para os limites. A dívida já desconta o dinheiro que o estado tem em caixa.</p>
-              <h3>O que acontece perto ou acima do limite?</h3>
-              <p>"Perto do limite" quer dizer acima de 90% dele. Nesse ponto, o tribunal de contas avisa o governo.</p>
-              <p>Folha de pagamento: acima de 95% do limite (o "limite prudencial", R$ 46,55 de cada R$ 100 na maioria dos estados), a lei proíbe dar aumentos, criar cargos e contratar, com algumas exceções. Acima do limite, o estado tem oito meses para voltar; se não voltar, fica sem transferências voluntárias da União e sem novos empréstimos. Desde 2021, quem estava acima tem até 2032 para voltar aos poucos (Lei Complementar 178).</p>
-              <p>Dívida: acima do limite, o estado fica proibido de pegar novos empréstimos e tem um ano para voltar. Estados no Regime de Recuperação Fiscal seguem regras especiais durante o acordo com a União.</p>
-              <h3>O que é cada imposto?</h3>
-              <p>Do estado: ICMS é o imposto sobre mercadorias (inclusive energia e combustíveis), transporte entre cidades e estados, telefone e internet, e vem embutido no preço. IPVA é o imposto anual sobre carros, motos e outros veículos. ITCMD é o imposto sobre herança e doação.</p>
-              <p>Da prefeitura: ISS é o imposto sobre serviços, do salão de beleza ao hospital e ao banco, e também vem embutido no preço. IPTU é o imposto anual sobre casas, apartamentos e terrenos na cidade. ITBI é o imposto pago na compra de um imóvel. Em Brasília, quem cobra esses três é o governo do Distrito Federal.</p>
-              <p>Os valores são o total arrecadado. Um quarto do ICMS e metade do IPVA do estado vão depois para as prefeituras. Com a reforma tributária, ICMS e ISS vão ser substituídos aos poucos por um novo imposto, o IBS, entre 2029 e 2033.</p>
-              <h3>De onde vêm os números?</h3>
-              <p>Números informados por cada estado ao Tesouro Nacional, só do governo do estado (sem Assembleia, Justiça e Ministério Público). Cada tribunal de contas tem regras próprias sobre o que entra na folha de pagamento, e elas mudaram com o tempo: um salto grande de um ano para o outro pode ser mudança na forma de contar.</p>
-              <button type="button" class="botao" data-baixar="estados">Baixar planilha com dívida e folha de pagamento</button>
-              <button type="button" class="botao" data-baixar="estados-receita">Baixar planilha com os impostos de estados e capitais</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
         </section>
 
         <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
