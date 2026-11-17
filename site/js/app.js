@@ -1593,7 +1593,9 @@ function montarMunicipios(ctx) {
     $('#onde-sugestao').hidden = true;
     $('#mun-trocar').textContent = 'Trocar cidade';
     const codigo7 = String(c[0]).padStart(7, '0');
-    guardarMunicipio(codigo7);
+    // Só a escolha feita pela pessoa vira "a cidade dela". Abrir um link de
+    // outra cidade mostra essa cidade, mas não troca a guardada.
+    if (rolar) guardarMunicipio(codigo7);
     mudarLugar({ codigo: codigo7, nome: c[1], uf: c[2] }, { pelaPessoa: rolar });
     if (rolar) $('#municipios').scrollIntoView({ block: 'start' });
     try {
@@ -1977,11 +1979,12 @@ function montarMunicipios(ctx) {
     const emAndamento = Math.max(...d.anos);
     const doAno = (a) => {
       const x = daCidade[String(a)];
-      if (!x) return null;
+      if (!x || !(x[0] > 0)) return null;
       const fator = fatorParaHoje(ctx, a) ?? 1;
-      return { pago: x[0] * fator, emendas: x[1], autores: x[2], maiores: x[3].map(([n, v]) => [n, v * fator]) };
+      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator]);
+      return { pago: x[0] * fator, emendas: x[1], autores: lista.length, lista };
     };
-    const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'} de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}`;
+    const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'}${x.autores ? ` de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}` : ''}`;
     const rotuloAno = (a) => (a === emAndamento ? `Pago em ${a} (ano em andamento)` : `Pago em ${a}`);
     const dl = $('#mun-emendas-numeros');
     dl.replaceChildren();
@@ -2010,23 +2013,44 @@ function montarMunicipios(ctx) {
     const lista = anoLista === ano ? escolhido : atual;
     const titulo = campo('mun-emendas-autores-titulo')[0];
     const barras = $('#mun-emendas-autores');
+    const botaoTodos = $('#mun-emendas-todos');
     barras.replaceChildren();
-    titulo.hidden = barras.hidden = !lista;
+    titulo.hidden = barras.hidden = !lista?.lista.length;
+    botaoTodos.hidden = true;
     const notas = [];
-    if (lista) {
-      titulo.textContent = `Quem mandou mais dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}`;
-      for (const [autor, valor] of lista.maiores) {
+    if (lista?.lista.length) {
+      titulo.textContent = `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
+      // Todos os autores; os 6 primeiros aparecem logo, o resto com o botão.
+      const VISIVEIS = 6;
+      lista.lista.forEach(([autor, valor], k) => {
         const pct = lista.pago > 0 ? (valor / lista.pago) * 100 : 0;
         const li = el('li', null, null, barras);
+        li.hidden = k >= VISIVEIS;
         const topo = el('div', 'barra-topo', null, li);
         el('span', 'barra-nome', autor, topo);
-        el('span', 'barra-valor', `${f.reaisCompacto(valor)} · ${f.parteDoTotal(pct)}`, topo);
+        // Entre 1 e 10 milhões, com uma casa: "R$ 1,4 mi", não "R$ 1 mi".
+        const valorCurto = valor >= 1e6 && valor < 1e7 ? `R$\u00A0${f.numero(valor / 1e6, 1)} mi` : f.reaisCompacto(valor);
+        el('span', 'barra-valor', `${valorCurto} · ${f.parteDoTotal(pct)}`, topo);
         const trilho = el('div', 'barra-trilho', null, li);
         trilho.setAttribute('aria-hidden', 'true');
         el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+      });
+      if (lista.lista.length > VISIVEIS) {
+        let aberto = false;
+        const rotular = () => {
+          botaoTodos.textContent = aberto ? `Mostrar só os ${VISIVEIS} maiores` : `Ver todos os ${f.numero(lista.lista.length)} autores`;
+          botaoTodos.setAttribute('aria-expanded', String(aberto));
+        };
+        botaoTodos.onclick = () => {
+          aberto = !aberto;
+          [...barras.children].forEach((li, k) => { li.hidden = !aberto && k >= VISIVEIS; });
+          rotular();
+          if (!aberto) titulo.scrollIntoView({ block: 'nearest' });
+        };
+        rotular();
+        botaoTodos.hidden = false;
       }
-      if (lista.autores > lista.maiores.length) notas.push(`Aparecem os ${lista.maiores.length} que mais mandaram, de ${lista.autores} autores.`);
-      const nomes = lista.maiores.map(([a]) => a);
+      const nomes = lista.lista.map(([a]) => a);
       if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
       if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
     }
@@ -2041,10 +2065,11 @@ function montarMunicipios(ctx) {
     const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
     return {
       nome: `emendas-pagas-as-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'pago_reais_da_epoca', 'emendas', 'autores', 'maiores_autores (reais da época)', 'fator para dinheiro de hoje (IPCA)'],
-      linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).map(([cod, anos]) => {
+      cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'autor', 'pago_reais_da_epoca', 'emendas_da_cidade_no_ano', 'fator para dinheiro de hoje (IPCA)'],
+      // Uma linha por cidade, ano e autor.
+      linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).flatMap(([cod, anos]) => {
         const x = anos[String(a)];
-        return [a, cod, nomes.get(cod) ?? '', uf, x[0], x[1], x[2], x[3].map(([n, v]) => `${n}: ${v}`).join(' | '), arred(fatorParaHoje(ctx, a) ?? 1, 6)];
+        return x[2].map(([i, v]) => [a, cod, nomes.get(cod) ?? '', uf, d.nomes[i], v, x[1], arred(fatorParaHoje(ctx, a) ?? 1, 6)]);
       })) : [],
     };
   });
@@ -4273,6 +4298,22 @@ async function iniciar() {
     requestAnimationFrame(reposicionarNaSecao);
   }
 }
+
+// Listas de barras em duas colunas (computador, regra no CSS): a ordem desce
+// pela coluna da esquerda e continua na da direita, com as linhas alinhadas.
+// A grade precisa saber quantas linhas há; conta só os itens visíveis.
+function alinharBarras(ul) {
+  const n = [...ul.children].filter((li) => !li.hidden).length;
+  ul.style.setProperty('--linhas', String(Math.max(1, Math.ceil(n / 2))));
+}
+new MutationObserver((mudancas) => {
+  const listas = new Set();
+  for (const m of mudancas) {
+    const ul = m.target.closest?.('ul.barras');
+    if (ul) listas.add(ul);
+  }
+  listas.forEach(alinharBarras);
+}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
 
 iniciarNavegacao();
 iniciar();

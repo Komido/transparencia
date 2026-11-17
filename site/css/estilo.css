@@ -1146,8 +1146,12 @@ td.num .detalhe { white-space: normal; }
    para baixo, primeiro a da esquerda); a tabela dos estados e as contas do
    orçamento ficam numa largura de leitura. */
 @media (min-width: 1024px) {
-  .barras:has(> li:nth-child(4)) { display: block; columns: 2; column-gap: var(--e-6); }
-  .barras:has(> li:nth-child(4)) > li { break-inside: avoid; margin-bottom: var(--e-3); }
+  .barras:has(> li:nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--linhas, 2), auto);
+    grid-auto-flow: column;
+    column-gap: var(--e-6);
+  }
   .bloco > .ranking { display: block; columns: 2; column-gap: var(--e-6); padding-left: 0; }
   .bloco > .ranking > li { break-inside: avoid; margin: 0 0 var(--e-2) 1.75rem; }
   .tabela-rolagem:has(#tabela-estados) { max-width: 46rem; }
