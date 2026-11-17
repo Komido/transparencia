@@ -110,6 +110,7 @@ function desenhar() {
     + (!r?.v && situacao !== 'df' && !outros.length ? ' Os outros anos também estão sem dado.' : '');
   selo.classList.toggle('aviso', situacao !== 'ok');
   desenharDespesas(r, ano);
+  desenharCamara(r, ano);
   desenharEmendas(ano, r?.p || m?.p);
   const caixaContas = $('#mun-contas');
   if (!r?.v) {
@@ -341,6 +342,39 @@ function desenharDespesas(r, ano) {
     if (det.length) el('dd', 'detalhe', det.join(' · '), div);
   }
   definir('mun-despesas-nota', `${nome} gastou ${f.reaisPorExtenso(hoje(total))} em ${ano}, em dinheiro de hoje. Mediana das cidades com despesas conferidas no mesmo ano${medFaixa.nd ? ` (${f.numero(medFaixa.nd)} do mesmo tamanho)` : ''}.`);
+}
+
+// Quanto custou a Câmara de Vereadores no ano (função Legislativa do RREO
+// Anexo 2), por morador, comparado com as medianas do país (mesmo tamanho)
+// e do estado. Só com as despesas do ano conferidas.
+function desenharCamara(r, ano) {
+  const caixa = $('#mun-camara');
+  caixa.hidden = true;
+  const campos = estado.indice.campos_despesa;
+  const i = campos?.indexOf('camara') ?? -1;
+  const { m, d } = estado;
+  const pop = r?.p || m?.p;
+  if (i < 0 || r?.ds !== 'ok' || !r.d || !(r.d[i] > 0) || !pop) return;
+  const fator = fatorParaHoje(estado.ctx, ano) ?? 1;
+  const hoje = (x) => x * fator;
+  const camara = r.d[i];
+  const total = r.d.reduce((a, x) => a + (x ?? 0), 0);
+  const faixas = estado.indice.faixas;
+  const iFaixa = faixas.findIndex((x) => x.ate == null || pop <= x.ate);
+  const medFaixa = estado.indice.medianas[String(ano)]?.[String(iFaixa)] ?? {};
+  const medUf = d.medianas?.[String(ano)] ?? {};
+  const dl = $('#mun-camara-numeros');
+  dl.replaceChildren();
+  const div = el('div', null, null, dl);
+  el('dt', null, `Câmara de Vereadores em ${ano}`, div);
+  el('dd', null, valorGrande(hoje(camara)), div);
+  el('dd', 'detalhe', `${f.moeda(hoje(camara) / pop, 0)} por morador; R$ ${f.numero((camara / total) * 100, 1)} de cada R$ 100 gastos pela prefeitura`, div);
+  const det = [];
+  if (medFaixa.camara_hab != null) det.push(`cidades do mesmo tamanho: ${f.moeda(hoje(medFaixa.camara_hab), 0)} por morador`);
+  if (medUf.camara_hab != null) det.push(`cidades de ${d.uf}: ${f.moeda(hoje(medUf.camara_hab), 0)}`);
+  if (det.length) el('dd', 'detalhe', det.join(' · '), div);
+  definir('mun-camara-nota', 'Inclui salários dos vereadores e dos servidores da Câmara, prédio e funcionamento, em dinheiro de hoje. A Constituição limita esse gasto a uma parte do que a cidade arrecada: de 7%, nas cidades de até 100 mil habitantes, a 3,5%, nas de mais de 8 milhões. O site não calcula esse limite, porque o relatório não traz a base exata da conta.');
+  caixa.hidden = false;
 }
 
 // ---------------------------------------------------------------------------

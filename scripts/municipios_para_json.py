@@ -447,7 +447,8 @@ def indicadores(reg_ano):
 
 
 def indicadores_despesa(reg_ano, pop):
-    """Por morador: despesa total, saúde e educação. Só com despesas "ok"."""
+    """Por morador: despesa total, saúde, educação e Câmara de Vereadores
+    (função Legislativa). Só com despesas "ok"."""
     if reg_ano.get("ds") != "ok" or not pop or pop <= 0:
         return None
     f = reg_ano.get("funcoes") or {}
@@ -455,7 +456,7 @@ def indicadores_despesa(reg_ano, pop):
     if total <= 0:
         return None
     return {"despesa_hab": total / pop, "saude_hab": f.get("Saúde", 0.0) / pop,
-            "educacao_hab": f.get("Educação", 0.0) / pop}
+            "educacao_hab": f.get("Educação", 0.0) / pop, "camara_hab": f.get("Legislativa", 0.0) / pop}
 
 
 def mediana(valores):
