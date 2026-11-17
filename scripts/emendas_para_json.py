@@ -130,8 +130,11 @@ NOMES_ANTIGOS = {
     ("FLORINIA", "SP"): "3516101",                   # Florínea
     ("SANTA TERESINHA", "BA"): "2928505",            # Santa Terezinha (a única "Santa Te..." da BA)
 }
-# Sem confirmação no IBGE nem no TSE em 17/11/2026: "Augusto Severo" (RN) e
-# "Seridó" (PB), R$ 20,8 milhões desde 2019; ficam a cargo da ligação pelo CNPJ.
+# "Augusto Severo" (RN) e "Seridó" (PB) não estão no IBGE nem no TSE; a ligação
+# pelo CNPJ os levou a Campo Grande (RN) e São Vicente do Seridó (PB) em
+# 17/11/2026. Na mesma data, 31 pagamentos com cidade "Porto Alegre" (RS) tinham
+# o CNPJ da prefeitura de Ponte Alta (SC), com autores de Santa Catarina: vale
+# o CNPJ.
 # Segunda fonte de nomes: a tabela oficial de códigos do TSE, que traz o nome
 # usado pelo TSE (às vezes o antigo) ao lado do código do IBGE.
 TSE_IBGE = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
@@ -275,8 +278,10 @@ def main():
             continue
         chave = (cod, ano)
         pago[chave] += valor
-        emendas[chave].add(l["Código da Emenda"])
         autor = nome_legivel(l["Nome do Autor da Emenda"]) or "Sem informação"
+        # Emenda sem código ("Sem informação", como as de relator antigas)
+        # conta como uma por autor; com código, cada código é uma emenda.
+        emendas[chave].add((l["Código da Emenda"], autor))
         autores[chave][autor] += valor
         autores_por_codigo[l["Código da Emenda"]].add(autor)
     total = sum(total_ano.values())
