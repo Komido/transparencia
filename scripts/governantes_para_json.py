@@ -20,8 +20,13 @@ prefeito eleito em 2020 pelo DEM ou pelo PSL aparece como União Brasil,
 criado da fusão dos dois em 2022). O site mostra o partido como o TSE
 publica e avisa isso.
 
-Só entram nome, nome de urna, gênero (para escrever "prefeita" ou
-"prefeito"), partido, cargo e a data e o tipo da eleição. CPF, e-mail, data
+O arquivo registra quem foi eleito, não quem governou: se o titular morreu,
+renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não
+aparece (em São Paulo, Bruno Covas foi eleito em 2020 e Ricardo Nunes, o
+vice, assumiu em 2021). Por isso o site mostra o vice junto do titular.
+
+Só entram nome de urna, gênero (para escrever "prefeita" ou "prefeito"),
+partido, cargo, o vice e a data e o tipo da eleição. CPF, e-mail, data
 de nascimento e outros dados pessoais do arquivo não são lidos para a saída.
 
 Saídas:
@@ -153,12 +158,19 @@ def codigos_tse_ibge():
 
 def eleitos(ano):
     cargo, (minimo, maximo), inicio, fim = ELEICOES[ano]
+    vice_cargo = f"VICE-{cargo}"
     z = zipfile.ZipFile(io.BytesIO(baixar(CANDIDATOS.format(ano=ano))))
     nome = f"consulta_cand_{ano}_BRASIL.csv"
     if nome not in z.namelist():
         falhar(f"{ano}: {nome} não está no zip")
     saida = []
-    for l in ler_csv(z.read(nome), f"candidatos {ano}"):
+    linhas = ler_csv(z.read(nome), f"candidatos {ano}")
+    # Vice eleito: mesma eleição, mesma cidade ou UF e mesmo número na urna.
+    vices = {}
+    for l in linhas:
+        if l.get("DS_CARGO") == vice_cargo and (l.get("DS_SIT_TOT_TURNO") or "").startswith("ELEITO"):
+            vices[(l.get("CD_ELEICAO"), l.get("SG_UE"), l.get("NR_CANDIDATO"))] = nome_proprio(l.get("NM_URNA_CANDIDATO"))
+    for l in linhas:
         if l.get("DS_CARGO") != cargo or l.get("DS_SIT_TOT_TURNO") != "ELEITO":
             continue
         uf = (l.get("SG_UF") or "").strip()
@@ -177,13 +189,15 @@ def eleitos(ano):
             "eleicao": ano, "data": data, "turno": int(l.get("NR_TURNO") or 1),
             "suplementar": "SUPLEMENTAR" in sem_acento(l.get("NM_TIPO_ELEICAO") or "") or "SUPLEMENTAR" in sem_acento(l.get("DS_ELEICAO") or ""),
             "nome": nome_proprio(l.get("NM_URNA_CANDIDATO") or l.get("NM_CANDIDATO")),
-            "nome_completo": nome_proprio(l.get("NM_CANDIDATO")),
             "feminino": (l.get("DS_GENERO") or "").strip().upper() == "FEMININO",
             "partido": partido, "partido_nome": nome_proprio(l.get("NM_PARTIDO")),
-            "inicio": inicio, "fim": fim,
+            "vice": vices.get((l.get("CD_ELEICAO"), l.get("SG_UE"), l.get("NR_CANDIDATO")), ""),
         })
     if not minimo <= len(saida) <= maximo:
         falhar(f"{ano}: {len(saida)} {cargo.lower()}s eleitos; esperado entre {minimo} e {maximo}")
+    sem_vice = sum(1 for e in saida if not e["vice"])
+    if sem_vice > 0.02 * len(saida):
+        falhar(f"{ano}: {sem_vice} eleitos sem vice; a ligação pelo número na urna falhou?")
     print(f"{ano}: {len(saida)} {cargo.lower()}s eleitos", flush=True)
     return saida
 
@@ -199,13 +213,19 @@ def gravar_json(caminho, dados):
 
 def main():
     mapa = codigos_tse_ibge()
+    # Saída compacta: cada eleito é [eleição, data, suplementar, nome,
+    # feminino, partido, vice]; o mandato de cada eleição e o nome de cada
+    # partido ficam uma vez só no arquivo.
+    campos = ["eleicao", "data", "suplementar", "nome", "feminino", "partido", "vice"]
+    eleicoes = {str(a): {"cargo": c.lower(), "inicio": i, "fim": f} for a, (c, _, i, f) in ELEICOES.items()}
     por_uf = {uf: {"uf": uf, "fonte": "TSE, dados abertos (candidatos e códigos de municípios)",
-                   "atualizado": dt.date.today().isoformat(), "governadores": [], "prefeitos": {}} for uf in UFS}
+                   "atualizado": dt.date.today().isoformat(), "campos": campos, "eleicoes": eleicoes,
+                   "partidos": {}, "governadores": [], "prefeitos": {}} for uf in UFS}
     sem_codigo = []
     for ano, (cargo, *_resto) in sorted(ELEICOES.items()):
         for e in eleitos(ano):
-            item = {k: e[k] for k in ("eleicao", "data", "turno", "suplementar", "nome", "nome_completo", "feminino",
-                                      "partido", "partido_nome", "inicio", "fim")}
+            item = [e["eleicao"], e["data"], int(e["suplementar"]), e["nome"], int(e["feminino"]), e["partido"], e["vice"]]
+            por_uf[e["uf"]]["partidos"][e["partido"]] = e["partido_nome"]
             if cargo == "GOVERNADOR":
                 por_uf[e["uf"]]["governadores"].append(item)
                 continue
@@ -224,9 +244,9 @@ def main():
     if sem_codigo:
         print("sem código do IBGE (ficam de fora):", sem_codigo)
     for d in por_uf.values():
-        d["governadores"].sort(key=lambda x: (x["eleicao"], x["data"]))
+        d["governadores"].sort(key=lambda x: (x[0], x[1]))
         for lista in d["prefeitos"].values():
-            lista.sort(key=lambda x: (x["eleicao"], x["data"]))
+            lista.sort(key=lambda x: (x[0], x[1]))
         if d["uf"] != "DF" and not d["prefeitos"]:
             falhar(f"{d['uf']}: nenhum prefeito")
         if not d["governadores"]:
