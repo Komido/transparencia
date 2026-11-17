@@ -220,6 +220,7 @@ def vereadores(mapa):
             "cidades": por_uf[uf],
         })
     print(f"vereadores {ano}: {total} eleitos em {len(por_cidade)} cidades", flush=True)
+    return partidos
 
 
 def eleitos(ano):
@@ -315,7 +316,17 @@ def main():
             falhar(f"{d['uf']}: nenhum governador")
         gravar_json(f"{DESTINO}/{d['uf']}.json", d)
     print(f"gravados {len(por_uf)} estados; {sum(len(d['prefeitos']) for d in por_uf.values())} cidades com prefeito")
-    vereadores(mapa)
+    partidos = vereadores(mapa)
+    # Siglas de todos os partidos que aparecem no site (prefeitos,
+    # governadores e vereadores), com o nome registrado no TSE.
+    for d in por_uf.values():
+        for sigla, nome in d["partidos"].items():
+            partidos.setdefault(sigla, nome)
+    gravar_json("site/dados/partidos.json", {
+        "fonte": "TSE, dados abertos (candidatos)", "atualizado": dt.date.today().isoformat(),
+        "partidos": dict(sorted(partidos.items())),
+    })
+    print(f"partidos: {len(partidos)}")
 
 
 if __name__ == "__main__":

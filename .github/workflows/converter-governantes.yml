@@ -34,14 +34,14 @@ jobs:
       - name: Gravar se mudou
         run: |
           set -euo pipefail
-          if git diff --quiet -- site/dados/governantes site/dados/vereadores \
-             && [ -z "$(git ls-files --others --exclude-standard site/dados/governantes site/dados/vereadores)" ]; then
+          if git diff --quiet -- site/dados/governantes site/dados/vereadores site/dados/partidos.json \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/governantes site/dados/vereadores site/dados/partidos.json)" ]; then
             echo "Nada mudou."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A site/dados/governantes site/dados/vereadores
+          git add -A site/dados/governantes site/dados/vereadores site/dados/partidos.json
           git commit -q -m "Atualiza prefeitos e governadores eleitos (TSE)"
           for i in 1 2 3 4 5; do
             git pull --rebase --quiet && git push --quiet && exit 0
