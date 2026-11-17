@@ -1,6 +1,6 @@
 {
  "uf": "RR",
- "atualizado": "2026-11-16",
+ "atualizado": "2026-11-17",
  "municipios": {
   "1400027": {
    "nome": "Amajari",
@@ -25,11 +25,30 @@
       "fundeb": 14679490.24,
       "rcl": 64557441.15
      },
+     "tipo": "completo",
      "sha256": "15ccc89f31cc0e0f91cd3103980fea3897f5a4a24645e54138062d50a0b491fe"
     },
     "2025": {
-     "s": "sem_relatorio",
-     "sha256": "aa1455501a9bf3a2ffbe5b70b7fc95e39613e78c42e4507adbe1cdc3ba2b8ace"
+     "s": "ok",
+     "pop": 16994,
+     "v": {
+      "receita": 77311245.34,
+      "tributos": 5274452.45,
+      "iptu": 0.0,
+      "iss": 4123122.16,
+      "itbi": 866907.95,
+      "irrf": 211560.01,
+      "outros_tributos": 72862.33,
+      "transferencias": 69048466.48,
+      "fpm": 12302374.78,
+      "icms": 13129792.55,
+      "ipva": 129093.32,
+      "itr": 149528.6,
+      "fundeb": 17257834.68,
+      "rcl": 72429759.08
+     },
+     "tipo": "simplificado",
+     "sha256": "b5c949d92ea7a7b2e5aa8b6d9dc2190391fd6726e746af46b7d73d283a549238"
     }
    }
   },
@@ -56,6 +75,7 @@
       "fundeb": 17978874.92,
       "rcl": 79262578.22
      },
+     "tipo": "completo",
      "sha256": "b3f8df942cadfe4ba45257a3a08b3a08b2be889ddc1618eb410e6f4af8d0a0be"
     },
     "2025": {
@@ -77,6 +97,7 @@
       "fundeb": 22012649.68,
       "rcl": 98705473.42
      },
+     "tipo": "completo",
      "sha256": "72a90c0c401ba69d5c6c9956dc8f3460b5f71973cdfcfc83c7cb6f71abad7280"
     }
    }
@@ -104,6 +125,7 @@
       "fundeb": 484810892.75,
       "rcl": 2379090247.01
      },
+     "tipo": "completo",
      "sha256": "36d17829a1a2b02a81ab8fa952a6d08b52321e6a8e638c56c9c70049b15b6ad3"
     },
     "2025": {
@@ -125,6 +147,7 @@
       "fundeb": 547297848.02,
       "rcl": 2688398151.21
      },
+     "tipo": "completo",
      "sha256": "add7cacea756567947fdae0fc3a7f6e1ae69e1674685aae4cd451f50ecaa01f3"
     }
    }
@@ -152,6 +175,7 @@
       "fundeb": 35606532.95,
       "rcl": 103612646.79
      },
+     "tipo": "completo",
      "sha256": "e6c163782ec92e2642bfa4831df32fe398e737bc9664a1bc2b5b4d90fc7ba385"
     },
     "2025": {
@@ -173,6 +197,7 @@
       "fundeb": 43731499.67,
       "rcl": 118946154.85
      },
+     "tipo": "completo",
      "sha256": "8bf3e11482b35f7b18b597b707c0bf8406b483f2dc70397888cadd97bd837e50"
     }
    }
@@ -200,6 +225,7 @@
       "fundeb": 30279171.25,
       "rcl": 100496846.35
      },
+     "tipo": "completo",
      "sha256": "4145e474d06860fe18e24dbd769651ae6434153679b9dfa91d255102bda2c722"
     },
     "2025": {
@@ -221,6 +247,7 @@
       "fundeb": 36563220.5,
       "rcl": 118498692.2
      },
+     "tipo": "completo",
      "sha256": "5cf2510e6f3cfd519be71f2aa1fb24f2965fa9f4857693b2a13d024fec12eac8"
     }
    }
@@ -230,12 +257,48 @@
    "pop": 22750,
    "anos": {
     "2024": {
-     "s": "sem_relatorio",
-     "sha256": "c3abf27eaa9efe4ccc1b591da7067fb33b3e5aed8cd83583474a552cdcb3f15b"
+     "s": "ok",
+     "pop": 20780,
+     "v": {
+      "receita": 125414548.26,
+      "tributos": 3655794.05,
+      "iptu": 288406.53,
+      "iss": 2322831.07,
+      "itbi": 289466.66,
+      "irrf": 510332.62,
+      "outros_tributos": 244757.17,
+      "transferencias": 119796477.21,
+      "fpm": 13268582.2,
+      "icms": 19361496.18,
+      "ipva": 315151.1,
+      "itr": 65240.35,
+      "fundeb": 31797030.49,
+      "rcl": 119007799.43
+     },
+     "tipo": "simplificado",
+     "sha256": "4c9a6a7b2db638d503aeaaa8c689e0da444abe33cf63d4d21e6f0189eddfc04c"
     },
     "2025": {
-     "s": "sem_relatorio",
-     "sha256": "6c77202e6cd1ac06a9e493f70cc3048db861f49d911ff6a2cb3a5ba2ecf2b1d8"
+     "s": "ok",
+     "pop": 20780,
+     "v": {
+      "receita": 131403383.62,
+      "tributos": 3689088.25,
+      "iptu": 230710.29,
+      "iss": 2579300.51,
+      "itbi": 204692.0,
+      "irrf": 401937.63,
+      "outros_tributos": 272447.82,
+      "transferencias": 125945864.84,
+      "fpm": 14762849.71,
+      "icms": 18974712.64,
+      "ipva": 269635.98,
+      "itr": 56376.28,
+      "fundeb": 29599286.48,
+      "rcl": 124899893.87
+     },
+     "tipo": "simplificado",
+     "sha256": "f9ea9d4dc076dcfbe0b9c265880d8a02ebf5354bdb74f1134c17b4904b83b431"
     }
    }
   },
@@ -262,6 +325,7 @@
       "fundeb": 17446498.22,
       "rcl": 68450127.82
      },
+     "tipo": "completo",
      "sha256": "2eb58560ffef26286a766d0c91091e12e2eb30a763fa9d066c18f36247faf46e"
     },
     "2025": {
@@ -283,6 +347,7 @@
       "fundeb": 18906380.38,
       "rcl": 75580016.8
      },
+     "tipo": "completo",
      "sha256": "724d36052665c4675ace1964a75b9d563e65f85826230a7cd5c0556a3c6149ff"
     }
    }
@@ -310,6 +375,7 @@
       "fundeb": 11827380.1,
       "rcl": 57018800.47
      },
+     "tipo": "completo",
      "sha256": "c163833c0223842470884891f4f40d8b3b0f3b2e0eb9b3db43cb142a842fe129"
     },
     "2025": {
@@ -331,6 +397,7 @@
       "fundeb": 12436180.72,
       "rcl": 55031355.71
      },
+     "tipo": "completo",
      "sha256": "65a381fb1e05f041488aecf4188dc8b0419a04cad84fe61fed69ed7510014170"
     }
    }
@@ -358,6 +425,7 @@
       "fundeb": 37776742.91,
       "rcl": 91965565.05
      },
+     "tipo": "completo",
      "sha256": "f29cbd9e810a01244f1be916ef136b1e02fa05265a06f288ded4b1d566d3a618"
     },
     "2025": {
@@ -379,6 +447,7 @@
       "fundeb": 33599482.92,
       "rcl": 105770200.26
      },
+     "tipo": "completo",
      "sha256": "9d4e50569fd8e30ad4312219f5d5db8f45750468df8fc41a131dfc28856819b8"
     }
    }
@@ -406,6 +475,7 @@
       "fundeb": 39653177.85,
       "rcl": 96662655.92
      },
+     "tipo": "completo",
      "sha256": "519f9f00153c40cbe85cc59189e8f8fac4703a1dca408145442bf644e14049a0"
     },
     "2025": {
@@ -427,6 +497,7 @@
       "fundeb": 47256803.82,
       "rcl": 110865046.14
      },
+     "tipo": "completo",
      "sha256": "e18165d4dc1c2cb12d0111c72bca772387ffac4e5c172e45a4abbb1045044e20"
     }
    }
@@ -454,6 +525,7 @@
       "fundeb": 50344730.94,
       "rcl": 105965169.05
      },
+     "tipo": "completo",
      "sha256": "7f8e634edf1f144312cf13d13a25623114bcfaf7721cdb82d9d2a26400e692fd"
     },
     "2025": {
@@ -475,6 +547,7 @@
       "fundeb": 72478930.97,
       "rcl": 153426450.24
      },
+     "tipo": "completo",
      "sha256": "91fcbe766398e16760b6df4af83db0115f92558f5a1ea124273c439968e79b09"
     }
    }
@@ -502,6 +575,7 @@
       "fundeb": 46178415.36,
       "rcl": 160332844.3
      },
+     "tipo": "completo",
      "sha256": "1a8151acfc3dd0cb0c5459dd7e408063227e7876eee600deb6d0ec932f9e10d5"
     },
     "2025": {
@@ -523,6 +597,7 @@
       "fundeb": 51518428.46,
       "rcl": 179003181.92
      },
+     "tipo": "completo",
      "sha256": "20d6ec9bacbfb373aeb4110ab8c471622973b45fffaeb2a1761b2a72824e9502"
     }
    }
@@ -550,6 +625,7 @@
       "fundeb": 15836656.69,
       "rcl": 59184102.17
      },
+     "tipo": "completo",
      "sha256": "d4c2f9800085ade68a1701401b94f74cc7fe1b8750534fd98d1843a731ee22d1"
     },
     "2025": {
@@ -571,6 +647,7 @@
       "fundeb": 18125167.6,
       "rcl": 77459363.33
      },
+     "tipo": "completo",
      "sha256": "343aa9f50f351c1c800e3cc1284c71b85cd38b177d5dc4246db74b86dff0489b"
     }
    }
@@ -598,6 +675,7 @@
       "fundeb": 14826218.33,
       "rcl": 50123799.83
      },
+     "tipo": "completo",
      "sha256": "1acb4adae497b2335a124760b1f599a644807014982c29c1f20080b1254ff789"
     },
     "2025": {
@@ -619,6 +697,7 @@
       "fundeb": 16018883.34,
       "rcl": 51568680.06
      },
+     "tipo": "completo",
      "sha256": "c0beb9367879d815c140efb8bf47b0b2686d194020e3b8fd4894372e003b90e2"
     }
    }
@@ -646,6 +725,7 @@
       "fundeb": 23954003.16,
       "rcl": 56523941.3
      },
+     "tipo": "completo",
      "sha256": "9389615b25737829f34cc4d774980791b0b796040f6264380e86e0863b679391"
     },
     "2025": {
@@ -667,6 +747,7 @@
       "fundeb": 34815371.32,
       "rcl": 72336615.61
      },
+     "tipo": "completo",
      "sha256": "c56169fafd25465bd11ec1e81a85c55290e6e0978fa6d00e482da07170cd5b90"
     }
    }
