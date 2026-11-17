@@ -1464,7 +1464,7 @@ const SELO_PREFEITURA = {
   sem_relatorio: (ano, data) => `A prefeitura não entregou ao Tesouro o relatório do ano completo de ${ano} (conferido em ${data}). Sem dado: o site não estima.`,
   formato: (ano) => `A prefeitura entregou o relatório de ${ano}, mas ele veio sem as linhas que o site usa para conferir a conta. Sem dado, para não mostrar número errado.`,
   erro: (ano) => `Não foi possível buscar as contas de ${ano} desta prefeitura na última atualização. Sem dado.`,
-  df: () => 'Brasília não tem prefeitura. Os impostos que nas outras cidades são da prefeitura, como IPTU e ISS, são cobrados pelo governo do Distrito Federal e aparecem em "Como estão as contas do seu estado?".',
+  df: () => 'Brasília não tem prefeitura. Os impostos que nas outras cidades são da prefeitura, como IPTU e ISS, são cobrados pelo governo do Distrito Federal e aparecem em "Contas do governo do estado".',
 };
 
 // Áreas de despesa das prefeituras, na ordem de campos_despesa do índice.
