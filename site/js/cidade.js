@@ -444,9 +444,16 @@ async function desenharCamaraTipos(ano) {
     barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
   }
   const semSubsidio = !itens.some((x) => x.k === 'vereadores');
+  // O custo acima vem do relatório da prefeitura ao Tesouro (SICONFI).
+  const iCam = estado.indice.campos_despesa?.indexOf('camara') ?? -1;
+  const sic = estado.m?.a?.[String(anoUsado)];
+  const custoTesouro = iCam >= 0 && sic?.ds === 'ok' ? sic.d?.[iCam] : null;
+  const longe = custoTesouro > 0 && (total / custoTesouro < 0.8 || total / custoTesouro > 1.25);
   definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
     + 'Fonte: Tribunal de Contas do Estado de São Paulo, cada pagamento da Câmara pelo tipo de despesa. '
-    + 'Pode diferir um pouco do custo acima, que vem do relatório da prefeitura ao Tesouro e conta a despesa liquidada, não a paga.'
+    + (longe
+      ? `Neste ano, o total é bem diferente do custo que a prefeitura informou ao Tesouro (${f.reaisPorExtenso(custoTesouro * fator)}); o site mostra cada número como a fonte publicou.`
+      : 'Pode diferir um pouco do custo informado pela prefeitura ao Tesouro, que conta a despesa liquidada, não a paga.')
     + (semSubsidio ? ' Neste ano, a Câmara não registrou nenhum pagamento como salário de vereador (subsídio); ele pode ter sido lançado junto com o dos servidores.' : ''));
   mostrar();
 }

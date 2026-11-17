@@ -17,7 +17,9 @@ de 100 MB, retomando de onde parou.
 
 Cada lançamento é "Empenhado", "Valor Liquidado", "Valor Pago", "Anulação"
 ou "Reforço". Entram só os de "Valor Pago": o dinheiro que de fato saiu no
-ano. Entram só os órgãos que são a câmara da cidade (nome com "CÂMARA",
+ano. Fica de fora a modalidade 91 (intra-orçamentária), o que a Câmara paga
+ao próprio município, como a contribuição ao fundo de aposentadoria dos
+servidores municipais, como faz o relatório ao Tesouro. Entram só os órgãos que são a câmara da cidade (nome com "CÂMARA",
 "LEGISLATIVO" ou "VEREADORES" e sem "PREFEITURA"; os nomes fora do padrão
 "CÂMARA MUNICIPAL ..." aparecem no registro da execução para conferência). O tipo vem do elemento de despesa (ex.: "31901175 - SUBSÍDIOS -
 AGENTES POLÍTICOS"), agrupado em poucas categorias para leigos (CATEGORIAS).
@@ -60,6 +62,8 @@ MUNICIPIOS = "site/dados/municipios/SP.json"
 TEMPORARIO = os.environ.get("RUNNER_TEMP", "/tmp")
 PEDACO = 100_000_000
 ANOS_GUARDADOS = 2
+# Muda quando a regra da conta muda, para refazer os anos já gravados.
+VERSAO_DA_CONTA = 2
 MINIMO_DE_CAMARAS = 600
 COLUNAS = ["id_despesa_detalhe", "ano_exercicio", "ds_municipio", "codigo_municipio_ibge", "ds_orgao",
            "mes_referencia", "mes_ref_extenso", "tp_despesa", "nr_empenho", "tp_identificador_despesa",
@@ -196,6 +200,7 @@ def somar(caminho, ano):
     orgaos = collections.Counter()
     tipos = collections.Counter()
     sem_codigo = 0
+    intra = 0.0
     linhas = 0
     inicio = time.time()
     with z.open(nomes[0]) as bruto:
@@ -226,10 +231,17 @@ def somar(caminho, ano):
                 valor = numero(l[i_val])
             except ValueError:
                 falhar(f"valor inválido {l[i_val]!r} na linha {linhas} do arquivo de {ano}")
+            # Modalidade 91 (intra-orçamentária): o que a Câmara paga ao próprio
+            # município, como a contribuição ao fundo de aposentadoria dos
+            # servidores. Fica fora, como no relatório ao Tesouro.
+            if l[i_elem].strip()[2:4] == "91":
+                intra += valor
+                continue
             item = por_cidade.setdefault(cod, [0.0, [0.0] * len(CATEGORIAS)])
             item[0] += valor
             item[1][INDICE[categoria(l[i_elem])]] += valor
     print(f"  {ano}: {linhas} linhas lidas em {(time.time() - inicio) / 60:.1f} min; tipos: {dict(tipos)}")
+    print(f"  {ano}: pagamentos intra-orçamentários deixados de fora: R$ {intra / 1e6:.1f} milhões")
     if sem_codigo:
         print(f"  {ano}: {sem_codigo} pagamentos de câmara sem código IBGE válido (ficaram fora)")
     fora_do_padrao = sorted({n for _, n in orgaos if not sem_acento(n).startswith("CAMARA MUNICIPAL")})
@@ -295,7 +307,7 @@ def main():
         tamanho, modificado, faixas = cabecalho(url)
         visto = (antigo.get("arquivos") or {}).get(str(ano))
         arquivos[str(ano)] = {"tamanho": tamanho, "modificado": modificado}
-        if visto == arquivos[str(ano)] and ano in (antigo.get("anos") or []):
+        if visto == arquivos[str(ano)] and ano in (antigo.get("anos") or []) and antigo.get("versao") == VERSAO_DA_CONTA:
             print(f"{ano}: sem mudança desde a última vez ({modificado}, {tamanho / 1e6:.0f} MB)", flush=True)
             for cod, por_ano in (antigo.get("cidades") or {}).items():
                 if str(ano) in por_ano:
@@ -329,6 +341,7 @@ def main():
                                                          for (_, r), v in zip(CATEGORIAS, tot)))
     gravar_json(DESTINO, {
         "uf": "SP",
+        "versao": VERSAO_DA_CONTA,
         "atualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "fonte": PAGINA,
         "arquivos": arquivos,
