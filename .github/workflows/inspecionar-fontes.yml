@@ -22,27 +22,37 @@ jobs:
       # quais colunas existem, se dá para saber o que é cada pagamento
       # (salário, diária, verba indenizatória) e quanto pesa o arquivo. Nomes
       # de pessoas físicas aparecem só como iniciais no registro.
-      - name: TCE-SP, despesas de 2025, colunas e câmaras
+      - name: TCE-SP, despesas de 2025 (começo do arquivo), colunas e câmaras
         continue-on-error: true
         run: |
           set -u
           mkdir -p /tmp/sp && cd /tmp/sp
           AGENTE="ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
-          curl -sSL --max-time 1800 -A "$AGENTE" -o d.zip -w "despesas-2025.zip: HTTP %{http_code} %{size_download} bytes em %{time_total}s\n" \
-            "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip"
-          python3 - d.zip <<'PY'
-          import collections, csv, io, re, sys, time, zipfile
+          # O arquivo de 2025 tem mais de 1 GB compactado e a primeira tentativa
+          # caiu depois de 22 minutos. Aqui só os primeiros 150 MB, lidos em
+          # fluxo (sem guardar o arquivo), bastam para ver colunas e exemplos.
+          curl -sSI --http1.1 -A "$AGENTE" "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip" | grep -i -E "^(HTTP|content-length|last-modified|accept-ranges)" || true
+          curl -sSL --http1.1 --max-time 900 -A "$AGENTE" --range 0-150000000 \
+            "https://transparencia.tce.sp.gov.br/sites/default/files/conjunto-dados/despesas-2025.zip" -o parte.zip || echo "curl terminou com erro $? (a parte baixada ainda serve)"
+          ls -l parte.zip
+          python3 - parte.zip <<'PY'
+          import collections, csv, io, re, struct, sys, time, zlib
           csv.field_size_limit(10_000_000)
-          z = zipfile.ZipFile(sys.argv[1])
-          for i in z.infolist(): print(f"  {i.filename}: {i.file_size / 1e6:.0f} MB descompactado, {i.compress_size / 1e6:.0f} MB compactado")
-          nome = max(z.infolist(), key=lambda i: i.file_size).filename
-          bruto = z.open(nome).read(300_000)
+          bruto = open(sys.argv[1], "rb").read()
+          assert bruto[:4] == b"PK\x03\x04", bruto[:4]
+          metodo, = struct.unpack("<H", bruto[8:10]); n_nome, n_extra = struct.unpack("<HH", bruto[26:30])
+          nome = bruto[30:30 + n_nome].decode("cp437")
+          print(f"primeiro arquivo dentro do zip: {nome}, método {metodo}")
+          d = zlib.decompressobj(-15)
+          texto = d.decompress(bruto[30 + n_nome + n_extra:], 700_000_000) if metodo == 8 else bruto[30 + n_nome + n_extra:]
+          print(f"descompactado da parte baixada: {len(texto) / 1e6:.0f} MB")
+          texto = texto[: texto.rfind(b"\n") + 1]
           cod = "utf-8-sig"
-          try: bruto.decode(cod)
+          try: texto[:300_000].decode(cod)
           except UnicodeDecodeError: cod = "latin-1"
-          primeira = bruto.decode(cod, "replace").splitlines()[0]
+          primeira = texto[:5000].decode(cod, "replace").splitlines()[0]
           sep = max(";,\t|", key=primeira.count)
-          print(f"arquivo {nome}, codificação {cod}, separador {sep!r}")
+          print(f"codificação {cod}, separador {sep!r}")
           def esconder(linha):
               d = dict(linha)
               ident = " ".join(str(v) for k, v in d.items() if "fornecedor" in k.lower() or "credor" in k.lower())
@@ -51,7 +61,7 @@ jobs:
                       if re.search(r"nm_|nome|ds_despesa", k, re.I) and d[k]:
                           d[k] = " ".join(p[0] + "." for p in str(d[k]).split())
               return d
-          leitor = csv.DictReader(io.TextIOWrapper(z.open(nome), encoding=cod, newline="", errors="replace"), delimiter=sep)
+          leitor = csv.DictReader(io.StringIO(texto.decode(cod, "replace")), delimiter=sep)
           cols = leitor.fieldnames
           print(f"colunas ({len(cols)}): {cols}")
           org = next((c for c in cols if "orgao" in c.lower()), None)
