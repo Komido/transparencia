@@ -23,81 +23,34 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      # Benefícios por município na API do Portal da Transparência. A chave
-      # (secret PORTAL_TRANSPARENCIA_CHAVE) vai só no cabeçalho e o GitHub a
-      # esconde no registro. Dados agregados por cidade, sem pessoas.
-      - name: Portal da Transparência, benefícios por município
+      # Emendas parlamentares: formato da API do Portal (com a chave) e o
+      # arquivo de download do Portal (só cabeçalhos).
+      - name: Portal da Transparência, emendas parlamentares
         continue-on-error: true
         env:
           CHAVE: ${{ secrets.PORTAL_TRANSPARENCIA_CHAVE }}
         run: |
           set -u
-          if [ -z "${CHAVE}" ]; then echo "secret PORTAL_TRANSPARENCIA_CHAVE vazio ou ausente"; exit 1; fi
-          echo "chave presente (${#CHAVE} caracteres)"
           api=https://api.portaldatransparencia.gov.br/api-de-dados
-          pedir() {
-            echo "=== $1"
-            curl -sS --max-time 60 -D cab.txt -o resp.json -w "HTTP %{http_code} %{size_download} bytes %{time_total}s\n" \
-              -H "accept: application/json" -H "chave-api-dados: ${CHAVE}" "$api/$1" || return 0
-            grep -i "^x-rate\|^retry-after\|^content-type" cab.txt || true
-            head -c 1500 resp.json; echo
-            sleep 2
-          }
-          echo "--- sem chave (deve recusar)"
-          curl -sS --max-time 60 -o /dev/null -w "HTTP %{http_code}\n" "$api/bpc-por-municipio?mesAno=202609&codigoIbge=3550308&pagina=1" || true
-          for cod in 3550308 3143104 1200401; do
-            for mes in 202609 202610 202611; do
-              pedir "novo-bolsa-familia-por-municipio?mesAno=${mes}&codigoIbge=${cod}&pagina=1"
-              pedir "bpc-por-municipio?mesAno=${mes}&codigoIbge=${cod}&pagina=1"
-            done
-          done
-          echo "--- página 2 (deve vir vazia)"
-          pedir "bpc-por-municipio?mesAno=202609&codigoIbge=3550308&pagina=2"
-          echo "--- programas anteriores ao Novo Bolsa Família"
-          pedir "novo-bolsa-familia-por-municipio?mesAno=202303&codigoIbge=3550308&pagina=1"
-          pedir "novo-bolsa-familia-por-municipio?mesAno=202302&codigoIbge=3550308&pagina=1"
-          pedir "auxilio-brasil-por-municipio?mesAno=202206&codigoIbge=3550308&pagina=1"
-          pedir "bolsa-familia-por-municipio?mesAno=202001&codigoIbge=3550308&pagina=1"
-          pedir "bpc-por-municipio?mesAno=201501&codigoIbge=3550308&pagina=1"
-
-      # TSE: candidatos eleitos (prefeitos em 2024 e 2020, governadores em
-      # 2022 e 2026). Formato, colunas, código da cidade e situação de eleito.
-      - name: TSE, candidatos
-        continue-on-error: true
-        run: |
-          set -u
-          mkdir -p /tmp/tse && cd /tmp/tse
-          for ano in 2024 2022 2026 2020; do
-            url="https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_${ano}.zip"
-            echo "=== ${url}"
-            curl -sS --max-time 600 -o "c${ano}.zip" -w "HTTP %{http_code} %{size_download} bytes\n" "$url" || continue
-            unzip -l "c${ano}.zip" | head -8
-            unzip -l "c${ano}.zip" | tail -2
-            python3 - "c${ano}.zip" "$ano" <<'PY'
-          import collections, csv, io, sys, zipfile
-          z = zipfile.ZipFile(sys.argv[1]); ano = sys.argv[2]
-          nomes = [n for n in z.namelist() if n.lower().endswith(".csv")]
-          alvo = next((n for n in nomes if n.endswith("_BRASIL.csv")), None) or next((n for n in nomes if n.endswith("_AC.csv")), nomes[0])
-          print("arquivo lido:", alvo)
-          bruto = z.read(alvo)
-          for cod in ("utf-8", "latin-1"):
-              try:
-                  texto = bruto.decode(cod); print("codificação:", cod); break
-              except UnicodeDecodeError:
-                  continue
-          linhas = list(csv.DictReader(io.StringIO(texto), delimiter=";"))
-          print("colunas:", list(linhas[0].keys()))
-          print("linhas:", len(linhas))
-          print("cargos:", collections.Counter(l.get("DS_CARGO") for l in linhas).most_common(10))
-          print("situação no turno:", collections.Counter(l.get("DS_SIT_TOT_TURNO") for l in linhas).most_common(12))
-          cargo = "PREFEITO" if ano in ("2024", "2020") else "GOVERNADOR"
-          eleitos = [l for l in linhas if l.get("DS_CARGO") == cargo and l.get("DS_SIT_TOT_TURNO", "").startswith("ELEITO")]
-          print(f"{cargo} eleitos neste arquivo:", len(eleitos))
-          for l in eleitos[:6]:
-              print({k: l.get(k) for k in ("ANO_ELEICAO", "NR_TURNO", "SG_UF", "SG_UE", "NM_UE", "DS_CARGO", "NM_URNA_CANDIDATO", "SG_PARTIDO", "NM_PARTIDO", "NR_PARTIDO", "DS_SIT_TOT_TURNO", "DS_COMPOSICAO_COLIGACAO", "DS_COMPOSICAO_FEDERACAO", "SG_FEDERACAO")})
+          for q in "emendas?ano=2025&pagina=1" "emendas?ano=2025&pagina=2" "emendas?ano=2025&pagina=500" "emendas?ano=2025&pagina=2000"; do
+            echo "=== ${q}"
+            curl -sS --max-time 60 -o resp.json -w "HTTP %{http_code} %{size_download} bytes %{time_total}s\n" \
+              -H "accept: application/json" -H "chave-api-dados: ${CHAVE}" "$api/$q" || continue
+            python3 - resp.json <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          print("linhas na página:", len(d) if isinstance(d, list) else type(d))
+          if isinstance(d, list) and d:
+              print("campos:", sorted(d[0].keys()))
+              for x in d[:3]:
+                  print(json.dumps(x, ensure_ascii=False)[:900])
           PY
-            rm -f "c${ano}.zip"
+            sleep 2
           done
+          echo "=== download do Portal (cabeçalhos)"
+          curl -sS -I -L --max-time 60 -A "ArrecadometroBrasil/1.0 (dados publicos)" \
+            "https://portaldatransparencia.gov.br/download-de-dados/emendas-parlamentares/UNICO" \
+            | grep -i "^HTTP\|^location\|^content-length\|^content-type\|^last-modified" || true
 
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
         continue-on-error: true
