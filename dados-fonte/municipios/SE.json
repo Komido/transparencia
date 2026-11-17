@@ -26,7 +26,24 @@
       "rcl": 31221263.31
      },
      "tipo": "completo",
-     "sha256": "1b049c4f96ec7e30a72dee05203d12323f948b22d5ee5eb65ee951b931c0a6c7"
+     "sha256": "1b049c4f96ec7e30a72dee05203d12323f948b22d5ee5eb65ee951b931c0a6c7",
+     "funcoes": {
+      "Legislativa": 1431493.11,
+      "Administração": 9138401.51,
+      "Assistência Social": 2144433.34,
+      "Saúde": 5396539.69,
+      "Educação": 8552216.01,
+      "Cultura": 3900.0,
+      "Urbanismo": 2754202.55,
+      "Gestão Ambiental": 129004.65,
+      "Agricultura": 660205.76,
+      "Transporte": 596187.96,
+      "Desporto e Lazer": 1225286.72,
+      "Encargos Especiais": 268020.09
+     },
+     "dtotal": 32299891.39,
+     "ds": "ok",
+     "dsha256": "c418c10c1f595cc79247d2dc329d447b5bba7d9b9d8a9a1992ebb488e8369611"
     },
     "2025": {
      "s": "ok",
@@ -48,7 +65,23 @@
       "rcl": 36599009.54
      },
      "tipo": "completo",
-     "sha256": "23f0c907f51c55cfed099fe1d206f56083a4da795da8de48aff7f018ae8dfb60"
+     "sha256": "23f0c907f51c55cfed099fe1d206f56083a4da795da8de48aff7f018ae8dfb60",
+     "funcoes": {
+      "Legislativa": 1701137.47,
+      "Administração": 6406130.15,
+      "Assistência Social": 1794789.36,
+      "Saúde": 5867710.97,
+      "Educação": 9347970.48,
+      "Cultura": 318092.32,
+      "Urbanismo": 4739825.45,
+      "Gestão Ambiental": 143022.44,
+      "Agricultura": 380405.08,
+      "Transporte": 800038.01,
+      "Desporto e Lazer": 2584159.89
+     },
+     "dtotal": 34083281.62,
+     "ds": "ok",
+     "dsha256": "b17880a96406035190dc62599723aaf3f47bae8a46fd7523b2ed25c5da927e14"
     }
    }
   },
@@ -76,7 +109,24 @@
       "rcl": 101311489.63
      },
      "tipo": "completo",
-     "sha256": "f7f51dba54cdf713d036488fa5a50f585cfaac276debd3bc50238828a31237f2"
+     "sha256": "f7f51dba54cdf713d036488fa5a50f585cfaac276debd3bc50238828a31237f2",
+     "funcoes": {
+      "Legislativa": 2777965.86,
+      "Judiciária": 2356709.36,
+      "Administração": 9541838.57,
+      "Assistência Social": 4025396.8,
+      "Saúde": 19230491.82,
+      "Educação": 44144797.02,
+      "Cultura": 4939132.25,
+      "Urbanismo": 9325133.78,
+      "Gestão Ambiental": 55160.0,
+      "Agricultura": 412521.17,
+      "Transporte": 1724914.18,
+      "Encargos Especiais": 1313358.81
+     },
+     "dtotal": 99847419.62,
+     "ds": "ok",
+     "dsha256": "405d246220fcc86e84059c57b6b8f7aefd37b9c0ce178bab36b7f99f2d3f74a8"
     },
     "2025": {
      "s": "ok",
@@ -98,7 +148,25 @@
       "rcl": 122450737.54
      },
      "tipo": "completo",
-     "sha256": "1bfd7e875d5e154423e3f98ab58c403bbeb1cb5bcbb4f41b6c4b18ceb2836be5"
+     "sha256": "1bfd7e875d5e154423e3f98ab58c403bbeb1cb5bcbb4f41b6c4b18ceb2836be5",
+     "funcoes": {
+      "Legislativa": 3142280.04,
+      "Judiciária": 1411557.97,
+      "Administração": 14011560.52,
+      "Assistência Social": 4331015.27,
+      "Saúde": 23600852.09,
+      "Educação": 49057781.88,
+      "Cultura": 2376965.0,
+      "Urbanismo": 13844173.87,
+      "Gestão Ambiental": 93520.0,
+      "Agricultura": 527881.8,
+      "Energia": 842184.99,
+      "Transporte": 598028.67,
+      "Encargos Especiais": 1249753.52
+     },
+     "dtotal": 115087555.62,
+     "ds": "ok",
+     "dsha256": "04ab2769e3853b0e2e6855f5a62127450b90654b512ab6dec1ca3ff8f301cd1e"
     }
    }
   },
@@ -126,7 +194,32 @@
       "rcl": 3227124901.09
      },
      "tipo": "completo",
-     "sha256": "6bf9b6d16ebd78b42209e757404bb0ff32c2a4aa2a919d8b7dd9fa6669156a16"
+     "sha256": "6bf9b6d16ebd78b42209e757404bb0ff32c2a4aa2a919d8b7dd9fa6669156a16",
+     "funcoes": {
+      "Legislativa": 83163098.23,
+      "Administração": 403336433.46,
+      "Segurança Pública": 386169.51,
+      "Assistência Social": 89515751.57,
+      "Previdência Social": 423934374.06,
+      "Saúde": 641088866.98,
+      "Trabalho": 10023342.09,
+      "Educação": 543493946.5,
+      "Cultura": 25242962.3,
+      "Direitos da Cidadania": 1078120.87,
+      "Urbanismo": 342246900.82,
+      "Habitação": 84681279.94,
+      "Saneamento": 69880513.78,
+      "Gestão Ambiental": 229160098.58,
+      "Ciência e Tecnologia": 781314.81,
+      "Comércio e Serviços": 10876882.69,
+      "Energia": 18658546.87,
+      "Transporte": 79407458.04,
+      "Desporto e Lazer": 15257848.71,
+      "Encargos Especiais": 201660001.93
+     },
+     "dtotal": 3273873911.74,
+     "ds": "ok",
+     "dsha256": "2c21f5a930333e184ad1d7bddfeedf05283bc1939b689e615f4926e5720d5c67"
     },
     "2025": {
      "s": "ok",
@@ -148,7 +241,32 @@
       "rcl": 3362035234.11
      },
      "tipo": "completo",
-     "sha256": "d632b06491fcb1bfdbdbc889f7f8dd924794fe5e3c8e076feed235c96857e97c"
+     "sha256": "d632b06491fcb1bfdbdbc889f7f8dd924794fe5e3c8e076feed235c96857e97c",
+     "funcoes": {
+      "Legislativa": 96231646.14,
+      "Administração": 534638129.63,
+      "Segurança Pública": 228639.44,
+      "Assistência Social": 33548276.8,
+      "Previdência Social": 497991569.47,
+      "Saúde": 675771594.34,
+      "Trabalho": 10113869.65,
+      "Educação": 566422643.48,
+      "Cultura": 40701068.56,
+      "Direitos da Cidadania": 2926185.26,
+      "Urbanismo": 232986947.7,
+      "Habitação": 22562004.69,
+      "Saneamento": 96074189.07,
+      "Gestão Ambiental": 271918809.86,
+      "Ciência e Tecnologia": 357129.01,
+      "Comércio e Serviços": 31030077.7,
+      "Energia": 20060854.92,
+      "Transporte": 152574024.38,
+      "Desporto e Lazer": 22019440.28,
+      "Encargos Especiais": 166164080.3
+     },
+     "dtotal": 3474321180.68,
+     "ds": "ok",
+     "dsha256": "b2429cbe3815ea4f034b06183175adaf1135df75be6798b1f09903a18a0c7148"
     }
    }
   },
@@ -176,7 +294,24 @@
       "rcl": 65271644.21
      },
      "tipo": "completo",
-     "sha256": "0437b513bcf426bf09ebdefbec63621bffc8a7d55c9abeea11cbacaff5481e2f"
+     "sha256": "0437b513bcf426bf09ebdefbec63621bffc8a7d55c9abeea11cbacaff5481e2f",
+     "funcoes": {
+      "Legislativa": 2040602.05,
+      "Judiciária": 1873139.02,
+      "Administração": 7189854.9,
+      "Assistência Social": 2760620.57,
+      "Saúde": 12786729.67,
+      "Educação": 26367091.78,
+      "Cultura": 1094673.92,
+      "Urbanismo": 7587861.97,
+      "Agricultura": 972873.95,
+      "Transporte": 1089589.0,
+      "Desporto e Lazer": 399036.2,
+      "Encargos Especiais": 883412.83
+     },
+     "dtotal": 65045485.86,
+     "ds": "ok",
+     "dsha256": "3da43d1c429f2ea7c847ebc1b9a032629dea3bf0fcc9fa61793db08ae6fa2042"
     },
     "2025": {
      "s": "ok",
@@ -198,7 +333,23 @@
       "rcl": 74841425.38
      },
      "tipo": "completo",
-     "sha256": "1fd12777c9f7801e08a898734fb1b28629f4d46389408324a8f7998b3c6c91e6"
+     "sha256": "1fd12777c9f7801e08a898734fb1b28629f4d46389408324a8f7998b3c6c91e6",
+     "funcoes": {
+      "Legislativa": 2361253.75,
+      "Judiciária": 3402963.89,
+      "Administração": 8011240.69,
+      "Assistência Social": 3465916.48,
+      "Saúde": 14502937.27,
+      "Educação": 32689238.93,
+      "Cultura": 2612211.04,
+      "Urbanismo": 8836552.21,
+      "Agricultura": 1183670.69,
+      "Transporte": 1177981.49,
+      "Encargos Especiais": 2020359.22
+     },
+     "dtotal": 80264325.66,
+     "ds": "ok",
+     "dsha256": "9e5ee99857774a95f2de06c9c7b958978cf76a3840ab991185057c80c820003d"
     }
    }
   },
@@ -226,7 +377,27 @@
       "rcl": 109244661.38
      },
      "tipo": "completo",
-     "sha256": "2cb7f649aa731a57125eb06014999080ec5e96fb5652247ecc7e8eb567e98e4c"
+     "sha256": "2cb7f649aa731a57125eb06014999080ec5e96fb5652247ecc7e8eb567e98e4c",
+     "funcoes": {
+      "Legislativa": 3216000.65,
+      "Judiciária": 656070.92,
+      "Administração": 10193022.93,
+      "Assistência Social": 5859223.46,
+      "Saúde": 25454563.61,
+      "Educação": 41939261.59,
+      "Cultura": 5050111.18,
+      "Urbanismo": 10091869.42,
+      "Gestão Ambiental": 670174.71,
+      "Agricultura": 2130800.71,
+      "Comércio e Serviços": 2040.0,
+      "Energia": 2774621.99,
+      "Transporte": 1657785.0,
+      "Desporto e Lazer": 556154.34,
+      "Encargos Especiais": 1575092.84
+     },
+     "dtotal": 111826793.35,
+     "ds": "ok",
+     "dsha256": "0f887970f76ad1d4076f6708afffdccfcd2123bb70b1ecf91e9ec2c1291b4bde"
     },
     "2025": {
      "s": "ok",
@@ -248,7 +419,26 @@
       "rcl": 113431130.42
      },
      "tipo": "completo",
-     "sha256": "bffb0ddfda4ee1c6fe19ede90e332a5ae6e52416af9b3bde18783e1980c59751"
+     "sha256": "bffb0ddfda4ee1c6fe19ede90e332a5ae6e52416af9b3bde18783e1980c59751",
+     "funcoes": {
+      "Legislativa": 3685326.79,
+      "Judiciária": 287339.23,
+      "Administração": 8954395.76,
+      "Assistência Social": 5777757.29,
+      "Saúde": 23518010.17,
+      "Educação": 45800085.6,
+      "Cultura": 8751849.56,
+      "Urbanismo": 7497722.57,
+      "Gestão Ambiental": 868293.29,
+      "Agricultura": 1650016.28,
+      "Energia": 1949826.55,
+      "Transporte": 1343087.07,
+      "Desporto e Lazer": 598549.11,
+      "Encargos Especiais": 330000.0
+     },
+     "dtotal": 111012259.27,
+     "ds": "ok",
+     "dsha256": "4f6d9ac1d27b53cd1c9d945a14b27192020cac6e7952a36df1ec075160f70982"
     }
    }
   },
@@ -276,7 +466,29 @@
       "rcl": 290998214.71
      },
      "tipo": "completo",
-     "sha256": "2c18ff885c65cab8c3546525565522d6d095546488125a7cba0bdd88c5c417cb"
+     "sha256": "2c18ff885c65cab8c3546525565522d6d095546488125a7cba0bdd88c5c417cb",
+     "funcoes": {
+      "Legislativa": 10143858.71,
+      "Judiciária": 7302188.25,
+      "Administração": 24249321.9,
+      "Segurança Pública": 3397243.03,
+      "Assistência Social": 25847021.93,
+      "Previdência Social": 1620754.12,
+      "Saúde": 53165565.19,
+      "Educação": 72399865.58,
+      "Cultura": 4495309.94,
+      "Urbanismo": 69599333.4,
+      "Gestão Ambiental": 1322679.27,
+      "Agricultura": 792398.04,
+      "Comércio e Serviços": 3925521.85,
+      "Comunicações": 962556.46,
+      "Transporte": 4175420.37,
+      "Desporto e Lazer": 1675526.08,
+      "Encargos Especiais": 4732898.96
+     },
+     "dtotal": 289807463.08,
+     "ds": "ok",
+     "dsha256": "545583b6263b943313414240c18c467bde8a3eb4842cd5889a52538c562ee89d"
     },
     "2025": {
      "s": "ok",
@@ -298,7 +510,30 @@
       "rcl": 316516721.85
      },
      "tipo": "completo",
-     "sha256": "d4b996f9cf7d912380aa0f7ebb47822e90c40c314aed686dea55ee318b08ffd2"
+     "sha256": "d4b996f9cf7d912380aa0f7ebb47822e90c40c314aed686dea55ee318b08ffd2",
+     "funcoes": {
+      "Legislativa": 14379793.84,
+      "Judiciária": 6495349.17,
+      "Administração": 31908667.09,
+      "Segurança Pública": 4950871.0,
+      "Assistência Social": 36163703.22,
+      "Previdência Social": 1765977.59,
+      "Saúde": 62957463.89,
+      "Educação": 85499848.14,
+      "Cultura": 2168115.51,
+      "Urbanismo": 50695160.16,
+      "Gestão Ambiental": 1070202.59,
+      "Ciência e Tecnologia": 1350754.94,
+      "Agricultura": 991844.81,
+      "Comércio e Serviços": 10182830.46,
+      "Comunicações": 3622403.43,
+      "Transporte": 6197585.23,
+      "Desporto e Lazer": 1455847.59,
+      "Encargos Especiais": 9701040.18
+     },
+     "dtotal": 331557458.84,
+     "ds": "ok",
+     "dsha256": "0025db42e8cf27c9fe1cede89623fe0c3f3a04bf3dabdac51347e97e3d23ffa9"
     }
    }
   },
@@ -326,7 +561,24 @@
       "rcl": 107779839.9
      },
      "tipo": "completo",
-     "sha256": "3dd482f01db69fd49bc50f93de5448debd278165a58319f37f061634bf7fb6dd"
+     "sha256": "3dd482f01db69fd49bc50f93de5448debd278165a58319f37f061634bf7fb6dd",
+     "funcoes": {
+      "Legislativa": 3321056.01,
+      "Judiciária": 1715879.55,
+      "Administração": 14678734.82,
+      "Assistência Social": 3597946.39,
+      "Saúde": 22411880.5,
+      "Educação": 44532608.78,
+      "Cultura": 2958744.26,
+      "Urbanismo": 3119601.65,
+      "Agricultura": 157681.7,
+      "Energia": 1610618.75,
+      "Desporto e Lazer": 872177.89,
+      "Encargos Especiais": 1623430.12
+     },
+     "dtotal": 100600360.42,
+     "ds": "ok",
+     "dsha256": "6674b7e36be65eab5d1aef2d2586e7d8a91c1b6379191eee3f36816e532a3586"
     },
     "2025": {
      "s": "ok",
@@ -348,7 +600,24 @@
       "rcl": 117543692.72
      },
      "tipo": "completo",
-     "sha256": "aa47d0991eac90bc91b24910f0c9139e6c82366de4d0b3efc05ed906e03a7941"
+     "sha256": "aa47d0991eac90bc91b24910f0c9139e6c82366de4d0b3efc05ed906e03a7941",
+     "funcoes": {
+      "Legislativa": 4149297.22,
+      "Judiciária": 2643686.3,
+      "Administração": 16660053.22,
+      "Assistência Social": 3691732.89,
+      "Saúde": 23893074.14,
+      "Educação": 49586370.28,
+      "Cultura": 1836301.08,
+      "Urbanismo": 6601717.89,
+      "Habitação": 155929.96,
+      "Energia": 2089848.5,
+      "Desporto e Lazer": 748642.34,
+      "Encargos Especiais": 3924894.6
+     },
+     "dtotal": 115981548.42,
+     "ds": "ok",
+     "dsha256": "0e808a9643a9df1860294e839445df3ad02e01700458da4ad4da57b2bc71038f"
     }
    }
   },
@@ -376,7 +645,26 @@
       "rcl": 55978462.84
      },
      "tipo": "completo",
-     "sha256": "964e9beec2d99214aef4b62a0e748e098a265d9f016fbf20ea7a5c6a2197fc02"
+     "sha256": "964e9beec2d99214aef4b62a0e748e098a265d9f016fbf20ea7a5c6a2197fc02",
+     "funcoes": {
+      "Legislativa": 1606211.45,
+      "Judiciária": 682909.75,
+      "Administração": 7917100.12,
+      "Assistência Social": 3156448.07,
+      "Saúde": 11539552.39,
+      "Educação": 20171993.0,
+      "Cultura": 2921580.29,
+      "Urbanismo": 7632643.63,
+      "Gestão Ambiental": 308625.15,
+      "Agricultura": 499286.22,
+      "Comércio e Serviços": 98803.61,
+      "Comunicações": 64541.96,
+      "Transporte": 478732.02,
+      "Desporto e Lazer": 150102.81
+     },
+     "dtotal": 57228530.47,
+     "ds": "ok",
+     "dsha256": "72ca7e268a6c3953b0d9d4ccfb186feddf2d90b1699595ae3f6b006a5da8666e"
     },
     "2025": {
      "s": "ok",
@@ -398,7 +686,28 @@
       "rcl": 62651459.07
      },
      "tipo": "completo",
-     "sha256": "3f2afdd56e72dc877cf53dc63cc4bc209a7eb694dd244edeb41dd638ec5720b5"
+     "sha256": "3f2afdd56e72dc877cf53dc63cc4bc209a7eb694dd244edeb41dd638ec5720b5",
+     "funcoes": {
+      "Legislativa": 1780092.02,
+      "Judiciária": 1602858.81,
+      "Administração": 7105798.48,
+      "Assistência Social": 3213522.11,
+      "Saúde": 11020303.47,
+      "Educação": 25107002.2,
+      "Cultura": 2939582.62,
+      "Urbanismo": 10368006.42,
+      "Gestão Ambiental": 314992.2,
+      "Agricultura": 623741.76,
+      "Comércio e Serviços": 161947.35,
+      "Comunicações": 72460.35,
+      "Energia": 1516850.71,
+      "Transporte": 603511.63,
+      "Desporto e Lazer": 227928.5,
+      "Encargos Especiais": 335727.07
+     },
+     "dtotal": 66994325.7,
+     "ds": "ok",
+     "dsha256": "b4c804ec9dc41b738be45c687fabedcb4035438c396a77e1f0006df16b3bdf8c"
     }
    }
   },
@@ -426,7 +735,25 @@
       "rcl": 84094843.32
      },
      "tipo": "completo",
-     "sha256": "8acd683b54a049dd6c5661deaeeb0aa565083e28399317d12851370f251e3208"
+     "sha256": "8acd683b54a049dd6c5661deaeeb0aa565083e28399317d12851370f251e3208",
+     "funcoes": {
+      "Legislativa": 3068557.52,
+      "Judiciária": 1113752.9,
+      "Administração": 13789059.8,
+      "Assistência Social": 3674468.97,
+      "Saúde": 20575379.78,
+      "Educação": 28466037.76,
+      "Cultura": 2753367.04,
+      "Urbanismo": 6088100.9,
+      "Agricultura": 347057.73,
+      "Comunicações": 206902.48,
+      "Energia": 1737020.16,
+      "Transporte": 2722731.22,
+      "Desporto e Lazer": 337791.78
+     },
+     "dtotal": 84880228.04,
+     "ds": "ok",
+     "dsha256": "9e1dc28ee990f0f663c6c82ec8dce12a2639560da6e8c230e197e5d1b1b5f1d7"
     },
     "2025": {
      "s": "ok",
@@ -448,7 +775,27 @@
       "rcl": 96250929.79
      },
      "tipo": "completo",
-     "sha256": "70fa673e79575579f5c224481756ef45a1c385a0aa841769867f68d2d503c104"
+     "sha256": "70fa673e79575579f5c224481756ef45a1c385a0aa841769867f68d2d503c104",
+     "funcoes": {
+      "Legislativa": 3501607.33,
+      "Judiciária": 2908253.22,
+      "Administração": 8571739.27,
+      "Assistência Social": 3892309.74,
+      "Saúde": 20616312.87,
+      "Educação": 32795413.95,
+      "Cultura": 3136313.43,
+      "Urbanismo": 5875381.07,
+      "Gestão Ambiental": 624346.4,
+      "Agricultura": 465686.69,
+      "Comunicações": 260448.76,
+      "Energia": 2322901.27,
+      "Transporte": 1112537.27,
+      "Desporto e Lazer": 232756.07,
+      "Encargos Especiais": 3640629.17
+     },
+     "dtotal": 89956636.51,
+     "ds": "ok",
+     "dsha256": "b6881f3e89c22d2ebd26ea8903e24eb69153f98f5fb2c451a241b95aa27b7893"
     }
    }
   },
@@ -476,7 +823,24 @@
       "rcl": 38964418.72
      },
      "tipo": "completo",
-     "sha256": "3005354221e9bb31daaa947d5264079b28a570f8d990809c86b8287b1849fb0a"
+     "sha256": "3005354221e9bb31daaa947d5264079b28a570f8d990809c86b8287b1849fb0a",
+     "funcoes": {
+      "Legislativa": 1458310.35,
+      "Judiciária": 885936.16,
+      "Administração": 4094108.47,
+      "Assistência Social": 2338759.34,
+      "Saúde": 6456331.78,
+      "Educação": 12213407.61,
+      "Cultura": 2096568.93,
+      "Urbanismo": 3364900.69,
+      "Agricultura": 1816290.88,
+      "Transporte": 649548.14,
+      "Desporto e Lazer": 159267.7,
+      "Encargos Especiais": 1548629.11
+     },
+     "dtotal": 37082059.16,
+     "ds": "ok",
+     "dsha256": "66b0d9d7c299ca92c1a7a64f24785873a21f88bd974d7702fb64f5d4c353fe90"
     },
     "2025": {
      "s": "ok",
@@ -498,7 +862,25 @@
       "rcl": 46523335.34
      },
      "tipo": "completo",
-     "sha256": "8fb5047c6866bd53624426307111a7b2dd9b3ec18775321b294103e7f7162248"
+     "sha256": "8fb5047c6866bd53624426307111a7b2dd9b3ec18775321b294103e7f7162248",
+     "funcoes": {
+      "Legislativa": 1683204.19,
+      "Judiciária": 1212760.69,
+      "Administração": 5057519.2,
+      "Assistência Social": 3055994.99,
+      "Saúde": 8056077.94,
+      "Educação": 15550086.26,
+      "Cultura": 3650025.49,
+      "Urbanismo": 4104929.88,
+      "Agricultura": 1432251.71,
+      "Comércio e Serviços": 6589.0,
+      "Transporte": 775542.76,
+      "Desporto e Lazer": 92071.18,
+      "Encargos Especiais": 1351622.64
+     },
+     "dtotal": 46028675.93,
+     "ds": "ok",
+     "dsha256": "91b942f647ffee400bfc456c6d457dad52f99367ce5641228847240ef7ac7a17"
     }
    }
   },
@@ -526,7 +908,24 @@
       "rcl": 241792421.77
      },
      "tipo": "completo",
-     "sha256": "1b961f23a9cb72d0e2f517a32c2897a6d2acfa715d44ea5cb05775f90c948f68"
+     "sha256": "1b961f23a9cb72d0e2f517a32c2897a6d2acfa715d44ea5cb05775f90c948f68",
+     "funcoes": {
+      "Legislativa": 10688589.51,
+      "Judiciária": 5833877.01,
+      "Administração": 40868775.0,
+      "Assistência Social": 9786523.71,
+      "Saúde": 60988127.99,
+      "Educação": 77179688.33,
+      "Cultura": 647628.68,
+      "Urbanismo": 17264798.93,
+      "Gestão Ambiental": 342551.52,
+      "Agricultura": 13107232.05,
+      "Transporte": 1001710.9,
+      "Desporto e Lazer": 57354.2
+     },
+     "dtotal": 237766857.83,
+     "ds": "ok",
+     "dsha256": "bfa14bd5749e679babfb5bb5db1c4a0987cff25d8176c3cb13ade42f5cfb1afa"
     },
     "2025": {
      "s": "ok",
@@ -548,7 +947,23 @@
       "rcl": 286006790.36
      },
      "tipo": "completo",
-     "sha256": "168091cdb4d84f4046ec49f1fc5fa18d52b2d4035fff823102a9c4083c1b6829"
+     "sha256": "168091cdb4d84f4046ec49f1fc5fa18d52b2d4035fff823102a9c4083c1b6829",
+     "funcoes": {
+      "Legislativa": 10669418.29,
+      "Judiciária": 16872620.58,
+      "Administração": 58328677.14,
+      "Assistência Social": 10493353.41,
+      "Saúde": 69032040.18,
+      "Educação": 95123795.16,
+      "Cultura": 1483389.0,
+      "Urbanismo": 23102866.29,
+      "Agricultura": 12711631.87,
+      "Transporte": 2938886.74,
+      "Desporto e Lazer": 35233.28
+     },
+     "dtotal": 300791911.94,
+     "ds": "ok",
+     "dsha256": "07bce6dd4390d4a9d053ad4808e28e998a14cdd2c45df0910ccaf2c4b6caf719"
     }
    }
   },
@@ -576,7 +991,27 @@
       "rcl": 205361350.2
      },
      "tipo": "completo",
-     "sha256": "dd77d187c53d0eaf3c78b64d0e117e9e4c5983faa91cd5960d166828378977d0"
+     "sha256": "dd77d187c53d0eaf3c78b64d0e117e9e4c5983faa91cd5960d166828378977d0",
+     "funcoes": {
+      "Legislativa": 4309510.61,
+      "Judiciária": 5592123.12,
+      "Administração": 45605780.01,
+      "Assistência Social": 8494798.99,
+      "Saúde": 40493931.0,
+      "Educação": 64704092.64,
+      "Cultura": 9069826.66,
+      "Urbanismo": 9486071.82,
+      "Saneamento": 4851274.1,
+      "Gestão Ambiental": 344743.97,
+      "Agricultura": 413024.8,
+      "Energia": 2364548.86,
+      "Transporte": 4952256.4,
+      "Desporto e Lazer": 370569.26,
+      "Encargos Especiais": 6129683.5
+     },
+     "dtotal": 207182235.74,
+     "ds": "ok",
+     "dsha256": "6d2c92a30c10a05f492369f1677e450bc4bc53d2dac8ccc578d9b7a402377f85"
     },
     "2025": {
      "s": "ok",
@@ -598,7 +1033,29 @@
       "rcl": 227380558.3
      },
      "tipo": "completo",
-     "sha256": "df3afc0fe77a26305951bb8cf8bfb249df0ddff432321d35661a5b2127fd126e"
+     "sha256": "df3afc0fe77a26305951bb8cf8bfb249df0ddff432321d35661a5b2127fd126e",
+     "funcoes": {
+      "Legislativa": 5197179.86,
+      "Judiciária": 7164781.3,
+      "Administração": 26469097.88,
+      "Segurança Pública": 116166.66,
+      "Assistência Social": 8680875.32,
+      "Saúde": 40553239.4,
+      "Educação": 92985631.49,
+      "Cultura": 8641870.15,
+      "Urbanismo": 8077730.33,
+      "Habitação": 73587.02,
+      "Saneamento": 6191334.37,
+      "Gestão Ambiental": 771124.84,
+      "Agricultura": 347570.99,
+      "Energia": 2775758.76,
+      "Transporte": 4954558.5,
+      "Desporto e Lazer": 169695.69,
+      "Encargos Especiais": 7273021.15
+     },
+     "dtotal": 220443223.71,
+     "ds": "ok",
+     "dsha256": "1da9467b75ee785a74138eea7623c1f22add6184564935d556180bc8723c0022"
     }
    }
   },
@@ -626,7 +1083,22 @@
       "rcl": 112837009.27
      },
      "tipo": "completo",
-     "sha256": "cc119b452aaed71fe77ab77f2514427c3cc588b61c23017887fe44e3e92cb2f8"
+     "sha256": "cc119b452aaed71fe77ab77f2514427c3cc588b61c23017887fe44e3e92cb2f8",
+     "funcoes": {
+      "Legislativa": 3444607.68,
+      "Judiciária": 6837416.36,
+      "Administração": 19208875.96,
+      "Assistência Social": 2920938.71,
+      "Saúde": 18162243.12,
+      "Educação": 49730416.96,
+      "Cultura": 1169940.68,
+      "Urbanismo": 3710043.57,
+      "Energia": 1848251.42,
+      "Desporto e Lazer": 519322.39
+     },
+     "dtotal": 107552056.85,
+     "ds": "ok",
+     "dsha256": "a487adb2e2da8a5bc311732cd2ccddd85ccb52c62c11e78eaa66dc4941075bc9"
     },
     "2025": {
      "s": "ok",
@@ -648,7 +1120,22 @@
       "rcl": 127797776.88
      },
      "tipo": "completo",
-     "sha256": "10e32dccc8de2194d4791739d6e44bd4b14bc9a062c5ffdcea8dbb2f624300e6"
+     "sha256": "10e32dccc8de2194d4791739d6e44bd4b14bc9a062c5ffdcea8dbb2f624300e6",
+     "funcoes": {
+      "Legislativa": 3900443.6,
+      "Judiciária": 6500776.93,
+      "Administração": 27227983.4,
+      "Assistência Social": 3514522.04,
+      "Saúde": 17772365.66,
+      "Educação": 56589491.76,
+      "Cultura": 96607.65,
+      "Urbanismo": 4954404.88,
+      "Energia": 1827315.79,
+      "Desporto e Lazer": 141826.76
+     },
+     "dtotal": 122525738.47,
+     "ds": "ok",
+     "dsha256": "f97bd1da272b5dd12fb920a0608ca28700d93fa0eee55048ee59f2eefefe8159"
     }
    }
   },
@@ -676,7 +1163,25 @@
       "rcl": 124129568.3
      },
      "tipo": "completo",
-     "sha256": "9db44e4d87aed7b28de601003ccf60a3e4712b813ddf484e70ca3be0c437259d"
+     "sha256": "9db44e4d87aed7b28de601003ccf60a3e4712b813ddf484e70ca3be0c437259d",
+     "funcoes": {
+      "Legislativa": 4230605.27,
+      "Judiciária": 6805019.96,
+      "Administração": 25872774.56,
+      "Assistência Social": 6533358.63,
+      "Saúde": 19921288.42,
+      "Educação": 27915066.07,
+      "Cultura": 366776.35,
+      "Urbanismo": 13222747.83,
+      "Saneamento": 2839076.66,
+      "Gestão Ambiental": 46226.75,
+      "Agricultura": 225080.32,
+      "Indústria": 959947.56,
+      "Desporto e Lazer": 284980.29
+     },
+     "dtotal": 109222948.67,
+     "ds": "ok",
+     "dsha256": "c7259ac7ffd8b949cea4bacbdd83f9fc1f636912f8b17f3fa62cb8d07144bb20"
     },
     "2025": {
      "s": "ok",
@@ -698,7 +1203,25 @@
       "rcl": 110365143.58
      },
      "tipo": "completo",
-     "sha256": "5035f680cffac86447784cdb56228edeecd3f9add65dfcd66023492d2cca88b7"
+     "sha256": "5035f680cffac86447784cdb56228edeecd3f9add65dfcd66023492d2cca88b7",
+     "funcoes": {
+      "Legislativa": 4728670.08,
+      "Judiciária": 5244341.3,
+      "Administração": 28725356.69,
+      "Assistência Social": 5810729.72,
+      "Saúde": 20933720.47,
+      "Educação": 32219170.72,
+      "Cultura": 473371.87,
+      "Urbanismo": 7941880.24,
+      "Saneamento": 2526421.21,
+      "Gestão Ambiental": 144588.36,
+      "Agricultura": 8383.68,
+      "Indústria": 284267.01,
+      "Desporto e Lazer": 29383.0
+     },
+     "dtotal": 109070284.35,
+     "ds": "ok",
+     "dsha256": "5bea28ed175868c4af6b1f263637975a51fbdaf63c3634147203ba49478bff73"
     }
    }
   },
@@ -726,7 +1249,26 @@
       "rcl": 38687351.19
      },
      "tipo": "completo",
-     "sha256": "bbb0257c60540f5b9060c1ed9a96fbdadb438ebe04fd075bb63af9e70962490a"
+     "sha256": "bbb0257c60540f5b9060c1ed9a96fbdadb438ebe04fd075bb63af9e70962490a",
+     "funcoes": {
+      "Legislativa": 1512776.71,
+      "Judiciária": 826672.78,
+      "Administração": 3917126.09,
+      "Assistência Social": 2577220.86,
+      "Saúde": 8924281.07,
+      "Educação": 12329914.84,
+      "Cultura": 2915451.47,
+      "Urbanismo": 6431653.01,
+      "Saneamento": 55563.27,
+      "Gestão Ambiental": 69879.62,
+      "Agricultura": 1377865.43,
+      "Transporte": 362340.8,
+      "Desporto e Lazer": 239962.8,
+      "Encargos Especiais": 541671.34
+     },
+     "dtotal": 42082380.09,
+     "ds": "ok",
+     "dsha256": "66e362ff50df32218df4e29a2f825edf556ae67cdda4097cafbc57031cde4278"
     },
     "2025": {
      "s": "ok",
@@ -748,7 +1290,26 @@
       "rcl": 45202074.33
      },
      "tipo": "completo",
-     "sha256": "b6cdcbd94659f5121659455b15d5e44b2cd89961d1edd7b02423222fd4a01b88"
+     "sha256": "b6cdcbd94659f5121659455b15d5e44b2cd89961d1edd7b02423222fd4a01b88",
+     "funcoes": {
+      "Legislativa": 1727745.59,
+      "Judiciária": 1175650.87,
+      "Administração": 4039394.69,
+      "Assistência Social": 3995216.93,
+      "Saúde": 9546880.58,
+      "Educação": 12581203.56,
+      "Cultura": 4165845.26,
+      "Urbanismo": 7493992.46,
+      "Saneamento": 431540.87,
+      "Gestão Ambiental": 118567.7,
+      "Agricultura": 1875767.19,
+      "Transporte": 487400.6,
+      "Desporto e Lazer": 79024.99,
+      "Encargos Especiais": 412423.09
+     },
+     "dtotal": 48130654.38,
+     "ds": "ok",
+     "dsha256": "da9b16004fd0ff86f70897eb545265088323fc81b3ea2a87379bb97fdc8e0333"
     }
    }
   },
@@ -776,7 +1337,25 @@
       "rcl": 109349054.7
      },
      "tipo": "completo",
-     "sha256": "d617ec2d3482ec256e10d0fa7866137872fae8c4e34ad3f986a1d4d9a5b7c26d"
+     "sha256": "d617ec2d3482ec256e10d0fa7866137872fae8c4e34ad3f986a1d4d9a5b7c26d",
+     "funcoes": {
+      "Legislativa": 3022711.85,
+      "Judiciária": 1819265.52,
+      "Administração": 8626625.4,
+      "Assistência Social": 4003210.25,
+      "Saúde": 23136085.11,
+      "Educação": 51107944.97,
+      "Cultura": 4849775.08,
+      "Urbanismo": 15744584.36,
+      "Gestão Ambiental": 955627.61,
+      "Agricultura": 1653651.52,
+      "Transporte": 4226044.36,
+      "Desporto e Lazer": 836304.43,
+      "Encargos Especiais": 9671096.49
+     },
+     "dtotal": 129652926.95,
+     "ds": "ok",
+     "dsha256": "3a03bde03089c7d01fd171d30814a24f4d18169155a3f3c71313425d2cb9766b"
     },
     "2025": {
      "s": "ok",
@@ -798,7 +1377,25 @@
       "rcl": 112689604.01
      },
      "tipo": "completo",
-     "sha256": "abc28aa2c67ea7761500cfded30b8737a75df1098b24917c4391e8909ad9e0c7"
+     "sha256": "abc28aa2c67ea7761500cfded30b8737a75df1098b24917c4391e8909ad9e0c7",
+     "funcoes": {
+      "Legislativa": 3820320.54,
+      "Judiciária": 1585694.56,
+      "Administração": 9728553.42,
+      "Assistência Social": 3769872.32,
+      "Saúde": 22913748.22,
+      "Educação": 50419665.96,
+      "Cultura": 5504463.34,
+      "Urbanismo": 11686347.11,
+      "Gestão Ambiental": 960067.73,
+      "Agricultura": 1074983.78,
+      "Transporte": 3133267.33,
+      "Desporto e Lazer": 907114.33,
+      "Encargos Especiais": 4872488.02
+     },
+     "dtotal": 120376586.66,
+     "ds": "ok",
+     "dsha256": "f2d6ba5d5d2a23f2a4dae5e861d8e1be645f965d140aeab49388df8741360f46"
     }
    }
   },
@@ -826,7 +1423,25 @@
       "rcl": 32245180.02
      },
      "tipo": "completo",
-     "sha256": "224dcf5b0160edcefa2dcb2209dbcc84d9fc633247becedba3060d2daa733392"
+     "sha256": "224dcf5b0160edcefa2dcb2209dbcc84d9fc633247becedba3060d2daa733392",
+     "funcoes": {
+      "Legislativa": 1495895.62,
+      "Judiciária": 427273.85,
+      "Administração": 3680119.49,
+      "Assistência Social": 2023025.51,
+      "Saúde": 7298390.2,
+      "Educação": 6779052.39,
+      "Cultura": 2247250.37,
+      "Urbanismo": 5456633.24,
+      "Gestão Ambiental": 123482.16,
+      "Agricultura": 143329.86,
+      "Energia": 93324.42,
+      "Transporte": 367025.53,
+      "Encargos Especiais": 679639.67
+     },
+     "dtotal": 30814442.31,
+     "ds": "ok",
+     "dsha256": "66ced1ca37e972e710432cdc5f1ba641884da7d704e803d4092a4b2f38b268ad"
     },
     "2025": {
      "s": "ok",
@@ -848,7 +1463,25 @@
       "rcl": 34821999.15
      },
      "tipo": "completo",
-     "sha256": "0b38dc0e449ab1a5cd10dbf5b0ec554ff2e654ba67a8d223cabf8a92e54cf125"
+     "sha256": "0b38dc0e449ab1a5cd10dbf5b0ec554ff2e654ba67a8d223cabf8a92e54cf125",
+     "funcoes": {
+      "Legislativa": 1695749.08,
+      "Judiciária": 1033982.09,
+      "Administração": 4510727.7,
+      "Assistência Social": 1966891.36,
+      "Saúde": 6892739.72,
+      "Educação": 6791812.44,
+      "Cultura": 3308908.59,
+      "Urbanismo": 4041518.05,
+      "Gestão Ambiental": 164330.66,
+      "Agricultura": 464407.04,
+      "Energia": 1333186.63,
+      "Transporte": 853451.84,
+      "Encargos Especiais": 1078401.38
+     },
+     "dtotal": 34136106.58,
+     "ds": "ok",
+     "dsha256": "e70e56266918b18bc9242d1f5f1b0a11f1952499d1634cc3f9b0396e4152a10a"
     }
    }
   },
@@ -876,7 +1509,25 @@
       "rcl": 52328298.49
      },
      "tipo": "completo",
-     "sha256": "f754c85e1b1ef2fe7e5f5dbec2df14f49b34544fe1c18c6b99c9d97742baa883"
+     "sha256": "f754c85e1b1ef2fe7e5f5dbec2df14f49b34544fe1c18c6b99c9d97742baa883",
+     "funcoes": {
+      "Legislativa": 1665640.29,
+      "Judiciária": 1270015.85,
+      "Administração": 5101257.44,
+      "Assistência Social": 2564511.54,
+      "Saúde": 9891201.08,
+      "Educação": 17765447.22,
+      "Cultura": 1877181.7,
+      "Urbanismo": 10383862.86,
+      "Habitação": 29588.26,
+      "Gestão Ambiental": 261017.49,
+      "Agricultura": 638186.85,
+      "Desporto e Lazer": 74772.02,
+      "Encargos Especiais": 664742.58
+     },
+     "dtotal": 52187425.18,
+     "ds": "ok",
+     "dsha256": "3dc3b2aacb7f237e18ae4363d3eef31b13fd0741f183010e263e9996ade59d86"
     },
     "2025": {
      "s": "ok",
@@ -898,7 +1549,24 @@
       "rcl": 59950135.19
      },
      "tipo": "completo",
-     "sha256": "7f51566dd59bb00b256ac16186bf6da68aad97851e982573ad1994d4e2b6170f"
+     "sha256": "7f51566dd59bb00b256ac16186bf6da68aad97851e982573ad1994d4e2b6170f",
+     "funcoes": {
+      "Legislativa": 1878441.1,
+      "Judiciária": 1485965.29,
+      "Administração": 6375484.98,
+      "Assistência Social": 3442732.7,
+      "Saúde": 12008931.85,
+      "Educação": 19832423.93,
+      "Cultura": 2774608.67,
+      "Urbanismo": 9575952.32,
+      "Gestão Ambiental": 168246.98,
+      "Agricultura": 819341.28,
+      "Desporto e Lazer": 319438.77,
+      "Encargos Especiais": 773535.13
+     },
+     "dtotal": 59455103.0,
+     "ds": "ok",
+     "dsha256": "d29721f6a6e64de5b40667aa4e2bf51dd6d1b6ef57b89785cb0ef5fcc9c6fb58"
     }
    }
   },
@@ -926,7 +1594,29 @@
       "rcl": 365451971.87
      },
      "tipo": "completo",
-     "sha256": "ffea683185ecc0af1f9009584dc77d6cddfaeb062b13f5832c3d4902979144f3"
+     "sha256": "ffea683185ecc0af1f9009584dc77d6cddfaeb062b13f5832c3d4902979144f3",
+     "funcoes": {
+      "Legislativa": 10834686.08,
+      "Judiciária": 9581589.44,
+      "Administração": 28336979.47,
+      "Segurança Pública": 447842.24,
+      "Assistência Social": 7583401.84,
+      "Previdência Social": 3166589.0,
+      "Saúde": 65904137.77,
+      "Educação": 103961389.1,
+      "Cultura": 7640286.35,
+      "Urbanismo": 34938227.32,
+      "Saneamento": 12053755.85,
+      "Gestão Ambiental": 3181610.36,
+      "Agricultura": 1960747.21,
+      "Comunicações": 1037080.21,
+      "Transporte": 5100521.49,
+      "Desporto e Lazer": 1863957.47,
+      "Encargos Especiais": 5320802.87
+     },
+     "dtotal": 302913604.07,
+     "ds": "ok",
+     "dsha256": "9f561aa402576016eb5fe1f4d715834eb13315028c830135dc25211ff69ae950"
     },
     "2025": {
      "s": "ok",
@@ -948,7 +1638,29 @@
       "rcl": 385586239.94
      },
      "tipo": "completo",
-     "sha256": "f754d6af1c7eb44705e087653ad7521fae92ca0c72aae422b697d9266083cd2a"
+     "sha256": "f754d6af1c7eb44705e087653ad7521fae92ca0c72aae422b697d9266083cd2a",
+     "funcoes": {
+      "Legislativa": 11763975.4,
+      "Judiciária": 10627980.08,
+      "Administração": 36718150.49,
+      "Segurança Pública": 476718.96,
+      "Assistência Social": 8830026.73,
+      "Previdência Social": 3376212.07,
+      "Saúde": 74017346.12,
+      "Educação": 107881297.28,
+      "Cultura": 15742845.96,
+      "Urbanismo": 39396610.51,
+      "Saneamento": 13692874.16,
+      "Gestão Ambiental": 3356168.63,
+      "Agricultura": 2611742.93,
+      "Comunicações": 1475824.02,
+      "Transporte": 5120308.95,
+      "Desporto e Lazer": 2098992.26,
+      "Encargos Especiais": 6857609.13
+     },
+     "dtotal": 344044683.68,
+     "ds": "ok",
+     "dsha256": "88937632295811c4f4a0131ae3bc2bc8e82ccba2c99b57c34e88d866e4a6d26a"
     }
    }
   },
@@ -976,7 +1688,22 @@
       "rcl": 39201858.23
      },
      "tipo": "completo",
-     "sha256": "86da6316cdf6543a413d26db2e89f1063c9ca2f571760189e141f72c44a7f018"
+     "sha256": "86da6316cdf6543a413d26db2e89f1063c9ca2f571760189e141f72c44a7f018",
+     "funcoes": {
+      "Legislativa": 1607433.75,
+      "Judiciária": 649162.61,
+      "Administração": 5382930.43,
+      "Assistência Social": 1957533.19,
+      "Saúde": 9195799.57,
+      "Educação": 13306520.49,
+      "Urbanismo": 7292303.47,
+      "Agricultura": 1350454.12,
+      "Desporto e Lazer": 412098.21,
+      "Encargos Especiais": 843285.45
+     },
+     "dtotal": 41997521.29,
+     "ds": "ok",
+     "dsha256": "826458ea8f2e67ab961f7d08da4c205ca249c051c7267c2b3785e68755d377d7"
     },
     "2025": {
      "s": "ok",
@@ -998,7 +1725,25 @@
       "rcl": 42427366.53
      },
      "tipo": "completo",
-     "sha256": "c4fb53b04cb2cbccd33a11968cc848e232dbc8bb70aa47382760436273a365e6"
+     "sha256": "c4fb53b04cb2cbccd33a11968cc848e232dbc8bb70aa47382760436273a365e6",
+     "funcoes": {
+      "Legislativa": 1834431.3,
+      "Judiciária": 1638603.13,
+      "Administração": 5740000.67,
+      "Assistência Social": 2264076.67,
+      "Saúde": 9178595.76,
+      "Educação": 14532008.57,
+      "Cultura": 1778095.68,
+      "Urbanismo": 4817301.38,
+      "Agricultura": 1504865.06,
+      "Comunicações": 97686.45,
+      "Transporte": 555354.92,
+      "Desporto e Lazer": 264289.97,
+      "Encargos Especiais": 506126.07
+     },
+     "dtotal": 44711435.63,
+     "ds": "ok",
+     "dsha256": "76f6a1abd8e2254a6cc0009e907581e081c72609b66372ae1e59d9e687a1b249"
     }
    }
   },
@@ -1026,7 +1771,24 @@
       "rcl": 81455949.19
      },
      "tipo": "completo",
-     "sha256": "54a41e716bfce35a4929fc059048f27f9b120c57a6cfb736195870600308d46d"
+     "sha256": "54a41e716bfce35a4929fc059048f27f9b120c57a6cfb736195870600308d46d",
+     "funcoes": {
+      "Legislativa": 2517886.46,
+      "Judiciária": 756417.71,
+      "Administração": 6470234.13,
+      "Assistência Social": 5401087.24,
+      "Saúde": 17131161.74,
+      "Educação": 28980056.81,
+      "Cultura": 4459945.34,
+      "Urbanismo": 10257740.33,
+      "Gestão Ambiental": 437743.49,
+      "Agricultura": 1077670.77,
+      "Transporte": 4903126.61,
+      "Desporto e Lazer": 365469.38
+     },
+     "dtotal": 82758540.01,
+     "ds": "ok",
+     "dsha256": "c774ba343d8aa316d929ec63e7a4fc9be69d729f20ee949852e838afa25e4a46"
     },
     "2025": {
      "s": "ok",
@@ -1048,7 +1810,24 @@
       "rcl": 87440194.36
      },
      "tipo": "completo",
-     "sha256": "5dcf57947ee4b47483c07ecc1247ad5759e88e8ccc254d7bdf9850d37ee4a08a"
+     "sha256": "5dcf57947ee4b47483c07ecc1247ad5759e88e8ccc254d7bdf9850d37ee4a08a",
+     "funcoes": {
+      "Legislativa": 2906105.47,
+      "Judiciária": 1025124.58,
+      "Administração": 8315051.45,
+      "Assistência Social": 4548513.94,
+      "Saúde": 17365330.74,
+      "Educação": 31887453.15,
+      "Cultura": 2834503.72,
+      "Urbanismo": 9951340.95,
+      "Gestão Ambiental": 445183.91,
+      "Agricultura": 1366045.12,
+      "Transporte": 5487207.7,
+      "Desporto e Lazer": 591625.79
+     },
+     "dtotal": 86723486.52,
+     "ds": "ok",
+     "dsha256": "de6356ed93e3b65fa68443c9874a162a0c2da97378c2764c32de92b2b152bf3d"
     }
    }
   },
@@ -1076,7 +1855,24 @@
       "rcl": 64368080.16
      },
      "tipo": "completo",
-     "sha256": "422d5f6ea4cdbd47c6ec192082ef2092f5ab7f7e2a956798b3479238a039f11a"
+     "sha256": "422d5f6ea4cdbd47c6ec192082ef2092f5ab7f7e2a956798b3479238a039f11a",
+     "funcoes": {
+      "Legislativa": 1794719.34,
+      "Judiciária": 1536630.81,
+      "Administração": 6424733.79,
+      "Assistência Social": 2579047.8,
+      "Saúde": 12409384.2,
+      "Educação": 23180001.7,
+      "Cultura": 3302901.23,
+      "Urbanismo": 8003429.72,
+      "Agricultura": 2266194.6,
+      "Transporte": 195233.6,
+      "Desporto e Lazer": 957847.14,
+      "Encargos Especiais": 1812562.91
+     },
+     "dtotal": 64462686.84,
+     "ds": "ok",
+     "dsha256": "1cde90db0e925cfb5e99ee3f4d1a48cf59089471051306c78028c7685d15ecf2"
     },
     "2025": {
      "s": "ok",
@@ -1098,7 +1894,24 @@
       "rcl": 77955966.24
      },
      "tipo": "completo",
-     "sha256": "933583c8dba077927ceaa0cd60c6c5d29814b694cc8a41ae19c64f0940975d1b"
+     "sha256": "933583c8dba077927ceaa0cd60c6c5d29814b694cc8a41ae19c64f0940975d1b",
+     "funcoes": {
+      "Legislativa": 2279244.04,
+      "Judiciária": 1755741.98,
+      "Administração": 6315433.81,
+      "Assistência Social": 2811539.3,
+      "Saúde": 14264983.28,
+      "Educação": 29424748.6,
+      "Cultura": 3198753.08,
+      "Urbanismo": 11452901.92,
+      "Agricultura": 2177391.16,
+      "Transporte": 334079.82,
+      "Desporto e Lazer": 1530345.0,
+      "Encargos Especiais": 59000.0
+     },
+     "dtotal": 75604161.99,
+     "ds": "ok",
+     "dsha256": "958b143b639a891284c4c46a3cc03294c6bc18f3376277abdd6fd5806b8c65c7"
     }
    }
   },
@@ -1126,7 +1939,24 @@
       "rcl": 39141146.22
      },
      "tipo": "completo",
-     "sha256": "98efdd7bcf7e4f89ed86ebc60768179daf030d3a48587fe0f90e8e2d052a6721"
+     "sha256": "98efdd7bcf7e4f89ed86ebc60768179daf030d3a48587fe0f90e8e2d052a6721",
+     "funcoes": {
+      "Legislativa": 1641074.54,
+      "Judiciária": 1854967.82,
+      "Administração": 9676557.09,
+      "Assistência Social": 2738121.61,
+      "Saúde": 7408559.6,
+      "Educação": 7681023.58,
+      "Cultura": 150604.72,
+      "Urbanismo": 4598345.02,
+      "Gestão Ambiental": 79542.16,
+      "Agricultura": 228765.76,
+      "Desporto e Lazer": 618969.96,
+      "Encargos Especiais": 1515506.3
+     },
+     "dtotal": 38192038.16,
+     "ds": "ok",
+     "dsha256": "4453bd6f02187b4545968d1ebaa55346d6e89530b3d75b22d4e26889e0ae43da"
     },
     "2025": {
      "s": "ok",
@@ -1148,7 +1978,25 @@
       "rcl": 38778310.58
      },
      "tipo": "completo",
-     "sha256": "133aae3dc30c4e65c1270d2c44a75b4607fc7aa734e938a2b64dfa6679fea7d1"
+     "sha256": "133aae3dc30c4e65c1270d2c44a75b4607fc7aa734e938a2b64dfa6679fea7d1",
+     "funcoes": {
+      "Legislativa": 1671332.75,
+      "Judiciária": 1739517.78,
+      "Administração": 9869658.16,
+      "Assistência Social": 2694656.86,
+      "Saúde": 7873688.66,
+      "Educação": 8885273.51,
+      "Cultura": 247103.2,
+      "Urbanismo": 4486267.69,
+      "Gestão Ambiental": 206721.72,
+      "Agricultura": 250939.53,
+      "Energia": 121796.0,
+      "Desporto e Lazer": 796803.11,
+      "Encargos Especiais": 1315458.21
+     },
+     "dtotal": 40159217.18,
+     "ds": "ok",
+     "dsha256": "29cfcb735dc6a5700ed0540d68f02404dbfb1b68c6d773defdfe276f160418dc"
     }
    }
   },
@@ -1176,7 +2024,24 @@
       "rcl": 39178743.09
      },
      "tipo": "completo",
-     "sha256": "6c86e13cc22e19fe0084daad131e2ebfb82393f45ffdac01fc0a415218904c7d"
+     "sha256": "6c86e13cc22e19fe0084daad131e2ebfb82393f45ffdac01fc0a415218904c7d",
+     "funcoes": {
+      "Legislativa": 1496018.27,
+      "Judiciária": 3000801.64,
+      "Administração": 5870696.09,
+      "Assistência Social": 2125026.04,
+      "Saúde": 6058097.0,
+      "Educação": 9606842.87,
+      "Cultura": 430052.99,
+      "Urbanismo": 5679679.69,
+      "Gestão Ambiental": 438893.24,
+      "Agricultura": 862855.58,
+      "Transporte": 349701.08,
+      "Desporto e Lazer": 3270025.52
+     },
+     "dtotal": 39188690.01,
+     "ds": "ok",
+     "dsha256": "6a5a10c18459e99e9ebe34866007b6cf59961c0a2707ef2f62a4302b03e9ef13"
     },
     "2025": {
      "s": "ok",
@@ -1198,7 +2063,25 @@
       "rcl": 43768900.13
      },
      "tipo": "completo",
-     "sha256": "4cdfe381b91e84de2b479683c9ab80b3a32f6bfc3ca9970fa7622028dc4ef5f7"
+     "sha256": "4cdfe381b91e84de2b479683c9ab80b3a32f6bfc3ca9970fa7622028dc4ef5f7",
+     "funcoes": {
+      "Legislativa": 1614400.38,
+      "Judiciária": 2259042.7,
+      "Administração": 5223452.91,
+      "Assistência Social": 2273225.58,
+      "Saúde": 10290929.72,
+      "Educação": 12068999.4,
+      "Cultura": 3726267.05,
+      "Urbanismo": 6185667.41,
+      "Gestão Ambiental": 430880.44,
+      "Agricultura": 919913.38,
+      "Comunicações": 131069.78,
+      "Energia": 725724.77,
+      "Transporte": 520080.57
+     },
+     "dtotal": 46369654.09,
+     "ds": "ok",
+     "dsha256": "e7cab25cc8f567737c973121c249664243c53e6ead52bacbe503a1f973534047"
     }
    }
   },
@@ -1226,7 +2109,25 @@
       "rcl": 63265970.78
      },
      "tipo": "completo",
-     "sha256": "a78778d5023953e4e9a0170f8cc580000986c352edb70b440e7d575b1e3b36b8"
+     "sha256": "a78778d5023953e4e9a0170f8cc580000986c352edb70b440e7d575b1e3b36b8",
+     "funcoes": {
+      "Legislativa": 1431519.9,
+      "Judiciária": 549599.97,
+      "Administração": 8294701.8,
+      "Assistência Social": 4378224.6,
+      "Previdência Social": 3860204.01,
+      "Saúde": 10155109.8,
+      "Educação": 24949678.26,
+      "Cultura": 3121754.39,
+      "Urbanismo": 4423874.66,
+      "Agricultura": 126120.66,
+      "Comércio e Serviços": 115334.0,
+      "Desporto e Lazer": 832415.5,
+      "Encargos Especiais": 939370.58
+     },
+     "dtotal": 63177908.13,
+     "ds": "ok",
+     "dsha256": "1589a6970a8477cc98ca983fc912722f852283c2dffa718ef463ec909d3b5c13"
     },
     "2025": {
      "s": "ok",
@@ -1248,7 +2149,25 @@
       "rcl": 81209456.14
      },
      "tipo": "completo",
-     "sha256": "32f3015a5e2d43402ce26cc2fc45072c5b34f2190ce49c626d252237d42699a6"
+     "sha256": "32f3015a5e2d43402ce26cc2fc45072c5b34f2190ce49c626d252237d42699a6",
+     "funcoes": {
+      "Legislativa": 1652076.56,
+      "Judiciária": 183061.1,
+      "Administração": 6168067.68,
+      "Assistência Social": 5394608.3,
+      "Previdência Social": 4085734.41,
+      "Saúde": 12465908.94,
+      "Educação": 40147732.07,
+      "Cultura": 4114907.0,
+      "Urbanismo": 8400131.18,
+      "Agricultura": 201826.8,
+      "Indústria": 71734.0,
+      "Desporto e Lazer": 140512.4,
+      "Encargos Especiais": 1006814.04
+     },
+     "dtotal": 84033114.48,
+     "ds": "ok",
+     "dsha256": "540a5055a1b0970d9fa2c5785217af614dd14f99c58a36a14a83333c14d6daea"
     }
    }
   },
@@ -1276,7 +2195,26 @@
       "rcl": 104602288.82
      },
      "tipo": "completo",
-     "sha256": "31fd18ae0def766edc50286bf28753ceb5d6a91e328ff55bc66b1117c17fbc05"
+     "sha256": "31fd18ae0def766edc50286bf28753ceb5d6a91e328ff55bc66b1117c17fbc05",
+     "funcoes": {
+      "Legislativa": 3021329.48,
+      "Judiciária": 2264060.44,
+      "Administração": 16243346.33,
+      "Assistência Social": 5144159.28,
+      "Saúde": 18177691.9,
+      "Educação": 43173888.7,
+      "Cultura": 3104378.64,
+      "Urbanismo": 10015721.5,
+      "Saneamento": 39336.82,
+      "Gestão Ambiental": 149940.74,
+      "Agricultura": 266382.11,
+      "Transporte": 227039.0,
+      "Desporto e Lazer": 669083.21,
+      "Encargos Especiais": 3665954.66
+     },
+     "dtotal": 106162312.81,
+     "ds": "ok",
+     "dsha256": "ae59e6f407c405a67b7e08f23998ebf37fc66dfee807494b3108a718aa4ef33c"
     },
     "2025": {
      "s": "ok",
@@ -1298,7 +2236,27 @@
       "rcl": 129631590.52
      },
      "tipo": "completo",
-     "sha256": "8b575ddbc863d2a1ee6e3a19e5a357b4592b3854fc78f513a0de3d5fddc7d3ae"
+     "sha256": "8b575ddbc863d2a1ee6e3a19e5a357b4592b3854fc78f513a0de3d5fddc7d3ae",
+     "funcoes": {
+      "Legislativa": 3573534.14,
+      "Judiciária": 1868459.54,
+      "Administração": 18041882.21,
+      "Assistência Social": 5408071.92,
+      "Saúde": 19241899.67,
+      "Educação": 53438915.85,
+      "Cultura": 6161685.54,
+      "Urbanismo": 17153438.14,
+      "Habitação": 945.21,
+      "Saneamento": 76749.16,
+      "Gestão Ambiental": 167806.44,
+      "Agricultura": 24324.07,
+      "Transporte": 2098664.42,
+      "Desporto e Lazer": 211024.72,
+      "Encargos Especiais": 3743095.31
+     },
+     "dtotal": 131210496.34,
+     "ds": "ok",
+     "dsha256": "144343ffdb88cd2b731a3b33f6aea94345df3181c6b9e8aae479de79b5147aa9"
     }
    }
   },
@@ -1326,7 +2284,26 @@
       "rcl": 441690913.47
      },
      "tipo": "completo",
-     "sha256": "2cee586fae02b1e2ff3785385b0467e2862c80100ea7a5f0553e8418d4f0ac12"
+     "sha256": "2cee586fae02b1e2ff3785385b0467e2862c80100ea7a5f0553e8418d4f0ac12",
+     "funcoes": {
+      "Legislativa": 12494347.19,
+      "Judiciária": 2281426.71,
+      "Administração": 41068714.76,
+      "Assistência Social": 9038883.51,
+      "Saúde": 116743211.17,
+      "Educação": 119982422.62,
+      "Cultura": 12946889.04,
+      "Urbanismo": 49611095.26,
+      "Gestão Ambiental": 4770864.02,
+      "Agricultura": 6647671.94,
+      "Comércio e Serviços": 411912.55,
+      "Energia": 19765831.26,
+      "Transporte": 6314967.07,
+      "Desporto e Lazer": 2004377.82
+     },
+     "dtotal": 404082614.92,
+     "ds": "ok",
+     "dsha256": "cca3d92f0e0df4ff80f34a2e3d23b84d2aa87b7e2afef66b43549320742e14b9"
     },
     "2025": {
      "s": "ok",
@@ -1348,7 +2325,26 @@
       "rcl": 437682481.14
      },
      "tipo": "completo",
-     "sha256": "97772a1c0b3ef18a4df2a9a69a940472a32e49c0cc7175f1b1645dd749ca373c"
+     "sha256": "97772a1c0b3ef18a4df2a9a69a940472a32e49c0cc7175f1b1645dd749ca373c",
+     "funcoes": {
+      "Legislativa": 12595681.89,
+      "Judiciária": 1861515.46,
+      "Administração": 43171464.85,
+      "Assistência Social": 10040441.79,
+      "Saúde": 114509999.35,
+      "Educação": 134589484.43,
+      "Cultura": 21619391.67,
+      "Urbanismo": 74206980.96,
+      "Gestão Ambiental": 4662226.84,
+      "Agricultura": 8227128.46,
+      "Comércio e Serviços": 342944.33,
+      "Energia": 18021096.79,
+      "Transporte": 4633995.68,
+      "Desporto e Lazer": 2135377.28
+     },
+     "dtotal": 450617729.78,
+     "ds": "ok",
+     "dsha256": "c8906ede6b3c2d4aaca1c4d2c4b06cce1db10ae46f49ca37f4720bd8f87362f5"
     }
    }
   },
@@ -1376,7 +2372,28 @@
       "rcl": 199931309.58
      },
      "tipo": "completo",
-     "sha256": "21f61913917c77ae2753012a5c7b835c82820bba7cd17cc5ef897e2cc5d7d819"
+     "sha256": "21f61913917c77ae2753012a5c7b835c82820bba7cd17cc5ef897e2cc5d7d819",
+     "funcoes": {
+      "Legislativa": 4893682.73,
+      "Judiciária": 2543664.28,
+      "Administração": 9536643.11,
+      "Assistência Social": 4370638.51,
+      "Saúde": 36041569.65,
+      "Educação": 88002725.33,
+      "Cultura": 7939308.48,
+      "Urbanismo": 21649969.02,
+      "Gestão Ambiental": 127626.99,
+      "Agricultura": 6135645.62,
+      "Indústria": 681421.94,
+      "Comércio e Serviços": 1443169.2,
+      "Comunicações": 332412.42,
+      "Transporte": 1869537.26,
+      "Desporto e Lazer": 223067.49,
+      "Encargos Especiais": 1690194.69
+     },
+     "dtotal": 187481276.72,
+     "ds": "ok",
+     "dsha256": "744b3a56795bacfe0dfa143d6d9dcaaaf281c07145fd2444db0bdce611706dd0"
     },
     "2025": {
      "s": "ok",
@@ -1398,7 +2415,28 @@
       "rcl": 212303393.12
      },
      "tipo": "completo",
-     "sha256": "882dc766b47989feed7377367933d0a9f00b8aa549887d2568f65a4d504e2be7"
+     "sha256": "882dc766b47989feed7377367933d0a9f00b8aa549887d2568f65a4d504e2be7",
+     "funcoes": {
+      "Legislativa": 5480828.0,
+      "Judiciária": 3068955.69,
+      "Administração": 10965964.03,
+      "Assistência Social": 4802557.62,
+      "Saúde": 39456988.27,
+      "Educação": 91636337.62,
+      "Cultura": 8235852.91,
+      "Urbanismo": 12686700.39,
+      "Gestão Ambiental": 160250.13,
+      "Agricultura": 4024662.55,
+      "Indústria": 712151.04,
+      "Comércio e Serviços": 1149993.56,
+      "Comunicações": 409845.81,
+      "Transporte": 2374683.79,
+      "Desporto e Lazer": 486073.22,
+      "Encargos Especiais": 1954641.8
+     },
+     "dtotal": 187606486.43,
+     "ds": "ok",
+     "dsha256": "e13bdf24cdba8e10f1e4d956f7ec11dd1f15b070c5ffeedbd2a32adac6998766"
     }
    }
   },
@@ -1426,7 +2464,23 @@
       "rcl": 33122812.36
      },
      "tipo": "completo",
-     "sha256": "5830d02c253b96dbc54abd49f7a41dee8f3a3b3d6de2073cc120941d78b5de28"
+     "sha256": "5830d02c253b96dbc54abd49f7a41dee8f3a3b3d6de2073cc120941d78b5de28",
+     "funcoes": {
+      "Legislativa": 1455970.66,
+      "Judiciária": 424293.12,
+      "Essencial à Justiça": 212077.07,
+      "Administração": 4948495.66,
+      "Assistência Social": 2093421.98,
+      "Saúde": 7752154.38,
+      "Educação": 10322886.4,
+      "Cultura": 367715.85,
+      "Urbanismo": 4549490.11,
+      "Agricultura": 1211303.52,
+      "Desporto e Lazer": 143363.77
+     },
+     "dtotal": 33481172.52,
+     "ds": "ok",
+     "dsha256": "d10e02626daa31846f7fe1374af36edb84c0b220d36b9b63f9b0863d68bf6320"
     },
     "2025": {
      "s": "ok",
@@ -1448,7 +2502,25 @@
       "rcl": 38225047.92
      },
      "tipo": "completo",
-     "sha256": "ab99335e457ea40479ae6388700c100a848a596c09091bd390263b0e8a84034b"
+     "sha256": "ab99335e457ea40479ae6388700c100a848a596c09091bd390263b0e8a84034b",
+     "funcoes": {
+      "Legislativa": 1665275.08,
+      "Judiciária": 421157.18,
+      "Essencial à Justiça": 314273.43,
+      "Administração": 4707884.51,
+      "Assistência Social": 2407643.65,
+      "Saúde": 8036220.16,
+      "Educação": 13532365.17,
+      "Cultura": 1120708.22,
+      "Urbanismo": 8244398.27,
+      "Habitação": 2050000.0,
+      "Agricultura": 1260024.72,
+      "Comércio e Serviços": 419978.84,
+      "Desporto e Lazer": 235020.88
+     },
+     "dtotal": 44414950.11,
+     "ds": "ok",
+     "dsha256": "22d362a2df53566825b29de29c01da264f71e178aeac4f37454d0da93544fdad"
     }
    }
   },
@@ -1476,7 +2548,24 @@
       "rcl": 196927191.22
      },
      "tipo": "completo",
-     "sha256": "1988a293a1e7c96ab97bc3a9c473ed5c4e1ddc6ccd0cb3fc71a9fa9a1fd72585"
+     "sha256": "1988a293a1e7c96ab97bc3a9c473ed5c4e1ddc6ccd0cb3fc71a9fa9a1fd72585",
+     "funcoes": {
+      "Legislativa": 5311009.15,
+      "Judiciária": 10506629.25,
+      "Administração": 16302255.1,
+      "Assistência Social": 6488666.16,
+      "Saúde": 40705682.95,
+      "Educação": 73049343.85,
+      "Cultura": 2607079.44,
+      "Urbanismo": 26692748.21,
+      "Gestão Ambiental": 982499.44,
+      "Agricultura": 795521.69,
+      "Energia": 4495552.77,
+      "Desporto e Lazer": 401281.99
+     },
+     "dtotal": 188338270.0,
+     "ds": "ok",
+     "dsha256": "0b90ac1750ee5e2d71af827c52122f3f4ae9840b7a7167c2fad68e01c862db1d"
     },
     "2025": {
      "s": "ok",
@@ -1498,7 +2587,27 @@
       "rcl": 230946583.74
      },
      "tipo": "completo",
-     "sha256": "90b2243d4000450f011786d4508d814ea03397dea6137517ad8a716d73fc2002"
+     "sha256": "90b2243d4000450f011786d4508d814ea03397dea6137517ad8a716d73fc2002",
+     "funcoes": {
+      "Legislativa": 5900178.24,
+      "Judiciária": 13907322.66,
+      "Administração": 19759923.22,
+      "Assistência Social": 6837896.04,
+      "Saúde": 45580720.91,
+      "Educação": 90064109.68,
+      "Cultura": 5882264.11,
+      "Direitos da Cidadania": 21000.0,
+      "Urbanismo": 17305808.09,
+      "Habitação": 5000.0,
+      "Gestão Ambiental": 624213.22,
+      "Agricultura": 1360147.94,
+      "Comunicações": 317356.4,
+      "Energia": 4115056.0,
+      "Desporto e Lazer": 716708.48
+     },
+     "dtotal": 212397704.99,
+     "ds": "ok",
+     "dsha256": "2fc4434df318fdcbfc873faa882ea6a313092db14aff6fed391c5ab147bc2dbb"
     }
    }
   },
@@ -1526,7 +2635,28 @@
       "rcl": 114140590.2
      },
      "tipo": "completo",
-     "sha256": "4fcbb6455e641d6bba6e87929e74b49216f548575d3673c8a6aa226e37af1313"
+     "sha256": "4fcbb6455e641d6bba6e87929e74b49216f548575d3673c8a6aa226e37af1313",
+     "funcoes": {
+      "Legislativa": 3503654.98,
+      "Judiciária": 1028440.75,
+      "Administração": 13236201.25,
+      "Segurança Pública": 1824258.67,
+      "Assistência Social": 6303517.38,
+      "Saúde": 23249307.17,
+      "Educação": 36172756.16,
+      "Cultura": 6289325.43,
+      "Urbanismo": 7983864.24,
+      "Gestão Ambiental": 235043.4,
+      "Agricultura": 911099.13,
+      "Comércio e Serviços": 2800.0,
+      "Energia": 3757396.98,
+      "Transporte": 3724738.93,
+      "Desporto e Lazer": 1462463.55,
+      "Encargos Especiais": 2045363.56
+     },
+     "dtotal": 111730231.58,
+     "ds": "ok",
+     "dsha256": "97b9d93221722434ad32d3a66bcf74c4f9a1b0edd2dc732ae2604e56271943bf"
     },
     "2025": {
      "s": "ok",
@@ -1548,7 +2678,27 @@
       "rcl": 130162489.13
      },
      "tipo": "completo",
-     "sha256": "ce1aa5a00d8909d1c91e6663cb56ba04a7ca67fb1527d16379d53003015fce5a"
+     "sha256": "ce1aa5a00d8909d1c91e6663cb56ba04a7ca67fb1527d16379d53003015fce5a",
+     "funcoes": {
+      "Legislativa": 4138144.98,
+      "Judiciária": 1423457.22,
+      "Administração": 11551085.13,
+      "Segurança Pública": 2658096.98,
+      "Assistência Social": 7369489.18,
+      "Saúde": 23406158.32,
+      "Educação": 47633151.11,
+      "Cultura": 4503392.65,
+      "Urbanismo": 15696319.86,
+      "Gestão Ambiental": 268920.34,
+      "Agricultura": 895632.94,
+      "Energia": 3047563.71,
+      "Transporte": 3817781.66,
+      "Desporto e Lazer": 1039682.74,
+      "Encargos Especiais": 694453.39
+     },
+     "dtotal": 128143330.21,
+     "ds": "ok",
+     "dsha256": "2461409ac38c38b95fd1204f2ea72274f1232fbc4e30730b6e70ff03e5222cb9"
     }
    }
   },
@@ -1576,7 +2726,26 @@
       "rcl": 80393889.31
      },
      "tipo": "completo",
-     "sha256": "bff75df1acdbaccd525cb1a9d2009ab95f6499c17a89a882bb0443a89aa751e3"
+     "sha256": "bff75df1acdbaccd525cb1a9d2009ab95f6499c17a89a882bb0443a89aa751e3",
+     "funcoes": {
+      "Legislativa": 2330347.18,
+      "Judiciária": 1112690.74,
+      "Administração": 6204297.48,
+      "Assistência Social": 4575414.43,
+      "Saúde": 14331222.64,
+      "Educação": 33110724.87,
+      "Cultura": 3877041.07,
+      "Urbanismo": 5124352.51,
+      "Gestão Ambiental": 2269705.99,
+      "Agricultura": 2021840.29,
+      "Energia": 2025574.46,
+      "Transporte": 1436189.12,
+      "Desporto e Lazer": 575058.19,
+      "Encargos Especiais": 2294179.69
+     },
+     "dtotal": 81288638.66,
+     "ds": "ok",
+     "dsha256": "135dcc1804e887e71ceb7ce5c03788bceeddb068dd4e484e722e15bd48dd4983"
     },
     "2025": {
      "s": "ok",
@@ -1598,7 +2767,27 @@
       "rcl": 89418215.96
      },
      "tipo": "completo",
-     "sha256": "605063e824e5e5e9ef61c916b986f48caed2de3fd8482f9762093fbfd5f15e0a"
+     "sha256": "605063e824e5e5e9ef61c916b986f48caed2de3fd8482f9762093fbfd5f15e0a",
+     "funcoes": {
+      "Legislativa": 2542924.2,
+      "Judiciária": 2142503.54,
+      "Administração": 6830885.4,
+      "Assistência Social": 5326809.69,
+      "Saúde": 14644199.23,
+      "Educação": 34717415.75,
+      "Cultura": 8582950.75,
+      "Urbanismo": 5117610.29,
+      "Saneamento": 31952.39,
+      "Gestão Ambiental": 2531904.98,
+      "Agricultura": 1818321.7,
+      "Energia": 903010.98,
+      "Transporte": 149768.8,
+      "Desporto e Lazer": 275992.53,
+      "Encargos Especiais": 2535261.29
+     },
+     "dtotal": 88151511.52,
+     "ds": "ok",
+     "dsha256": "d6191d5024910524c3f66a9c629ae62d3c4f695f828358bd2ec2a31403753e56"
     }
    }
   },
@@ -1626,7 +2815,30 @@
       "rcl": 438635414.57
      },
      "tipo": "completo",
-     "sha256": "9c9b7c015e1d147fe2d8e7f5ca0bd1332e328c1eb4b52aebc8fe0afa9711297d"
+     "sha256": "9c9b7c015e1d147fe2d8e7f5ca0bd1332e328c1eb4b52aebc8fe0afa9711297d",
+     "funcoes": {
+      "Legislativa": 9554987.61,
+      "Judiciária": 9127059.12,
+      "Administração": 28710911.93,
+      "Defesa Nacional": 100877.23,
+      "Segurança Pública": 22551.0,
+      "Assistência Social": 15065489.25,
+      "Saúde": 97171653.46,
+      "Educação": 170330773.46,
+      "Cultura": 12595221.74,
+      "Urbanismo": 35085040.59,
+      "Saneamento": 22348024.7,
+      "Gestão Ambiental": 1283450.72,
+      "Agricultura": 1644906.32,
+      "Comércio e Serviços": 877275.65,
+      "Comunicações": 1373123.5,
+      "Energia": 12150098.2,
+      "Desporto e Lazer": 1822245.99,
+      "Encargos Especiais": 9367347.93
+     },
+     "dtotal": 428631038.4,
+     "ds": "ok",
+     "dsha256": "42f88be926e96039e7ee1b34c8bb9559ead6dd90a5c9aa20d2d31b79a4bb22a6"
     },
     "2025": {
      "s": "ok",
@@ -1648,7 +2860,32 @@
       "rcl": 463606578.1
      },
      "tipo": "completo",
-     "sha256": "b71d75aa16a7af8cf079db5f34e06924082d6124f240d7a78fc10dd8b962564a"
+     "sha256": "b71d75aa16a7af8cf079db5f34e06924082d6124f240d7a78fc10dd8b962564a",
+     "funcoes": {
+      "Legislativa": 11614491.03,
+      "Judiciária": 9316183.6,
+      "Administração": 40727811.55,
+      "Defesa Nacional": 42674.52,
+      "Segurança Pública": 12000.0,
+      "Assistência Social": 12197938.21,
+      "Saúde": 100381642.64,
+      "Educação": 200057330.4,
+      "Cultura": 2037027.98,
+      "Direitos da Cidadania": 383506.04,
+      "Urbanismo": 34135330.54,
+      "Saneamento": 25343222.26,
+      "Gestão Ambiental": 2103784.29,
+      "Agricultura": 1869809.97,
+      "Comércio e Serviços": 19966396.85,
+      "Comunicações": 2547799.29,
+      "Energia": 6302885.49,
+      "Transporte": 46000.0,
+      "Desporto e Lazer": 1872742.14,
+      "Encargos Especiais": 3711088.82
+     },
+     "dtotal": 474669665.62,
+     "ds": "ok",
+     "dsha256": "b539c395e92e49b7be35199089f9675d683359d422866c4571702e926aa57538"
     }
    }
   },
@@ -1676,7 +2913,29 @@
       "rcl": 258446970.89
      },
      "tipo": "completo",
-     "sha256": "b2bf2ec57d83f6c8c64671d50f6ba5509567c0ec84461d64df5c78a4735ec1c8"
+     "sha256": "b2bf2ec57d83f6c8c64671d50f6ba5509567c0ec84461d64df5c78a4735ec1c8",
+     "funcoes": {
+      "Legislativa": 8208191.45,
+      "Judiciária": 5017464.49,
+      "Administração": 25036479.02,
+      "Segurança Pública": 2075221.98,
+      "Assistência Social": 17657159.96,
+      "Saúde": 49449172.83,
+      "Educação": 92632660.26,
+      "Cultura": 6789162.98,
+      "Direitos da Cidadania": 184492.54,
+      "Urbanismo": 38538736.68,
+      "Gestão Ambiental": 132037.25,
+      "Agricultura": 14034.0,
+      "Indústria": 823423.85,
+      "Energia": 5292547.11,
+      "Transporte": 3768128.06,
+      "Desporto e Lazer": 1128550.17,
+      "Encargos Especiais": 57191.02
+     },
+     "dtotal": 256804653.65,
+     "ds": "ok",
+     "dsha256": "331cb86206f6697bfb03989ba2ff8357de816801783cec76adbd9599d83bac3a"
     },
     "2025": {
      "s": "ok",
@@ -1698,7 +2957,29 @@
       "rcl": 302674444.42
      },
      "tipo": "completo",
-     "sha256": "e0a1847273bfb020f3ae49bdf2b31643b2801761b718efb23fc3723e4c8fd8b5"
+     "sha256": "e0a1847273bfb020f3ae49bdf2b31643b2801761b718efb23fc3723e4c8fd8b5",
+     "funcoes": {
+      "Legislativa": 7837639.69,
+      "Judiciária": 6547224.8,
+      "Administração": 28664857.44,
+      "Segurança Pública": 2278183.22,
+      "Assistência Social": 18841405.69,
+      "Saúde": 50309849.23,
+      "Educação": 125835145.82,
+      "Cultura": 9652400.15,
+      "Direitos da Cidadania": 173608.92,
+      "Urbanismo": 30173285.01,
+      "Gestão Ambiental": 83468.21,
+      "Indústria": 750070.57,
+      "Comércio e Serviços": 30500.0,
+      "Energia": 5462907.14,
+      "Transporte": 3001225.07,
+      "Desporto e Lazer": 1934400.01,
+      "Encargos Especiais": 1379943.43
+     },
+     "dtotal": 292956114.4,
+     "ds": "ok",
+     "dsha256": "bfe9b53ed0b95fc067dad099e33185557ab96e8c3b8a22073e3a4246f1bbcbd3"
     }
    }
   },
@@ -1726,7 +3007,24 @@
       "rcl": 45563001.56
      },
      "tipo": "completo",
-     "sha256": "ae0f2074595b716ab1e90af8698e30521f19369b560fb68a634466a1bc743368"
+     "sha256": "ae0f2074595b716ab1e90af8698e30521f19369b560fb68a634466a1bc743368",
+     "funcoes": {
+      "Legislativa": 1398341.78,
+      "Judiciária": 712781.56,
+      "Administração": 6698785.03,
+      "Assistência Social": 2297342.97,
+      "Saúde": 10256457.48,
+      "Educação": 14506547.02,
+      "Cultura": 1105562.34,
+      "Urbanismo": 4650132.57,
+      "Gestão Ambiental": 500272.02,
+      "Agricultura": 197421.93,
+      "Transporte": 952427.93,
+      "Desporto e Lazer": 452990.99
+     },
+     "dtotal": 43729063.62,
+     "ds": "ok",
+     "dsha256": "cb367702f19c3458e795a38ca37ec5c7dfeb61e83d27b4eae53209afe0f905b7"
     },
     "2025": {
      "s": "ok",
@@ -1748,7 +3046,25 @@
       "rcl": 49442832.66
      },
      "tipo": "completo",
-     "sha256": "1e8b830db9929aacf1591e3d1e4df60269ba93d43216ac9803aaee87a6b5cc26"
+     "sha256": "1e8b830db9929aacf1591e3d1e4df60269ba93d43216ac9803aaee87a6b5cc26",
+     "funcoes": {
+      "Legislativa": 1691570.32,
+      "Judiciária": 800028.57,
+      "Administração": 7256867.6,
+      "Assistência Social": 2104565.18,
+      "Saúde": 11619960.75,
+      "Educação": 16469338.78,
+      "Cultura": 1375450.97,
+      "Urbanismo": 5150032.85,
+      "Gestão Ambiental": 240742.3,
+      "Agricultura": 518794.79,
+      "Energia": 461974.14,
+      "Transporte": 1436792.91,
+      "Desporto e Lazer": 855596.12
+     },
+     "dtotal": 49981715.28,
+     "ds": "ok",
+     "dsha256": "eb0a0519812f0a4e4733b8b604d7cd75676a2e0ffbdc9a0a929eae1ae762a23e"
     }
    }
   },
@@ -1776,7 +3092,26 @@
       "rcl": 38819502.5
      },
      "tipo": "completo",
-     "sha256": "762633a58641eb5fc079460fc7831db33787d6bb954f9d1ae898fa71f519c52c"
+     "sha256": "762633a58641eb5fc079460fc7831db33787d6bb954f9d1ae898fa71f519c52c",
+     "funcoes": {
+      "Legislativa": 1464411.82,
+      "Judiciária": 361679.8,
+      "Administração": 4076750.82,
+      "Assistência Social": 3306504.1,
+      "Saúde": 6480725.93,
+      "Educação": 11192542.78,
+      "Cultura": 3401132.41,
+      "Urbanismo": 6183084.93,
+      "Saneamento": 95999.97,
+      "Gestão Ambiental": 606208.54,
+      "Agricultura": 294276.99,
+      "Energia": 662432.02,
+      "Transporte": 1088582.2,
+      "Encargos Especiais": 1258439.38
+     },
+     "dtotal": 40472771.69,
+     "ds": "ok",
+     "dsha256": "a4fb4f60b832c108d4b60aaf9b9493cabfb6b2e888f8ff577e180da1440fbf14"
     },
     "2025": {
      "s": "ok",
@@ -1798,7 +3133,28 @@
       "rcl": 41644388.06
      },
      "tipo": "completo",
-     "sha256": "d0842504a38f1ee73565360c2d96c05b927e1a5ec73a2ad3e26cb9e3013c63e1"
+     "sha256": "d0842504a38f1ee73565360c2d96c05b927e1a5ec73a2ad3e26cb9e3013c63e1",
+     "funcoes": {
+      "Legislativa": 1739403.6,
+      "Judiciária": 686136.59,
+      "Administração": 4630930.33,
+      "Assistência Social": 2731220.05,
+      "Saúde": 7431670.37,
+      "Educação": 13696345.97,
+      "Cultura": 3951316.47,
+      "Direitos da Cidadania": 81359.06,
+      "Urbanismo": 4737530.63,
+      "Saneamento": 97509.07,
+      "Gestão Ambiental": 558874.55,
+      "Agricultura": 683813.92,
+      "Energia": 1032182.38,
+      "Transporte": 991414.67,
+      "Desporto e Lazer": 614563.93,
+      "Encargos Especiais": 774298.26
+     },
+     "dtotal": 44438569.85,
+     "ds": "ok",
+     "dsha256": "2dca84204e9d3cf5b3b951e3e980410f77cb85e70111604bd3a4589a53009b31"
     }
    }
   },
@@ -1826,7 +3182,24 @@
       "rcl": 71830352.39
      },
      "tipo": "completo",
-     "sha256": "33cc7f0c06a7d3772d1780e89b32bb846c49712f59ac7f2d099732b2d8915697"
+     "sha256": "33cc7f0c06a7d3772d1780e89b32bb846c49712f59ac7f2d099732b2d8915697",
+     "funcoes": {
+      "Legislativa": 2039490.5,
+      "Judiciária": 1501193.67,
+      "Administração": 10750882.15,
+      "Assistência Social": 2693518.14,
+      "Saúde": 15817577.47,
+      "Educação": 23926926.59,
+      "Cultura": 3836559.67,
+      "Urbanismo": 9246693.23,
+      "Gestão Ambiental": 443364.87,
+      "Agricultura": 672206.22,
+      "Energia": 914825.64,
+      "Desporto e Lazer": 869000.03
+     },
+     "dtotal": 72712238.18,
+     "ds": "ok",
+     "dsha256": "dc76526939e3424b081583dd8b99170326f92eb25644866011bc47c87d66ae23"
     },
     "2025": {
      "s": "ok",
@@ -1848,7 +3221,24 @@
       "rcl": 79137207.85
      },
      "tipo": "completo",
-     "sha256": "73966e6975afded1ed6a6a28e95cf6863cfc4dfb4919a9565b01091b717cb1e2"
+     "sha256": "73966e6975afded1ed6a6a28e95cf6863cfc4dfb4919a9565b01091b717cb1e2",
+     "funcoes": {
+      "Legislativa": 2356230.8,
+      "Judiciária": 1775221.62,
+      "Administração": 12693776.25,
+      "Assistência Social": 3194492.46,
+      "Saúde": 16639402.61,
+      "Educação": 27317703.47,
+      "Cultura": 4072952.55,
+      "Urbanismo": 13331887.31,
+      "Gestão Ambiental": 663889.89,
+      "Agricultura": 1261032.62,
+      "Energia": 1017072.87,
+      "Desporto e Lazer": 325716.83
+     },
+     "dtotal": 84649379.28,
+     "ds": "ok",
+     "dsha256": "2f6170ac5a6436d580e8d876d4f5c90df82395783b0e148b9f74374f9cb71000"
     }
    }
   },
@@ -1876,7 +3266,25 @@
       "rcl": 95749836.09
      },
      "tipo": "completo",
-     "sha256": "39d14892625d8d4462b1e7225dc534527b948213136f5c3fe9b3f0b73ee5c3a5"
+     "sha256": "39d14892625d8d4462b1e7225dc534527b948213136f5c3fe9b3f0b73ee5c3a5",
+     "funcoes": {
+      "Legislativa": 3353820.02,
+      "Judiciária": 3711212.61,
+      "Administração": 16650767.14,
+      "Assistência Social": 3841530.31,
+      "Saúde": 23220491.29,
+      "Educação": 37219566.02,
+      "Cultura": 2018164.73,
+      "Urbanismo": 12375298.41,
+      "Gestão Ambiental": 165614.77,
+      "Agricultura": 425006.05,
+      "Indústria": 237450.86,
+      "Desporto e Lazer": 1432679.06,
+      "Encargos Especiais": 4605728.99
+     },
+     "dtotal": 109257330.26,
+     "ds": "ok",
+     "dsha256": "0f086a47ecf331ad936567880d563ba603981a54a5f365afde81f660d0d6796f"
     },
     "2025": {
      "s": "ok",
@@ -1898,7 +3306,26 @@
       "rcl": 101167868.74
      },
      "tipo": "completo",
-     "sha256": "c4b2d953dc812721b90b6b8060ac28e3732b0570f0028a14b0897978d3396e13"
+     "sha256": "c4b2d953dc812721b90b6b8060ac28e3732b0570f0028a14b0897978d3396e13",
+     "funcoes": {
+      "Legislativa": 3582930.05,
+      "Judiciária": 1606306.1,
+      "Administração": 13537455.27,
+      "Assistência Social": 2949013.49,
+      "Saúde": 22024401.2,
+      "Educação": 35534900.67,
+      "Cultura": 2070215.62,
+      "Urbanismo": 15719991.94,
+      "Saneamento": 579706.37,
+      "Gestão Ambiental": 132855.18,
+      "Agricultura": 596321.8,
+      "Indústria": 275592.58,
+      "Desporto e Lazer": 962277.79,
+      "Encargos Especiais": 3916741.1
+     },
+     "dtotal": 103488709.16,
+     "ds": "ok",
+     "dsha256": "a8c9d2604e474a45b10704f48a8ef0622b9c275237995f2efbabc6a8236c7645"
     }
    }
   },
@@ -1926,7 +3353,25 @@
       "rcl": 66064162.92
      },
      "tipo": "completo",
-     "sha256": "cea155035e365bc9f831610b38d8663d327429ce3bf29881cc3b8c533a702b55"
+     "sha256": "cea155035e365bc9f831610b38d8663d327429ce3bf29881cc3b8c533a702b55",
+     "funcoes": {
+      "Legislativa": 1806245.73,
+      "Judiciária": 726887.18,
+      "Administração": 4384342.04,
+      "Assistência Social": 2609994.77,
+      "Previdência Social": 48190.5,
+      "Saúde": 14340947.42,
+      "Educação": 23317246.26,
+      "Cultura": 3411786.28,
+      "Urbanismo": 9946007.96,
+      "Gestão Ambiental": 394619.73,
+      "Agricultura": 2296561.62,
+      "Energia": 274364.4,
+      "Desporto e Lazer": 535393.18
+     },
+     "dtotal": 64092587.07,
+     "ds": "ok",
+     "dsha256": "f92fdcb9162072a8c08ec397106ee77f1fed8c5a4b470e752a42270db026230a"
     },
     "2025": {
      "s": "ok",
@@ -1948,7 +3393,25 @@
       "rcl": 73586593.92
      },
      "tipo": "completo",
-     "sha256": "204780b8001a26b12eb209f86d161332b60edda332706d6a0f5b712b08d78071"
+     "sha256": "204780b8001a26b12eb209f86d161332b60edda332706d6a0f5b712b08d78071",
+     "funcoes": {
+      "Legislativa": 2410585.99,
+      "Judiciária": 649433.47,
+      "Administração": 5699617.43,
+      "Assistência Social": 2717800.35,
+      "Previdência Social": 39090.46,
+      "Saúde": 16192639.87,
+      "Educação": 29445248.91,
+      "Cultura": 5569916.2,
+      "Urbanismo": 12842548.54,
+      "Gestão Ambiental": 445358.9,
+      "Agricultura": 2802881.43,
+      "Energia": 215441.87,
+      "Desporto e Lazer": 744291.5
+     },
+     "dtotal": 79774854.92,
+     "ds": "ok",
+     "dsha256": "c28ee611c89c484cab697b91df94530a4420afa31057af5fa90810693bff0e5b"
     }
    }
   },
@@ -1976,7 +3439,26 @@
       "rcl": 82232165.67
      },
      "tipo": "completo",
-     "sha256": "fe10610632563ecd1d419f3fedd72339e29d0b4f588cd696c68d4918137d48d4"
+     "sha256": "fe10610632563ecd1d419f3fedd72339e29d0b4f588cd696c68d4918137d48d4",
+     "funcoes": {
+      "Legislativa": 2693424.77,
+      "Judiciária": 1881049.77,
+      "Administração": 12582942.06,
+      "Assistência Social": 2962025.05,
+      "Saúde": 14987803.45,
+      "Educação": 35214689.27,
+      "Cultura": 2933123.41,
+      "Direitos da Cidadania": 63052.0,
+      "Urbanismo": 298718.27,
+      "Saneamento": 88850.2,
+      "Agricultura": 2026824.45,
+      "Transporte": 1199387.86,
+      "Desporto e Lazer": 3318641.25,
+      "Encargos Especiais": 3712927.65
+     },
+     "dtotal": 83963459.46,
+     "ds": "ok",
+     "dsha256": "9a9bd500fbb61f7aa496c57a6c0dfcb33f7022e201acc6d4d050da245fe1306c"
     },
     "2025": {
      "s": "ok",
@@ -1998,7 +3480,26 @@
       "rcl": 91354723.85
      },
      "tipo": "completo",
-     "sha256": "54f58c10aad8ffe35c08932585122b22572be61e83dccc39185ee0e575622709"
+     "sha256": "54f58c10aad8ffe35c08932585122b22572be61e83dccc39185ee0e575622709",
+     "funcoes": {
+      "Legislativa": 3052115.61,
+      "Judiciária": 4037041.62,
+      "Administração": 13507615.91,
+      "Assistência Social": 3691176.27,
+      "Saúde": 18577381.89,
+      "Educação": 40067921.9,
+      "Cultura": 7255249.78,
+      "Direitos da Cidadania": 430158.95,
+      "Urbanismo": 1654279.09,
+      "Saneamento": 84244.8,
+      "Agricultura": 1898441.83,
+      "Transporte": 1500406.15,
+      "Desporto e Lazer": 2034078.91,
+      "Encargos Especiais": 3143542.45
+     },
+     "dtotal": 100933655.16,
+     "ds": "ok",
+     "dsha256": "c9e7f34f94826e06ae83aa44aba285b9cc1f5c3f67df6bd764b2bdfd4a870231"
     }
    }
   },
@@ -2026,7 +3527,27 @@
       "rcl": 42970027.7
      },
      "tipo": "completo",
-     "sha256": "d8f9dcf8da5b36b2600a74b3b0b0173850c41252071ac573c2d575c2c72a2e2e"
+     "sha256": "d8f9dcf8da5b36b2600a74b3b0b0173850c41252071ac573c2d575c2c72a2e2e",
+     "funcoes": {
+      "Legislativa": 1614594.71,
+      "Administração": 6177912.22,
+      "Segurança Pública": 548297.89,
+      "Assistência Social": 2976595.02,
+      "Saúde": 9346435.27,
+      "Educação": 14974317.04,
+      "Cultura": 1698545.51,
+      "Urbanismo": 5803529.86,
+      "Habitação": 103490.64,
+      "Gestão Ambiental": 14000.04,
+      "Agricultura": 1285862.83,
+      "Comunicações": 113420.0,
+      "Energia": 399219.36,
+      "Desporto e Lazer": 152633.0,
+      "Encargos Especiais": 1559191.27
+     },
+     "dtotal": 46768044.66,
+     "ds": "ok",
+     "dsha256": "acfbfa6a77c4906d901715c39fd643e294fe6b0e9ea20855cf6d5b4d296daeeb"
     },
     "2025": {
      "s": "ok",
@@ -2048,7 +3569,27 @@
       "rcl": 43845994.21
      },
      "tipo": "completo",
-     "sha256": "d010ae804075c7ca199b00fbf6c5e378fda7732ade8dc90ba71dad8c7adaaba2"
+     "sha256": "d010ae804075c7ca199b00fbf6c5e378fda7732ade8dc90ba71dad8c7adaaba2",
+     "funcoes": {
+      "Legislativa": 1725925.34,
+      "Administração": 7586448.13,
+      "Segurança Pública": 219269.1,
+      "Assistência Social": 2994553.69,
+      "Saúde": 9254350.3,
+      "Educação": 15751832.21,
+      "Cultura": 1593738.36,
+      "Urbanismo": 5751022.91,
+      "Habitação": 163050.89,
+      "Gestão Ambiental": 232746.0,
+      "Agricultura": 1115813.88,
+      "Comunicações": 158125.0,
+      "Energia": 278321.13,
+      "Transporte": 689384.74,
+      "Encargos Especiais": 1356238.46
+     },
+     "dtotal": 48870820.14,
+     "ds": "ok",
+     "dsha256": "ac5bed82311890b05d03ae1bb0dc53e54ae19eafeebda547d42c769df34ae5f6"
     }
    }
   },
@@ -2076,7 +3617,24 @@
       "rcl": 84993226.46
      },
      "tipo": "completo",
-     "sha256": "8773b4419001e81fb19c7a37af2f49d742a46f31e62f5fb0945cb1efef428d8b"
+     "sha256": "8773b4419001e81fb19c7a37af2f49d742a46f31e62f5fb0945cb1efef428d8b",
+     "funcoes": {
+      "Legislativa": 2879114.88,
+      "Judiciária": 1057753.01,
+      "Administração": 14864626.32,
+      "Assistência Social": 3190146.46,
+      "Saúde": 21446020.23,
+      "Educação": 28800135.94,
+      "Cultura": 6676861.8,
+      "Urbanismo": 2607300.37,
+      "Gestão Ambiental": 2574883.57,
+      "Agricultura": 810912.4,
+      "Energia": 892841.04,
+      "Desporto e Lazer": 676229.45
+     },
+     "dtotal": 86476825.47,
+     "ds": "ok",
+     "dsha256": "771dacda612d450ae5ba774c01e7ceb512c6b41672eb4a3b7a5ea52be4fcf8d3"
     },
     "2025": {
      "s": "ok",
@@ -2098,7 +3656,27 @@
       "rcl": 102158413.39
      },
      "tipo": "completo",
-     "sha256": "fdd4d24c6aed3ccff8ebaaa46453240ebfbbadafd691eac2924ec5d013109ea7"
+     "sha256": "fdd4d24c6aed3ccff8ebaaa46453240ebfbbadafd691eac2924ec5d013109ea7",
+     "funcoes": {
+      "Legislativa": 3656165.96,
+      "Judiciária": 2051443.49,
+      "Administração": 10644975.09,
+      "Assistência Social": 4475822.36,
+      "Saúde": 19988071.72,
+      "Educação": 32301623.64,
+      "Cultura": 10026138.02,
+      "Urbanismo": 3450793.32,
+      "Gestão Ambiental": 3609833.38,
+      "Agricultura": 599230.3,
+      "Comércio e Serviços": 63500.0,
+      "Comunicações": 173371.49,
+      "Energia": 2900048.2,
+      "Transporte": 24069.43,
+      "Desporto e Lazer": 375185.06
+     },
+     "dtotal": 94340271.46,
+     "ds": "ok",
+     "dsha256": "32cf45e21e090c3b3493e02b47b45b72ba5b52925a8b98388f0a9b6b290c62ac"
     }
    }
   },
@@ -2126,7 +3704,26 @@
       "rcl": 49300483.87
      },
      "tipo": "completo",
-     "sha256": "f42503be57345fc9a087dd96c6344cfc5dd04809ddb89cbfff88aae9bba4bab2"
+     "sha256": "f42503be57345fc9a087dd96c6344cfc5dd04809ddb89cbfff88aae9bba4bab2",
+     "funcoes": {
+      "Legislativa": 1698765.37,
+      "Judiciária": 529554.87,
+      "Administração": 4568526.33,
+      "Assistência Social": 1682197.86,
+      "Saúde": 11742160.02,
+      "Educação": 14992822.34,
+      "Cultura": 2215884.89,
+      "Urbanismo": 4395508.3,
+      "Saneamento": 149006.44,
+      "Agricultura": 642568.8,
+      "Energia": 747958.17,
+      "Transporte": 904420.06,
+      "Desporto e Lazer": 1171399.73,
+      "Encargos Especiais": 3241661.11
+     },
+     "dtotal": 48682434.29,
+     "ds": "ok",
+     "dsha256": "4876468879b545e0660062911ad9e15709603999e33c95ff03cb5ee07da96b26"
     },
     "2025": {
      "s": "ok",
@@ -2148,7 +3745,27 @@
       "rcl": 50338865.06
      },
      "tipo": "completo",
-     "sha256": "d2f3f616adf1323a5d95b15488db512a4fca2b2a9af0e6e89c190b6368da7224"
+     "sha256": "d2f3f616adf1323a5d95b15488db512a4fca2b2a9af0e6e89c190b6368da7224",
+     "funcoes": {
+      "Legislativa": 1940367.18,
+      "Judiciária": 501878.21,
+      "Administração": 5284531.44,
+      "Assistência Social": 1981211.2,
+      "Saúde": 11223241.29,
+      "Educação": 15733970.65,
+      "Cultura": 2252016.07,
+      "Urbanismo": 5301554.93,
+      "Saneamento": 105870.46,
+      "Gestão Ambiental": 195331.65,
+      "Agricultura": 756867.57,
+      "Energia": 2243845.9,
+      "Transporte": 1122203.01,
+      "Desporto e Lazer": 1688797.36,
+      "Encargos Especiais": 3167589.95
+     },
+     "dtotal": 53499276.87,
+     "ds": "ok",
+     "dsha256": "07318abeda6feb095f6cd56b06030baa108ea1f858d9d68f4aa03c6e86ca1648"
     }
    }
   },
@@ -2176,7 +3793,25 @@
       "rcl": 218555864.55
      },
      "tipo": "completo",
-     "sha256": "1d07f7aa7001077007d55ad10d7f7b305d1043a330215db483d96dfc2bf6c1b4"
+     "sha256": "1d07f7aa7001077007d55ad10d7f7b305d1043a330215db483d96dfc2bf6c1b4",
+     "funcoes": {
+      "Legislativa": 6299581.36,
+      "Judiciária": 1521854.33,
+      "Administração": 19476442.76,
+      "Assistência Social": 6970124.73,
+      "Saúde": 32784867.16,
+      "Educação": 79372196.2,
+      "Cultura": 369156.5,
+      "Urbanismo": 23739952.71,
+      "Gestão Ambiental": 361860.49,
+      "Agricultura": 4181148.05,
+      "Transporte": 1901804.44,
+      "Desporto e Lazer": 2482307.65,
+      "Encargos Especiais": 15073911.16
+     },
+     "dtotal": 194535207.54,
+     "ds": "ok",
+     "dsha256": "ad47d4c189b1634db8b0b246d0cc08123f96dcc368689268ba52977c183a0b91"
     },
     "2025": {
      "s": "ok",
@@ -2198,7 +3833,25 @@
       "rcl": 242681521.26
      },
      "tipo": "completo",
-     "sha256": "614a782b45c47f9be71c097b6698cc361bd8d1d1399dd030563abc9a5c64946a"
+     "sha256": "614a782b45c47f9be71c097b6698cc361bd8d1d1399dd030563abc9a5c64946a",
+     "funcoes": {
+      "Legislativa": 7637774.08,
+      "Judiciária": 2476456.71,
+      "Administração": 28734799.06,
+      "Assistência Social": 7175246.52,
+      "Saúde": 42520041.6,
+      "Educação": 100286407.63,
+      "Cultura": 427922.27,
+      "Urbanismo": 36425727.49,
+      "Gestão Ambiental": 284630.22,
+      "Agricultura": 3709042.23,
+      "Transporte": 2199257.76,
+      "Desporto e Lazer": 2803069.43,
+      "Encargos Especiais": 11504371.39
+     },
+     "dtotal": 246184746.39,
+     "ds": "ok",
+     "dsha256": "babf6ac85bf249932a48296f4884f3bdabac0ae38cc6ad05f7f76f9292942678"
     }
    }
   },
@@ -2226,7 +3879,26 @@
       "rcl": 143462623.43
      },
      "tipo": "completo",
-     "sha256": "5a7160215023cafac181573d588fcb65eb9d576aa026cafaf683e115ffa4438f"
+     "sha256": "5a7160215023cafac181573d588fcb65eb9d576aa026cafaf683e115ffa4438f",
+     "funcoes": {
+      "Legislativa": 3881089.98,
+      "Judiciária": 5455134.3,
+      "Administração": 11469404.31,
+      "Assistência Social": 4888002.71,
+      "Saúde": 30514918.18,
+      "Educação": 48515597.62,
+      "Cultura": 5798841.72,
+      "Urbanismo": 7231723.62,
+      "Gestão Ambiental": 9086481.97,
+      "Agricultura": 2103761.0,
+      "Comunicações": 432708.06,
+      "Energia": 6447684.92,
+      "Transporte": 1733591.49,
+      "Encargos Especiais": 2445205.21
+     },
+     "dtotal": 140004145.09,
+     "ds": "ok",
+     "dsha256": "57982ecdacaa65a400cdf60503f08814620dee7d46784fb1387678269b0802e4"
     },
     "2025": {
      "s": "ok",
@@ -2248,7 +3920,27 @@
       "rcl": 153761319.71
      },
      "tipo": "completo",
-     "sha256": "3c55d3cae73d7ed37f8b222979da059e6a6720579ec3fddbf2ea06f63d06b91c"
+     "sha256": "3c55d3cae73d7ed37f8b222979da059e6a6720579ec3fddbf2ea06f63d06b91c",
+     "funcoes": {
+      "Legislativa": 4363955.07,
+      "Judiciária": 2317657.65,
+      "Administração": 11455496.52,
+      "Assistência Social": 4299088.8,
+      "Saúde": 31196374.21,
+      "Educação": 58162516.26,
+      "Cultura": 5378329.22,
+      "Urbanismo": 2693554.57,
+      "Gestão Ambiental": 10139309.42,
+      "Agricultura": 2237474.81,
+      "Comunicações": 71959.24,
+      "Energia": 667751.57,
+      "Transporte": 297198.51,
+      "Desporto e Lazer": 72537.5,
+      "Encargos Especiais": 6129450.22
+     },
+     "dtotal": 139482653.57,
+     "ds": "ok",
+     "dsha256": "99726f6cd61371f3a12850ce233a6668dd4bde04b0dd1811a4a716a8a332c13f"
     }
    }
   },
@@ -2276,7 +3968,21 @@
       "rcl": 40327946.19
      },
      "tipo": "completo",
-     "sha256": "aff75fba625da7615672e782cc1d141a8699d855b847e5cd0211235ddcf6516c"
+     "sha256": "aff75fba625da7615672e782cc1d141a8699d855b847e5cd0211235ddcf6516c",
+     "funcoes": {
+      "Legislativa": 1482333.59,
+      "Administração": 6704311.51,
+      "Assistência Social": 2714771.41,
+      "Saúde": 10430425.78,
+      "Educação": 11572221.9,
+      "Cultura": 7440.65,
+      "Urbanismo": 6803963.88,
+      "Agricultura": 1544583.76,
+      "Energia": 619732.0
+     },
+     "dtotal": 41879784.48,
+     "ds": "ok",
+     "dsha256": "7406512558f6855092fe370e6652ce0f8385ad0c650a58505b24c697f796267b"
     },
     "2025": {
      "s": "ok",
@@ -2298,7 +4004,24 @@
       "rcl": 43316223.75
      },
      "tipo": "completo",
-     "sha256": "85d13520e792a47a4c9686f3eb87c6b9de7804ec6de0a786c01e9152329ad39a"
+     "sha256": "85d13520e792a47a4c9686f3eb87c6b9de7804ec6de0a786c01e9152329ad39a",
+     "funcoes": {
+      "Legislativa": 1773155.44,
+      "Judiciária": 362425.65,
+      "Administração": 4657112.2,
+      "Assistência Social": 2965214.05,
+      "Saúde": 9651253.66,
+      "Educação": 13723189.65,
+      "Cultura": 2691481.2,
+      "Urbanismo": 3145610.65,
+      "Gestão Ambiental": 191369.34,
+      "Agricultura": 1641252.71,
+      "Transporte": 244219.57,
+      "Desporto e Lazer": 187367.6
+     },
+     "dtotal": 41233651.72,
+     "ds": "ok",
+     "dsha256": "a2399765e4897fce2763940d2ceefc28e34e156ca8c1676ba98ddb554a08d652"
     }
    }
   },
@@ -2326,7 +4049,27 @@
       "rcl": 809459096.59
      },
      "tipo": "completo",
-     "sha256": "895a780dba8ce77446cf80de80c1046e3774da3d5147cbefe0852e6b32d7eada"
+     "sha256": "895a780dba8ce77446cf80de80c1046e3774da3d5147cbefe0852e6b32d7eada",
+     "funcoes": {
+      "Legislativa": 19019684.61,
+      "Judiciária": 17899264.96,
+      "Administração": 119237374.33,
+      "Assistência Social": 40372659.01,
+      "Saúde": 169715935.92,
+      "Educação": 203715682.47,
+      "Cultura": 10911710.28,
+      "Urbanismo": 105795526.79,
+      "Gestão Ambiental": 3094942.97,
+      "Agricultura": 3871057.45,
+      "Comércio e Serviços": 2071388.35,
+      "Comunicações": 3124667.55,
+      "Energia": 14203761.43,
+      "Desporto e Lazer": 2233997.52,
+      "Encargos Especiais": 7456047.68
+     },
+     "dtotal": 722723701.32,
+     "ds": "ok",
+     "dsha256": "8dd6e8dbe64036cd9ef9387e1dea11b112bb57c6a3863608026394c4cea48122"
     },
     "2025": {
      "s": "ok",
@@ -2348,7 +4091,29 @@
       "rcl": 703116022.35
      },
      "tipo": "completo",
-     "sha256": "9ddc5c0eedfd1b4410f139c4b5573228d3c65adbc9a384739d8d8dfc92cba8f1"
+     "sha256": "9ddc5c0eedfd1b4410f139c4b5573228d3c65adbc9a384739d8d8dfc92cba8f1",
+     "funcoes": {
+      "Legislativa": 25431260.7,
+      "Judiciária": 22504721.75,
+      "Administração": 92633969.39,
+      "Assistência Social": 30460255.59,
+      "Saúde": 163252378.99,
+      "Educação": 209736818.06,
+      "Cultura": 12880753.28,
+      "Urbanismo": 93109042.71,
+      "Habitação": 11387013.37,
+      "Gestão Ambiental": 2272214.17,
+      "Agricultura": 2405391.65,
+      "Comércio e Serviços": 1023667.06,
+      "Comunicações": 2068767.87,
+      "Energia": 13367413.46,
+      "Transporte": 28708.31,
+      "Desporto e Lazer": 1839085.45,
+      "Encargos Especiais": 32757678.77
+     },
+     "dtotal": 717159140.58,
+     "ds": "ok",
+     "dsha256": "f2abd2f7f6d0a005e42d746c8953a26034c0bdb35db450c0850fae56fb936138"
     }
    }
   },
@@ -2376,7 +4141,27 @@
       "rcl": 87490883.76
      },
      "tipo": "completo",
-     "sha256": "ae04179dc86ae0afbeec25e826265e543e72ee8bbd9d8c3b07139f13272f9535"
+     "sha256": "ae04179dc86ae0afbeec25e826265e543e72ee8bbd9d8c3b07139f13272f9535",
+     "funcoes": {
+      "Legislativa": 2735777.95,
+      "Judiciária": 4815800.2,
+      "Administração": 23571457.75,
+      "Assistência Social": 4214547.15,
+      "Saúde": 14391789.79,
+      "Educação": 34662262.45,
+      "Cultura": 8953605.43,
+      "Urbanismo": 34809812.97,
+      "Gestão Ambiental": 563119.79,
+      "Ciência e Tecnologia": 177177.97,
+      "Agricultura": 1193675.43,
+      "Comércio e Serviços": 608543.49,
+      "Transporte": 2593528.84,
+      "Desporto e Lazer": 182207.74,
+      "Encargos Especiais": 6191931.47
+     },
+     "dtotal": 139665238.42,
+     "ds": "ok",
+     "dsha256": "8d3fe0479a87e5a494b8e64e595352494e59e1db7534bc250a5ab56abe67ba15"
     },
     "2025": {
      "s": "ok",
@@ -2398,7 +4183,26 @@
       "rcl": 88623512.22
      },
      "tipo": "completo",
-     "sha256": "be3cec4443a831d22e12356b4844b1651949c56aad86b1e419b870de783363ff"
+     "sha256": "be3cec4443a831d22e12356b4844b1651949c56aad86b1e419b870de783363ff",
+     "funcoes": {
+      "Legislativa": 3030459.2,
+      "Judiciária": 4298959.41,
+      "Administração": 10645517.89,
+      "Assistência Social": 3459728.21,
+      "Saúde": 15687660.3,
+      "Educação": 35441691.9,
+      "Cultura": 5515792.86,
+      "Urbanismo": 20903231.76,
+      "Gestão Ambiental": 417852.85,
+      "Agricultura": 875617.27,
+      "Comércio e Serviços": 745245.71,
+      "Transporte": 2217191.91,
+      "Desporto e Lazer": 98910.68,
+      "Encargos Especiais": 2843015.77
+     },
+     "dtotal": 106180875.72,
+     "ds": "ok",
+     "dsha256": "3641fb58f01e995aa886a4705e61989c0602d5bc350b4b43eedc95c34c89c0f7"
     }
    }
   },
@@ -2426,7 +4230,25 @@
       "rcl": 33658971.34
      },
      "tipo": "completo",
-     "sha256": "8ef51be7a8853856fa9ba6bc328f04f1731eef57aecb7ccfe9c04e594ca6b221"
+     "sha256": "8ef51be7a8853856fa9ba6bc328f04f1731eef57aecb7ccfe9c04e594ca6b221",
+     "funcoes": {
+      "Legislativa": 1398530.2,
+      "Judiciária": 1854216.92,
+      "Administração": 4375932.08,
+      "Assistência Social": 1846500.94,
+      "Saúde": 6467617.13,
+      "Educação": 9154303.56,
+      "Cultura": 1089825.48,
+      "Urbanismo": 2074290.42,
+      "Gestão Ambiental": 69650.74,
+      "Agricultura": 1452022.09,
+      "Energia": 624476.38,
+      "Desporto e Lazer": 2028580.07,
+      "Encargos Especiais": 1589449.11
+     },
+     "dtotal": 34025395.12,
+     "ds": "ok",
+     "dsha256": "4760b18e281c82f3e9f4ac43807c71f532354146c5c26ed9df941e1ab0c6312c"
     },
     "2025": {
      "s": "ok",
@@ -2448,7 +4270,24 @@
       "rcl": 37927792.8
      },
      "tipo": "completo",
-     "sha256": "072bca013f3d5bf3299c960f39d9793403816210ba7a96cc1020e10c91f78659"
+     "sha256": "072bca013f3d5bf3299c960f39d9793403816210ba7a96cc1020e10c91f78659",
+     "funcoes": {
+      "Legislativa": 1740557.2,
+      "Judiciária": 878913.49,
+      "Administração": 5260556.38,
+      "Assistência Social": 1924123.11,
+      "Saúde": 8145171.49,
+      "Educação": 11906468.75,
+      "Cultura": 1974632.8,
+      "Urbanismo": 3646111.62,
+      "Gestão Ambiental": 77612.44,
+      "Agricultura": 1514623.24,
+      "Energia": 683782.52,
+      "Encargos Especiais": 1728737.0
+     },
+     "dtotal": 39481290.04,
+     "ds": "ok",
+     "dsha256": "be5392b407a73ef3e1860c58124f706de2e07795c3bb7cc7550e947ccc84afb9"
     }
    }
   },
@@ -2476,7 +4315,22 @@
       "rcl": 58842567.91
      },
      "tipo": "completo",
-     "sha256": "b0aa4a9890bab54e2dfc3026c4cf8ae5579d608e2a79a8e5efc4647899d22688"
+     "sha256": "b0aa4a9890bab54e2dfc3026c4cf8ae5579d608e2a79a8e5efc4647899d22688",
+     "funcoes": {
+      "Legislativa": 1613955.31,
+      "Judiciária": 2957816.1,
+      "Administração": 6123779.25,
+      "Assistência Social": 3084606.37,
+      "Saúde": 10533709.08,
+      "Educação": 29428096.49,
+      "Cultura": 1421604.92,
+      "Urbanismo": 4351610.91,
+      "Gestão Ambiental": 402532.91,
+      "Encargos Especiais": 1632351.23
+     },
+     "dtotal": 61550062.57,
+     "ds": "ok",
+     "dsha256": "289b88d3bb92b0cb9ebcc6efbc5b21f0ed8a04a1919d18f35262ed38c96b236a"
     },
     "2025": {
      "s": "ok",
@@ -2498,7 +4352,24 @@
       "rcl": 65561409.47
      },
      "tipo": "completo",
-     "sha256": "2f8b1dc2d598cb4f5a6e345ee46e34b6eb3297a4d0f85aedde98a68c5a5651c9"
+     "sha256": "2f8b1dc2d598cb4f5a6e345ee46e34b6eb3297a4d0f85aedde98a68c5a5651c9",
+     "funcoes": {
+      "Legislativa": 1866277.33,
+      "Judiciária": 2139336.2,
+      "Administração": 7145122.59,
+      "Segurança Pública": 64416.0,
+      "Assistência Social": 3519107.31,
+      "Saúde": 13308454.32,
+      "Educação": 27104014.34,
+      "Cultura": 2468214.33,
+      "Urbanismo": 6726604.03,
+      "Gestão Ambiental": 760338.79,
+      "Agricultura": 47576.3,
+      "Encargos Especiais": 2415305.53
+     },
+     "dtotal": 67564767.07,
+     "ds": "ok",
+     "dsha256": "f82d430a97ab607d8c1fec3aaf1357aff791669795a725f479bc800ad0922833"
     }
    }
   },
@@ -2526,7 +4397,23 @@
       "rcl": 44790979.98
      },
      "tipo": "completo",
-     "sha256": "a7308097bfeef8ee87af5c579ad732eae3b2a5d2ac2bb1c2aa50f49aeb59871f"
+     "sha256": "a7308097bfeef8ee87af5c579ad732eae3b2a5d2ac2bb1c2aa50f49aeb59871f",
+     "funcoes": {
+      "Legislativa": 1400765.77,
+      "Judiciária": 217579.31,
+      "Administração": 6115669.99,
+      "Assistência Social": 1772026.3,
+      "Saúde": 9230681.49,
+      "Educação": 15414271.88,
+      "Cultura": 2314598.08,
+      "Urbanismo": 4513653.41,
+      "Agricultura": 1240280.8,
+      "Transporte": 133686.58,
+      "Desporto e Lazer": 193122.0
+     },
+     "dtotal": 42546335.61,
+     "ds": "ok",
+     "dsha256": "3ccc7bdbc69230714b3ecd0430512c17a785ad34105c21bf4293b26d81ddbc24"
     },
     "2025": {
      "s": "ok",
@@ -2548,7 +4435,24 @@
       "rcl": 45998272.5
      },
      "tipo": "completo",
-     "sha256": "f1911834ecd12f417d0b7daec8891f0c12104bd416324bdcfd19ecf294988a6e"
+     "sha256": "f1911834ecd12f417d0b7daec8891f0c12104bd416324bdcfd19ecf294988a6e",
+     "funcoes": {
+      "Legislativa": 1865152.45,
+      "Judiciária": 372347.17,
+      "Administração": 6471086.59,
+      "Assistência Social": 2266227.99,
+      "Saúde": 10287739.37,
+      "Educação": 16629389.51,
+      "Cultura": 1216616.06,
+      "Urbanismo": 5028003.26,
+      "Gestão Ambiental": 163407.85,
+      "Agricultura": 1229826.06,
+      "Transporte": 359611.3,
+      "Desporto e Lazer": 434198.12
+     },
+     "dtotal": 46323605.73,
+     "ds": "ok",
+     "dsha256": "30b03009c40afd9044722982512cf9c294f713e9f793dbc2c124a6b07560c432"
     }
    }
   },
@@ -2576,7 +4480,27 @@
       "rcl": 59554200.5
      },
      "tipo": "completo",
-     "sha256": "b10c02fd90d96441fb2dd43862cd7a39d27260f9e86a2395bb91fe90e77dc036"
+     "sha256": "b10c02fd90d96441fb2dd43862cd7a39d27260f9e86a2395bb91fe90e77dc036",
+     "funcoes": {
+      "Legislativa": 1636261.6,
+      "Judiciária": 5088031.07,
+      "Administração": 4936983.28,
+      "Segurança Pública": 541043.64,
+      "Assistência Social": 3787978.48,
+      "Saúde": 12375089.96,
+      "Educação": 20684777.79,
+      "Cultura": 7061616.87,
+      "Urbanismo": 15527437.19,
+      "Gestão Ambiental": 426702.34,
+      "Agricultura": 848572.67,
+      "Comércio e Serviços": 429398.91,
+      "Comunicações": 294631.64,
+      "Desporto e Lazer": 422810.57,
+      "Encargos Especiais": 64618.3
+     },
+     "dtotal": 74125954.31,
+     "ds": "ok",
+     "dsha256": "142ece2af3012ffe7c51cf5bbe7aa4298e2768481c890f0e8aa17521446d3e8f"
     },
     "2025": {
      "s": "ok",
@@ -2598,7 +4522,27 @@
       "rcl": 61739035.11
      },
      "tipo": "completo",
-     "sha256": "598a735e77e54d5bb54c5d15bdeb0ba73105d17e89e2535c1ae2ab6e6ecb21c8"
+     "sha256": "598a735e77e54d5bb54c5d15bdeb0ba73105d17e89e2535c1ae2ab6e6ecb21c8",
+     "funcoes": {
+      "Legislativa": 1895588.5,
+      "Judiciária": 2962179.08,
+      "Administração": 6154120.04,
+      "Segurança Pública": 535718.83,
+      "Assistência Social": 3205712.08,
+      "Saúde": 12739693.62,
+      "Educação": 21022652.45,
+      "Cultura": 5312610.83,
+      "Urbanismo": 11451659.17,
+      "Gestão Ambiental": 228717.29,
+      "Agricultura": 795758.95,
+      "Comércio e Serviços": 346866.49,
+      "Comunicações": 316327.26,
+      "Desporto e Lazer": 303832.01,
+      "Encargos Especiais": 51694.64
+     },
+     "dtotal": 67323131.24,
+     "ds": "ok",
+     "dsha256": "8436d4d1c737cbaf7abc2cfdb13667f72368ffab1845a5ed036c997b80e9aca0"
     }
    }
   },
@@ -2626,7 +4570,25 @@
       "rcl": 153835172.46
      },
      "tipo": "completo",
-     "sha256": "2513ff97081649cde2ffedd2e8a283783c817311ca6c9173c6c7b6781f87bd41"
+     "sha256": "2513ff97081649cde2ffedd2e8a283783c817311ca6c9173c6c7b6781f87bd41",
+     "funcoes": {
+      "Legislativa": 4155175.49,
+      "Judiciária": 2765688.6,
+      "Administração": 11086759.06,
+      "Assistência Social": 4131823.19,
+      "Saúde": 28514845.6,
+      "Educação": 61825834.59,
+      "Cultura": 2641390.49,
+      "Urbanismo": 17468536.62,
+      "Gestão Ambiental": 52869.46,
+      "Agricultura": 3286173.57,
+      "Energia": 1226869.66,
+      "Transporte": 1560790.48,
+      "Desporto e Lazer": 124538.68
+     },
+     "dtotal": 138841295.49,
+     "ds": "ok",
+     "dsha256": "e3699bffbb83cf313c1a6333f901bb53cc1928b7ea505dbeecbc8802d0c08da2"
     },
     "2025": {
      "s": "ok",
@@ -2648,7 +4610,27 @@
       "rcl": 159022327.71
      },
      "tipo": "completo",
-     "sha256": "f80965ef5f2cb7d77dac0966a3e515896ba872993c12cb527afad7a8407477d8"
+     "sha256": "f80965ef5f2cb7d77dac0966a3e515896ba872993c12cb527afad7a8407477d8",
+     "funcoes": {
+      "Legislativa": 5020252.95,
+      "Judiciária": 7271076.45,
+      "Administração": 22735180.56,
+      "Assistência Social": 5263328.59,
+      "Saúde": 36456922.3,
+      "Educação": 70946695.86,
+      "Cultura": 3330200.78,
+      "Urbanismo": 13445137.28,
+      "Saneamento": 403789.42,
+      "Gestão Ambiental": 1532845.87,
+      "Agricultura": 2162966.81,
+      "Comércio e Serviços": 61840.0,
+      "Energia": 5569909.43,
+      "Transporte": 319999.44,
+      "Desporto e Lazer": 218994.72
+     },
+     "dtotal": 174739140.46,
+     "ds": "ok",
+     "dsha256": "b8acd0c2459738341ba37897d7c1434ddbe6bd86f8bd85bab0aec86f778047d9"
     }
    }
   },
@@ -2676,7 +4658,25 @@
       "rcl": 102478095.12
      },
      "tipo": "completo",
-     "sha256": "01708977f412ca0fa3da5984b552fe6e6998475585e11c6a78d2bab4fa9bf9a8"
+     "sha256": "01708977f412ca0fa3da5984b552fe6e6998475585e11c6a78d2bab4fa9bf9a8",
+     "funcoes": {
+      "Legislativa": 3187167.49,
+      "Judiciária": 4525529.16,
+      "Administração": 10134736.31,
+      "Defesa Nacional": 167286.88,
+      "Assistência Social": 3432885.7,
+      "Saúde": 25110645.74,
+      "Educação": 32288843.05,
+      "Urbanismo": 11449508.44,
+      "Saneamento": 602459.52,
+      "Gestão Ambiental": 1391309.3,
+      "Transporte": 2296961.8,
+      "Desporto e Lazer": 4196245.74,
+      "Encargos Especiais": 57078.85
+     },
+     "dtotal": 98840657.98,
+     "ds": "ok",
+     "dsha256": "b94f6a59675ee805bf5f8372db34a05eb8d2cd37f95498afa0f7567004b931eb"
     },
     "2025": {
      "s": "ok",
@@ -2698,7 +4698,25 @@
       "rcl": 110025024.51
      },
      "tipo": "completo",
-     "sha256": "753e4e121fd48d7bdf03ca0671014566562388862063dc0c7a46bb3ee05883d2"
+     "sha256": "753e4e121fd48d7bdf03ca0671014566562388862063dc0c7a46bb3ee05883d2",
+     "funcoes": {
+      "Legislativa": 3836407.58,
+      "Judiciária": 4672591.68,
+      "Administração": 10029681.19,
+      "Defesa Nacional": 3782.0,
+      "Assistência Social": 3171307.06,
+      "Saúde": 26734165.93,
+      "Educação": 37942981.29,
+      "Urbanismo": 5053483.6,
+      "Saneamento": 105084.84,
+      "Gestão Ambiental": 3201380.36,
+      "Transporte": 2447194.86,
+      "Desporto e Lazer": 2767942.04,
+      "Encargos Especiais": 1869061.98
+     },
+     "dtotal": 101835064.41,
+     "ds": "ok",
+     "dsha256": "24f740def4578828b4b41b794fddb0a619d3584bcc0487b3848a725b54b05716"
     }
    }
   },
@@ -2726,7 +4744,25 @@
       "rcl": 124109392.58
      },
      "tipo": "completo",
-     "sha256": "527e85f374502b3520348ff6cdaed073bd3fc8b5f608141c6a050d47e6dc988e"
+     "sha256": "527e85f374502b3520348ff6cdaed073bd3fc8b5f608141c6a050d47e6dc988e",
+     "funcoes": {
+      "Legislativa": 3330211.69,
+      "Judiciária": 3400402.99,
+      "Administração": 12631830.5,
+      "Assistência Social": 3057770.18,
+      "Saúde": 29466653.45,
+      "Educação": 42068314.44,
+      "Cultura": 7800038.02,
+      "Urbanismo": 10550358.63,
+      "Saneamento": 142015.21,
+      "Agricultura": 2246842.71,
+      "Comércio e Serviços": 238802.79,
+      "Desporto e Lazer": 61200.0,
+      "Encargos Especiais": 7865772.25
+     },
+     "dtotal": 122860212.86,
+     "ds": "ok",
+     "dsha256": "fc51d3c7b56ae1e62f251d054dbdc3be6790123edcad571440ffcdbd77878679"
     },
     "2025": {
      "s": "ok",
@@ -2748,7 +4784,25 @@
       "rcl": 130005649.3
      },
      "tipo": "completo",
-     "sha256": "e02859362d3149dbfe211f705b7cdfb031de6329db5c1f405aa355ba74828c85"
+     "sha256": "e02859362d3149dbfe211f705b7cdfb031de6329db5c1f405aa355ba74828c85",
+     "funcoes": {
+      "Legislativa": 4023494.92,
+      "Judiciária": 2910294.68,
+      "Administração": 17283149.6,
+      "Assistência Social": 3865963.75,
+      "Saúde": 38241671.11,
+      "Educação": 48282283.34,
+      "Cultura": 8608977.54,
+      "Urbanismo": 8154505.47,
+      "Saneamento": 539454.13,
+      "Agricultura": 4324990.45,
+      "Comunicações": 47688.56,
+      "Desporto e Lazer": 283975.87,
+      "Encargos Especiais": 2462427.36
+     },
+     "dtotal": 139028876.78,
+     "ds": "ok",
+     "dsha256": "ca405d294b7718182213e0e516603b93ee2ae31c4083446584ca71f446b41145"
     }
    }
   },
@@ -2776,7 +4830,23 @@
       "rcl": 114980600.77
      },
      "tipo": "completo",
-     "sha256": "d4bd87046fdc488a01c8e0a7084aa6b64597191f69f7930d30c2ca5b64436de0"
+     "sha256": "d4bd87046fdc488a01c8e0a7084aa6b64597191f69f7930d30c2ca5b64436de0",
+     "funcoes": {
+      "Legislativa": 4044769.37,
+      "Judiciária": 1532364.26,
+      "Administração": 27808432.58,
+      "Assistência Social": 5322528.46,
+      "Saúde": 30944735.48,
+      "Educação": 26165144.82,
+      "Cultura": 3871719.13,
+      "Urbanismo": 6658265.9,
+      "Gestão Ambiental": 1171526.53,
+      "Agricultura": 208394.51,
+      "Encargos Especiais": 1979568.26
+     },
+     "dtotal": 109707449.3,
+     "ds": "ok",
+     "dsha256": "15f94dfdf1b8fca70493389a29f0b9107213c13af4be2a60bec6381c2f17db62"
     },
     "2025": {
      "s": "ok",
@@ -2798,7 +4868,25 @@
       "rcl": 130563245.52
      },
      "tipo": "completo",
-     "sha256": "2d903ca30d8125eb4ab191f8a279a870dd0d7599ff8fb97f178266a4a96e6317"
+     "sha256": "2d903ca30d8125eb4ab191f8a279a870dd0d7599ff8fb97f178266a4a96e6317",
+     "funcoes": {
+      "Legislativa": 5230332.61,
+      "Judiciária": 4519710.89,
+      "Administração": 27973502.76,
+      "Assistência Social": 4652238.27,
+      "Saúde": 33833846.64,
+      "Educação": 29569877.91,
+      "Cultura": 3213563.38,
+      "Urbanismo": 3110723.39,
+      "Gestão Ambiental": 1158675.08,
+      "Agricultura": 416093.39,
+      "Comércio e Serviços": 1914.0,
+      "Comunicações": 124404.14,
+      "Encargos Especiais": 1936465.75
+     },
+     "dtotal": 115741348.21,
+     "ds": "ok",
+     "dsha256": "dcb5a8e16c28d52eb3ab3bdb0406559f8a6cd033a9b8c45bb8920852cb67cbac"
     }
    }
   },
@@ -2826,7 +4914,26 @@
       "rcl": 97164040.84
      },
      "tipo": "completo",
-     "sha256": "bfe20276c52e8138f2a939ee7f33d5aa7d7f9018b6a50db1a7246c5ec825f8ef"
+     "sha256": "bfe20276c52e8138f2a939ee7f33d5aa7d7f9018b6a50db1a7246c5ec825f8ef",
+     "funcoes": {
+      "Legislativa": 2949986.71,
+      "Judiciária": 2151287.06,
+      "Administração": 7265909.42,
+      "Assistência Social": 2846805.67,
+      "Saúde": 18921765.5,
+      "Educação": 42001074.13,
+      "Cultura": 1590420.73,
+      "Urbanismo": 8386103.41,
+      "Gestão Ambiental": 302647.55,
+      "Agricultura": 1259959.66,
+      "Energia": 823280.73,
+      "Transporte": 1491457.53,
+      "Desporto e Lazer": 543256.48,
+      "Encargos Especiais": 5126051.61
+     },
+     "dtotal": 95660006.19,
+     "ds": "ok",
+     "dsha256": "b11a89d78d4bc9be8f4a50699e19b0c1e3f5f4d645978f3a4e6d8807675acfe4"
     },
     "2025": {
      "s": "ok",
@@ -2848,7 +4955,26 @@
       "rcl": 109567052.86
      },
      "tipo": "completo",
-     "sha256": "17dd28f3a5210a106c1280fee49d3e02bb2605b7c04dbb5e575198c4528458d2"
+     "sha256": "17dd28f3a5210a106c1280fee49d3e02bb2605b7c04dbb5e575198c4528458d2",
+     "funcoes": {
+      "Legislativa": 3327269.5,
+      "Judiciária": 3513644.89,
+      "Administração": 7473192.42,
+      "Assistência Social": 3217275.16,
+      "Saúde": 20840231.08,
+      "Educação": 50781330.33,
+      "Cultura": 256046.73,
+      "Urbanismo": 4660242.01,
+      "Gestão Ambiental": 479707.12,
+      "Agricultura": 1058550.97,
+      "Energia": 741602.76,
+      "Transporte": 2379613.24,
+      "Desporto e Lazer": 627328.12,
+      "Encargos Especiais": 3625952.25
+     },
+     "dtotal": 102981986.58,
+     "ds": "ok",
+     "dsha256": "572a7118a5d8dcc9e98d514d67a35c4216f0985acc73ba3c3540898fccc0340e"
     }
    }
   },
@@ -2876,7 +5002,25 @@
       "rcl": 79937451.7
      },
      "tipo": "completo",
-     "sha256": "fef824aead7c95c7845a60b3bfde674a77ce9b0bf849aea866c6c331dbd4d54f"
+     "sha256": "fef824aead7c95c7845a60b3bfde674a77ce9b0bf849aea866c6c331dbd4d54f",
+     "funcoes": {
+      "Legislativa": 2441426.25,
+      "Judiciária": 317334.66,
+      "Administração": 8867892.15,
+      "Assistência Social": 4857803.49,
+      "Saúde": 11933964.37,
+      "Educação": 20631182.74,
+      "Cultura": 2197487.23,
+      "Urbanismo": 16442682.53,
+      "Gestão Ambiental": 66400.0,
+      "Agricultura": 192149.27,
+      "Comércio e Serviços": 4700.0,
+      "Desporto e Lazer": 388254.55,
+      "Encargos Especiais": 2773758.5
+     },
+     "dtotal": 71115035.74,
+     "ds": "ok",
+     "dsha256": "7ea32c6fd8e08ae9aa08feb54629be7098c4c4ea489025d7d0d3550873c1b83f"
     },
     "2025": {
      "s": "ok",
@@ -2898,7 +5042,24 @@
       "rcl": 159058450.45
      },
      "tipo": "completo",
-     "sha256": "5040f238cb8dfe14552a30e1d902ae7ff253990271adbf81433422824c0e154c"
+     "sha256": "5040f238cb8dfe14552a30e1d902ae7ff253990271adbf81433422824c0e154c",
+     "funcoes": {
+      "Legislativa": 2723463.05,
+      "Judiciária": 551365.81,
+      "Administração": 25166975.03,
+      "Assistência Social": 6057389.83,
+      "Saúde": 15486652.66,
+      "Educação": 24140512.38,
+      "Cultura": 11416730.72,
+      "Urbanismo": 22638370.27,
+      "Agricultura": 1088701.7,
+      "Comércio e Serviços": 98013.9,
+      "Desporto e Lazer": 913223.9,
+      "Encargos Especiais": 7474354.5
+     },
+     "dtotal": 117755753.75,
+     "ds": "ok",
+     "dsha256": "7b3b884b63708b618d91d1588bc885d4010f0dbc7e4abd0f82ed30aa8123ac9a"
     }
    }
   },
@@ -2926,7 +5087,28 @@
       "rcl": 91397844.15
      },
      "tipo": "completo",
-     "sha256": "5ba7c212db9decfa15e8caf8e0ca6c7acd9bad734a81a1ced927819558a81c93"
+     "sha256": "5ba7c212db9decfa15e8caf8e0ca6c7acd9bad734a81a1ced927819558a81c93",
+     "funcoes": {
+      "Legislativa": 3110280.62,
+      "Judiciária": 2632022.6,
+      "Administração": 4945818.9,
+      "Assistência Social": 2890985.04,
+      "Saúde": 19869638.41,
+      "Educação": 26153913.9,
+      "Cultura": 149377.13,
+      "Urbanismo": 10028507.38,
+      "Saneamento": 385719.83,
+      "Gestão Ambiental": 425795.15,
+      "Agricultura": 1339777.71,
+      "Comércio e Serviços": 2794268.0,
+      "Energia": 2617556.99,
+      "Transporte": 306020.75,
+      "Desporto e Lazer": 1324849.52,
+      "Encargos Especiais": 7589782.55
+     },
+     "dtotal": 86564314.48,
+     "ds": "ok",
+     "dsha256": "fd11161d0a8a8af53b62281a6ba242f3ce46839f5ea5c204a7287dd285020630"
     },
     "2025": {
      "s": "ok",
@@ -2948,7 +5130,27 @@
       "rcl": 85210316.34
      },
      "tipo": "completo",
-     "sha256": "f9d987cd671407d481cfa2f864c7e80486492c700526a7dec1f42d1da0dc148d"
+     "sha256": "f9d987cd671407d481cfa2f864c7e80486492c700526a7dec1f42d1da0dc148d",
+     "funcoes": {
+      "Legislativa": 3594176.08,
+      "Judiciária": 2953106.64,
+      "Administração": 6653928.96,
+      "Assistência Social": 3310211.24,
+      "Saúde": 21396543.31,
+      "Educação": 26124288.43,
+      "Cultura": 172815.93,
+      "Urbanismo": 8186373.74,
+      "Gestão Ambiental": 304267.2,
+      "Agricultura": 1651495.88,
+      "Comércio e Serviços": 1712407.5,
+      "Energia": 3687178.89,
+      "Transporte": 319104.76,
+      "Desporto e Lazer": 1349379.18,
+      "Encargos Especiais": 5549960.72
+     },
+     "dtotal": 86965238.46,
+     "ds": "ok",
+     "dsha256": "85203b444077f541fd0d469e67deef480894b79df975c33b12cb7ea5bdde94d5"
     }
    }
   },
@@ -2976,7 +5178,24 @@
       "rcl": 111578705.75
      },
      "tipo": "completo",
-     "sha256": "96aacd61919da1ae575ff12d80d5d344bd76e1ff9a0ec945bf0ed00fc4405432"
+     "sha256": "96aacd61919da1ae575ff12d80d5d344bd76e1ff9a0ec945bf0ed00fc4405432",
+     "funcoes": {
+      "Legislativa": 4491678.91,
+      "Judiciária": 2901817.2,
+      "Administração": 25639774.47,
+      "Assistência Social": 8718182.4,
+      "Saúde": 21086915.39,
+      "Trabalho": 688740.53,
+      "Educação": 28060721.06,
+      "Cultura": 7953909.06,
+      "Urbanismo": 8772901.84,
+      "Habitação": 880786.83,
+      "Agricultura": 531083.48,
+      "Desporto e Lazer": 502023.0
+     },
+     "dtotal": 110228534.17,
+     "ds": "ok",
+     "dsha256": "c2fc7ffd5730970781704b808769868ca6202664752ac03c0d8a737d495d093f"
     },
     "2025": {
      "s": "ok",
@@ -2998,7 +5217,26 @@
       "rcl": 124783671.69
      },
      "tipo": "completo",
-     "sha256": "a5bd7337d44365ef52c9364f9f50bd1fd411b2f24d658ff6a54723b406a64416"
+     "sha256": "a5bd7337d44365ef52c9364f9f50bd1fd411b2f24d658ff6a54723b406a64416",
+     "funcoes": {
+      "Legislativa": 5338543.94,
+      "Judiciária": 3242399.06,
+      "Administração": 26360537.11,
+      "Assistência Social": 9012477.73,
+      "Saúde": 21026636.55,
+      "Trabalho": 742195.85,
+      "Educação": 30219725.57,
+      "Cultura": 6502939.12,
+      "Urbanismo": 10393316.98,
+      "Habitação": 254221.75,
+      "Agricultura": 408348.1,
+      "Comércio e Serviços": 35438.0,
+      "Desporto e Lazer": 394831.44,
+      "Encargos Especiais": 317336.43
+     },
+     "dtotal": 114248947.63,
+     "ds": "ok",
+     "dsha256": "8396a4287e7f76e76d6b752164654f9e67addc053cbb33b82d51b03429d59f9d"
     }
    }
   },
@@ -3026,7 +5264,26 @@
       "rcl": 90946156.37
      },
      "tipo": "completo",
-     "sha256": "48593c11a9e4955901847aecb92abf078843c97448c8319871fb8c1ff25c2147"
+     "sha256": "48593c11a9e4955901847aecb92abf078843c97448c8319871fb8c1ff25c2147",
+     "funcoes": {
+      "Legislativa": 2951116.25,
+      "Judiciária": 4648629.3,
+      "Administração": 6711408.1,
+      "Assistência Social": 4001273.64,
+      "Saúde": 18593719.67,
+      "Educação": 35487460.84,
+      "Cultura": 1363199.8,
+      "Urbanismo": 8847863.59,
+      "Gestão Ambiental": 339444.27,
+      "Agricultura": 265904.34,
+      "Comércio e Serviços": 386472.41,
+      "Transporte": 196236.01,
+      "Desporto e Lazer": 374425.68,
+      "Encargos Especiais": 2193762.33
+     },
+     "dtotal": 86360916.23,
+     "ds": "ok",
+     "dsha256": "3aacbe6faba32e3535d80b9b08da4cf7a92bccdbd8e89567eeac42fb2772d76d"
     },
     "2025": {
      "s": "ok",
@@ -3048,7 +5305,26 @@
       "rcl": 102161214.12
      },
      "tipo": "completo",
-     "sha256": "e905a5c691f8dd7ebf2592c0825c9e11e83fcefdfbfc9436cc3b362bfde60521"
+     "sha256": "e905a5c691f8dd7ebf2592c0825c9e11e83fcefdfbfc9436cc3b362bfde60521",
+     "funcoes": {
+      "Legislativa": 3374222.95,
+      "Judiciária": 5369043.97,
+      "Administração": 14783936.67,
+      "Assistência Social": 2933632.11,
+      "Saúde": 20463378.44,
+      "Educação": 38526202.09,
+      "Cultura": 1061888.35,
+      "Urbanismo": 5982700.08,
+      "Gestão Ambiental": 437509.19,
+      "Agricultura": 258612.39,
+      "Comércio e Serviços": 351862.94,
+      "Transporte": 171378.08,
+      "Desporto e Lazer": 353522.33,
+      "Encargos Especiais": 3263448.06
+     },
+     "dtotal": 97331337.65,
+     "ds": "ok",
+     "dsha256": "1372c5baa06e8fa10eb01569ea32e4bd62d2770dd559c7567a1a2816a5b888b7"
     }
    }
   },
@@ -3076,7 +5352,25 @@
       "rcl": 93774012.55
      },
      "tipo": "completo",
-     "sha256": "9c2bb81e04108579a3425d6bbf45e7cfe794363f5c69dfa7351f1ba3010ecccb"
+     "sha256": "9c2bb81e04108579a3425d6bbf45e7cfe794363f5c69dfa7351f1ba3010ecccb",
+     "funcoes": {
+      "Legislativa": 2413634.89,
+      "Judiciária": 520413.48,
+      "Administração": 7900059.53,
+      "Assistência Social": 4820158.69,
+      "Saúde": 16348056.64,
+      "Educação": 49471571.09,
+      "Cultura": 2894493.97,
+      "Urbanismo": 9627628.57,
+      "Gestão Ambiental": 522074.86,
+      "Agricultura": 919049.17,
+      "Energia": 399580.21,
+      "Desporto e Lazer": 288102.63,
+      "Encargos Especiais": 2647834.76
+     },
+     "dtotal": 98772658.49,
+     "ds": "ok",
+     "dsha256": "cf93cdf94c4a026ea89b51ebf1e241c64bfb083b3c4c8f81c1fe90bbf90d7c45"
     },
     "2025": {
      "s": "ok",
@@ -3098,7 +5392,25 @@
       "rcl": 119150248.6
      },
      "tipo": "completo",
-     "sha256": "9ba5444f068955df895a4fa3c69e3c0c325e7740bb5b06b25bf217ac90eb8cb2"
+     "sha256": "9ba5444f068955df895a4fa3c69e3c0c325e7740bb5b06b25bf217ac90eb8cb2",
+     "funcoes": {
+      "Legislativa": 2789966.75,
+      "Judiciária": 2699740.2,
+      "Administração": 11635124.44,
+      "Assistência Social": 5152519.14,
+      "Saúde": 17525599.07,
+      "Educação": 54018095.05,
+      "Cultura": 1802171.29,
+      "Urbanismo": 14948617.66,
+      "Gestão Ambiental": 664869.91,
+      "Agricultura": 1045462.92,
+      "Energia": 475300.26,
+      "Desporto e Lazer": 282381.9,
+      "Encargos Especiais": 2680824.04
+     },
+     "dtotal": 115720672.63,
+     "ds": "ok",
+     "dsha256": "a3e5829966498258f4fb635e2d61235b1363977e6cd2efc256b0e09fc232fd4b"
     }
    }
   },
@@ -3126,7 +5438,27 @@
       "rcl": 59472861.14
      },
      "tipo": "completo",
-     "sha256": "cb088202cbfe977d5ee6c371932e3f326f5997f1fd9654c48d44013afa722fb0"
+     "sha256": "cb088202cbfe977d5ee6c371932e3f326f5997f1fd9654c48d44013afa722fb0",
+     "funcoes": {
+      "Legislativa": 1567414.68,
+      "Judiciária": 1902940.95,
+      "Administração": 10303987.54,
+      "Assistência Social": 2349608.46,
+      "Saúde": 10029060.2,
+      "Educação": 16554750.0,
+      "Cultura": 4896171.08,
+      "Urbanismo": 6767634.81,
+      "Habitação": 194954.2,
+      "Gestão Ambiental": 360078.15,
+      "Agricultura": 721401.97,
+      "Comércio e Serviços": 278832.1,
+      "Energia": 1025564.16,
+      "Desporto e Lazer": 411417.63,
+      "Encargos Especiais": 2113251.59
+     },
+     "dtotal": 59477067.52,
+     "ds": "ok",
+     "dsha256": "c81c1f8fee88187fc7b55df7e295189d8625192a0c31f83c8184c0732ed35ee5"
     },
     "2025": {
      "s": "ok",
@@ -3148,7 +5480,26 @@
       "rcl": 61380303.87
      },
      "tipo": "completo",
-     "sha256": "0e8d51303b03ed4c3d277211c8f3692823a314ce6f8fcf5ebfdb793c10409d30"
+     "sha256": "0e8d51303b03ed4c3d277211c8f3692823a314ce6f8fcf5ebfdb793c10409d30",
+     "funcoes": {
+      "Legislativa": 1725215.31,
+      "Judiciária": 1301088.48,
+      "Administração": 11174736.38,
+      "Assistência Social": 2495682.43,
+      "Saúde": 11874320.2,
+      "Educação": 17951903.75,
+      "Cultura": 5257879.43,
+      "Urbanismo": 8606819.4,
+      "Gestão Ambiental": 425742.3,
+      "Agricultura": 782967.4,
+      "Comércio e Serviços": 371255.66,
+      "Energia": 653318.5,
+      "Desporto e Lazer": 609868.34,
+      "Encargos Especiais": 877012.33
+     },
+     "dtotal": 64107809.91,
+     "ds": "ok",
+     "dsha256": "61b2b350a169da77f1590c5f6856f5de349b8528053feb6f2f968a1d8847219c"
     }
    }
   },
@@ -3176,7 +5527,25 @@
       "rcl": 36781410.64
      },
      "tipo": "completo",
-     "sha256": "ee369f67a3c7a2145b0c4ace83f07edfec76ca36f1e3667b0a9fe9bb9b6578a3"
+     "sha256": "ee369f67a3c7a2145b0c4ace83f07edfec76ca36f1e3667b0a9fe9bb9b6578a3",
+     "funcoes": {
+      "Legislativa": 1514158.35,
+      "Judiciária": 883617.42,
+      "Administração": 6159138.32,
+      "Assistência Social": 2589390.56,
+      "Saúde": 7089555.87,
+      "Educação": 14495128.86,
+      "Cultura": 1379212.63,
+      "Urbanismo": 2154282.86,
+      "Gestão Ambiental": 138041.48,
+      "Agricultura": 73505.29,
+      "Energia": 390503.1,
+      "Desporto e Lazer": 285066.93,
+      "Encargos Especiais": 1054114.2
+     },
+     "dtotal": 38205715.87,
+     "ds": "ok",
+     "dsha256": "7b5274b6c7effab61f1ce4030d76e499611e0e361ce4a1faaf367060c1b4c262"
     },
     "2025": {
      "s": "ok",
@@ -3198,7 +5567,25 @@
       "rcl": 40732196.26
      },
      "tipo": "completo",
-     "sha256": "dc47cf907cbc401605eb364f93e9098ff4807aeed59cc8bd39516811e3f30632"
+     "sha256": "dc47cf907cbc401605eb364f93e9098ff4807aeed59cc8bd39516811e3f30632",
+     "funcoes": {
+      "Legislativa": 1739200.93,
+      "Judiciária": 939483.04,
+      "Administração": 6032416.14,
+      "Assistência Social": 2616123.06,
+      "Saúde": 8204536.19,
+      "Educação": 13539749.45,
+      "Cultura": 499603.53,
+      "Urbanismo": 2328517.96,
+      "Gestão Ambiental": 155657.63,
+      "Agricultura": 274475.27,
+      "Energia": 188989.0,
+      "Desporto e Lazer": 275329.76,
+      "Encargos Especiais": 2642317.07
+     },
+     "dtotal": 39436399.03,
+     "ds": "ok",
+     "dsha256": "a4035a8b1b3fabd075e890df6cdbf68d770f9a2736d95c792d3ad7271c7e9acd"
     }
    }
   },
@@ -3226,7 +5613,26 @@
       "rcl": 75195095.86
      },
      "tipo": "completo",
-     "sha256": "ded90c3597ea28e92993773e9099e1cd53a9480479507500552b9a2c10e72eae"
+     "sha256": "ded90c3597ea28e92993773e9099e1cd53a9480479507500552b9a2c10e72eae",
+     "funcoes": {
+      "Legislativa": 2203314.53,
+      "Judiciária": 2653267.84,
+      "Administração": 11440333.62,
+      "Segurança Pública": 1632324.33,
+      "Assistência Social": 2919068.28,
+      "Saúde": 15361309.12,
+      "Educação": 21516191.82,
+      "Cultura": 2069551.62,
+      "Urbanismo": 2117445.12,
+      "Habitação": 41955.85,
+      "Agricultura": 493442.94,
+      "Transporte": 9884267.96,
+      "Desporto e Lazer": 680711.91,
+      "Encargos Especiais": 1192047.32
+     },
+     "dtotal": 74205232.26,
+     "ds": "ok",
+     "dsha256": "f9b688ff77934d01ef186a1297e5d13ff2c727e2f85c9401553b0bb21a3996d9"
     },
     "2025": {
      "s": "ok",
@@ -3248,7 +5654,26 @@
       "rcl": 73784578.91
      },
      "tipo": "completo",
-     "sha256": "e2511c18531d473538f7e4a34a977609f496aa43efe506826a2e9c6854ab6a31"
+     "sha256": "e2511c18531d473538f7e4a34a977609f496aa43efe506826a2e9c6854ab6a31",
+     "funcoes": {
+      "Legislativa": 2594161.68,
+      "Judiciária": 1671505.6,
+      "Administração": 13677494.03,
+      "Segurança Pública": 1599508.5,
+      "Assistência Social": 2744192.03,
+      "Saúde": 16196080.98,
+      "Educação": 20745113.98,
+      "Cultura": 2670644.34,
+      "Urbanismo": 1460749.33,
+      "Agricultura": 452271.74,
+      "Comércio e Serviços": 69170.03,
+      "Transporte": 10576188.94,
+      "Desporto e Lazer": 429293.63,
+      "Encargos Especiais": 1206719.89
+     },
+     "dtotal": 76093094.7,
+     "ds": "ok",
+     "dsha256": "7671c14fb06cb0138ae3270adb4ec1b97a66de038e4db1ccf8cc6afa34ca2c78"
     }
    }
   },
@@ -3276,7 +5701,31 @@
       "rcl": 305751377.51
      },
      "tipo": "completo",
-     "sha256": "872376ff78cc31deec318207af923a59ee0b3a8d1d2f60bec76fd7d01fa3c12c"
+     "sha256": "872376ff78cc31deec318207af923a59ee0b3a8d1d2f60bec76fd7d01fa3c12c",
+     "funcoes": {
+      "Legislativa": 9365965.04,
+      "Judiciária": 7272513.9,
+      "Administração": 53574781.94,
+      "Segurança Pública": 67796.88,
+      "Assistência Social": 12470100.26,
+      "Saúde": 54631575.06,
+      "Trabalho": 36153.65,
+      "Educação": 96944501.96,
+      "Cultura": 7246451.56,
+      "Direitos da Cidadania": 2185743.22,
+      "Urbanismo": 19665605.92,
+      "Saneamento": 13817428.27,
+      "Gestão Ambiental": 407811.99,
+      "Ciência e Tecnologia": 4603.71,
+      "Agricultura": 24064.0,
+      "Comércio e Serviços": 6825.0,
+      "Comunicações": 3082439.52,
+      "Desporto e Lazer": 910037.56,
+      "Encargos Especiais": 7307985.39
+     },
+     "dtotal": 289022384.83,
+     "ds": "ok",
+     "dsha256": "7047d70833f2e35d9222e1b416672c81360cbd200d9e54b46b19655fbc204871"
     },
     "2025": {
      "s": "ok",
@@ -3298,7 +5747,33 @@
       "rcl": 414699578.42
      },
      "tipo": "completo",
-     "sha256": "76ede85995d680d4cb429fa0dfc3d6ace4ecc73072aa8e6c45e57f6e010a1ac1"
+     "sha256": "76ede85995d680d4cb429fa0dfc3d6ace4ecc73072aa8e6c45e57f6e010a1ac1",
+     "funcoes": {
+      "Legislativa": 9874242.16,
+      "Judiciária": 6895126.59,
+      "Administração": 58943550.97,
+      "Segurança Pública": 798.74,
+      "Assistência Social": 12367275.67,
+      "Saúde": 63456293.87,
+      "Trabalho": 38211.27,
+      "Educação": 118243700.62,
+      "Cultura": 10672427.29,
+      "Direitos da Cidadania": 2758507.94,
+      "Urbanismo": 27849484.03,
+      "Habitação": 105277.38,
+      "Saneamento": 14263648.09,
+      "Gestão Ambiental": 261739.12,
+      "Ciência e Tecnologia": 25666.18,
+      "Agricultura": 568884.71,
+      "Comércio e Serviços": 325082.9,
+      "Comunicações": 991581.12,
+      "Transporte": 149437.5,
+      "Desporto e Lazer": 167635.64,
+      "Encargos Especiais": 10333838.63
+     },
+     "dtotal": 338292410.42,
+     "ds": "ok",
+     "dsha256": "32da9c8f6e2d73d3cc913655a785008e573df85a2a2b9000bf247ad647161e5e"
     }
    }
   },
@@ -3326,7 +5801,25 @@
       "rcl": 55856584.74
      },
      "tipo": "completo",
-     "sha256": "4007e60f0fa1bf2cb3a9d41d3a40f01cab4e6498d8aff15aeed0e9261d505bc5"
+     "sha256": "4007e60f0fa1bf2cb3a9d41d3a40f01cab4e6498d8aff15aeed0e9261d505bc5",
+     "funcoes": {
+      "Legislativa": 1992618.28,
+      "Judiciária": 4359445.39,
+      "Administração": 6051819.64,
+      "Assistência Social": 2355076.1,
+      "Saúde": 9588707.43,
+      "Educação": 23168529.1,
+      "Cultura": 1689522.28,
+      "Urbanismo": 3017425.17,
+      "Gestão Ambiental": 15803.84,
+      "Agricultura": 998481.46,
+      "Energia": 11540.88,
+      "Transporte": 1548308.21,
+      "Desporto e Lazer": 220096.83
+     },
+     "dtotal": 55017374.61,
+     "ds": "ok",
+     "dsha256": "a0bde2ab339ee5515b68755d50358ecdbf630c48703453f881b4452f800a4e92"
     },
     "2025": {
      "s": "ok",
@@ -3348,7 +5841,25 @@
       "rcl": 62960866.64
      },
      "tipo": "completo",
-     "sha256": "273e8b94d5346cfb7b6f39d7ecab3181de17ce09bb100039be933824797e8dbc"
+     "sha256": "273e8b94d5346cfb7b6f39d7ecab3181de17ce09bb100039be933824797e8dbc",
+     "funcoes": {
+      "Legislativa": 2269238.38,
+      "Judiciária": 3500238.14,
+      "Administração": 7200283.39,
+      "Assistência Social": 2668210.02,
+      "Saúde": 10670878.28,
+      "Educação": 23719504.89,
+      "Cultura": 4047688.59,
+      "Urbanismo": 4208079.39,
+      "Gestão Ambiental": 241720.54,
+      "Agricultura": 1072093.67,
+      "Energia": 11382.0,
+      "Transporte": 1176903.63,
+      "Desporto e Lazer": 32000.0
+     },
+     "dtotal": 60818220.92,
+     "ds": "ok",
+     "dsha256": "943aced8dceca02ba5ddaf606b337508d64e0817f045872a86a34a82d25633b1"
     }
    }
   },
@@ -3376,7 +5887,25 @@
       "rcl": 35338623.39
      },
      "tipo": "completo",
-     "sha256": "9ab33cbda0081ef9cfad2473c6fa713dca3fbdb6056c2724eb433133ed85c19e"
+     "sha256": "9ab33cbda0081ef9cfad2473c6fa713dca3fbdb6056c2724eb433133ed85c19e",
+     "funcoes": {
+      "Legislativa": 1426941.15,
+      "Judiciária": 203805.35,
+      "Administração": 4604753.78,
+      "Assistência Social": 2598455.22,
+      "Saúde": 7734197.75,
+      "Educação": 9467185.73,
+      "Cultura": 2783506.6,
+      "Urbanismo": 4585288.72,
+      "Gestão Ambiental": 237809.35,
+      "Agricultura": 290036.64,
+      "Transporte": 41250.0,
+      "Desporto e Lazer": 842126.0,
+      "Encargos Especiais": 1452700.0
+     },
+     "dtotal": 36268056.29,
+     "ds": "ok",
+     "dsha256": "af52c5227c28f825cdc6538e1a0ddd8904f11b948ff42175b57e3b2b2cb7c2aa"
     },
     "2025": {
      "s": "ok",
@@ -3398,7 +5927,25 @@
       "rcl": 38901755.37
      },
      "tipo": "completo",
-     "sha256": "05884425e71e7e8280456bfb5fead662cdb5d2a852549bb13ea11e63f2f690a6"
+     "sha256": "05884425e71e7e8280456bfb5fead662cdb5d2a852549bb13ea11e63f2f690a6",
+     "funcoes": {
+      "Legislativa": 1663038.84,
+      "Judiciária": 119897.45,
+      "Administração": 5520300.02,
+      "Assistência Social": 2315583.72,
+      "Saúde": 7842321.82,
+      "Educação": 10544233.13,
+      "Cultura": 2590951.18,
+      "Urbanismo": 4345367.08,
+      "Gestão Ambiental": 265903.96,
+      "Agricultura": 360431.97,
+      "Transporte": 81396.0,
+      "Desporto e Lazer": 141125.4,
+      "Encargos Especiais": 1761383.21
+     },
+     "dtotal": 37551933.78,
+     "ds": "ok",
+     "dsha256": "5841e16d8d42551072db6ac7be4e951e867c6a82d151cf5fe2d0903f77c8e8fa"
     }
    }
   },
@@ -3426,7 +5973,24 @@
       "rcl": 32391945.97
      },
      "tipo": "completo",
-     "sha256": "d2f81a7ffa1cc6eb3268737560366a83170ba924465ad638e5750e01189317a7"
+     "sha256": "d2f81a7ffa1cc6eb3268737560366a83170ba924465ad638e5750e01189317a7",
+     "funcoes": {
+      "Legislativa": 1507295.91,
+      "Judiciária": 1944794.62,
+      "Administração": 3035228.6,
+      "Assistência Social": 1926515.59,
+      "Saúde": 6465976.17,
+      "Educação": 9375045.38,
+      "Cultura": 169525.11,
+      "Urbanismo": 3077083.6,
+      "Agricultura": 1385286.81,
+      "Transporte": 573077.07,
+      "Desporto e Lazer": 648076.28,
+      "Encargos Especiais": 1503390.62
+     },
+     "dtotal": 31611295.76,
+     "ds": "ok",
+     "dsha256": "adbac573c1f37bebd5efc6e18bdb0ae70c2ed985e2cca0c505c4dd982df55e71"
     },
     "2025": {
      "s": "ok",
@@ -3448,7 +6012,24 @@
       "rcl": 37885412.23
      },
      "tipo": "completo",
-     "sha256": "1fcf81f4c52367610774e6111667ba5b8888bf3625fa935589b8ea4c62826ff4"
+     "sha256": "1fcf81f4c52367610774e6111667ba5b8888bf3625fa935589b8ea4c62826ff4",
+     "funcoes": {
+      "Legislativa": 1705055.35,
+      "Judiciária": 677392.05,
+      "Administração": 4686276.04,
+      "Assistência Social": 1972840.57,
+      "Saúde": 5939084.42,
+      "Educação": 10339617.6,
+      "Cultura": 4349.55,
+      "Urbanismo": 3631323.25,
+      "Agricultura": 1283245.21,
+      "Transporte": 729706.98,
+      "Desporto e Lazer": 488015.59,
+      "Encargos Especiais": 1388561.85
+     },
+     "dtotal": 32845468.46,
+     "ds": "ok",
+     "dsha256": "c01333cf73ad13ac009cf00e0c58960c9c4ce830c154a47a656c1a06b50500be"
     }
    }
   },
@@ -3476,7 +6057,27 @@
       "rcl": 175764270.32
      },
      "tipo": "completo",
-     "sha256": "1e68b566520689bc3bb0f13511cd4da77412bf5272456adf5efa858b8d76357d"
+     "sha256": "1e68b566520689bc3bb0f13511cd4da77412bf5272456adf5efa858b8d76357d",
+     "funcoes": {
+      "Legislativa": 5453328.08,
+      "Judiciária": 2721302.74,
+      "Administração": 14249712.63,
+      "Segurança Pública": 1481061.18,
+      "Assistência Social": 6433224.38,
+      "Saúde": 36436856.92,
+      "Educação": 59616149.41,
+      "Cultura": 672735.6,
+      "Urbanismo": 11091005.98,
+      "Gestão Ambiental": 1135243.29,
+      "Agricultura": 5888502.06,
+      "Energia": 2684428.59,
+      "Transporte": 4377869.16,
+      "Desporto e Lazer": 957642.46,
+      "Encargos Especiais": 4252666.11
+     },
+     "dtotal": 157451728.59,
+     "ds": "ok",
+     "dsha256": "a89d6237481203bddaafbe90a122d562a05a2e090435d4cab92099afcacdebe7"
     },
     "2025": {
      "s": "ok",
@@ -3498,7 +6099,28 @@
       "rcl": 202425314.79
      },
      "tipo": "completo",
-     "sha256": "830111ef057f6772320b1a0b2570095aae8cd322374f0e8ad06bc929b0241c15"
+     "sha256": "830111ef057f6772320b1a0b2570095aae8cd322374f0e8ad06bc929b0241c15",
+     "funcoes": {
+      "Legislativa": 5851832.02,
+      "Judiciária": 2047350.29,
+      "Administração": 22028936.87,
+      "Segurança Pública": 1377020.34,
+      "Assistência Social": 7818919.13,
+      "Saúde": 43736185.56,
+      "Educação": 70371799.15,
+      "Cultura": 1267213.29,
+      "Urbanismo": 15545038.17,
+      "Gestão Ambiental": 475826.15,
+      "Agricultura": 5757087.14,
+      "Comunicações": 143861.92,
+      "Energia": 4573107.67,
+      "Transporte": 4175225.89,
+      "Desporto e Lazer": 1165135.2,
+      "Encargos Especiais": 4560201.58
+     },
+     "dtotal": 190894740.37,
+     "ds": "ok",
+     "dsha256": "197d2c66ec322a0f6a2214d9bb9fd2108b7c4402af9139f9555540082c94929c"
     }
    }
   },
@@ -3526,7 +6148,26 @@
       "rcl": 52522736.83
      },
      "tipo": "completo",
-     "sha256": "bc50072942262584c5ff0f60c120682e6d5fc5ca3dfe1b8e8a89704050f308c6"
+     "sha256": "bc50072942262584c5ff0f60c120682e6d5fc5ca3dfe1b8e8a89704050f308c6",
+     "funcoes": {
+      "Legislativa": 1729827.05,
+      "Judiciária": 133622.79,
+      "Administração": 7502794.2,
+      "Segurança Pública": 64374.0,
+      "Assistência Social": 2914692.24,
+      "Saúde": 12690381.8,
+      "Educação": 17060695.88,
+      "Cultura": 1612185.73,
+      "Urbanismo": 3890238.49,
+      "Gestão Ambiental": 71043.36,
+      "Agricultura": 1845570.59,
+      "Energia": 563996.12,
+      "Transporte": 1570786.75,
+      "Desporto e Lazer": 407943.37
+     },
+     "dtotal": 52058152.37,
+     "ds": "ok",
+     "dsha256": "f168dc8edec0901adde4f6e6e6b9b25fa3ddd75737ce410d12a0f2d07378a657"
     },
     "2025": {
      "s": "ok",
@@ -3548,7 +6189,25 @@
       "rcl": 56323749.89
      },
      "tipo": "completo",
-     "sha256": "354c5bc5a050c5c9830ed7a9ed9cde5a0395e2ebc1daf9c0af7f6a6dfe145a8e"
+     "sha256": "354c5bc5a050c5c9830ed7a9ed9cde5a0395e2ebc1daf9c0af7f6a6dfe145a8e",
+     "funcoes": {
+      "Legislativa": 2011032.55,
+      "Judiciária": 847790.73,
+      "Administração": 8134724.69,
+      "Assistência Social": 2776762.49,
+      "Saúde": 12504569.61,
+      "Educação": 18335198.61,
+      "Cultura": 1553963.97,
+      "Urbanismo": 4723326.34,
+      "Gestão Ambiental": 212855.45,
+      "Agricultura": 782187.94,
+      "Energia": 1148355.24,
+      "Transporte": 1822729.67,
+      "Desporto e Lazer": 410779.49
+     },
+     "dtotal": 55264276.78,
+     "ds": "ok",
+     "dsha256": "8e0ca055bbe0b1f46f5de240b63b83b0d0cd7c14f1ee20d74ce25596711403c2"
     }
    }
   },
@@ -3576,7 +6235,24 @@
       "rcl": 31705929.51
      },
      "tipo": "completo",
-     "sha256": "68867115b5f11f6ca5271c4bccb82177476a145411e268b21b4622f09c894e77"
+     "sha256": "68867115b5f11f6ca5271c4bccb82177476a145411e268b21b4622f09c894e77",
+     "funcoes": {
+      "Legislativa": 1442144.85,
+      "Judiciária": 374485.09,
+      "Administração": 3610661.18,
+      "Assistência Social": 2490556.53,
+      "Saúde": 6015292.49,
+      "Educação": 7760076.99,
+      "Cultura": 79463.71,
+      "Urbanismo": 4412334.25,
+      "Gestão Ambiental": 66850.0,
+      "Agricultura": 325699.3,
+      "Desporto e Lazer": 4409536.4,
+      "Encargos Especiais": 47996.37
+     },
+     "dtotal": 31035097.16,
+     "ds": "ok",
+     "dsha256": "1f7a308c97dea65283e8f488b152839ed24ad0128c67dfdb1752143867ca41c5"
     },
     "2025": {
      "s": "ok",
@@ -3598,7 +6274,26 @@
       "rcl": 33029120.9
      },
      "tipo": "completo",
-     "sha256": "ce107fd3a8f238d89c1dd83d0d586a03dc38d94ff6859c5a1cdb697c4fe71654"
+     "sha256": "ce107fd3a8f238d89c1dd83d0d586a03dc38d94ff6859c5a1cdb697c4fe71654",
+     "funcoes": {
+      "Legislativa": 1630345.18,
+      "Judiciária": 1402838.42,
+      "Administração": 4051598.19,
+      "Assistência Social": 2445694.91,
+      "Saúde": 6629858.59,
+      "Educação": 8701122.26,
+      "Cultura": 52700.0,
+      "Urbanismo": 4431696.17,
+      "Gestão Ambiental": 112086.6,
+      "Agricultura": 459837.4,
+      "Comércio e Serviços": 91262.08,
+      "Transporte": 298143.32,
+      "Desporto e Lazer": 3708794.87,
+      "Encargos Especiais": 132624.08
+     },
+     "dtotal": 34148602.07,
+     "ds": "ok",
+     "dsha256": "bb978be24f1e01e25a54a28255e4d9686b4ac480a4d3a39163a589c7f7551445"
     }
    }
   },
@@ -3626,7 +6321,26 @@
       "rcl": 221228547.78
      },
      "tipo": "completo",
-     "sha256": "86c484b967b4ce33325f9129865adba35bbf0c1f9353283e65c1d922a76f2748"
+     "sha256": "86c484b967b4ce33325f9129865adba35bbf0c1f9353283e65c1d922a76f2748",
+     "funcoes": {
+      "Legislativa": 6084900.58,
+      "Judiciária": 5030701.19,
+      "Administração": 13263386.84,
+      "Assistência Social": 6216607.36,
+      "Saúde": 47479663.4,
+      "Educação": 92452360.72,
+      "Cultura": 3990569.46,
+      "Urbanismo": 35390147.2,
+      "Agricultura": 1475897.6,
+      "Comércio e Serviços": 3334668.55,
+      "Energia": 6093978.08,
+      "Transporte": 7563.18,
+      "Desporto e Lazer": 563673.61,
+      "Encargos Especiais": 11068656.16
+     },
+     "dtotal": 232452773.93,
+     "ds": "ok",
+     "dsha256": "eabd503a10b8cd0a4b79e45c96b654c52ed07765e5628d0eaadb553df4411757"
     },
     "2025": {
      "s": "ok",
@@ -3648,7 +6362,26 @@
       "rcl": 230723201.88
      },
      "tipo": "completo",
-     "sha256": "067727bc4db76d121a70aa0e3acc9f9d0b90b742afc6591462e52092c2f392f7"
+     "sha256": "067727bc4db76d121a70aa0e3acc9f9d0b90b742afc6591462e52092c2f392f7",
+     "funcoes": {
+      "Legislativa": 7002141.61,
+      "Judiciária": 3890714.54,
+      "Administração": 13029219.94,
+      "Assistência Social": 7642008.07,
+      "Saúde": 50811110.31,
+      "Educação": 97725457.29,
+      "Cultura": 12781493.02,
+      "Urbanismo": 35800663.13,
+      "Agricultura": 1548171.29,
+      "Comércio e Serviços": 3615262.59,
+      "Energia": 8304017.94,
+      "Transporte": 233846.27,
+      "Desporto e Lazer": 1484056.38,
+      "Encargos Especiais": 7854221.81
+     },
+     "dtotal": 251722384.19,
+     "ds": "ok",
+     "dsha256": "eb36ab4358ef4238756060aa4b27dd02f227481d9941d51c60529653412e096f"
     }
    }
   },
@@ -3676,7 +6409,25 @@
       "rcl": 66583147.26
      },
      "tipo": "completo",
-     "sha256": "cb5e6e90303d9759c2edaf0b465b9afb9865ca38993eb21043d1eb28c14e1114"
+     "sha256": "cb5e6e90303d9759c2edaf0b465b9afb9865ca38993eb21043d1eb28c14e1114",
+     "funcoes": {
+      "Legislativa": 1917142.92,
+      "Judiciária": 711346.96,
+      "Administração": 5148821.96,
+      "Segurança Pública": 65361.41,
+      "Assistência Social": 2153276.66,
+      "Previdência Social": 11490565.13,
+      "Saúde": 13345660.29,
+      "Educação": 25441378.2,
+      "Cultura": 23421.7,
+      "Urbanismo": 8195422.67,
+      "Gestão Ambiental": 251088.67,
+      "Agricultura": 468295.53,
+      "Encargos Especiais": 601630.19
+     },
+     "dtotal": 69813412.29,
+     "ds": "ok",
+     "dsha256": "e17215fc0a6cb52512bf30f48b427da2466585d136edc1cc22f7b38523eb2d2b"
     },
     "2025": {
      "s": "ok",
@@ -3698,7 +6449,24 @@
       "rcl": 72400317.33
      },
      "tipo": "completo",
-     "sha256": "b456cd6d63d5b7df82362f49d4a76a2763a202df54788885708ecf7161047d44"
+     "sha256": "b456cd6d63d5b7df82362f49d4a76a2763a202df54788885708ecf7161047d44",
+     "funcoes": {
+      "Legislativa": 1815001.53,
+      "Judiciária": 4538128.15,
+      "Administração": 7071896.53,
+      "Assistência Social": 2708372.19,
+      "Previdência Social": 15401686.56,
+      "Saúde": 13848081.86,
+      "Educação": 27384604.02,
+      "Cultura": 982076.92,
+      "Urbanismo": 9091542.74,
+      "Gestão Ambiental": 218002.8,
+      "Agricultura": 614398.09,
+      "Encargos Especiais": 7440596.55
+     },
+     "dtotal": 91114387.94,
+     "ds": "ok",
+     "dsha256": "c947bb0c7d097ab493d3317ed6c9b1969b91c6e5aba13c269221b74709c3340b"
     }
    }
   },
@@ -3726,7 +6494,25 @@
       "rcl": 131542895.74
      },
      "tipo": "completo",
-     "sha256": "43d6fd3074641191342fe63c0086191e29c2dd81e70cd7ad7cee03c5dee5db71"
+     "sha256": "43d6fd3074641191342fe63c0086191e29c2dd81e70cd7ad7cee03c5dee5db71",
+     "funcoes": {
+      "Legislativa": 3731233.7,
+      "Judiciária": 3160570.21,
+      "Administração": 8119126.4,
+      "Assistência Social": 4390505.9,
+      "Saúde": 23440476.62,
+      "Educação": 52078771.58,
+      "Cultura": 4145929.14,
+      "Urbanismo": 14776046.66,
+      "Gestão Ambiental": 402295.55,
+      "Agricultura": 1140323.81,
+      "Comunicações": 324109.83,
+      "Desporto e Lazer": 614454.21,
+      "Encargos Especiais": 6380849.25
+     },
+     "dtotal": 122704692.86,
+     "ds": "ok",
+     "dsha256": "08473acc6b661cd7a57b14a2e4e9dcf77e9da41f65d4833b5691348abaaa6efb"
     },
     "2025": {
      "s": "ok",
@@ -3748,7 +6534,25 @@
       "rcl": 134375781.71
      },
      "tipo": "completo",
-     "sha256": "b785c354c87fe15bc8cc9c0ca14bc25321c5d10dac1f4cd4b912cc426e63f825"
+     "sha256": "b785c354c87fe15bc8cc9c0ca14bc25321c5d10dac1f4cd4b912cc426e63f825",
+     "funcoes": {
+      "Legislativa": 4351842.14,
+      "Judiciária": 3374975.35,
+      "Administração": 11826432.29,
+      "Segurança Pública": 7830.02,
+      "Assistência Social": 4013841.61,
+      "Saúde": 26703391.18,
+      "Educação": 60864201.38,
+      "Cultura": 4163667.2,
+      "Urbanismo": 11890970.63,
+      "Gestão Ambiental": 564317.54,
+      "Agricultura": 1370188.48,
+      "Desporto e Lazer": 841709.22,
+      "Encargos Especiais": 7264672.77
+     },
+     "dtotal": 137238039.81,
+     "ds": "ok",
+     "dsha256": "e6ada13ddbfa8c19252008909eab20e3a138e9efc0bae52acaf9ec5dcd24ebed"
     }
    }
   }
