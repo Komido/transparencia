@@ -35,7 +35,19 @@ Saídas:
   site/dados/emendas/UF.json   por cidade e ano: valor pago à prefeitura,
                                número de emendas e todos os autores, do que
                                mais mandou ao que menos mandou; os nomes
-                               ficam uma vez só, na lista "nomes" do arquivo
+                               ficam uma vez só, na lista "nomes" do arquivo,
+                               com o cargo ao lado (lista "cargos")
+
+Cargo do autor: bancada, comissão e relator vêm do próprio nome; deputado e
+senador, das listas oficiais da Câmara e do Senado já usadas na cota
+parlamentar (site/dados/cota/AAAA.json), com o partido e a UF do ano mais
+recente em que o nome aparece. Nome sem par nessas listas (ex-parlamentar,
+suplente que não usou a cota) fica como "Câmara ou Senado".
+
+Limite conhecido: parte das emendas é paga ao Banco do Brasil (CNPJ
+00.000.000/0001-91, cidade "Brasília"), sem dizer qual prefeitura, estado ou
+entidade recebeu; em 17/11/2026 eram R$ 33,98 bilhões desde 2023. Esse
+dinheiro não entra na conta por cidade, que por isso é um piso.
 """
 
 import collections
@@ -55,6 +67,8 @@ IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nive
 SICONFI_ENTES = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/entes"
 AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
 DESTINO = "site/dados/emendas"
+COTA = "site/dados/cota"
+CNPJ_BANCO_DO_BRASIL = "00000000000191"
 ARQUIVO = "EmendasParlamentares_PorFavorecido.csv"
 COLUNAS = ["Código da Emenda", "Nome do Autor da Emenda", "Tipo de Emenda", "Ano/Mês", "Código do Favorecido",
            "Natureza Jurídica", "UF Favorecido", "Município Favorecido", "Valor Recebido"]
@@ -204,6 +218,48 @@ def nome_legivel(texto):
     return " ".join(palavras)
 
 
+def cargos_da_cota():
+    """Nome (chave_nome) -> "Câmara · PT-MG" ou "Senado · PSD-MG", pelo ano
+    mais recente da cota em que o nome aparece."""
+    achados = {}
+    arquivos = sorted(f for f in os.listdir(COTA) if f[:4].isdigit() and f.endswith(".json"))
+    for arq in arquivos:
+        with open(os.path.join(COTA, arq), encoding="utf-8") as fh:
+            d = json.load(fh)
+        vistos = collections.defaultdict(set)
+        for casa, rotulo in (("camara", "Câmara"), ("senado", "Senado")):
+            for p in (d.get(casa) or {}).get("parlamentares", []):
+                k = chave_nome(p.get("nome"))
+                partido, uf = (p.get("partido") or "").strip(), (p.get("uf") or "").strip()
+                if k and len(uf) == 2:
+                    vistos[k].add(f"{rotulo} · {partido}-{uf}" if partido else f"{rotulo} · {uf}")
+        for k, v in vistos.items():
+            achados[k] = next(iter(v)) if len(v) == 1 else "Câmara ou Senado"
+    if len(achados) < 500:
+        falhar(f"listas da cota com só {len(achados)} parlamentares")
+    return achados
+
+
+PREFIXOS = ("DEP ", "DEPUTADO ", "DEPUTADA ", "SEN ", "SENADOR ", "SENADORA ")
+
+
+def cargo_do_autor(bruto, cota):
+    k = chave_nome(bruto)
+    if not k or k in ("SEM INFORMACAO", "S/I"):
+        return ""
+    if k.startswith("BANCADA "):
+        return "Bancada do estado"
+    if k.startswith("COM ") or k.startswith("COMISSAO "):
+        return "Comissão do Congresso"
+    if k.startswith("RELATOR"):
+        return "Relator do orçamento"
+    for pre in PREFIXOS:
+        if k.startswith(pre):
+            k = k[len(pre):]
+            break
+    return cota.get(k, "Câmara ou Senado")
+
+
 def gravar_json(caminho, dados):
     os.makedirs(os.path.dirname(caminho), exist_ok=True)
     temporario = caminho + ".tmp"
@@ -216,6 +272,7 @@ def gravar_json(caminho, dados):
 def main():
     mapa = municipios_ibge()
     por_cnpj = cnpjs_das_prefeituras(set(mapa.values()))
+    cota = cargos_da_cota()
     z = zipfile.ZipFile(io.BytesIO(baixar(URL)))
     if ARQUIVO not in z.namelist():
         falhar(f"{ARQUIVO} não está no zip: {z.namelist()}")
@@ -229,11 +286,14 @@ def main():
     # serve para os fundos municipais da mesma cidade.
     linhas = 0
     uteis = []
+    pelo_banco = collections.defaultdict(float)
     for n, l in enumerate(leitor, start=2):
         linhas += 1
         am = (l["Ano/Mês"] or "").strip()
         if len(am) != 6 or not am.isdigit() or not 2010 <= int(am[:4]) <= ano_atual or not 1 <= int(am[4:]) <= 12:
             falhar(f"linha {n}: ano/mês {am!r}")
+        if int(am[:4]) >= PRIMEIRO_ANO and "".join(c for c in l.get("Código do Favorecido") or "" if c.isdigit()) == CNPJ_BANCO_DO_BRASIL:
+            pelo_banco[int(am[:4])] += numero(l["Valor Recebido"], f"linha {n}")
         if int(am[:4]) >= PRIMEIRO_ANO and (l["Natureza Jurídica"] or "").strip() in NATUREZAS:
             uteis.append((n, l))
     if not 500000 <= linhas <= 3000000:
@@ -255,6 +315,7 @@ def main():
     novos = {k: next(iter(v)) for k, v in aprendidos.items() if len(v) == 1 and k not in mapa}
     print(f"nomes ligados pelo CNPJ que não estavam nas listas: {sorted(novos.items())}")
     autores_por_codigo = collections.defaultdict(set)
+    bruto_do_autor = {}
     pago = collections.defaultdict(float)
     emendas = collections.defaultdict(set)
     autores = collections.defaultdict(lambda: collections.defaultdict(float))
@@ -279,6 +340,7 @@ def main():
         chave = (cod, ano)
         pago[chave] += valor
         autor = nome_legivel(l["Nome do Autor da Emenda"]) or "Sem informação"
+        bruto_do_autor.setdefault(autor, l["Nome do Autor da Emenda"])
         # Emenda sem código ("Sem informação", como as de relator antigas)
         # conta como uma por autor; com código, cada código é uma emenda.
         emendas[chave].add((l["Código da Emenda"], autor))
@@ -288,6 +350,8 @@ def main():
     fora = sum(sem_cidade.values())
     print(f"pago a prefeituras e fundos municipais desde {PRIMEIRO_ANO}: R$ {total / 1e9:.2f} bi; sem cidade: R$ {fora / 1e6:.1f} mi")
     print(f"ligado pelo CNPJ da prefeitura: R$ {pelo_cnpj / 1e9:.2f} bi")
+    print("pago ao Banco do Brasil, sem dizer quem recebeu (fica fora):",
+          {a: f"R$ {v / 1e9:.2f} bi" for a, v in sorted(pelo_banco.items())})
     varios = {c: sorted(a) for c, a in autores_por_codigo.items() if len(a) > 1}
     print(f"códigos de emenda com mais de um autor: {len(varios)} de {len(autores_por_codigo)}; exemplos: {list(varios.items())[:12]}")
     for ano in sorted(total_ano):
@@ -317,9 +381,12 @@ def main():
             "uf": uf, "atualizado": hoje, "fonte": URL, "anos": anos,
             "campos": ["pago", "emendas", "autores"],
             "nomes": list(nomes_uf[uf]),
+            "cargos": [cargo_do_autor(bruto_do_autor.get(n, n), cota) for n in nomes_uf[uf]],
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")
+    rotulos = collections.Counter(cargo_do_autor(b, cota).split(" · ")[0] for b in bruto_do_autor.values())
+    print("cargos dos autores:", rotulos.most_common())
 
 
 if __name__ == "__main__":
