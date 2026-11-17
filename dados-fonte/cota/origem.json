@@ -25,12 +25,12 @@
    "sha256": "76610c85230aa532d4de46776fe581e2abb6841b568ce92a87f862d6f23586b6"
   },
   "https://www.camara.leg.br/cotas/Ano-2025.csv.zip": {
-   "bytes": 6933207,
-   "sha256": "8256486e331bd10947476e34670746c8d01fd186cde9f0ea2ca6d17d6fbf0b9d"
+   "bytes": 6933064,
+   "sha256": "bc37cbca6c2c96fec2fb277221f47714a2933cd1112720d60cf74ef113daf764"
   },
   "https://www.camara.leg.br/cotas/Ano-2026.csv.zip": {
-   "bytes": 4684991,
-   "sha256": "04962a2884a063e953fcbeaa3f109dd4efd6a009579eaccc35dab09974255ff0"
+   "bytes": 4709829,
+   "sha256": "13efad5422593f6e168cc6802196a51d6e93ac7c1ccd56c3a73d99bf5214191b"
   },
   "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2019.csv": {
    "bytes": 5896424,
@@ -57,13 +57,13 @@
    "sha256": "17a8933b91f81c5b9025e85832bbc22a4458188f51b2ecb797a61e3f84174400"
   },
   "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2025.csv": {
-   "bytes": 5768699,
-   "sha256": "0168e8b30e374aa92f916b15d31b99617de334d0790b3b48bf19e2e3c87ecdca"
+   "bytes": 5768682,
+   "sha256": "75b109db525ecb37ba523db4e32dc3b7a432cb0356a9d3b2e6026b21552c4e4a"
   },
   "https://www.senado.leg.br/transparencia/LAI/verba/despesa_ceaps_2026.csv": {
-   "bytes": 3977748,
-   "sha256": "90e644a5f0d36730e9efee69a2d16cadf677ff7aa11c69ba7e4b316f6b062a53"
+   "bytes": 4048662,
+   "sha256": "21644b327352fe3bc93efa0220086ba4cf580b851bddbf80ef57ebfb1e6cc676"
   }
  },
- "atualizado_em": "2026-11-16"
+ "atualizado_em": "2026-11-17"
 }
