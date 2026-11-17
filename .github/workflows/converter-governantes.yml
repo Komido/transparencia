@@ -1,0 +1,50 @@
+name: Prefeitos e governadores eleitos (TSE)
+
+# Lê nos dados abertos do TSE os prefeitos eleitos em 2020 e 2024 e os
+# governadores eleitos em 2018, 2022 e 2026, liga cada cidade ao código do
+# IBGE pela tabela oficial do TSE (scripts/governantes_para_json.py) e grava
+# site/dados/governantes/UF.json. Nada passa pelo banco.
+#
+# Uma vez por mês basta: muda só com eleição suplementar ou correção do TSE.
+# Quem dispara é o agendador do banco (pg_cron, etl.disparar_github); ver
+# supabase/migrations/20261117020000_disparo_governantes.sql.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: governantes
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ler os eleitos no TSE
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/governantes_para_json.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/governantes \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/governantes)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/governantes
+          git commit -q -m "Atualiza prefeitos e governadores eleitos (TSE)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
