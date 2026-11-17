@@ -897,6 +897,9 @@ function montarEstados(ctx) {
     marcarLinha();
   };
   selUf.addEventListener('change', () => { escolhidoPelaPessoa = true; desenharTudo(); });
+  // Link direto: ?uf=SP#estados abre o estado.
+  const ufPedida = new URLSearchParams(location.search).get('uf');
+  if (ufPedida && estados.some((x) => x.sigla === ufPedida)) { selUf.value = ufPedida; escolhidoPelaPessoa = true; }
   document.querySelectorAll('input[name="estados-visao"]').forEach((r) => r.addEventListener('change', desenharGrafico));
   aoMudarCidade(() => {
     const sigla = ufDaCidade();
@@ -1578,6 +1581,7 @@ function montarMunicipios(ctx) {
     $('#mun-baixar').hidden = false;
     desenhar();
     desenharBeneficios();
+    guardarNoEndereco();
   };
 
   entrada.addEventListener('focus', () => { carregarIndice().catch(() => {}); });
@@ -1590,7 +1594,29 @@ function montarMunicipios(ctx) {
     else if (ev.key === 'Escape') fecharSugestoes();
   });
   entrada.addEventListener('blur', () => setTimeout(fecharSugestoes, 100));
-  selAno.addEventListener('change', () => { if (estado.cidade) desenhar(); });
+  selAno.addEventListener('change', () => { if (estado.cidade) { desenhar(); guardarNoEndereco(); } });
+
+  // Link direto: ?cidade=CODIGO_IBGE&ano=AAAA#municipios abre a cidade e o
+  // ano; a escolha feita na página vai para o endereço, para poder ser
+  // compartilhada.
+  const guardarNoEndereco = () => {
+    if (!estado.cidade) return;
+    const p = new URLSearchParams(location.search);
+    p.set('cidade', String(estado.cidade.codigo).padStart(7, '0'));
+    p.set('ano', selAno.value);
+    history.replaceState(null, '', `${location.pathname}?${p}#municipios`);
+  };
+  const pedido = new URLSearchParams(location.search);
+  if (/^[0-9]{7}$/.test(pedido.get('cidade') ?? '')) {
+    carregarIndice().then((d) => {
+      const c = d.cidades.find((x) => x[0] === Number(pedido.get('cidade')));
+      if (!c) return;
+      const ano = pedido.get('ano');
+      if (ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
+      // A cidade abre depois do salto do navegador para #municipios: volta à seção.
+      return escolher(c).then(() => reposicionarNaSecao());
+    }).catch(() => {});
+  }
 
   function desenhar() {
     const { codigo, nome, uf } = estado.cidade;
