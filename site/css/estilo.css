@@ -880,8 +880,10 @@ td.num .detalhe { white-space: normal; }
 .barras { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-3); }
 .barras li { display: grid; gap: var(--e-1); }
 .barras .barra-topo { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: var(--e-2); row-gap: 2px; font-size: 0.9375rem; }
-.barras .barra-valor { font-variant-numeric: tabular-nums; color: var(--tinta-2); white-space: nowrap; }
-.barras .barra-nome { min-width: 0; flex: 1 1 11rem; }
+.barras .barra-valor { font-variant-numeric: tabular-nums; color: var(--tinta-2); white-space: nowrap; margin-left: auto; }
+/* 8rem: no celular, valores como "menos de 0,1% · R$ 950" ainda cabem ao lado
+   do nome; os mais longos descem, alinhados à direita. */
+.barras .barra-nome { min-width: 0; flex: 1 1 8rem; }
 .barras .barra-explica { display: block; font-size: var(--fs-1); color: var(--tinta-2); }
 .barra-trilho { height: 8px; background: var(--trilho); border-radius: 4px; overflow: hidden; }
 .barra { height: 100%; background: var(--serie-1); border-radius: 0 4px 4px 0; }
@@ -1216,7 +1218,6 @@ td.num .detalhe { white-space: normal; }
    de espremer o nome. */
 @media (min-width: 1024px) {
   .barras:has(> li:nth-child(4)) .barra-nome { flex-basis: 14rem; }
-  .barras .barra-valor { margin-left: auto; }
 }
 
 
