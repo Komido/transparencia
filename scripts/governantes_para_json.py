@@ -39,6 +39,7 @@ Se algo sair do formato conferido, o script falha sem gravar; vale a versão
 anterior.
 """
 
+import collections
 import csv
 import datetime as dt
 import io
@@ -157,15 +158,75 @@ def codigos_tse_ibge():
     return mapa
 
 
+_CANDIDATOS = {}
+
+
+def candidatos(ano):
+    """Linhas do arquivo de candidatos do ano (baixado uma vez só)."""
+    if ano not in _CANDIDATOS:
+        z = zipfile.ZipFile(io.BytesIO(baixar(CANDIDATOS.format(ano=ano))))
+        nome = f"consulta_cand_{ano}_BRASIL.csv"
+        if nome not in z.namelist():
+            falhar(f"{ano}: {nome} não está no zip")
+        _CANDIDATOS[ano] = ler_csv(z.read(nome), f"candidatos {ano}")
+    return _CANDIDATOS[ano]
+
+
+# Vereadores eleitos na última eleição municipal. "ELEITO POR QP" (pelo
+# quociente partidário) e "ELEITO POR MÉDIA" (pelas sobras); suplente e não
+# eleito ficam de fora. Em 2024 eram cerca de 58 mil.
+ELEICAO_VEREADORES = (2024, 2025, 2028)
+DESTINO_VEREADORES = "site/dados/vereadores"
+
+
+def vereadores(mapa):
+    ano, inicio, fim = ELEICAO_VEREADORES
+    por_cidade = collections.defaultdict(list)
+    partidos, sem_codigo = {}, collections.Counter()
+    for l in candidatos(ano):
+        if l.get("DS_CARGO") != "VEREADOR" or not (l.get("DS_SIT_TOT_TURNO") or "").startswith("ELEITO"):
+            continue
+        ue = (l.get("SG_UE") or "").strip().lstrip("0")
+        ibge = mapa.get(ue)
+        if not ibge:
+            sem_codigo[f"{l.get('NM_UE')} ({l.get('SG_UF')})"] += 1
+            continue
+        partido = (l.get("SG_PARTIDO") or "").strip()
+        if not partido or partido == "#NULO":
+            falhar(f"vereador sem partido: {l.get('NM_URNA_CANDIDATO')} em {l.get('NM_UE')}")
+        partidos[partido] = nome_proprio(l.get("NM_PARTIDO"))
+        por_cidade[(l.get("SG_UF"), ibge)].append([
+            nome_proprio(l.get("NM_URNA_CANDIDATO") or l.get("NM_CANDIDATO")),
+            int((l.get("DS_GENERO") or "").strip().upper() == "FEMININO"),
+            partido,
+            "media" if "MÉDIA" in (l.get("DS_SIT_TOT_TURNO") or "").upper() or "MEDIA" in sem_acento(l.get("DS_SIT_TOT_TURNO") or "") else "qp",
+        ])
+    total = sum(len(v) for v in por_cidade.values())
+    if not 55000 <= total <= 62000:
+        falhar(f"{total} vereadores eleitos em {ano}; esperado perto de 58 mil")
+    if len(sem_codigo) > 5:
+        falhar(f"{len(sem_codigo)} cidades sem código do IBGE nos vereadores: {list(sem_codigo)[:10]}")
+    por_uf = collections.defaultdict(dict)
+    for (uf, ibge), lista in por_cidade.items():
+        if not 5 <= len(lista) <= 60:
+            falhar(f"{ibge} ({uf}): {len(lista)} vereadores eleitos; a lei permite de 9 a 55")
+        por_uf[uf][ibge] = sorted(lista, key=lambda x: sem_acento(x[0]))
+    for uf in UFS:
+        gravar_json(f"{DESTINO_VEREADORES}/{uf}.json", {
+            "uf": uf, "fonte": "TSE, dados abertos (candidatos e códigos de municípios)",
+            "atualizado": dt.date.today().isoformat(), "eleicao": ano, "inicio": inicio, "fim": fim,
+            "campos": ["nome", "feminino", "partido", "eleito_por"],
+            "partidos": {p: partidos[p] for p in sorted({x[2] for lst in por_uf[uf].values() for x in lst})},
+            "cidades": por_uf[uf],
+        })
+    print(f"vereadores {ano}: {total} eleitos em {len(por_cidade)} cidades", flush=True)
+
+
 def eleitos(ano):
     cargo, (minimo, maximo), inicio, fim = ELEICOES[ano]
     vice_cargo = f"VICE-{cargo}"
-    z = zipfile.ZipFile(io.BytesIO(baixar(CANDIDATOS.format(ano=ano))))
-    nome = f"consulta_cand_{ano}_BRASIL.csv"
-    if nome not in z.namelist():
-        falhar(f"{ano}: {nome} não está no zip")
     saida = []
-    linhas = ler_csv(z.read(nome), f"candidatos {ano}")
+    linhas = candidatos(ano)
     # Vice eleito: mesma eleição, mesma cidade ou UF e mesmo número na urna.
     vices = {}
     for l in linhas:
@@ -254,6 +315,7 @@ def main():
             falhar(f"{d['uf']}: nenhum governador")
         gravar_json(f"{DESTINO}/{d['uf']}.json", d)
     print(f"gravados {len(por_uf)} estados; {sum(len(d['prefeitos']) for d in por_uf.values())} cidades com prefeito")
+    vereadores(mapa)
 
 
 if __name__ == "__main__":
