@@ -4,7 +4,9 @@
 // para o resto do site.
 
 import * as f from './formato.js';
-import { carregarPainel, carregarIndiceMunicipios, carregarMunicipiosUf, carregarBeneficiosUf, carregarEmendasUf, carregarVereadoresUf } from './dados.js';
+import {
+  carregarPainel, carregarIndiceMunicipios, carregarMunicipiosUf, carregarBeneficiosUf, carregarEmendasUf, carregarVereadoresUf, carregarCamarasUf,
+} from './dados.js';
 import { caminhoDaCidade, slugDaCidade, slugDoCaminho } from './endereco.js';
 import {
   $, el, campo, definir, inflacao, fatorParaHoje, fatorMesParaHoje, mesAnterior, arred, definirTopicos, registrarDownload, montarBusca,
@@ -350,6 +352,9 @@ function desenharDespesas(r, ano) {
 function desenharCamara(r, ano) {
   const caixa = $('#mun-camara');
   caixa.hidden = true;
+  $('#mun-camara-numeros').replaceChildren();
+  definir('mun-camara-nota', '');
+  desenharCamaraTipos(ano);
   const campos = estado.indice.campos_despesa;
   const i = campos?.indexOf('camara') ?? -1;
   const { m, d } = estado;
@@ -375,6 +380,75 @@ function desenharCamara(r, ano) {
   if (det.length) el('dd', 'detalhe', det.join(' · '), div);
   definir('mun-camara-nota', 'Inclui salários dos vereadores e dos servidores da Câmara, prédio e funcionamento, em dinheiro de hoje. A Constituição limita esse gasto a uma parte do que a cidade arrecada: de 7%, nas cidades de até 100 mil habitantes, a 3,5%, nas de mais de 8 milhões. O site não calcula esse limite, porque o relatório não traz a base exata da conta.');
   caixa.hidden = false;
+}
+
+// Em que a Câmara gastou, pelo tipo de despesa de cada pagamento (Tribunal de
+// Contas do estado). Só onde o tribunal publica os lançamentos: por enquanto,
+// SP. Sem nomes de pessoas.
+const UFS_COM_CAMARAS = new Set(['SP']);
+const CAPITAL_SP = '3550308';
+const TIPOS_CAMARA = {
+  vereadores: 'o subsídio pago a cada vereador',
+  pessoal: 'servidores da Câmara e contribuições à previdência, inclusive sobre o salário dos vereadores',
+  diarias: 'valor por dia de viagem a serviço, de vereadores e servidores',
+  viagens: 'passagens, pedágios, táxi e outros deslocamentos',
+  servicos: 'empresas e pessoas contratadas: sistemas, contabilidade, limpeza, publicidade',
+  material: 'combustível, papel, limpeza, alimentação',
+  obras: 'reformas, veículos, móveis e computadores',
+  outros: 'auxílio-alimentação, indenizações, contas de anos anteriores e outros',
+};
+
+// Câmaras pequenas gastam poucos milhões: "R$ 1,4 mi", não "R$ 1 mi".
+const milhoes = (v) => (Math.abs(v) >= 1e6 && Math.abs(v) < 1e8 ? `R$\u00A0${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v));
+
+async function desenharCamaraTipos(ano) {
+  const caixa = $('#mun-camara-tipos');
+  caixa.hidden = true;
+  $('#mun-baixar-camaras').hidden = true;
+  const { codigo7, uf } = estado.cidade;
+  if (!UFS_COM_CAMARAS.has(uf)) return;
+  if (estado.camaras === undefined) {
+    try { estado.camaras = await carregarCamarasUf(uf); } catch (erro) { console.error(erro); estado.camaras = null; }
+  }
+  // O ano mudou enquanto o arquivo carregava: o desenho seguinte cuida.
+  if (anoEscolhido() !== ano) return;
+  const d = estado.camaras;
+  if (!d) return;
+  $('#mun-baixar-camaras').hidden = false;
+  const lista = $('#mun-camara-barras');
+  lista.replaceChildren();
+  const mostrar = () => { caixa.hidden = false; $('#mun-camara').hidden = false; };
+  if (codigo7 === CAPITAL_SP) {
+    definir('mun-camara-tipos-titulo', 'Em que a Câmara gastou');
+    definir('mun-camara-tipos-nota', 'A Câmara Municipal de São Paulo é fiscalizada pelo Tribunal de Contas do Município, não pelo Tribunal de Contas do Estado, e por isso fica fora desta conta.');
+    mostrar();
+    return;
+  }
+  const porAno = d.cidades[codigo7] ?? {};
+  const anosCom = d.anos.filter((a) => porAno[String(a)]?.[0] > 0).sort((a, b) => a - b);
+  if (!anosCom.length) return;
+  // Sem o ano escolhido no tribunal: o mais recente até ele, ou o primeiro que houver.
+  const anoUsado = anosCom.includes(ano) ? ano : (anosCom.filter((a) => a < ano).pop() ?? anosCom[0]);
+  const [total, partes] = porAno[String(anoUsado)];
+  const fator = fatorParaHoje(estado.ctx, anoUsado) ?? 1;
+  const itens = d.categorias.map(([k, rotulo], i) => ({ k, rotulo, valor: partes[i] }))
+    .filter((x) => x.valor > 0)
+    .sort((a, b) => (a.k === 'outros') - (b.k === 'outros') || b.valor - a.valor);
+  const soma = itens.reduce((s, x) => s + x.valor, 0);
+  if (!(soma > 0)) return;
+  definir('mun-camara-tipos-titulo', anoUsado === ano
+    ? `Em que a Câmara gastou em ${anoUsado}`
+    : `Em que a Câmara gastou em ${anoUsado} (${d.anos.includes(ano) ? `o Tribunal de Contas não traz pagamentos desta Câmara em ${ano}` : `o Tribunal de Contas ainda não publicou ${ano}`})`);
+  for (const x of itens) {
+    const pct = (x.valor / soma) * 100;
+    barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
+  }
+  const semSubsidio = !itens.some((x) => x.k === 'vereadores');
+  definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
+    + 'Fonte: Tribunal de Contas do Estado de São Paulo, cada pagamento da Câmara pelo tipo de despesa. '
+    + 'Pode diferir um pouco do custo acima, que vem do relatório da prefeitura ao Tesouro e conta a despesa liquidada, não a paga.'
+    + (semSubsidio ? ' Neste ano, a Câmara não registrou nenhum pagamento como salário de vereador (subsídio); ele pode ter sido lançado junto com o dos servidores.' : ''));
+  mostrar();
 }
 
 // ---------------------------------------------------------------------------
@@ -666,6 +740,21 @@ registrarDownload('beneficios', () => {
     linhas: d ? d.meses.flatMap((mes, k) => Object.entries(d.municipios).map(([cod, serie]) => {
       const x = serie[k];
       return [mes, cod, nomes.get(cod) ?? '', uf, x?.[0] ?? '', x?.[1] ?? '', x?.[2] ?? '', x?.[2] != null && x?.[3] ? pessoasNoBpc(x[2], x[3], mes) : '', x?.[3] ?? ''];
+    })) : [],
+  };
+});
+
+registrarDownload('camaras', () => {
+  const uf = estado.cidade?.uf;
+  const d = estado.camaras;
+  const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
+  return {
+    nome: `gastos-das-camaras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
+    cabecalhos: d ? ['ano', 'codigo_ibge', 'cidade', 'uf', 'total_pago (R$ da época)',
+      ...d.categorias.map(([, rotulo]) => `${rotulo} (R$ da época)`), 'fator para dinheiro de hoje (IPCA)'] : [],
+    linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).map(([cod, anos]) => {
+      const [total, partes] = anos[String(a)];
+      return [a, cod, nomes.get(cod) ?? '', uf, total, ...partes, arred(fatorParaHoje(estado.ctx, a) ?? 1, 6)];
     })) : [],
   };
 });

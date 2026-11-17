@@ -299,6 +299,35 @@ export async function carregarEmendasUf(uf) {
   return d;
 }
 
+// Gastos das câmaras municipais por tipo de despesa (Tribunal de Contas de
+// SP; scripts/camaras_sp_para_json.py): {anos, categorias: [[chave, rótulo]],
+// cidades: {código: {ano: [total pago, [por categoria]]}}}, em reais da
+// época. Por enquanto só existe para SP.
+export async function carregarCamarasUf(uf) {
+  if (!/^[A-Z]{2}$/.test(uf)) falhar('câmaras: UF');
+  const resposta = await fetch(`/dados/camaras/${uf}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar os gastos das câmaras de ${uf} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || d.uf !== uf || !ehData(d.atualizado) || !ehLinkSeguro(d.fonte)
+    || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
+    || !Array.isArray(d.categorias) || !d.categorias.length
+    || !d.categorias.every((c) => Array.isArray(c) && c.length === 2 && ehTexto(c[0]) && ehTexto(c[1]))
+    || !d.cidades || typeof d.cidades !== 'object') {
+    falhar(`câmaras de ${uf}`);
+  }
+  const n = d.categorias.length;
+  const ehAno = (x) => Array.isArray(x) && x.length === 2 && Number.isFinite(x[0])
+    && Array.isArray(x[1]) && x[1].length === n && x[1].every(Number.isFinite);
+  for (const [cod, anos] of Object.entries(d.cidades)) {
+    if (!/^[0-9]{7}$/.test(cod) || !anos || typeof anos !== 'object'
+      || !Object.entries(anos).every(([a, x]) => d.anos.includes(Number(a)) && ehAno(x))) {
+      falhar(`câmara da cidade ${cod}`);
+    }
+  }
+  return d;
+}
+
 // Deputados e senadores com página (scripts/emendas_para_json.py):
 // [endereço, nome, casa, partido, UF, emendas pagas nos anos do site].
 const CAMPOS_PARLAMENTARES = ['endereco', 'nome', 'casa', 'partido', 'uf', 'emendas_pagas'];
