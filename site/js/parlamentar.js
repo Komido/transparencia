@@ -3,7 +3,7 @@
 // por ano, para quem foram e quais cidades receberam, e a cota do ano.
 
 import * as f from './formato.js';
-import { carregarPainel, carregarIndiceParlamentares, carregarEmendasParlamentar, carregarIndiceMunicipios, carregarCotaAno } from './dados.js';
+import { carregarPainel, carregarIndiceParlamentares, carregarEmendasParlamentar, carregarIndiceMunicipios, carregarCotaAno, carregarAtividade, carregarVotacoesAno } from './dados.js';
 import { caminhoDaCidade } from './endereco.js';
 import { $, el, campo, definir, semAcento, inflacao, fatorParaHoje, arred, registrarDownload, barra, encurtarLista, montarBusca } from './comum.js';
 
@@ -17,13 +17,143 @@ const TIPOS = {
 const CASA = { camara: 'Câmara dos Deputados', senado: 'Senado', '': 'Câmara ou Senado' };
 
 // Linha [endereço, nome, casa, partido, UF, total] -> "Câmara dos Deputados · PL-MG".
-const rotulo = (p) => (p[2] ? `${CASA[p[2]]} · ${p[3] ? `${p[3]}-` : ''}${p[4]}` : 'Câmara ou Senado');
 const sigla = (p) => (p[4] ? ` (${p[3] ? `${p[3]}-` : ''}${p[4]})` : '');
 // Entre 1 e 10 milhões, com uma casa: "R$ 1,4 mi".
 const valorCurto = (v) => (v >= 1e6 && v < 1e7 ? `R$ ${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v));
 const valorGrande = (v) => (v >= 1e6 ? f.reaisPorExtenso(v) : f.reaisCompacto(v));
 
-const estado = { indice: null, ctx: null, p: null, d: null, cidades: null };
+const estado = { indice: null, ctx: null, p: null, d: null, cidades: null, atv: null };
+
+// "Deputada federal · PT-MG", "Senador · PSD-MG"; sem a lista oficial, a casa.
+function cargo(p) {
+  const sexo = p[7] ?? estado.atv?.sexo ?? '';
+  const casa = p[2];
+  if (!casa) return 'Câmara ou Senado';
+  const nome = casa === 'senado' ? (sexo === 'F' ? 'Senadora' : sexo === 'M' ? 'Senador' : 'Senado')
+    : (sexo === 'F' ? 'Deputada federal' : sexo === 'M' ? 'Deputado federal' : 'Câmara dos Deputados');
+  return `${nome} · ${p[3] ? `${p[3]}-` : ''}${p[4]}`;
+}
+
+const VOTO_TEXTO = { S: 'Sim', N: 'Não', A: 'Abstenção', O: 'Obstrução', V: 'Votou (voto secreto)', P: 'Presidiu a sessão' };
+// Motivos de quem não votou, como o Senado registra.
+const AUSENCIA_SENADO = { NCom: 'não compareceu', MIS: 'em missão oficial', LS: 'licença de saúde', LP: 'licença particular', 'P-NRV': 'presente, sem registrar voto' };
+const linkProposicao = (casa, id) => (casa === 'camara'
+  ? `https://www.camara.leg.br/propostas-legislativas/${id}`
+  : `https://www25.senado.leg.br/web/atividade/materias/-/materia/${id}`);
+
+function item(lista, { titulo, href, lado, texto, detalhe }) {
+  const li = el('li', null, null, lista);
+  const topo = el('div', 'item-topo', null, li);
+  const t = el('span', 'item-titulo', null, topo);
+  if (href) {
+    const a = el('a', null, titulo, t);
+    a.href = href;
+    a.rel = 'noopener';
+  } else t.textContent = titulo;
+  if (lado) el('span', 'item-voto', lado, topo);
+  if (texto) el('span', 'item-texto', texto, li);
+  if (detalhe) el('span', 'item-detalhe', detalhe, li);
+  return li;
+}
+
+async function desenharVotacoes(ano) {
+  const secao = $('#votacoes');
+  const atv = estado.atv;
+  const casa = estado.p[2];
+  if (!atv || !casa) { secao.hidden = true; $('#parl-resumo-votacoes').hidden = true; return; }
+  let vot;
+  try { vot = await carregarVotacoesAno(casa, ano); } catch { vot = null; }
+  if (Number($('#parl-ano').value) !== ano) return;
+  secao.hidden = false;
+  const meus = atv.votos[String(ano)] ?? [];
+  const numeros = $('#parl-votos-numeros');
+  const lista = $('#parl-votacoes');
+  numeros.replaceChildren();
+  lista.replaceChildren();
+  const linha = (rot, valor, detalhes) => {
+    const div = el('div', null, null, numeros);
+    el('dt', null, rot, div);
+    el('dd', null, valor, div);
+    detalhes.forEach((t) => el('dd', 'detalhe', t, div));
+  };
+  if (!vot) {
+    definir('parl-votos-nota', `Sem dado de votações de ${ano}.`);
+    campo('parl-votacoes-titulo')[0].hidden = true;
+    resumo('parl-resumo-votacoes', 'sem dado', null);
+    return;
+  }
+  const total = vot.votacoes.length;
+  const registrados = meus.filter(([, v]) => ['S', 'N', 'A', 'O', 'V', 'P'].includes(v));
+  const conta = (cod) => meus.filter(([, v]) => v === cod).length;
+  if (casa === 'camara') {
+    linha(`Votou em ${ano}`, `${f.numero(registrados.length)} de ${f.numero(total)}`, ['votações nominais do Plenário no ano']);
+    resumo('parl-resumo-votacoes', `${f.numero(registrados.length)} de ${f.numero(total)}`, 'votações em que registrou voto');
+  } else {
+    const ausencias = {};
+    meus.filter(([, v]) => v.startsWith('x:')).forEach(([, v]) => { const m = v.slice(2); ausencias[m] = (ausencias[m] ?? 0) + 1; });
+    const motivos = Object.entries(ausencias).sort((a, b) => b[1] - a[1]).map(([m, n]) => `${AUSENCIA_SENADO[m] ?? `registro "${m}"`}: ${n}`);
+    linha(`Votou em ${ano}`, `${f.numero(registrados.length)} de ${f.numero(meus.length)}`, [
+      'votações nominais em que estava no mandato',
+      ...(motivos.length ? [`Não votou: ${motivos.join('; ')}`] : []),
+    ]);
+    resumo('parl-resumo-votacoes', `${f.numero(registrados.length)} de ${f.numero(meus.length)}`, 'votações em que registrou voto');
+  }
+  const partes = [['S', 'Sim'], ['N', 'Não'], ['A', 'Abstenção'], ['O', 'Obstrução'], ['V', 'Voto secreto']].map(([c, t]) => [t, conta(c)]).filter(([, n]) => n > 0);
+  if (partes.length) linha('Como votou', partes.map(([t, n]) => `${t}: ${f.numero(n)}`).join(' · '), ['contagem das votações em que registrou voto']);
+
+  // A lista: da votação mais recente para a mais antiga.
+  const iVoto = new Map(meus.map(([k, v]) => [k, v]));
+  const ordem = vot.votacoes.map((v, k) => [v, k]).filter(([, k]) => iVoto.has(k)).reverse();
+  campo('parl-votacoes-titulo')[0].hidden = !ordem.length;
+  ordem.forEach(([v, k]) => {
+    const cod = iVoto.get(k);
+    const voto = VOTO_TEXTO[cod] ?? (cod.startsWith('x:') ? `Não votou (${AUSENCIA_SENADO[cod.slice(2)] ?? cod.slice(2)})` : 'Outro registro');
+    const resultado = casa === 'camara' ? v[4] : [v[4], v[10]].filter(Boolean).join(' ');
+    const idProp = casa === 'camara' ? v[8] : v[8];
+    item(lista, {
+      titulo: v[2] || 'Votação',
+      href: idProp ? linkProposicao(casa, idProp) : null,
+      lado: voto,
+      texto: v[3],
+      detalhe: [f.dataCurta(v[1]), resultado].filter(Boolean).join(' · '),
+    });
+  });
+  encurtarLista(lista, $('#parl-votacoes-todas'), 10, { abrir: `Ver todas as ${f.numero(ordem.length)} votações`, fechar: 'Mostrar só as 10 mais recentes' });
+  definir('parl-votos-nota', casa === 'camara'
+    ? 'Fonte: Câmara dos Deputados, dados abertos. O arquivo da Câmara traz só quem votou: quem estava de licença, era ministro ou secretário, ou ainda não tinha assumido aparece como não tendo votado, sem o motivo.'
+    : 'Fonte: Senado Federal, dados abertos. Em votação secreta, o Senado registra só que o senador votou.');
+}
+
+function desenharProjetos(ano) {
+  const secao = $('#projetos');
+  const atv = estado.atv;
+  if (!atv) { secao.hidden = true; $('#parl-resumo-projetos').hidden = true; return; }
+  secao.hidden = false;
+  const casa = estado.p[2];
+  const doAno = atv.projetos.filter((x) => x[4].startsWith(String(ano)));
+  const numeros = $('#parl-projetos-numeros');
+  numeros.replaceChildren();
+  const div = el('div', null, null, numeros);
+  el('dt', null, `Apresentados em ${ano}`, div);
+  el('dd', null, f.numero(doAno.length), div);
+  const principal = doAno.filter((x) => x[6] === 1).length;
+  if (doAno.length) el('dd', 'detalhe', `${f.numero(principal)} como autor principal`, div);
+  const div2 = el('div', null, null, numeros);
+  el('dt', null, `Desde ${Math.min(...estado.indice.anos)}`, div2);
+  el('dd', null, f.numero(atv.projetos.length), div2);
+  resumo('parl-resumo-projetos', f.numero(doAno.length), `${f.numero(principal)} como autor principal`);
+  const lista = $('#parl-projetos');
+  lista.replaceChildren();
+  doAno.forEach((x) => item(lista, {
+    titulo: x[1],
+    href: linkProposicao(casa, x[0]),
+    lado: x[6] === 1 ? 'Autor principal' : 'Coautor',
+    texto: x[3],
+    detalhe: [f.dataCurta(x[4]), x[5]].filter(Boolean).join(' · '),
+  }));
+  encurtarLista(lista, $('#parl-projetos-todos'), 10, { abrir: `Ver todos os ${f.numero(doAno.length)} projetos`, fechar: 'Mostrar só os 10 mais recentes' });
+  definir('parl-projetos-nota', `Fonte: ${casa === 'camara' ? 'Câmara dos Deputados' : 'Senado Federal'}, dados abertos. Quantidade não mede qualidade: um projeto pode ser importante ou uma homenagem, e muitos são assinados em conjunto. O link leva à página oficial, com o texto e a tramitação.`);
+}
 
 function enderecoDaPagina() {
   const m = /^\/parlamentar\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(location.pathname);
@@ -169,6 +299,8 @@ function desenhar() {
   definir('parl-resumo-titulo', `Resumo de ${ano}`);
   desenharEmendas(ano);
   desenharCota(ano);
+  desenharVotacoes(ano);
+  desenharProjetos(ano);
   const q = new URLSearchParams(location.search);
   q.delete('p');
   q.set('ano', String(ano));
@@ -211,7 +343,7 @@ async function iniciar() {
     prefixo: 'parl-op',
     itens: () => estado.indice.parlamentares,
     texto: (x) => `${x[1]} ${x[4]}`,
-    rotulo: (x) => [x[1], rotulo(x)],
+    rotulo: (x) => [x[1], cargo(x)],
     vazio: 'Nenhum deputado ou senador com esse nome',
     aoEscolher: (x) => { location.href = `/parlamentar/${x[0]}`; },
   });
@@ -230,9 +362,14 @@ async function iniciar() {
     status('Não foi possível carregar as emendas agora. Tente de novo mais tarde.');
     return;
   }
+  // Votos e projetos, pela identificação oficial na Câmara ou no Senado.
+  const [casaOficial, idOficial] = (p[6] ?? '').split(':');
+  if (casaOficial && idOficial) {
+    try { estado.atv = await carregarAtividade(casaOficial, idOficial); } catch (erro) { console.error(erro); estado.atv = null; }
+  }
   definir('parl-nome', p[1]);
   definir('trilha-nome', p[1]);
-  definir('parl-cargo', rotulo(p));
+  definir('parl-cargo', cargo(p));
   document.title = `${p[1]}${sigla(p)}: emendas e cota parlamentar · Arrecadômetro Brasil`;
   const selAno = $('#parl-ano');
   [...estado.indice.anos].reverse().forEach((a) => { el('option', null, String(a), selAno).value = String(a); });

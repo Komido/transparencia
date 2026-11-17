@@ -1353,3 +1353,13 @@ td.num .detalhe { white-space: normal; }
 .trilha a { color: var(--tinta-2); }
 .abertura .parl-cargo { margin-top: var(--e-1); font-size: var(--fs-3); }
 .pagina-propria .filtros { margin-top: var(--e-4); }
+
+/* Votações e projetos do parlamentar: uma linha por item, voto em texto. */
+.votacoes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.votacoes li { display: grid; gap: 2px; padding: var(--e-3) 0; border-top: 1px solid var(--borda); }
+.votacoes li:first-child { border-top: 0; }
+.votacoes .item-topo { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: var(--e-3); row-gap: 2px; }
+.votacoes .item-titulo { font-weight: 600; min-width: 0; }
+.votacoes .item-voto { font-weight: 700; white-space: nowrap; }
+.votacoes .item-texto { font-size: var(--fs-2); color: var(--tinta); }
+.votacoes .item-detalhe { font-size: var(--fs-1); color: var(--tinta-2); }

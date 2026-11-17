@@ -467,10 +467,24 @@ def paginas_dos_parlamentares(cota, tipos_autor, nome_do_autor, autores, bruto_d
             kp = chave_do_parlamentar(bruto_do_autor.get(autor, autor))
             if kp and round(valor) > 0:
                 cidades[kp][ano][cod] = cidades[kp][ano].get(cod, 0) + valor
-    chaves = {k for k, p in cota.items() if p["ano"] >= min(anos)} | {k for (k, _) in tipos_autor}
+    # Lista oficial da Câmara e do Senado (scripts/congresso_para_json.py), com
+    # o código de cada um; tem precedência sobre a cota para nome, partido e UF.
+    oficiais = collections.defaultdict(list)
+    caminho = f"{PARLAMENTARES}/oficiais.json"
+    if os.path.exists(caminho):
+        with open(caminho, encoding="utf-8") as fh:
+            for casa, ident, nome, sexo, partido, uf in json.load(fh).get("parlamentares", []):
+                oficiais[chave_nome(nome)].append({"nome": nome, "casa": casa, "partido": partido, "uf": uf,
+                                                   "oficial": f"{casa}:{ident}", "sexo": sexo})
+    print(f"lista oficial: {sum(len(v) for v in oficiais.values())} parlamentares")
+    chaves = {k for k, p in cota.items() if p["ano"] >= min(anos)} | {k for (k, _) in tipos_autor} | set(oficiais)
     usados, enderecos, indice = set(), {}, []
     for k in sorted(chaves):
-        p = cota.get(k) or {"nome": nome_legivel(nome_do_autor.get(k, k)), "casa": "", "partido": "", "uf": ""}
+        candidatos = oficiais.get(k, [])
+        if len(candidatos) > 1 and cota.get(k):
+            candidatos = [c for c in candidatos if c["uf"] == cota[k]["uf"]] or candidatos
+        p = candidatos[0] if candidatos else (
+            cota.get(k) or {"nome": nome_legivel(nome_do_autor.get(k, k)), "casa": "", "partido": "", "uf": ""})
         base = slug(p["nome"], p["uf"])
         endereco, n = base, 2
         while endereco in usados:
@@ -489,7 +503,8 @@ def paginas_dos_parlamentares(cota, tipos_autor, nome_do_autor, autores, bruto_d
                 "tipos": [round(x) for x in t],
                 "cidades": [[cod, round(v)] for cod, v in sorted(c.items(), key=lambda x: (-x[1], x[0])) if round(v) > 0],
             }
-        indice.append([endereco, p["nome"], p["casa"], p["partido"], p["uf"], sum(x["pago"] for x in por_ano.values())])
+        indice.append([endereco, p["nome"], p["casa"], p["partido"], p["uf"], sum(x["pago"] for x in por_ano.values()),
+                       p.get("oficial", ""), p.get("sexo", "")])
         gravar_json(f"{PARLAMENTARES}/emendas/{endereco}.json", {
             "endereco": endereco, "nome": p["nome"], "casa": p["casa"], "partido": p["partido"], "uf": p["uf"],
             "atualizado": hoje, "fonte": URL, "tipos": TIPOS_RECEBEDOR, "anos": por_ano,
@@ -500,11 +515,11 @@ def paginas_dos_parlamentares(cota, tipos_autor, nome_do_autor, autores, bruto_d
             os.remove(f"{PARLAMENTARES}/emendas/{arq}")
     indice.sort(key=lambda x: (chave_nome(x[1]), x[4]))
     gravar_json(f"{PARLAMENTARES}/indice.json", {
-        "atualizado": hoje, "anos": anos, "campos": ["endereco", "nome", "casa", "partido", "uf", "emendas_pagas"],
+        "atualizado": hoje, "anos": anos, "campos": ["endereco", "nome", "casa", "partido", "uf", "emendas_pagas", "oficial", "sexo"],
         "parlamentares": indice,
     })
     print(f"parlamentares: {len(indice)} páginas; com emendas: {sum(1 for x in indice if x[5] > 0)}; "
-          f"sem par na cota: {sum(1 for x in indice if not x[2])}")
+          f"sem casa: {sum(1 for x in indice if not x[2])}; com código oficial: {sum(1 for x in indice if x[6])}")
     return enderecos
 
 

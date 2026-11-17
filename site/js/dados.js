@@ -296,16 +296,20 @@ export async function carregarEmendasUf(uf) {
 // Deputados e senadores com página (scripts/emendas_para_json.py):
 // [endereço, nome, casa, partido, UF, emendas pagas nos anos do site].
 const CAMPOS_PARLAMENTARES = ['endereco', 'nome', 'casa', 'partido', 'uf', 'emendas_pagas'];
+const CAMPOS_PARLAMENTARES_V2 = [...CAMPOS_PARLAMENTARES, 'oficial', 'sexo'];
 const ehEndereco = (v) => typeof v === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v);
 export async function carregarIndiceParlamentares() {
   const resposta = await fetch('/dados/parlamentares/indice.json', { credentials: 'same-origin' });
   if (resposta.status === 404) return null;
   if (!resposta.ok) throw new Error(`Falha ao carregar os parlamentares (HTTP ${resposta.status})`);
   const d = await resposta.json();
-  if (!d || !ehData(d.atualizado) || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_PARLAMENTARES)
+  const v2 = JSON.stringify(d?.campos) === JSON.stringify(CAMPOS_PARLAMENTARES_V2);
+  const n = v2 ? 8 : 6;
+  if (!d || !ehData(d.atualizado) || (!v2 && JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_PARLAMENTARES))
     || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
     || !Array.isArray(d.parlamentares) || d.parlamentares.length < 500
-    || !d.parlamentares.every((x) => Array.isArray(x) && x.length === 6 && ehEndereco(x[0]) && ehTexto(x[1])
+    || !d.parlamentares.every((x) => Array.isArray(x) && x.length === n && ehEndereco(x[0]) && ehTexto(x[1])
+      && (!v2 || ((x[6] === '' || /^(camara|senado):[0-9]{1,9}$/.test(x[6])) && ['M', 'F', ''].includes(x[7])))
       && ['camara', 'senado', ''].includes(x[2]) && typeof x[3] === 'string' && (x[4] === '' || /^[A-Z]{2}$/.test(x[4]))
       && Number.isFinite(x[5]))) {
     falhar('lista de parlamentares');
@@ -330,6 +334,44 @@ export async function carregarEmendasParlamentar(endereco) {
     falhar(`emendas de ${endereco}`);
   }
   return d;
+}
+
+// Votos e projetos de um parlamentar (scripts/congresso_para_json.py).
+export async function carregarAtividade(casa, id) {
+  if (!['camara', 'senado'].includes(casa) || !/^[0-9]{1,9}$/.test(id)) falhar('parlamentar: identificação');
+  const resposta = await fetch(`/dados/parlamentares/${casa}/${id}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar a atividade de ${casa}/${id} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  const ehVoto = (v) => Array.isArray(v) && v.length === 2 && Number.isInteger(v[0]) && v[0] >= 0 && typeof v[1] === 'string' && v[1].length <= 20;
+  if (!d || d.casa !== casa || String(d.id) !== id || !ehTexto(d.nome) || !d.votos || typeof d.votos !== 'object'
+    || !Object.entries(d.votos).every(([a, l]) => /^\d{4}$/.test(a) && Array.isArray(l) && l.every(ehVoto))
+    || !Array.isArray(d.projetos) || !d.projetos.every((x) => Array.isArray(x) && x.length === 7 && typeof x[0] === 'string'
+      && ehTexto(x[1]) && typeof x[3] === 'string' && ehData(x[4]) && typeof x[5] === 'string' && (x[6] === 0 || x[6] === 1))) {
+    falhar(`atividade de ${casa}/${id}`);
+  }
+  return d;
+}
+
+// Votações nominais do Plenário de uma casa num ano.
+const cacheVotacoes = new Map();
+export function carregarVotacoesAno(casa, ano) {
+  const chave = `${casa}-${ano}`;
+  if (!cacheVotacoes.has(chave)) {
+    cacheVotacoes.set(chave, (async () => {
+      if (!['camara', 'senado'].includes(casa) || !Number.isInteger(ano)) falhar('votações: casa ou ano');
+      const resposta = await fetch(`/dados/parlamentares/votacoes/${chave}.json`, { credentials: 'same-origin' });
+      if (resposta.status === 404) return null;
+      if (!resposta.ok) throw new Error(`Falha ao carregar as votações ${chave} (HTTP ${resposta.status})`);
+      const d = await resposta.json();
+      if (!d || d.casa !== casa || d.ano !== ano || !Array.isArray(d.campos) || !Array.isArray(d.votacoes)
+        || !d.votacoes.every((v) => Array.isArray(v) && v.length === d.campos.length && typeof v[0] === 'string' && ehData(v[1]))) {
+        falhar(`votações ${chave}`);
+      }
+      return d;
+    })().catch((erro) => { cacheVotacoes.delete(chave); throw erro; }));
+  }
+  return cacheVotacoes.get(chave);
 }
 
 // Prefeitos e governadores eleitos (TSE; scripts/governantes_para_json.py).
