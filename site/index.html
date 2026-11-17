@@ -37,26 +37,32 @@
                 <li><a href="#combustiveis">Combustíveis e gás</a></li>
                 <li><a href="#salario">Salário mínimo</a></li>
                 <li><a href="#ir">Imposto de Renda</a></li>
+                <li><a href="#dinheiro">Salário líquido, juros e inflação</a></li>
                 <li><a href="#dolar">Dólar</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
-              <p class="secoes-titulo">Impostos</p>
+              <p class="secoes-titulo">Sua cidade</p>
               <ul>
-                <li><a href="#arrecadacao">Quanto o governo arrecada</a></li>
-                <li><a href="#composicao">De onde vem o dinheiro</a></li>
+                <li><a href="#municipios">Contas da prefeitura</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
-              <p class="secoes-titulo">Contas do governo</p>
+              <p class="secoes-titulo">Seu estado</p>
               <ul>
-                <li><a href="#gastos">Para onde vai o dinheiro</a></li>
+                <li><a href="#estados">Contas do governo do estado</a></li>
+              </ul>
+            </div>
+            <div class="secoes-grupo">
+              <p class="secoes-titulo">Governo federal</p>
+              <ul>
+                <li><a href="#arrecadacao">Quanto arrecada</a></li>
+                <li><a href="#composicao">Quais impostos pesam mais</a></li>
+                <li><a href="#gastos">Onde gasta</a></li>
                 <li><a href="#ministerios">Quanto cada ministério gasta</a></li>
                 <li><a href="#cartao">Cartão corporativo</a></li>
-                <li><a href="#viagens">Viagens a serviço e de ministros</a></li>
+                <li><a href="#viagens">Viagens a serviço</a></li>
                 <li><a href="#contas">As contas fecham?</a></li>
-                <li><a href="#estados">Contas do seu estado</a></li>
-                <li><a href="#municipios">Contas da sua cidade</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
@@ -69,7 +75,6 @@
               <p class="secoes-titulo">Entenda</p>
               <ul>
                 <li><a href="#quem-faz">Quem faz o quê no governo</a></li>
-                <li><a href="#dinheiro">Dinheiro no dia a dia</a></li>
               </ul>
             </div>
             <div class="secoes-grupo">
@@ -152,7 +157,7 @@
               </div>
             </dl>
             <p>A Receita Federal publica o total arrecadado uma vez por mês. O número acima soma o que ela já publicou neste ano e estima o restante pela média por segundo dos últimos 12 meses. Inclui todos os impostos e contribuições federais, inclusive a do INSS.</p>
-            <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#composicao">De onde vem o dinheiro</a>.</p>
+            <p>Os impostos de estados e prefeituras, como ICMS, IPVA, ISS e IPTU, não entram nesta conta e aparecem em <a href="#estados">Contas do governo do estado</a> e <a href="#municipios">Contas da prefeitura</a>.</p>
             <p class="fonte">Fonte: Receita Federal, que publica a arrecadação uma vez por mês, algumas semanas depois de o mês terminar. Último mês publicado: <span data-campo="arrec-ultimo">sem dado</span>.</p>
           </div>
         </details>
@@ -161,10 +166,12 @@
       <nav class="temas" aria-labelledby="temas-titulo">
         <h2 id="temas-titulo">Escolha um assunto</h2>
         <ul>
-          <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR e dólar</span></a></li>
-          <li><a href="#arrecadacao"><strong>Impostos</strong><span>quanto o governo arrecada e de onde vem</span></a></li>
-          <li><a href="#gastos"><strong>Contas do governo</strong><span>ministérios, cartão corporativo, viagens, dívida, estados e cidades</span></a></li>
+          <li><a href="#orcamento"><strong>Seu bolso</strong><span>salário, preços, combustíveis, IR, juros e dólar</span></a></li>
+          <li><a href="#municipios"><strong>Sua cidade</strong><span>receitas e gastos da prefeitura, quem foi eleito, Bolsa Família</span></a></li>
+          <li><a href="#estados"><strong>Seu estado</strong><span>dívida, folha de pagamento, impostos e governadores</span></a></li>
+          <li><a href="#arrecadacao"><strong>Governo federal</strong><span>impostos, gastos, ministérios, cartão corporativo e viagens</span></a></li>
           <li><a href="#cota"><strong>Congresso</strong><span>gastos de deputados e senadores</span></a></li>
+          <li><a href="#quem-faz"><strong>Entenda</strong><span>quem faz o quê: prefeito, governador, presidente e o Congresso</span></a></li>
         </ul>
       </nav>
     </div>
@@ -389,6 +396,70 @@
           <p class="fonte">Fonte: tabelas do IRPF publicadas pela Receita Federal, e IPCA (IBGE). A tabela só muda quando uma lei altera os valores; a inflação sai uma vez por mês.</p>
         </section>
 
+        <section id="dinheiro" class="bloco bloco-dados" aria-labelledby="dinheiro-titulo">
+          <p class="tema">Seu bolso</p>
+          <h2 id="dinheiro-titulo">Salário líquido, juros e inflação</h2>
+          <p class="intro">Três contas que mexem com o bolso de todo mundo, feitas com as tabelas e as taxas oficiais. São médias e regras gerais: o seu caso pode ter detalhes diferentes.</p>
+
+          <h3>Quanto do seu salário fica com o governo?</h3>
+          <p class="nota">Para quem tem carteira assinada. Digite o salário bruto, o valor antes dos descontos.</p>
+          <div class="filtros">
+            <label class="campo"><span>Salário bruto (R$)</span>
+              <input id="din-salario" type="number" inputmode="decimal" min="0" step="0.01">
+            </label>
+            <label class="campo"><span>Dependentes</span>
+              <select id="din-dependentes">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="din-salario-resumo"></div>
+          <dl class="conta" id="din-conta">
+            <div><dt>Salário bruto</dt><dd data-campo="din-bruto">sem dado</dd><dd></dd></div>
+            <div><dt>INSS</dt><dd data-campo="din-inss">sem dado</dd><dd data-campo="din-inss-parte"></dd></div>
+            <div><dt>Imposto de Renda</dt><dd data-campo="din-ir">sem dado</dd><dd data-campo="din-ir-parte"></dd></div>
+            <div class="conta-fim"><dt>Salário líquido</dt><dd data-campo="din-liquido">sem dado</dd><dd data-campo="din-liquido-parte"></dd></div>
+          </dl>
+          <p class="nota" data-campo="din-salario-nota"></p>
+
+          <h3>O que a inflação faz com o dinheiro parado?</h3>
+          <div class="filtros">
+            <label class="campo"><span>Valor (R$)</span>
+              <input id="din-valor" type="number" inputmode="decimal" min="0" step="0.01" value="1000">
+            </label>
+            <label class="campo"><span>Guardado desde</span>
+              <select id="din-desde"></select>
+            </label>
+          </div>
+          <div class="resumo" data-campo="din-inflacao-resumo"></div>
+          <ul class="barras" id="din-inflacao-barras"></ul>
+
+          <h3>Quanto custa pegar dinheiro emprestado?</h3>
+          <div class="resumo" data-campo="din-juros-resumo"></div>
+          <ul class="barras" id="din-juros-barras"></ul>
+          <p class="nota" data-campo="din-juros-nota"></p>
+
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Como o salário líquido é calculado?</h3>
+              <p>O INSS é progressivo: cada alíquota (7,5%, 9%, 12% e 14%) vale só para a parte do salário dentro da sua faixa, até o teto. O Imposto de Renda usa a tabela mensal sobre o salário menos a dedução maior entre duas: o INSS mais R$ 189,59 por dependente, ou o desconto simplificado de R$ 607,20. Desde janeiro de 2026, há uma redução: quem ganha até R$ 5.000 não paga, e de R$ 5.000 a R$ 7.350 o imposto diminui aos poucos. Não entram pensão alimentícia, previdência privada, plano de saúde nem outros descontos da empresa.</p>
+              <h3>O que a empresa paga além do seu salário?</h3>
+              <p>A empresa deposita 8% do salário no seu FGTS, que é seu e não sai do seu salário. Empresas fora do Simples Nacional também pagam, em geral, 20% de INSS sobre a folha. Esses valores não aparecem no seu contracheque.</p>
+              <h3>Inflação e poupança</h3>
+              <p>A correção usa o IPCA, a inflação oficial, do mês escolhido até o último mês publicado. A poupança usa o rendimento oficial de um depósito feito no dia 1º de cada mês, pela regra dos depósitos a partir de 4 de maio de 2012; por isso a comparação com a poupança começa em junho de 2012.</p>
+              <h3>Juros</h3>
+              <p>São as taxas médias cobradas pelos bancos de pessoas físicas no último mês publicado pelo Banco Central. Cada banco cobra uma taxa, e a sua pode ser maior ou menor. No cartão de crédito, a lei limita os juros e encargos do rotativo e do parcelamento da fatura ao valor da dívida original (Lei 14.690/2023): uma dívida de R$ 500 não passa de R$ 1.000. O cheque especial tem juros limitados a 8% ao mês (Resolução CMN 4.765/2019).</p>
+              <button type="button" class="botao" data-baixar="dinheiro">Baixar planilha com as taxas</button>
+            </div>
+          </details>
+          <p class="fonte">Fontes: INSS e Receita Federal (tabelas de 2026, conferidas em <span data-campo="din-conferido">sem dado</span>), IBGE (IPCA) e Banco Central (taxas médias de juros, séries 25477, 25463 e 25470, e rendimento da poupança, série 195). As taxas mudam uma vez por mês.</p>
+        </section>
+
         <section id="dolar" class="bloco bloco-dados" aria-labelledby="dolar-titulo">
           <p class="tema">Seu bolso</p>
           <h2 id="dolar-titulo">O dólar está caro ou barato?</h2>
@@ -405,272 +476,77 @@
           <p class="fonte">Fontes: dólar comercial, venda, média mensal (Banco Central, SGS 3698), IPCA (IBGE) e inflação dos EUA (U.S. Bureau of Labor Statistics). O dólar muda todo dia, mas o site usa a média de cada mês, que fecha no fim do mês.</p>
         </section>
 
-        <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
-          <p class="tema">Impostos</p>
-          <h2 id="arrecadacao-titulo">Quanto o governo federal arrecada por ano?</h2>
-          <div class="resumo" data-campo="arrec-resumo"></div>
+        <section id="municipios" class="bloco bloco-dados" aria-labelledby="municipios-titulo">
+          <p class="tema">Sua cidade</p>
+          <h2 id="municipios-titulo">As contas da prefeitura da sua cidade</h2>
+          <p class="intro">De onde vem e para onde vai o dinheiro da prefeitura, quem foi eleito e quanto o governo federal paga direto aos moradores. A prefeitura paga escola, posto de saúde, coleta de lixo e obras com impostos que ela mesma cobra, como IPTU e ISS, e com repasses da União e do estado. Em muitas cidades, quase tudo vem de repasses.</p>
           <div class="filtros">
-            <fieldset class="campo largo">
-              <legend>Mostrar</legend>
-              <div class="segmentos">
-                <label><input type="radio" name="arrec-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
-                <label><input type="radio" name="arrec-medida" value="pib"><span>Parte da economia</span></label>
-              </div>
-            </fieldset>
-          </div>
-          <div id="grafico-arrecadacao"></div>
-          <p class="nota" data-campo="arrec-nota"></p>
-          <details class="tabela-dados">
-            <summary>Ver os números por ano</summary>
-            <div class="tabela-rolagem"><table id="tabela-arrecadacao-anual"></table></div>
-          </details>
-          <details class="tabela-dados">
-            <summary>Comparação entre governos</summary>
-            <div class="filtros">
-              <fieldset class="campo largo">
-                <legend>Agrupar por</legend>
-                <div class="segmentos">
-                  <label><input type="radio" name="arrec-agrupar" value="mandato" checked><span>Mandato</span></label>
-                  <label><input type="radio" name="arrec-agrupar" value="partido"><span>Partido</span></label>
-                </div>
-              </fieldset>
-              <label class="opcao largo"><input type="checkbox" id="arrec-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
+            <div class="campo largo busca-cidade">
+              <label for="mun-busca">Cidade</label>
+              <input id="mun-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mun-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome da cidade">
+              <ul id="mun-sugestoes" class="sugestoes" role="listbox" aria-label="Cidades encontradas" hidden></ul>
             </div>
-            <div class="tabela-rolagem"><table id="tabela-arrecadacao-governos"></table></div>
-            <p class="nota">Cada ano conta para quem governou a maior parte dele. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior. A opção acima tira esse ano da conta de todos ao mesmo tempo. A arrecadação também sobe e desce com a economia, então a tabela mostra o que aconteceu no período, não o mérito de quem governou.</p>
-          </details>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que é "parte da economia"?</h3>
-              <p>É a comparação com o PIB, a soma de tudo o que o país produz em um ano. Dizer que a arrecadação foi 16% significa que, de cada R$ 100 produzidos no país, R$ 16 foram pagos nesses impostos e contribuições.</p>
-              <h3>Por que esta conta deixa o INSS de fora?</h3>
-              <p>Para comparar anos de forma justa, usamos só o que aparece na base da Receita Federal desde 2000. A contribuição ao INSS só passou a ser registrada nessa base em 2005, e as receitas de outros órgãos em 2010. Se entrassem na conta, os anos seguintes pareceriam maiores só porque a forma de registrar mudou.</p>
-              <button type="button" class="botao" data-baixar="arrecadacao">Baixar planilha com os dados</button>
-            </div>
-          </details>
-          <p class="fonte">Fontes: Receita Federal (arrecadação), IBGE via Banco Central (IPCA, SGS 433) e Banco Central (PIB mensal, SGS 4380). Todos saem uma vez por mês. O ano em curso só fecha quando a Receita publica dezembro.</p>
-        </section>
-
-        <section id="composicao" class="bloco bloco-dados" aria-labelledby="composicao-titulo">
-          <p class="tema">Impostos</p>
-          <h2 id="composicao-titulo">De onde vem o dinheiro dos impostos federais?</h2>
-          <div class="resumo" data-campo="composicao-resumo"></div>
-          <ul class="barras" id="lista-composicao"></ul>
-          <p class="nota">Cada barra mostra a parte do total. A lista tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. O FGTS fica de fora: vai para a conta do trabalhador e não conta como imposto.</p>
-          <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">sem dado</span>.</p>
-          <div id="composicao-estados-caixa" hidden>
-            <h3>E os impostos de estados e prefeituras?</h3>
-            <div class="resumo" data-campo="composicao-estados"></div>
-            <p class="nota"><a href="#estados">Veja quanto o seu estado e a sua capital arrecadam</a>.</p>
-            <p class="fonte">Fontes: Tesouro Nacional. Estados: Relatório Resumido da Execução Orçamentária de cada estado (anexo 3, no Siconfi), valores antes dos repasses às prefeituras. Prefeituras e total do país: Estimativa da Carga Tributária Bruta do Governo Geral, publicada uma vez por ano.</p>
-          </div>
-        </section>
-
-        <section id="gastos" class="bloco bloco-dados" aria-labelledby="gastos-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="gastos-titulo">Para onde vai o dinheiro do governo federal?</h2>
-          <div class="resumo" data-campo="gastos-resumo"></div>
-          <div class="filtros">
             <label class="campo"><span>Ano</span>
-              <select id="gastos-ano"></select>
+              <select id="mun-ano"></select>
             </label>
           </div>
-          <ul class="barras" id="lista-gastos"></ul>
-          <h3>Comparar áreas ao longo dos anos</h3>
-          <div class="filtros">
-            <label class="campo"><span>Área</span>
-              <select id="gastos-area-a"></select>
-            </label>
-            <label class="campo"><span>Comparar com</span>
-              <select id="gastos-area-b"></select>
-            </label>
-            <fieldset class="campo largo">
-              <legend>Mostrar</legend>
-              <div class="segmentos">
-                <label><input type="radio" name="gastos-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
-                <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
-              </div>
-            </fieldset>
+          <p id="mun-vazio" class="resumo-vazio">Digite o nome de uma cidade para ver de onde vem o dinheiro da prefeitura. Estão aqui as 5.570 cidades do país.</p>
+          <div id="mun-detalhe" hidden>
+            <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
+            <p id="mun-selo" class="selo-dado"></p>
+            <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
+            <div id="mun-governo" class="governo" hidden>
+              <ul class="governo-lista" id="mun-governo-lista"></ul>
+            </div>
+            <div class="resumo" data-campo="mun-resumo"></div>
+            <div id="mun-contas">
+              <h3>Receitas da prefeitura: de onde veio cada R$ 100</h3>
+              <ul class="barras" id="mun-barras"></ul>
+              <h3>Comparada com outras cidades</h3>
+              <dl class="numeros" id="mun-compara"></dl>
+              <p class="nota" data-campo="mun-compara-nota"></p>
+            </div>
+            <div id="mun-despesas" hidden>
+              <h3 data-campo="mun-despesas-titulo">Gastos da prefeitura</h3>
+              <p id="mun-despesas-selo" class="selo-dado aviso" hidden></p>
+              <ul class="barras" id="mun-despesas-barras"></ul>
+              <dl class="numeros empilhado" id="mun-despesas-compara"></dl>
+              <p class="nota" data-campo="mun-despesas-nota"></p>
+            </div>
+            <div id="mun-beneficios" hidden>
+              <h3>Dinheiro federal pago direto aos moradores</h3>
+              <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
+              <dl class="numeros empilhado" id="mun-beneficios-numeros"></dl>
+              <p class="nota" data-campo="mun-beneficios-nota"></p>
+            </div>
           </div>
-          <div class="resumo" data-campo="gastos-comparacao"></div>
-          <div id="grafico-gastos"></div>
-          <p class="como-ler">Cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
           <details class="entenda">
             <summary>Entenda e baixe os dados</summary>
             <div class="entenda-corpo">
-              <h3>O que é a "rolagem da dívida"?</h3>
-              <p>Quando uma parte da dívida pública vence, o governo pode pagar com dinheiro do orçamento ou emitir dívida nova para pagar a velha. Essa segunda forma é a rolagem. Ela aparece no orçamento como gasto, mas não é dinheiro que vai para serviços ou para as pessoas: troca uma dívida por outra. Por isso fica fora da conta "de cada R$ 100".</p>
-              <h3>Que gasto é esse?</h3>
-              <p>Todo gasto público passa por três etapas: empenho (o governo reserva o dinheiro), liquidação (o serviço foi entregue e o valor passa a ser devido) e pagamento. O site usa a liquidação, que mostra o que foi de fato executado no ano. Os números são da União; estados e municípios gastam com saúde e educação também, com dinheiro próprio e com os repasses federais.</p>
-              <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
+              <h3>Que dinheiro entra nessa conta?</h3>
+              <p>A receita corrente do ano: o dinheiro que entra para o dia a dia da prefeitura. Ficam de fora empréstimos, venda de imóveis e repasses feitos só para obras (as receitas de capital). Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
+              <h3>O que é cada repasse?</h3>
+              <p><strong>FPM:</strong> o Fundo de Participação dos Municípios. A União junta parte do Imposto de Renda e do IPI e divide entre as cidades; cidades pequenas recebem mais por morador. <strong>ICMS:</strong> um quarto do imposto estadual sobre mercadorias e serviços fica com as cidades, dividido principalmente pela atividade econômica de cada uma. <strong>IPVA:</strong> metade do imposto dos carros registrados na cidade fica com ela. <strong>FUNDEB:</strong> o fundo da educação básica. Parte do FPM e do ICMS de cada cidade vai para o fundo, que devolve de acordo com o número de alunos da rede. <strong>Outros repasses:</strong> o dinheiro do SUS, da assistência social, da merenda, a parte do imposto sobre terras rurais (ITR) e outros.</p>
+              <h3>Por que comparar com cidades do mesmo tamanho?</h3>
+              <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
+              <h3>O que quer dizer cada aviso?</h3>
+              <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
+              <h3>Quem foi eleito?</h3>
+              <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
+              <h3>Para onde vai o dinheiro da prefeitura?</h3>
+              <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
+              <h3>Bolsa Família e BPC</h3>
+              <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
+              <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
+              <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
             </div>
           </details>
-          <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
-        </section>
-
-        <section id="ministerios" class="bloco bloco-dados" aria-labelledby="ministerios-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="ministerios-titulo">Quanto cada ministério gasta?</h2>
-          <div class="resumo" data-campo="ministerios-resumo"></div>
-          <div class="filtros">
-            <label class="campo"><span>Ano</span>
-              <select id="ministerios-ano"></select>
-            </label>
-          </div>
-          <ul class="barras" id="ministerios-lista"></ul>
-          <h3>Um ministério ao longo dos anos</h3>
-          <div class="filtros">
-            <label class="campo largo"><span>Ministério</span>
-              <select id="ministerios-orgao"></select>
-            </label>
-          </div>
-          <p class="nota" data-campo="ministerios-explicacao"></p>
-          <div id="grafico-ministerios"></div>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>Que gasto é esse?</h3>
-              <p>É o valor liquidado: o serviço ou a compra foi entregue e o pagamento passou a ser devido. É a mesma etapa usada em "Para onde vai o dinheiro", que mostra o gasto por área; aqui ele aparece por ministério, como o governo se organiza.</p>
-              <h3>Por que a dívida fica de fora?</h3>
-              <p>Juros e pagamento da dívida pública são feitos pelo Ministério da Fazenda e somam centenas de bilhões por mês, a maior parte trocando dívida velha por nova. Se entrassem, a Fazenda pareceria o ministério que mais gasta com serviços. Por isso aparecem à parte.</p>
-              <h3>Por que alguns ministérios têm valores tão grandes?</h3>
-              <p>A Previdência paga as aposentadorias e pensões do INSS. Saúde e Educação repassam boa parte do dinheiro a estados e prefeituras, que atendem a população. A Fazenda faz os repasses de impostos que a Constituição manda dividir com estados e municípios. A lista mostra quanto de cada ministério foi repassado.</p>
-              <h3>Ministérios mudam de nome</h3>
-              <p>Ministérios são criados, juntados e separados de um governo para outro. O gráfico segue o código do órgão no sistema do governo, e a dica de cada ano mostra o nome que ele tinha naquele ano.</p>
-              <button type="button" class="botao" data-baixar="ministerios">Baixar planilha com os dados</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), execução da despesa, arquivos mensais desde 2014. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="ministerios-atualizado">sem dado</span>.</p>
-        </section>
-
-        <section id="cartao" class="bloco bloco-dados" aria-labelledby="cartao-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="cartao-titulo">Quanto o governo federal gasta no cartão corporativo?</h2>
-          <p class="intro">O cartão de pagamento do governo federal é usado para despesas pequenas ou que não podem esperar o processo normal de compra. Cada lançamento fica registrado no Portal da Transparência.</p>
-          <div class="resumo" data-campo="cartao-resumo"></div>
-          <div class="filtros">
-            <label class="campo"><span>Ano</span>
-              <select id="cartao-ano"></select>
-            </label>
-          </div>
-          <h3>Quem mais usou</h3>
-          <ul class="barras" id="cartao-lista"></ul>
-          <h3>Ano a ano</h3>
-          <div id="grafico-cartao"></div>
-          <p class="como-ler">A linha cheia é o total gasto no ano; a tracejada, a parte sob sigilo. Em dinheiro de hoje.</p>
-          <details class="tabela-dados">
-            <summary>Comparação entre governos</summary>
-            <div class="filtros">
-              <label class="opcao largo"><input type="checkbox" id="cartao-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
-            </div>
-            <div class="tabela-rolagem"><table id="tabela-cartao-governos"></table></div>
-            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
-          </details>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que é o gasto "sob sigilo"?</h3>
-              <p>São lançamentos que o Portal da Transparência mostra só com o valor, marcados como "informações protegidas por sigilo", sem dizer o que foi comprado nem onde. O site soma esses valores no total e mostra quanto eles representam em cada órgão.</p>
-              <h3>Por que há saques em dinheiro?</h3>
-              <p>O cartão permite saque em dinheiro, com regras próprias. Os saques aparecem separados porque o registro mostra só o saque, não com o que o dinheiro foi gasto.</p>
-              <h3>Gasto alto é sinal de problema?</h3>
-              <p>Não necessariamente. O valor depende do tamanho de cada órgão e do tipo de trabalho que ele faz. Os números mostram quanto foi gasto, não se o gasto foi correto.</p>
-              <button type="button" class="botao" data-baixar="cartao">Baixar planilha com os dados</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), cartão de pagamento do governo federal, arquivos mensais desde 2013. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="cartao-atualizado">sem dado</span>.</p>
-        </section>
-
-        <section id="viagens" class="bloco bloco-dados" aria-labelledby="viagens-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="viagens-titulo">Quanto o governo federal gasta com viagens a serviço?</h2>
-          <div class="resumo" data-campo="viagens-resumo"></div>
-          <div class="filtros">
-            <label class="campo"><span>Ano</span>
-              <select id="viagens-ano"></select>
-            </label>
-          </div>
-          <h3>Por ministério</h3>
-          <ul class="barras" id="viagens-lista"></ul>
-          <h3>Viagens de ministros</h3>
-          <div class="resumo resumo-menor" data-campo="viagens-ministros-nota"></div>
-          <ol class="ranking" id="viagens-ministros"></ol>
-          <h3>Ano a ano</h3>
-          <div id="grafico-viagens"></div>
-          <details class="tabela-dados">
-            <summary>Comparação entre governos</summary>
-            <div class="filtros">
-              <label class="opcao largo"><input type="checkbox" id="viagens-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
-            </div>
-            <div class="tabela-rolagem"><table id="tabela-viagens-governos"></table></div>
-            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
-          </details>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que entra na conta?</h3>
-              <p>Diárias (o dinheiro para hospedagem e alimentação durante a viagem), passagens e outros gastos da viagem, menos o que o servidor devolveu. Entram todas as viagens de servidores e convidados do governo federal registradas no Portal da Transparência no ano.</p>
-              <h3>Quem são os "ministros" da lista?</h3>
-              <p>As pessoas que viajaram ocupando cargo de natureza especial: os ministros de Estado e outros cargos do mesmo nível. O Portal não traz o cargo "ministro de Estado" em um campo próprio; por isso a lista usa esse critério, igual para todos os anos. Viagens sob sigilo não entram na lista.</p>
-              <h3>O que é a parte sob sigilo?</h3>
-              <p>Viagens em que o Portal esconde quem viajou e para onde, como as ligadas a investigações e à segurança. O valor entra no total.</p>
-              <button type="button" class="botao" data-baixar="viagens">Baixar planilha com os dados</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), viagens a serviço, um arquivo por ano desde 2015. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="viagens-atualizado">sem dado</span>.</p>
-        </section>
-
-        <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="contas-titulo">As contas do governo federal fecham?</h2>
-          <div class="resumo" data-campo="contas-resumo"></div>
-          <div class="filtros">
-            <fieldset class="campo largo">
-              <legend>O que mostrar</legend>
-              <div class="segmentos segmentos-quatro">
-                <label><input type="radio" name="contas-visao" value="primario" checked><span>Sem os juros</span></label>
-                <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
-                <label><input type="radio" name="contas-visao" value="nominal"><span>Com os juros</span></label>
-                <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
-              </div>
-            </fieldset>
-            <fieldset class="campo largo" id="contas-medida-caixa">
-              <legend>Medida</legend>
-              <div class="segmentos">
-                <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte da economia</span></label>
-                <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
-              </div>
-            </fieldset>
-          </div>
-          <p class="nota" data-campo="contas-explicacao"></p>
-          <div id="grafico-contas"></div>
-          <details class="tabela-dados">
-            <summary>Comparação entre governos</summary>
-            <div class="filtros">
-              <label class="opcao largo"><input type="checkbox" id="contas-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
-            </div>
-            <div class="tabela-rolagem"><table id="tabela-contas-governos"></table></div>
-            <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
-          </details>
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>O que são esses resultados?</h3>
-              <p>"Sem os juros" (o resultado primário) é a diferença entre o que o governo arrecadou e o que gastou com tudo, menos os juros da dívida. "Com os juros" (o resultado nominal) inclui os juros. Quando o resultado é negativo, faltou dinheiro (é o déficit) e o governo precisa pegar emprestado, e a dívida cresce; quando é positivo, sobrou (superávit). Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
-              <h3>Por que os juros aqui são maiores do que em "Para onde vai o dinheiro"?</h3>
-              <p>Aqui o Banco Central conta os juros que a dívida rendeu no ano, pagos ou somados à própria dívida, e inclui o Banco Central. Em "Para onde vai o dinheiro" entra só o que o governo pagou de fato no ano. As duas contas estão certas; medem coisas diferentes.</p>
-              <h3>Por que comparar com tudo o que o país produz (o PIB)?</h3>
-              <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
-              <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
-            </div>
-          </details>
-          <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
+          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
         </section>
 
         <section id="estados" class="bloco bloco-dados" aria-labelledby="estados-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="estados-titulo">Como estão as contas do seu estado?</h2>
+          <p class="tema">Seu estado</p>
+          <h2 id="estados-titulo">Como estão as contas do governo do seu estado?</h2>
           <div class="filtros">
             <label class="campo largo"><span>Estado</span>
               <select id="estados-uf"></select>
@@ -739,72 +615,267 @@
           <p class="fonte">Fonte: Tesouro Nacional, Siconfi. Dívida e folha de pagamento: Relatório de Gestão Fiscal de cada estado, fim de cada ano. Impostos: Relatório Resumido da Execução Orçamentária de cada estado, que sai a cada dois meses. O site confere os relatórios mais recentes todo dia e os mais antigos uma vez por mês, para pegar correções.</p>
         </section>
 
-        <section id="municipios" class="bloco bloco-dados" aria-labelledby="municipios-titulo">
-          <p class="tema">Contas do governo</p>
-          <h2 id="municipios-titulo">De onde vem o dinheiro da sua cidade?</h2>
-          <p class="intro">A prefeitura paga escola, posto de saúde, coleta de lixo e obras com dois tipos de dinheiro: impostos que ela mesma cobra, como IPTU e ISS, e repasses da União e do estado. Em muitas cidades, quase tudo vem de repasses.</p>
+        <section id="arrecadacao" class="bloco bloco-dados" aria-labelledby="arrecadacao-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="arrecadacao-titulo">Quanto o governo federal arrecada por ano?</h2>
+          <div class="resumo" data-campo="arrec-resumo"></div>
           <div class="filtros">
-            <div class="campo largo busca-cidade">
-              <label for="mun-busca">Cidade</label>
-              <input id="mun-busca" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mun-sugestoes" autocomplete="off" spellcheck="false" placeholder="Digite o nome da cidade">
-              <ul id="mun-sugestoes" class="sugestoes" role="listbox" aria-label="Cidades encontradas" hidden></ul>
-            </div>
-            <label class="campo"><span>Ano</span>
-              <select id="mun-ano"></select>
-            </label>
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="arrec-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
+                <label><input type="radio" name="arrec-medida" value="pib"><span>Parte da economia</span></label>
+              </div>
+            </fieldset>
           </div>
-          <p id="mun-vazio" class="resumo-vazio">Digite o nome de uma cidade para ver de onde vem o dinheiro da prefeitura. Estão aqui as 5.570 cidades do país.</p>
-          <div id="mun-detalhe" hidden>
-            <p class="mun-cabeca" data-campo="mun-cabeca" aria-live="polite"></p>
-            <p id="mun-selo" class="selo-dado"></p>
-            <p id="mun-outro-ano" hidden><button type="button" class="botao" id="mun-ver-ano"></button></p>
-            <div id="mun-governo" class="governo" hidden>
-              <ul class="governo-lista" id="mun-governo-lista"></ul>
+          <div id="grafico-arrecadacao"></div>
+          <p class="nota" data-campo="arrec-nota"></p>
+          <details class="tabela-dados">
+            <summary>Ver os números por ano</summary>
+            <div class="tabela-rolagem"><table id="tabela-arrecadacao-anual"></table></div>
+          </details>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="filtros">
+              <fieldset class="campo largo">
+                <legend>Agrupar por</legend>
+                <div class="segmentos">
+                  <label><input type="radio" name="arrec-agrupar" value="mandato" checked><span>Mandato</span></label>
+                  <label><input type="radio" name="arrec-agrupar" value="partido"><span>Partido</span></label>
+                </div>
+              </fieldset>
+              <label class="opcao largo"><input type="checkbox" id="arrec-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
             </div>
-            <div class="resumo" data-campo="mun-resumo"></div>
-            <div id="mun-contas">
-              <h3>De onde veio cada R$ 100</h3>
-              <ul class="barras" id="mun-barras"></ul>
-              <h3>Comparada com outras cidades</h3>
-              <dl class="numeros" id="mun-compara"></dl>
-              <p class="nota" data-campo="mun-compara-nota"></p>
-            </div>
-            <div id="mun-despesas" hidden>
-              <h3 data-campo="mun-despesas-titulo">Para onde foi o dinheiro</h3>
-              <p id="mun-despesas-selo" class="selo-dado aviso" hidden></p>
-              <ul class="barras" id="mun-despesas-barras"></ul>
-              <dl class="numeros empilhado" id="mun-despesas-compara"></dl>
-              <p class="nota" data-campo="mun-despesas-nota"></p>
-            </div>
-            <div id="mun-beneficios" hidden>
-              <h3>Dinheiro federal pago direto aos moradores</h3>
-              <p class="nota">Não passa pela prefeitura: o governo federal paga direto a cada família ou pessoa.</p>
-              <dl class="numeros empilhado" id="mun-beneficios-numeros"></dl>
-              <p class="nota" data-campo="mun-beneficios-nota"></p>
-            </div>
-          </div>
+            <div class="tabela-rolagem"><table id="tabela-arrecadacao-governos"></table></div>
+            <p class="nota">Cada ano conta para quem governou a maior parte dele. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior. A opção acima tira esse ano da conta de todos ao mesmo tempo. A arrecadação também sobe e desce com a economia, então a tabela mostra o que aconteceu no período, não o mérito de quem governou.</p>
+          </details>
           <details class="entenda">
             <summary>Entenda e baixe os dados</summary>
             <div class="entenda-corpo">
-              <h3>Que dinheiro entra nessa conta?</h3>
-              <p>A receita corrente do ano: o dinheiro que entra para o dia a dia da prefeitura. Ficam de fora empréstimos, venda de imóveis e repasses feitos só para obras (as receitas de capital). Os valores estão em dinheiro de hoje, corrigidos pela inflação (IPCA).</p>
-              <h3>O que é cada repasse?</h3>
-              <p><strong>FPM:</strong> o Fundo de Participação dos Municípios. A União junta parte do Imposto de Renda e do IPI e divide entre as cidades; cidades pequenas recebem mais por morador. <strong>ICMS:</strong> um quarto do imposto estadual sobre mercadorias e serviços fica com as cidades, dividido principalmente pela atividade econômica de cada uma. <strong>IPVA:</strong> metade do imposto dos carros registrados na cidade fica com ela. <strong>FUNDEB:</strong> o fundo da educação básica. Parte do FPM e do ICMS de cada cidade vai para o fundo, que devolve de acordo com o número de alunos da rede. <strong>Outros repasses:</strong> o dinheiro do SUS, da assistência social, da merenda, a parte do imposto sobre terras rurais (ITR) e outros.</p>
-              <h3>Por que comparar com cidades do mesmo tamanho?</h3>
-              <p>Uma cidade de 3 mil habitantes e uma capital vivem de jeitos muito diferentes: a pequena recebe mais FPM por morador e tem pouca atividade para cobrar ISS. A comparação usa a mediana: metade das cidades da faixa está acima e metade abaixo. Só entram as cidades com contas entregues e conferidas.</p>
-              <h3>O que quer dizer cada aviso?</h3>
-              <p>As contas vêm do relatório que cada prefeitura entrega ao Tesouro Nacional. O site confere se as partes somam o total. Quando somam, aparece "contas entregues e conferidas". Quando não somam, os números aparecem como a prefeitura entregou, com aviso. Quando a prefeitura não entregou o relatório do ano, o site mostra "sem dado" e não estima nada.</p>
-              <h3>Quem foi eleito?</h3>
-              <p>Prefeitos e governadores eleitos, pelos dados abertos do TSE. O TSE registra quem foi eleito, não quem governou: se o titular morreu, renunciou ou foi cassado e o vice assumiu sem nova eleição, a troca não aparece. Por isso o vice aparece junto. Quando houve eleição suplementar, ela aparece com a data. O partido é o da data da eleição; alguns partidos já mudaram de nome ou se juntaram a outros depois.</p>
-              <h3>Para onde vai o dinheiro?</h3>
-              <p>É a despesa "liquidada" do ano: o serviço foi prestado ou a compra foi entregue e conferida. Fica de fora o dinheiro que a prefeitura passa para ela mesma, como a parte que ela paga ao próprio fundo de aposentadoria dos servidores, para não contar duas vezes. As áreas seguem a classificação oficial usada em todo o país. <strong>Administração</strong> é o funcionamento da prefeitura (pessoal administrativo, prédios, sistemas, cobrança de impostos). <strong>Aposentadorias dos servidores</strong> são as de quem trabalhou na prefeitura. <strong>Dívidas e outros encargos</strong> incluem juros e parcelas de empréstimos e outros compromissos que não são de uma área. Os mínimos que a Constituição exige em educação (25%) e saúde (15%) são calculados de outro jeito, sobre os impostos, e não aparecem aqui.</p>
-              <h3>Bolsa Família e BPC</h3>
-              <p><strong>Bolsa Família:</strong> pago todo mês a famílias de baixa renda inscritas no Cadastro Único; o número é de famílias. <strong>BPC (Benefício de Prestação Continuada):</strong> um salário mínimo por mês para idosos a partir de 65 anos e pessoas com deficiência de famílias de baixa renda; o número é de pessoas. Os dois são pagos pelo governo federal direto a quem recebe, então não entram nas contas da prefeitura. O valor de um ano antes está em dinheiro de hoje, corrigido pela inflação (IPCA).</p>
-              <button type="button" class="botao" id="mun-baixar" data-baixar="municipios" hidden>Baixar planilha das cidades do estado</button>
-              <button type="button" class="botao" id="mun-baixar-beneficios" data-baixar="beneficios" hidden>Baixar planilha do Bolsa Família e BPC do estado</button>
+              <h3>O que é "parte da economia"?</h3>
+              <p>É a comparação com o PIB, a soma de tudo o que o país produz em um ano. Dizer que a arrecadação foi 16% significa que, de cada R$ 100 produzidos no país, R$ 16 foram pagos nesses impostos e contribuições.</p>
+              <h3>Por que esta conta deixa o INSS de fora?</h3>
+              <p>Para comparar anos de forma justa, usamos só o que aparece na base da Receita Federal desde 2000. A contribuição ao INSS só passou a ser registrada nessa base em 2005, e as receitas de outros órgãos em 2010. Se entrassem na conta, os anos seguintes pareceriam maiores só porque a forma de registrar mudou.</p>
+              <button type="button" class="botao" data-baixar="arrecadacao">Baixar planilha com os dados</button>
             </div>
           </details>
-          <p class="fonte">Fonte: Tesouro Nacional (SICONFI), Relatório Resumido da Execução Orçamentária que cada prefeitura entrega: Anexo 3 (receitas) e Anexo 2 (despesas), ano completo (6º bimestre). Atualizado uma vez por mês. Atualização: <span data-campo="mun-atualizado">sem dado</span>. Bolsa Família e BPC: Portal da Transparência (CGU), pagamentos por cidade e mês.</p>
+          <p class="fonte">Fontes: Receita Federal (arrecadação), IBGE via Banco Central (IPCA, SGS 433) e Banco Central (PIB mensal, SGS 4380). Todos saem uma vez por mês. O ano em curso só fecha quando a Receita publica dezembro.</p>
+        </section>
+
+        <section id="composicao" class="bloco bloco-dados" aria-labelledby="composicao-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="composicao-titulo">Quais impostos pesam mais na arrecadação federal?</h2>
+          <div class="resumo" data-campo="composicao-resumo"></div>
+          <ul class="barras" id="lista-composicao"></ul>
+          <p class="nota">Cada barra mostra a parte do total. A lista tem só os tributos federais e as receitas que outros órgãos federais cobram, como royalties de petróleo. O FGTS fica de fora: vai para a conta do trabalhador e não conta como imposto.</p>
+          <p class="fonte">Fonte: Receita Federal. Período: <span data-campo="composicao-periodo">sem dado</span>.</p>
+          <div id="composicao-estados-caixa" hidden>
+            <h3>E os impostos de estados e prefeituras?</h3>
+            <div class="resumo" data-campo="composicao-estados"></div>
+            <p class="nota"><a href="#estados">Veja quanto o seu estado e a sua capital arrecadam</a>.</p>
+            <p class="fonte">Fontes: Tesouro Nacional. Estados: Relatório Resumido da Execução Orçamentária de cada estado (anexo 3, no Siconfi), valores antes dos repasses às prefeituras. Prefeituras e total do país: Estimativa da Carga Tributária Bruta do Governo Geral, publicada uma vez por ano.</p>
+          </div>
+        </section>
+
+        <section id="gastos" class="bloco bloco-dados" aria-labelledby="gastos-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="gastos-titulo">Onde o governo federal gasta?</h2>
+          <div class="resumo" data-campo="gastos-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="gastos-ano"></select>
+            </label>
+          </div>
+          <ul class="barras" id="lista-gastos"></ul>
+          <h3>Comparar áreas ao longo dos anos</h3>
+          <div class="filtros">
+            <label class="campo"><span>Área</span>
+              <select id="gastos-area-a"></select>
+            </label>
+            <label class="campo"><span>Comparar com</span>
+              <select id="gastos-area-b"></select>
+            </label>
+            <fieldset class="campo largo">
+              <legend>Mostrar</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="gastos-medida" value="real" checked><span>Em dinheiro de hoje</span></label>
+                <label><input type="radio" name="gastos-medida" value="parte"><span>De cada R$ 100</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="resumo" data-campo="gastos-comparacao"></div>
+          <div id="grafico-gastos"></div>
+          <p class="como-ler">Cada ponto é o gasto de um ano inteiro. Em "dinheiro de hoje", os valores antigos estão corrigidos pela inflação; em "de cada R$ 100", mostra a fatia de cada área no gasto do governo federal. A comparação mostra onde o dinheiro foi gasto, não se foi bem ou mal gasto.</p>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é a "rolagem da dívida"?</h3>
+              <p>Quando uma parte da dívida pública vence, o governo pode pagar com dinheiro do orçamento ou emitir dívida nova para pagar a velha. Essa segunda forma é a rolagem. Ela aparece no orçamento como gasto, mas não é dinheiro que vai para serviços ou para as pessoas: troca uma dívida por outra. Por isso fica fora da conta "de cada R$ 100".</p>
+              <h3>Que gasto é esse?</h3>
+              <p>Todo gasto público passa por três etapas: empenho (o governo reserva o dinheiro), liquidação (o serviço foi entregue e o valor passa a ser devido) e pagamento. O site usa a liquidação, que mostra o que foi de fato executado no ano. Os números são da União; estados e municípios gastam com saúde e educação também, com dinheiro próprio e com os repasses federais.</p>
+              <button type="button" class="botao" data-baixar="gastos">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Tesouro Nacional, Declaração de Contas Anuais da União (SICONFI), despesa liquidada por função. É publicada uma vez por ano, alguns meses depois de o ano terminar. Valores em dinheiro de hoje corrigidos pelo IPCA (IBGE).</p>
+        </section>
+
+        <section id="ministerios" class="bloco bloco-dados" aria-labelledby="ministerios-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="ministerios-titulo">Quanto cada ministério gasta?</h2>
+          <div class="resumo" data-campo="ministerios-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="ministerios-ano"></select>
+            </label>
+          </div>
+          <ul class="barras" id="ministerios-lista"></ul>
+          <h3>Um ministério ao longo dos anos</h3>
+          <div class="filtros">
+            <label class="campo largo"><span>Ministério</span>
+              <select id="ministerios-orgao"></select>
+            </label>
+          </div>
+          <p class="nota" data-campo="ministerios-explicacao"></p>
+          <div id="grafico-ministerios"></div>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>Que gasto é esse?</h3>
+              <p>É o valor liquidado: o serviço ou a compra foi entregue e o pagamento passou a ser devido. É a mesma etapa usada em "Onde o governo federal gasta", que mostra o gasto por área; aqui ele aparece por ministério, como o governo se organiza.</p>
+              <h3>Por que a dívida fica de fora?</h3>
+              <p>Juros e pagamento da dívida pública são feitos pelo Ministério da Fazenda e somam centenas de bilhões por mês, a maior parte trocando dívida velha por nova. Se entrassem, a Fazenda pareceria o ministério que mais gasta com serviços. Por isso aparecem à parte.</p>
+              <h3>Por que alguns ministérios têm valores tão grandes?</h3>
+              <p>A Previdência paga as aposentadorias e pensões do INSS. Saúde e Educação repassam boa parte do dinheiro a estados e prefeituras, que atendem a população. A Fazenda faz os repasses de impostos que a Constituição manda dividir com estados e municípios. A lista mostra quanto de cada ministério foi repassado.</p>
+              <h3>Ministérios mudam de nome</h3>
+              <p>Ministérios são criados, juntados e separados de um governo para outro. O gráfico segue o código do órgão no sistema do governo, e a dica de cada ano mostra o nome que ele tinha naquele ano.</p>
+              <button type="button" class="botao" data-baixar="ministerios">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), execução da despesa, arquivos mensais desde 2014. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="ministerios-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="cartao" class="bloco bloco-dados" aria-labelledby="cartao-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="cartao-titulo">Quanto o governo federal gasta no cartão corporativo?</h2>
+          <p class="intro">O cartão de pagamento do governo federal é usado para despesas pequenas ou que não podem esperar o processo normal de compra. Cada lançamento fica registrado no Portal da Transparência.</p>
+          <div class="resumo" data-campo="cartao-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="cartao-ano"></select>
+            </label>
+          </div>
+          <h3>Quem mais usou</h3>
+          <ul class="barras" id="cartao-lista"></ul>
+          <h3>Ano a ano</h3>
+          <div id="grafico-cartao"></div>
+          <p class="como-ler">A linha cheia é o total gasto no ano; a tracejada, a parte sob sigilo. Em dinheiro de hoje.</p>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="filtros">
+              <label class="opcao largo"><input type="checkbox" id="cartao-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
+            </div>
+            <div class="tabela-rolagem"><table id="tabela-cartao-governos"></table></div>
+            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que é o gasto "sob sigilo"?</h3>
+              <p>São lançamentos que o Portal da Transparência mostra só com o valor, marcados como "informações protegidas por sigilo", sem dizer o que foi comprado nem onde. O site soma esses valores no total e mostra quanto eles representam em cada órgão.</p>
+              <h3>Por que há saques em dinheiro?</h3>
+              <p>O cartão permite saque em dinheiro, com regras próprias. Os saques aparecem separados porque o registro mostra só o saque, não com o que o dinheiro foi gasto.</p>
+              <h3>Gasto alto é sinal de problema?</h3>
+              <p>Não necessariamente. O valor depende do tamanho de cada órgão e do tipo de trabalho que ele faz. Os números mostram quanto foi gasto, não se o gasto foi correto.</p>
+              <button type="button" class="botao" data-baixar="cartao">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), cartão de pagamento do governo federal, arquivos mensais desde 2013. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="cartao-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="viagens" class="bloco bloco-dados" aria-labelledby="viagens-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="viagens-titulo">Quanto o governo federal gasta com viagens a serviço?</h2>
+          <div class="resumo" data-campo="viagens-resumo"></div>
+          <div class="filtros">
+            <label class="campo"><span>Ano</span>
+              <select id="viagens-ano"></select>
+            </label>
+          </div>
+          <h3>Por ministério</h3>
+          <ul class="barras" id="viagens-lista"></ul>
+          <h3>Viagens de ministros</h3>
+          <div class="resumo resumo-menor" data-campo="viagens-ministros-nota"></div>
+          <ol class="ranking" id="viagens-ministros"></ol>
+          <h3>Ano a ano</h3>
+          <div id="grafico-viagens"></div>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="filtros">
+              <label class="opcao largo"><input type="checkbox" id="viagens-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
+            </div>
+            <div class="tabela-rolagem"><table id="tabela-viagens-governos"></table></div>
+            <p class="nota">Média por ano, em dinheiro de hoje. Cada ano conta para quem governou a maior parte dele; o ano em curso fica de fora. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que entra na conta?</h3>
+              <p>Diárias (o dinheiro para hospedagem e alimentação durante a viagem), passagens e outros gastos da viagem, menos o que o servidor devolveu. Entram todas as viagens de servidores e convidados do governo federal registradas no Portal da Transparência no ano.</p>
+              <h3>Quem são os "ministros" da lista?</h3>
+              <p>As pessoas que viajaram ocupando cargo de natureza especial: os ministros de Estado e outros cargos do mesmo nível. O Portal não traz o cargo "ministro de Estado" em um campo próprio; por isso a lista usa esse critério, igual para todos os anos. Viagens sob sigilo não entram na lista.</p>
+              <h3>O que é a parte sob sigilo?</h3>
+              <p>Viagens em que o Portal esconde quem viajou e para onde, como as ligadas a investigações e à segurança. O valor entra no total.</p>
+              <button type="button" class="botao" data-baixar="viagens">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Portal da Transparência (Controladoria-Geral da União), viagens a serviço, um arquivo por ano desde 2015. Valores em dinheiro de hoje corrigidos pelo IPCA. Atualizado uma vez por semana. Atualização: <span data-campo="viagens-atualizado">sem dado</span>.</p>
+        </section>
+
+        <section id="contas" class="bloco bloco-dados" aria-labelledby="contas-titulo">
+          <p class="tema">Governo federal</p>
+          <h2 id="contas-titulo">As contas do governo federal fecham?</h2>
+          <div class="resumo" data-campo="contas-resumo"></div>
+          <div class="filtros">
+            <fieldset class="campo largo">
+              <legend>O que mostrar</legend>
+              <div class="segmentos segmentos-quatro">
+                <label><input type="radio" name="contas-visao" value="primario" checked><span>Sem os juros</span></label>
+                <label><input type="radio" name="contas-visao" value="juros"><span>Juros</span></label>
+                <label><input type="radio" name="contas-visao" value="nominal"><span>Com os juros</span></label>
+                <label><input type="radio" name="contas-visao" value="divida"><span>Dívida</span></label>
+              </div>
+            </fieldset>
+            <fieldset class="campo largo" id="contas-medida-caixa">
+              <legend>Medida</legend>
+              <div class="segmentos">
+                <label><input type="radio" name="contas-medida" value="pib" checked><span>Parte da economia</span></label>
+                <label><input type="radio" name="contas-medida" value="real"><span>Em dinheiro de hoje</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <p class="nota" data-campo="contas-explicacao"></p>
+          <div id="grafico-contas"></div>
+          <details class="tabela-dados">
+            <summary>Comparação entre governos</summary>
+            <div class="filtros">
+              <label class="opcao largo"><input type="checkbox" id="contas-excluir-primeiro"> Não contar o 1º ano de cada mandato</label>
+            </div>
+            <div class="tabela-rolagem"><table id="tabela-contas-governos"></table></div>
+            <p class="nota">Cada ano conta para quem governou a maior parte dele. O resultado depende também da economia, de decisões do Congresso e de despesas extraordinárias, como as da pandemia em 2020. A tabela mostra o que aconteceu, não o mérito de quem governou. No 1º ano de cada mandato, o governo usa o orçamento aprovado no ano anterior; a opção acima tira esse ano da conta de todos ao mesmo tempo.</p>
+          </details>
+          <details class="entenda">
+            <summary>Entenda e baixe os dados</summary>
+            <div class="entenda-corpo">
+              <h3>O que são esses resultados?</h3>
+              <p>"Sem os juros" (o resultado primário) é a diferença entre o que o governo arrecadou e o que gastou com tudo, menos os juros da dívida. "Com os juros" (o resultado nominal) inclui os juros. Quando o resultado é negativo, faltou dinheiro (é o déficit) e o governo precisa pegar emprestado, e a dívida cresce; quando é positivo, sobrou (superávit). Os números são do governo federal, incluindo o INSS, e do Banco Central, como o Banco Central publica. A dívida é do governo geral: União, estados e municípios.</p>
+              <h3>Por que os juros aqui são maiores do que em "Onde o governo federal gasta"?</h3>
+              <p>Aqui o Banco Central conta os juros que a dívida rendeu no ano, pagos ou somados à própria dívida, e inclui o Banco Central. Em "Onde o governo federal gasta" entra só o que o governo pagou de fato no ano. As duas contas estão certas; medem coisas diferentes.</p>
+              <h3>Por que comparar com tudo o que o país produz (o PIB)?</h3>
+              <p>O PIB é tudo o que o país produz em um ano. Uma dívida de R$ 1 trilhão pesa muito mais num país pequeno do que num grande. Comparar com o PIB permite ver se a dívida e o déficit estão crescendo mais rápido que a economia.</p>
+              <button type="button" class="botao" data-baixar="contas">Baixar planilha com os dados</button>
+            </div>
+          </details>
+          <p class="fonte">Fonte: Banco Central, estatísticas fiscais (NFSP do governo federal e Banco Central, séries SGS 4639, 4606, 4573, 5783, 5750 e 5717; dívida bruta do governo geral, SGS 13762). Publicadas uma vez por mês. Valores em dinheiro de hoje corrigidos pelo IPCA.</p>
         </section>
 
         <section id="cota" class="bloco bloco-dados" aria-labelledby="cota-titulo">
@@ -884,7 +955,7 @@
                   <p class="cargo-papel">Administra</p>
                   <p class="cargo-nome">Presidente da República</p>
                   <p>Comanda o governo federal: propõe o orçamento da União, sanciona ou veta as leis e escolhe os ministros.</p>
-                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> INSS, Bolsa Família, universidades federais e Polícia Federal são do governo federal. <a href="#gastos">Para onde vai o dinheiro</a></p>
+                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> INSS, Bolsa Família, universidades federais e Polícia Federal são do governo federal. <a href="#gastos">Onde o governo federal gasta</a></p>
                   <dl class="cargo-fatos">
                     <div><dt>Mandato</dt><dd>4 anos; pode ser reeleito uma vez seguida</dd></div>
                     <div><dt>Próxima eleição</dt><dd>outubro de 2030</dd></div>
@@ -910,7 +981,7 @@
                   <p class="cargo-papel">Administra</p>
                   <p class="cargo-nome">Governador</p>
                   <p>Comanda o governo do estado: polícias Militar e Civil, presídios, ensino médio, hospitais e estradas do estado. Propõe o orçamento do estado.</p>
-                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> o IPVA do carro e o ICMS que vem na conta de luz são impostos do estado. <a href="#estados">Contas do seu estado</a></p>
+                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> o IPVA do carro e o ICMS que vem na conta de luz são impostos do estado. <a href="#estados">Contas do governo do estado</a></p>
                   <dl class="cargo-fatos">
                     <div><dt>Mandato</dt><dd>4 anos; pode ser reeleito uma vez seguida</dd></div>
                     <div><dt>Próxima eleição</dt><dd>outubro de 2030</dd></div>
@@ -936,7 +1007,7 @@
                   <p class="cargo-papel">Administra</p>
                   <p class="cargo-nome">Prefeito</p>
                   <p>Comanda a prefeitura: postos de saúde, creches e escolas de ensino fundamental, coleta de lixo, ruas, iluminação e ônibus da cidade. Propõe o orçamento da cidade.</p>
-                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> o buraco na rua e a fila do posto de saúde são assunto da prefeitura. <a href="#municipios">De onde vem o dinheiro da sua cidade</a></p>
+                  <p class="cargo-exemplo"><strong>No dia a dia:</strong> o buraco na rua e a fila do posto de saúde são assunto da prefeitura. <a href="#municipios">Contas da prefeitura</a></p>
                   <dl class="cargo-fatos">
                     <div><dt>Mandato</dt><dd>4 anos; pode ser reeleito uma vez seguida</dd></div>
                     <div><dt>Próxima eleição</dt><dd>outubro de 2028</dd></div>
@@ -983,9 +1054,9 @@
                 <tr><th scope="row">Ônibus da cidade</th><td>Prefeitura</td><td>Ônibus entre cidades e metrô costumam ser do estado.</td></tr>
                 <tr><th scope="row">INSS, aposentadoria, Bolsa Família</th><td>União</td><td></td></tr>
                 <tr><th scope="row">Salário mínimo</th><td>União</td><td>O valor sai por decreto do presidente, seguindo a regra de reajuste aprovada em lei.</td></tr>
-                <tr><th scope="row">Imposto de Renda, IPI, IOF, ITR e a contribuição ao INSS</th><td>União</td><td><a href="#composicao">De onde vem o dinheiro</a></td></tr>
-                <tr><th scope="row">ICMS, IPVA, ITCMD (herança)</th><td>Estado</td><td><a href="#estados">Contas do seu estado</a></td></tr>
-                <tr><th scope="row">IPTU, ISS, ITBI (compra de imóvel)</th><td>Prefeitura</td><td><a href="#municipios">Contas da sua cidade</a></td></tr>
+                <tr><th scope="row">Imposto de Renda, IPI, IOF, ITR e a contribuição ao INSS</th><td>União</td><td><a href="#composicao">Quais impostos pesam mais</a></td></tr>
+                <tr><th scope="row">ICMS, IPVA, ITCMD (herança)</th><td>Estado</td><td><a href="#estados">Contas do governo do estado</a></td></tr>
+                <tr><th scope="row">IPTU, ISS, ITBI (compra de imóvel)</th><td>Prefeitura</td><td><a href="#municipios">Contas da prefeitura</a></td></tr>
               </tbody>
             </table>
           </div>
@@ -999,70 +1070,6 @@
             <li><strong>2032:</strong> prefeitos e vereadores de novo.</li>
           </ul>
           <p class="fonte">Fontes: Constituição Federal (artigos 14, 18, 27 a 30, 44 a 46, 52, 77, 82, 84, 101, 144, 153 a 156, 198 e 211), Emenda Constitucional 111/2021 (datas de posse), Emenda Constitucional 132/2023 (reforma tributária) e Lei 15.270/2025 (isenção do Imposto de Renda). Conferido em 16/11/2026.</p>
-        </section>
-
-        <section id="dinheiro" class="bloco bloco-dados" aria-labelledby="dinheiro-titulo">
-          <p class="tema">Entenda</p>
-          <h2 id="dinheiro-titulo">Dinheiro no dia a dia</h2>
-          <p class="intro">Três contas que mexem com o bolso de todo mundo, feitas com as tabelas e as taxas oficiais. São médias e regras gerais: o seu caso pode ter detalhes diferentes.</p>
-
-          <h3>Quanto do seu salário fica com o governo?</h3>
-          <p class="nota">Para quem tem carteira assinada. Digite o salário bruto, o valor antes dos descontos.</p>
-          <div class="filtros">
-            <label class="campo"><span>Salário bruto (R$)</span>
-              <input id="din-salario" type="number" inputmode="decimal" min="0" step="0.01">
-            </label>
-            <label class="campo"><span>Dependentes</span>
-              <select id="din-dependentes">
-                <option value="0" selected>0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-            </label>
-          </div>
-          <div class="resumo" data-campo="din-salario-resumo"></div>
-          <dl class="conta" id="din-conta">
-            <div><dt>Salário bruto</dt><dd data-campo="din-bruto">sem dado</dd><dd></dd></div>
-            <div><dt>INSS</dt><dd data-campo="din-inss">sem dado</dd><dd data-campo="din-inss-parte"></dd></div>
-            <div><dt>Imposto de Renda</dt><dd data-campo="din-ir">sem dado</dd><dd data-campo="din-ir-parte"></dd></div>
-            <div class="conta-fim"><dt>Salário líquido</dt><dd data-campo="din-liquido">sem dado</dd><dd data-campo="din-liquido-parte"></dd></div>
-          </dl>
-          <p class="nota" data-campo="din-salario-nota"></p>
-
-          <h3>O que a inflação faz com o dinheiro parado?</h3>
-          <div class="filtros">
-            <label class="campo"><span>Valor (R$)</span>
-              <input id="din-valor" type="number" inputmode="decimal" min="0" step="0.01" value="1000">
-            </label>
-            <label class="campo"><span>Guardado desde</span>
-              <select id="din-desde"></select>
-            </label>
-          </div>
-          <div class="resumo" data-campo="din-inflacao-resumo"></div>
-          <ul class="barras" id="din-inflacao-barras"></ul>
-
-          <h3>Quanto custa pegar dinheiro emprestado?</h3>
-          <div class="resumo" data-campo="din-juros-resumo"></div>
-          <ul class="barras" id="din-juros-barras"></ul>
-          <p class="nota" data-campo="din-juros-nota"></p>
-
-          <details class="entenda">
-            <summary>Entenda e baixe os dados</summary>
-            <div class="entenda-corpo">
-              <h3>Como o salário líquido é calculado?</h3>
-              <p>O INSS é progressivo: cada alíquota (7,5%, 9%, 12% e 14%) vale só para a parte do salário dentro da sua faixa, até o teto. O Imposto de Renda usa a tabela mensal sobre o salário menos a dedução maior entre duas: o INSS mais R$ 189,59 por dependente, ou o desconto simplificado de R$ 607,20. Desde janeiro de 2026, há uma redução: quem ganha até R$ 5.000 não paga, e de R$ 5.000 a R$ 7.350 o imposto diminui aos poucos. Não entram pensão alimentícia, previdência privada, plano de saúde nem outros descontos da empresa.</p>
-              <h3>O que a empresa paga além do seu salário?</h3>
-              <p>A empresa deposita 8% do salário no seu FGTS, que é seu e não sai do seu salário. Empresas fora do Simples Nacional também pagam, em geral, 20% de INSS sobre a folha. Esses valores não aparecem no seu contracheque.</p>
-              <h3>Inflação e poupança</h3>
-              <p>A correção usa o IPCA, a inflação oficial, do mês escolhido até o último mês publicado. A poupança usa o rendimento oficial de um depósito feito no dia 1º de cada mês, pela regra dos depósitos a partir de 4 de maio de 2012; por isso a comparação com a poupança começa em junho de 2012.</p>
-              <h3>Juros</h3>
-              <p>São as taxas médias cobradas pelos bancos de pessoas físicas no último mês publicado pelo Banco Central. Cada banco cobra uma taxa, e a sua pode ser maior ou menor. No cartão de crédito, a lei limita os juros e encargos do rotativo e do parcelamento da fatura ao valor da dívida original (Lei 14.690/2023): uma dívida de R$ 500 não passa de R$ 1.000. O cheque especial tem juros limitados a 8% ao mês (Resolução CMN 4.765/2019).</p>
-              <button type="button" class="botao" data-baixar="dinheiro">Baixar planilha com as taxas</button>
-            </div>
-          </details>
-          <p class="fonte">Fontes: INSS e Receita Federal (tabelas de 2026, conferidas em <span data-campo="din-conferido">sem dado</span>), IBGE (IPCA) e Banco Central (taxas médias de juros, séries 25477, 25463 e 25470, e rendimento da poupança, série 195). As taxas mudam uma vez por mês.</p>
         </section>
 
         <section id="avisos" class="bloco bloco-dados" aria-labelledby="avisos-titulo">

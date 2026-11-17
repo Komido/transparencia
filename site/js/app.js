@@ -334,7 +334,7 @@ function montarComposicaoEstados(ctx) {
 }
 
 // ---------------------------------------------------------------------------
-// Para onde vai o dinheiro do governo federal
+// Onde o governo federal gasta
 // ---------------------------------------------------------------------------
 
 // Base de comparação: despesa total sem a rolagem da dívida (dívida velha paga
@@ -1772,13 +1772,13 @@ function montarMunicipios(ctx) {
     caixa.hidden = false;
     const total = r.d ? r.d.reduce((a, x) => a + (x ?? 0), 0) : 0;
     if (!r.d || total <= 0) {
-      definir('mun-despesas-titulo', `Para onde foi o dinheiro em ${ano}`);
+      definir('mun-despesas-titulo', `Gastos da prefeitura em ${ano}`);
       return;
     }
     const fator = fatorParaHoje(ctx, ano) ?? 1;
     const hoje = (x) => x * fator;
     const pop = r.p || m.p;
-    definir('mun-despesas-titulo', `Para onde foi o dinheiro: de cada R$ 100 gastos em ${ano}`);
+    definir('mun-despesas-titulo', `Gastos da prefeitura: de cada R$ 100 em ${ano}`);
     const itens = campos.map((k, i) => ({ k, valor: r.d[i] ?? 0 }))
       .filter((x) => x.valor > 0 && AREAS_PREFEITURA[x.k])
       .sort((a, b) => (a.k === 'outras') - (b.k === 'outras') || b.valor - a.valor);
@@ -3896,7 +3896,7 @@ function montarAvisos(ctx) {
         titulo: `A Receita Federal publicou ${parte} de ${f.mesLongo(a.mes)} com os mesmos números de ${f.mesLongo(a.igual_a)}`,
         texto: `Os números são iguais em todos os estados, o que indica erro no arquivo da Receita. O site mostra o dado como foi publicado e corrige quando a Receita corrigir. ${afetaComparavel
           ? 'Isso afeta a comparação da arrecadação entre os anos.'
-          : 'A comparação entre os anos não usa essa parte, então não muda. O contador e a lista "De onde vem o dinheiro" usam, e ficam menores do que deveriam nesse mês.'}`,
+          : 'A comparação entre os anos não usa essa parte, então não muda. O contador e a lista "Quais impostos pesam mais" usam, e ficam menores do que deveriam nesse mês.'}`,
         secoes: afetaComparavel ? ['#arrecadacao', '#composicao'] : ['#contador', '#composicao'],
       });
     }

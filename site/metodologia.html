@@ -235,7 +235,7 @@
         </ul>
 
         <h2 id="prefeituras">Contas das prefeituras</h2>
-        <p>A seção "De onde vem o dinheiro da sua cidade?" cobre as 5.570 cidades do país, com a mesma regra para todas: de onde vem a receita da prefeitura e para onde vai a despesa.</p>
+        <p>A seção "As contas da prefeitura da sua cidade" cobre as 5.570 cidades do país, com a mesma regra para todas: de onde vem a receita da prefeitura e para onde vai a despesa.</p>
         <ul>
           <li><strong>Fonte:</strong> Relatório Resumido da Execução Orçamentária que cada prefeitura entrega ao Tesouro Nacional, Anexo 3, 6º bimestre, coluna dos 12 meses do ano, na API do SICONFI. A API só devolve uma prefeitura por pedido (sem o código da cidade a resposta vem vazia, testado em 16/11/2026) e o Tesouro não publica arquivo com todas; por isso uma tarefa pede uma cidade por vez, com pausa entre os pedidos, uma vez por mês. Ficam os dois últimos anos cujo prazo de entrega (30 de janeiro do ano seguinte) já venceu.</li>
           <li><strong>Relatório simplificado:</strong> cidades com menos de 50 mil habitantes podem usar o regime simplificado da Lei de Responsabilidade Fiscal (art. 63), e o Tesouro guarda o relatório delas com outro nome ("RREO Simplificado"). O Anexo 3 é o mesmo, com as mesmas linhas. O site pede os dois tipos e só diz que a prefeitura não entregou quando os dois vêm vazios. Conferido em 16/11/2026 em Monte Carmelo (MG), que aparece no extrato de entregas do Tesouro com o relatório simplificado de 2025.</li>
@@ -270,7 +270,7 @@
           <li><strong>Médias e inflação:</strong> a média por família é o valor do mês dividido pelo número de famílias. Valores de meses anteriores são corrigidos pelo IPCA até o último mês publicado. Para o BPC não há média: a lei fixa o benefício em um salário mínimo por pessoa, e o valor do mês dividido pelo número de pessoas dá um pouco mais que isso (R$ 1.804 em São Paulo, em setembro de 2026, com o mínimo a R$ 1.621); o Portal não separa o que é pagamento atrasado, e o site não tenta explicar a diferença.</li>
         </ul>
 
-        <h2 id="dinheiro">Dinheiro no dia a dia</h2>
+        <h2 id="dinheiro">Salário líquido, juros e inflação</h2>
         <ul>
           <li><strong>Salário líquido:</strong> tabelas oficiais do ano, gravadas em <a href="dados/folha.json">dados/folha.json</a> e conferidas nas páginas do INSS e da Receita Federal (data no arquivo). INSS do empregado progressivo por faixa, até o teto. Imposto de Renda pela tabela mensal sobre o salário menos a dedução maior entre o INSS mais R$ 189,59 por dependente e o desconto simplificado de R$ 607,20; depois, a redução da Lei 15.270/2025, calculada sobre o salário bruto: até R$ 5.000 o imposto zera; de R$ 5.000,01 a R$ 7.350, a redução é R$ 978,62 − 0,133145 × salário. Conferido com o exemplo da Receita: salário de R$ 6.000, INSS de R$ 641,51, redução de R$ 179,75 e imposto de R$ 385,10. Se o ano mudar e o arquivo não for atualizado, a página avisa.</li>
           <li><strong>Inflação:</strong> IPCA acumulado do mês escolhido até o último mês publicado, inclusive.</li>
