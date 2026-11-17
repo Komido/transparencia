@@ -53,7 +53,7 @@ import zipfile
 
 CANDIDATOS = "https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_{ano}.zip"
 CODIGOS = "https://cdn.tse.jus.br/estatistica/sead/odsele/municipio_tse_ibge/municipio_tse_ibge.zip"
-AGENTE = "Mozilla/5.0 (X11; Linux x86_64) ArrecadometroBrasil/1.0"
+AGENTE = "ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
 DESTINO = "site/dados/governantes"
 
 # Eleição -> (cargo, faixa plausível de eleitos, início e fim do mandato).
