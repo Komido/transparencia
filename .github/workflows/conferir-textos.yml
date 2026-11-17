@@ -1,0 +1,23 @@
+name: Conferir regras escritas no site (MDS e INSS)
+
+# Uma vez por semana, confere se os valores do Bolsa Família e as regras do
+# BPC explicados na página Entenda continuam nas páginas oficiais
+# (scripts/conferir_textos.py). Se algum sumiu, a tarefa falha de propósito
+# e o GitHub avisa por e-mail: é hora de reler a fonte e atualizar o texto.
+# Não grava nada. Quem dispara é o agendador do banco (pg_cron,
+# etl.disparar_github); ver supabase/migrations/20261117050000_conferir_textos.sql.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conferir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir as páginas do MDS e do INSS
+        run: python3 scripts/conferir_textos.py

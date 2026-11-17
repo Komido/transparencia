@@ -1,8 +1,14 @@
-// Página Entenda (/entenda): explicações em linguagem simples. O único dado
-// carregado é a tabela das siglas dos partidos (dados/partidos.json, do TSE).
+// Página Entenda (/entenda): explicações em linguagem simples. Dados
+// carregados: as siglas dos partidos (dados/partidos.json, do TSE) e o
+// salário mínimo em vigor (painel, série oficial do Banco Central), que
+// atualiza os valores do BPC sem depender de edição do texto. Sem os dados,
+// fica o valor escrito na página, conferido na data indicada.
 
+import * as f from './formato.js';
 import { preencherTabela } from './graficos.js';
-import { $ } from './comum.js';
+import { carregarPainel } from './dados.js';
+import { $, definir } from './comum.js';
+import * as c from './calculos.js';
 
 async function montarPartidos() {
   const caixa = $('#partidos-caixa');
@@ -24,4 +30,23 @@ async function montarPartidos() {
   abrir();
 }
 
+// Salário mínimo do mês mais recente da série e um quarto dele (limite de
+// renda por pessoa do BPC, Lei 8.742/1993, art. 20, § 3º).
+async function montarSalarioMinimo() {
+  try {
+    const painel = await carregarPainel();
+    const meses = c.listaMeses(painel.mensal.inicio, painel.mensal.fim);
+    const serie = painel.mensal.series.salario_minimo ?? [];
+    const i = c.ultimoIndice(serie);
+    const sm = i >= 0 ? serie[i] : null;
+    if (!(sm > 1000 && sm < 100000)) return;
+    definir('sm-valor', f.moeda(sm, 0));
+    definir('sm-quarto', f.moeda(sm / 4, 2));
+    definir('sm-ano', String(c.anoDe(meses[i])));
+  } catch (erro) {
+    console.error(erro);
+  }
+}
+
 montarPartidos();
+montarSalarioMinimo();
