@@ -51,9 +51,20 @@ tudo em 2023 (R$ 14,46 bi) e 2024 (R$ 19,27 bi), e só R$ 0,15 bi em 2025.
 Conferido nas outras tabelas do mesmo arquivo: o arquivo principal traz
 esses códigos de emenda, mas com lugar de aplicação "Múltiplo", "Nacional"
 ou só o estado, e município "Sem informação"; a tabela de convênios cobre
-3% do valor. A maior parte é de saúde (atenção básica e hospitais). Esse
-dinheiro não entra na conta por cidade, que nesses anos é um piso; o total
-de cada ano vai no arquivo ("banco") para o site avisar.
+3% do valor. A maior parte é de saúde (atenção básica e hospitais). O total
+de cada ano vai no arquivo ("banco").
+
+Nesses anos (mais de R$ 1 bilhão ao banco), o total de cada cidade vem da
+série "Emendas Parlamentares Individuais e de bancada" do Tesouro
+Transparente, que registra cada ordem bancária a estados e municípios com o
+código do IBGE (mas sem o código da emenda e sem o autor): individuais e de
+bancada pelo maior entre Tesouro e Portal, mais comissão e relator pagos
+direto à prefeitura (Portal), que o Tesouro não tem. Conferido em
+17/11/2026: em 2025, sem pagamento ao banco, as duas fontes batem (Alfenas,
+R$ 23,16 mi nas duas; no país, R$ 24,44 bi contra R$ 24,27 bi), e o script
+falha se um ano fechado sem pagamento ao banco diferir mais de 10%. Os
+autores de cada cidade continuam sendo só os do Portal, e nesses anos somam
+menos que o total ("total", "anos_total").
 """
 
 import collections
@@ -69,6 +80,14 @@ import urllib.request
 import zipfile
 
 URL = "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/emendas-parlamentares/EmendasParlamentares.zip"
+# Tesouro Transparente, série "Emendas Parlamentares Individuais e de bancada":
+# uma linha por ordem bancária a estado ou município, com o código do IBGE,
+# o tipo de emenda e o valor, sem o código da emenda nem o autor.
+TESOURO = ("https://www.tesourotransparente.gov.br/ckan/dataset/83e419da-1552-46bf-bfc3-05160b2c46c9/"
+           "resource/66d69917-a5d8-4500-b4b2-ef1f5d062430/download/emendas-parlamentares.csv")
+# Ano em que o Portal registrou mais que isto como pago ao Banco do Brasil
+# (sem a cidade): o total da cidade vem da série do Tesouro.
+LIMITE_BANCO = 1e9
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado"
 SICONFI_ENTES = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/entes"
 AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
@@ -323,8 +342,41 @@ def gravar_json(caminho, dados):
     os.replace(temporario, caminho)
 
 
+def emendas_do_tesouro():
+    """{(código IBGE, ano): valor} das emendas individuais e de bancada pagas
+    a cada município, pela série do Tesouro. Confere colunas e tamanho."""
+    bruto = baixar(TESOURO)
+    try:
+        texto = bruto.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        texto = bruto.decode("latin-1")
+    leitor = csv.DictReader(io.StringIO(texto), delimiter=";")
+    esperadas = {"Código IBGE", "Ano", "Tipo Ente", "Nome Emenda", "Valor"}
+    if not esperadas <= set(leitor.fieldnames or []):
+        falhar(f"Tesouro: colunas {leitor.fieldnames}")
+    por_cidade = collections.defaultdict(float)
+    linhas = 0
+    for l in leitor:
+        linhas += 1
+        if l["Tipo Ente"].strip() != "Município" or l["Nome Emenda"].strip() not in ("Emenda Individual", "Emenda de Bancada"):
+            continue
+        cod = "".join(c for c in l["Código IBGE"] if c.isdigit())
+        t = (l["Valor"] or "").strip()
+        try:
+            valor = float(t.replace(".", "").replace(",", ".")) if "," in t else float(t or 0)
+        except ValueError:
+            falhar(f"Tesouro: valor inválido {t!r}")
+        if len(cod) != 7 or not l["Ano"].strip().isdigit():
+            falhar(f"Tesouro: linha {linhas} com código {l['Código IBGE']!r} ou ano {l['Ano']!r}")
+        por_cidade[(cod, int(l["Ano"]))] += valor
+    if linhas < 300000:
+        falhar(f"Tesouro: {linhas} linhas; esperado perto de 400 mil")
+    return por_cidade
+
+
 def main():
     mapa = municipios_ibge()
+    uf_do_codigo_global = {cod: uf for (_, uf), cod in mapa.items()}
     por_cnpj = cnpjs_das_prefeituras(set(mapa.values()))
     cota = parlamentares_da_cota()
     z = zipfile.ZipFile(io.BytesIO(baixar(URL)))
@@ -341,6 +393,7 @@ def main():
     linhas = 0
     uteis = []
     pelo_banco = collections.defaultdict(float)
+    pelo_banco_cr = collections.defaultdict(float)  # comissão e relator, sem série do Tesouro
     tipos_autor = collections.defaultdict(lambda: [0.0] * len(TIPOS_RECEBEDOR))
     nome_do_autor = {}
     for n, l in enumerate(leitor, start=2):
@@ -351,6 +404,9 @@ def main():
         cnpj = "".join(c for c in l.get("Código do Favorecido") or "" if c.isdigit())
         if int(am[:4]) >= PRIMEIRO_ANO and cnpj == CNPJ_BANCO_DO_BRASIL:
             pelo_banco[int(am[:4])] += numero(l["Valor Recebido"], f"linha {n}")
+            tipo_bb = (l["Tipo de Emenda"] or "").strip()
+            if not (tipo_bb.startswith("Emenda Individual") or tipo_bb == "Emenda de Bancada"):
+                pelo_banco_cr[int(am[:4])] += numero(l["Valor Recebido"], f"linha {n}")
         if int(am[:4]) >= ano_atual - 3:
             kp = chave_do_parlamentar(l["Nome do Autor da Emenda"])
             if kp:
@@ -379,6 +435,7 @@ def main():
     autores_por_codigo = collections.defaultdict(set)
     bruto_do_autor = {}
     pago = collections.defaultdict(float)
+    pago_ib = collections.defaultdict(float)  # individuais e de bancada
     emendas = collections.defaultdict(set)
     autores = collections.defaultdict(lambda: collections.defaultdict(float))
     total_ano = collections.defaultdict(float)
@@ -401,6 +458,9 @@ def main():
             continue
         chave = (cod, ano)
         pago[chave] += valor
+        tipo = (l["Tipo de Emenda"] or "").strip()
+        if tipo.startswith("Emenda Individual") or tipo == "Emenda de Bancada":
+            pago_ib[chave] += valor
         autor = nome_legivel(l["Nome do Autor da Emenda"]) or "Sem informação"
         bruto_do_autor.setdefault(autor, l["Nome do Autor da Emenda"])
         # Emenda sem código ("Sem informação", como as de relator antigas)
@@ -424,6 +484,34 @@ def main():
         falhar(f"R$ {fora:,.2f} sem cidade, mais de {MAXIMO_SEM_CIDADE:.1%} do total")
     # No site, os últimos quatro anos (o ano das contas e o atual cabem).
     anos = list(range(ano_atual - 3, ano_atual + 1))
+    # Anos em que muito dinheiro foi registrado como pago ao Banco do Brasil:
+    # o total de cada cidade vem do Tesouro (individuais e de bancada, pelo
+    # maior entre Tesouro e Portal) mais comissão e relator do Portal, que o
+    # Tesouro não tem. Os autores continuam sendo só os do Portal.
+    tesouro = emendas_do_tesouro()
+    anos_total = [a for a in anos if pelo_banco.get(a, 0.0) >= LIMITE_BANCO]
+    for a in anos:
+        t_ano = sum(v for (c, aa), v in tesouro.items() if aa == a)
+        p_ano = sum(v for (c, aa), v in pago_ib.items() if aa == a)
+        print(f"  {a}: individuais e de bancada a municípios, Tesouro R$ {t_ano / 1e9:.2f} bi; Portal (prefeitura e fundos) R$ {p_ano / 1e9:.2f} bi")
+        # Ano fechado e sem pagamento ao banco: as duas fontes têm de bater.
+        if a < ano_atual and a not in anos_total and p_ano > 0 and abs(t_ano - p_ano) > 0.10 * p_ano:
+            falhar(f"{a}: Tesouro e Portal diferem mais de 10% ({t_ano:,.0f} contra {p_ano:,.0f})")
+        if a in anos_total and not 10e9 <= t_ano <= 60e9:
+            falhar(f"{a}: Tesouro com R$ {t_ano:,.0f} para municípios, fora da faixa esperada")
+    total_cidade = {}
+    for a in anos_total:
+        cidades_ano = {c for (c, aa) in tesouro if aa == a} | {c for (c, aa) in pago if aa == a}
+        for c in cidades_ano:
+            if c not in uf_do_codigo_global:
+                continue
+            ib = max(tesouro.get((c, a), 0.0), pago_ib.get((c, a), 0.0))
+            outros = pago.get((c, a), 0.0) - pago_ib.get((c, a), 0.0)
+            total_cidade[(c, a)] = ib + outros
+    print(f"anos com total pelo Tesouro: {anos_total}; cidades com total: {len(total_cidade)}")
+    total_por_uf = collections.defaultdict(lambda: collections.defaultdict(dict))
+    for (c, a), v in sorted(total_cidade.items()):
+        total_por_uf[uf_do_codigo_global[c]][c][str(a)] = round(v)
     por_uf = collections.defaultdict(dict)
     nomes_uf = collections.defaultdict(dict)  # uf -> {nome: índice}
     uf_do_codigo = {cod: uf for (_, uf), cod in mapa.items()}
@@ -453,6 +541,15 @@ def main():
             # Total do país pago ao Banco do Brasil em cada ano, sem dizer
             # quem recebeu: o site avisa só nos anos em que isso pesa.
             "banco": {str(a): round(pelo_banco.get(a, 0.0)) for a in anos},
+            # Nos anos de "anos_total", o total da cidade (Tesouro + comissão
+            # e relator do Portal), em reais da época; os autores de
+            # "cidades" somam menos que ele.
+            "anos_total": anos_total,
+            # Comissão e relator pagos ao Banco do Brasil (país): sem série que
+            # diga a cidade, ficam de fora mesmo nesses anos.
+            "banco_comissao_relator": {str(a): round(pelo_banco_cr.get(a, 0.0)) for a in anos},
+            "fonte_total": TESOURO,
+            "total": {c: dict(anos_c) for c, anos_c in sorted(total_por_uf[uf].items())},
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")

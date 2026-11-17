@@ -278,6 +278,11 @@ export async function carregarEmendasUf(uf) {
     || (d.cargos !== undefined && (!Array.isArray(d.cargos) || d.cargos.length !== d.nomes.length || !d.cargos.every((c) => typeof c === 'string')))
     || (d.paginas !== undefined && (!Array.isArray(d.paginas) || d.paginas.length !== d.nomes.length || !d.paginas.every((c) => c === '' || ehEndereco(c))))
     || (d.banco !== undefined && (!d.banco || typeof d.banco !== 'object' || !Object.entries(d.banco).every(([a, v]) => /^\d{4}$/.test(a) && Number.isFinite(v) && v >= 0)))
+    || (d.anos_total !== undefined && (!Array.isArray(d.anos_total) || !d.anos_total.every((a) => d.anos.includes(a))))
+    || (d.banco_comissao_relator !== undefined && (!d.banco_comissao_relator || typeof d.banco_comissao_relator !== 'object'
+      || !Object.entries(d.banco_comissao_relator).every(([a, v]) => /^\d{4}$/.test(a) && Number.isFinite(v) && v >= 0)))
+    || (d.total !== undefined && (!d.total || typeof d.total !== 'object' || !Object.entries(d.total).every(([cod, anos]) => /^[0-9]{7}$/.test(cod)
+      && anos && typeof anos === 'object' && Object.entries(anos).every(([a, v]) => (d.anos_total ?? []).includes(Number(a)) && Number.isFinite(v) && v >= 0))))
     || !d.cidades || typeof d.cidades !== 'object') {
     falhar(`emendas de ${uf}`);
   }

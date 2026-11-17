@@ -413,14 +413,24 @@ async function desenharEmendas(ano, moradores) {
   }
   const daCidade = d.cidades[codigo7] ?? {};
   const emAndamento = Math.max(...d.anos);
+  // Nos anos de d.anos_total (muito dinheiro registrado no Portal como pago
+  // ao Banco do Brasil), o total vem do arquivo: série do Tesouro mais
+  // comissão e relator do Portal. A lista de autores é só a do Portal.
   const doAno = (a) => {
     const x = daCidade[String(a)];
-    if (!x || !(x[0] > 0)) return null;
+    const temPortal = Boolean(x && x[0] > 0);
+    const total = d.anos_total?.includes(a) ? d.total?.[codigo7]?.[String(a)] : undefined;
+    if (!temPortal && !(total > 0)) return null;
     const fator = fatorParaHoje(estado.ctx, a) ?? 1;
-    const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '', d.paginas?.[i] ?? '']);
-    return { pago: x[0] * fator, emendas: x[1], autores: lista.length, lista };
+    const lista = temPortal ? x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '', d.paginas?.[i] ?? '']) : [];
+    const portal = temPortal ? x[0] * fator : 0;
+    // Só quando o Tesouro traz dinheiro que o Portal não ligou à cidade.
+    const pelaSerie = total > 0 && total * fator - portal > Math.max(1000, 0.01 * portal);
+    return { pago: pelaSerie ? Math.max(total * fator, portal) : portal, portal, emendas: temPortal ? x[1] : 0, autores: lista.length, lista, pelaSerie };
   };
   const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'}${x.autores ? ` de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}` : ''}`;
+  const detalheDoAno = (x) => (!x.pelaSerie ? quantas(x)
+    : (x.autores ? `${valorGrande(x.portal)} com autor identificado (${quantas(x)})` : 'nenhuma com autor identificado'));
   const rotuloAno = (a) => (a === emAndamento ? `Pago em ${a} (ano em andamento)` : `Pago em ${a}`);
   const dl = $('#mun-emendas-numeros');
   dl.replaceChildren();
@@ -438,13 +448,13 @@ async function desenharEmendas(ano, moradores) {
     linha(rotuloAno(ano), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura neste ano.']);
     resumo('cid-resumo-emendas', f.moeda(0, 0), 'nenhuma emenda paga');
   } else {
-    const det = [quantas(escolhido)];
+    const det = [detalheDoAno(escolhido)];
     if (moradores) det.push(`${f.moeda(escolhido.pago / moradores, 0)} por morador`);
     linha(rotuloAno(ano), valorGrande(escolhido.pago), det);
-    resumo('cid-resumo-emendas', valorGrande(escolhido.pago), quantas(escolhido));
+    resumo('cid-resumo-emendas', valorGrande(escolhido.pago), escolhido.pelaSerie ? 'total do Tesouro Nacional' : quantas(escolhido));
   }
   const atual = ano !== emAndamento ? doAno(emAndamento) : null;
-  if (atual) linha(rotuloAno(emAndamento), valorGrande(atual.pago), [quantas(atual)]);
+  if (atual) linha(rotuloAno(emAndamento), valorGrande(atual.pago), [detalheDoAno(atual)]);
   else if (ano !== emAndamento) linha(rotuloAno(emAndamento), f.moeda(0, 0), ['Nenhuma emenda paga à prefeitura até agora.']);
 
   // Quem mandou mais: no ano escolhido ou, sem ele, no ano em andamento.
@@ -458,7 +468,9 @@ async function desenharEmendas(ano, moradores) {
   botaoTodos.hidden = true;
   const notas = [];
   if (lista?.lista.length) {
-    titulo.textContent = `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
+    titulo.textContent = lista.pelaSerie
+      ? `Quem mandou dinheiro em ${anoLista}: só a parte com autor identificado (${valorGrande(lista.portal)} de ${valorGrande(lista.pago)})`
+      : `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
     // Todos os autores; os 6 primeiros aparecem logo, o resto com o botão.
     const VISIVEIS = 6;
     lista.lista.forEach(([autor, valor, cargo, pagina], k) => {
@@ -500,11 +512,19 @@ async function desenharEmendas(ano, moradores) {
   // 2023 e 2024. O aviso aparece só no ano em que isso pesa (o arquivo traz o
   // total do país por ano); em arquivo antigo, sem esse total, aviso geral.
   const anoNota = anoLista ?? ano;
+  const doNota = anoNota === ano ? escolhido : atual;
   const banco = d.banco?.[String(anoNota)];
-  const avisoBanco = d.banco === undefined
+  // Anos com o total pelo Tesouro: individuais e de bancada completas;
+  // comissão e relator pagos por meio do banco seguem sem cidade.
+  const anoComTotal = d.anos_total?.includes(anoNota);
+  const bancoCR = d.banco_comissao_relator?.[String(anoNota)];
+  const avisoBanco = anoComTotal
+    ? ` Em ${anoNota}, parte das emendas foi registrada no Portal como paga ao Banco do Brasil, sem dizer a cidade. As individuais e de bancada estão completas aqui pela série do Tesouro Nacional, que registra cada pagamento à prefeitura${doNota?.pelaSerie ? ', mas não diz o autor: a lista de quem mandou soma menos que o total' : ''}.${bancoCR >= 1e8 ? ` As de comissão e de relator pagas por meio do banco (${f.reaisPorExtenso(bancoCR)} no país) não têm essa série e ficam de fora, então o valor de ${anoNota} pode ser maior.` : ''}`
+    : d.banco === undefined
     ? ' Parte das emendas é paga por meio do Banco do Brasil, e o arquivo oficial não diz para qual cidade foi; esse dinheiro também não entra, então o valor real pode ser maior.'
     : (banco >= 1e9 ? ` Em ${anoNota}, ${f.reaisPorExtenso(banco)} em emendas do país inteiro (a maior parte de saúde) foram registrados como pagos ao Banco do Brasil, sem dizer a cidade; esse dinheiro não entra aqui, então o valor de ${anoNota} pode ser maior.` : '');
-  notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram.${avisoBanco} Atualização: ${f.dataCurta(d.atualizado)}.`);
+  const fonteTesouro = anoComTotal ? ' e Tesouro Nacional (série Emendas Parlamentares Individuais e de Bancada)' : '';
+  notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais${fonteTesouro}, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram.${avisoBanco} Atualização: ${f.dataCurta(d.atualizado)}.`);
   definir('mun-emendas-nota', notas.join(' '));
   caixa.hidden = false;
 }
@@ -619,12 +639,20 @@ registrarDownload('emendas', () => {
   const nomes = new Map((estado.indice?.cidades ?? []).filter((c) => c[2] === uf).map((c) => [String(c[0]).padStart(7, '0'), c[1]]));
   return {
     nome: `emendas-pagas-as-prefeituras-${(uf ?? 'sem-estado').toLowerCase()}.csv`,
-    cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'autor', 'pago_reais_da_epoca', 'emendas_da_cidade_no_ano', 'fator para dinheiro de hoje (IPCA)'],
-    // Uma linha por cidade, ano e autor.
-    linhas: d ? d.anos.flatMap((a) => Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).flatMap(([cod, anos]) => {
-      const x = anos[String(a)];
-      return x[2].map(([i, v]) => [a, cod, nomes.get(cod) ?? '', uf, d.nomes[i], v, x[1], arred(fatorParaHoje(estado.ctx, a) ?? 1, 6)]);
-    })) : [],
+    cabecalhos: ['ano', 'codigo_ibge', 'cidade', 'uf', 'autor', 'pago_reais_da_epoca', 'emendas_da_cidade_no_ano', 'fator para dinheiro de hoje (IPCA)',
+      'total_da_cidade_no_ano (R$ da época; em 2023 e 2024, Tesouro + comissão e relator do Portal)'],
+    // Uma linha por cidade, ano e autor; cidade só com o total do Tesouro
+    // (nenhum autor no Portal) tem uma linha sem autor.
+    linhas: d ? d.anos.flatMap((a) => {
+      const total = (cod) => d.total?.[cod]?.[String(a)];
+      const comAutor = Object.entries(d.cidades).filter(([, anos]) => anos[String(a)]).flatMap(([cod, anos]) => {
+        const x = anos[String(a)];
+        return x[2].map(([i, v]) => [a, cod, nomes.get(cod) ?? '', uf, d.nomes[i], v, x[1], arred(fatorParaHoje(estado.ctx, a) ?? 1, 6), total(cod) ?? x[0]]);
+      });
+      const soTesouro = Object.keys(d.total ?? {}).filter((cod) => total(cod) > 0 && !d.cidades[cod]?.[String(a)])
+        .map((cod) => [a, cod, nomes.get(cod) ?? '', uf, '(sem autor identificado no Portal)', 0, 0, arred(fatorParaHoje(estado.ctx, a) ?? 1, 6), total(cod)]);
+      return [...comAutor, ...soTesouro];
+    }) : [],
   };
 });
 
