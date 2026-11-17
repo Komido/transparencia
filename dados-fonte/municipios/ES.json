@@ -1,0 +1,3906 @@
+{
+ "uf": "ES",
+ "atualizado": "2026-11-17",
+ "municipios": {
+  "3200102": {
+   "nome": "Afonso Cláudio",
+   "pop": 32456,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 30603,
+     "v": {
+      "receita": 168396345.34,
+      "tributos": 11071808.38,
+      "iptu": 777303.89,
+      "iss": 4162109.54,
+      "itbi": 1068078.02,
+      "irrf": 3257439.52,
+      "outros_tributos": 1806877.41,
+      "transferencias": 150348747.39,
+      "fpm": 46902160.73,
+      "icms": 37971052.77,
+      "ipva": 3304705.93,
+      "itr": 23890.29,
+      "fundeb": 31806561.98,
+      "rcl": 151532931.61
+     },
+     "tipo": "simplificado",
+     "sha256": "eb3f063632b12786cd07ef49469797b01696a42a082e14eff7919c9e0e6f8ea9"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 30603,
+     "v": {
+      "receita": 193033082.67,
+      "tributos": 13884635.74,
+      "iptu": 1164624.8,
+      "iss": 4938875.75,
+      "itbi": 1548455.25,
+      "irrf": 3998637.63,
+      "outros_tributos": 2234042.31,
+      "transferencias": 170346589.54,
+      "fpm": 51567189.19,
+      "icms": 37786733.2,
+      "ipva": 3786958.8,
+      "itr": 25279.61,
+      "fundeb": 38202456.35,
+      "rcl": 175401027.27
+     },
+     "tipo": "simplificado",
+     "sha256": "5e97b884e5159ac40467a38ec143881d090dab790daac7ec9c291abd42f6e43c"
+    }
+   }
+  },
+  "3200136": {
+   "nome": "Águia Branca",
+   "pop": 10143,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 9714,
+     "v": {
+      "receita": 89341544.33,
+      "tributos": 4834981.94,
+      "iptu": 354496.44,
+      "iss": 2471462.51,
+      "itbi": 185645.34,
+      "irrf": 1679214.27,
+      "outros_tributos": 144163.38,
+      "transferencias": 74336061.11,
+      "fpm": 17588310.27,
+      "icms": 23875540.8,
+      "ipva": 1269473.39,
+      "itr": 19226.57,
+      "fundeb": 12847141.94,
+      "rcl": 76581672.83
+     },
+     "tipo": "simplificado",
+     "sha256": "4dd9b6a55ee93147dc6635c15a4e7379311ed166caa61f3986031efdb3a260e8"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 9714,
+     "v": {
+      "receita": 102713749.59,
+      "tributos": 4884063.07,
+      "iptu": 384528.07,
+      "iss": 2315025.6,
+      "itbi": 259910.18,
+      "irrf": 1843040.86,
+      "outros_tributos": 81558.36,
+      "transferencias": 83793746.62,
+      "fpm": 19337695.92,
+      "icms": 29472114.15,
+      "ipva": 1543203.98,
+      "itr": 15655.0,
+      "fundeb": 14847818.41,
+      "rcl": 84997214.33
+     },
+     "tipo": "simplificado",
+     "sha256": "1ad14dede45fa6d5115317b70833e1b029f4fb7f05fdefec061e8d619ad24947"
+    }
+   }
+  },
+  "3200169": {
+   "nome": "Água Doce do Norte",
+   "pop": 12585,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12038,
+     "v": {
+      "receita": 72929268.37,
+      "tributos": 4998658.96,
+      "iptu": 388612.25,
+      "iss": 1567185.13,
+      "itbi": 240016.16,
+      "irrf": 2126769.94,
+      "outros_tributos": 676075.48,
+      "transferencias": 65110139.09,
+      "fpm": 23313488.94,
+      "icms": 14634017.84,
+      "ipva": 1115111.56,
+      "itr": 18610.04,
+      "fundeb": 12714421.23,
+      "rcl": 65487183.43
+     },
+     "tipo": "simplificado",
+     "sha256": "fbc8b09706030bf227f136bdcfa7ffa6a7587c6ec0d03977e63bd49a32b6defe"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12038,
+     "v": {
+      "receita": 87052544.0,
+      "tributos": 6261403.28,
+      "iptu": 512980.89,
+      "iss": 2404228.61,
+      "itbi": 338471.45,
+      "irrf": 2172545.16,
+      "outros_tributos": 833177.17,
+      "transferencias": 78119410.04,
+      "fpm": 25783558.17,
+      "icms": 17399798.87,
+      "ipva": 1376546.77,
+      "itr": 25791.91,
+      "fundeb": 13712742.53,
+      "rcl": 78642225.18
+     },
+     "tipo": "simplificado",
+     "sha256": "cb3389ae9f3cf2495bf14ca7f61461cc8dc1b9710044c3c5e6053a7529f5da15"
+    }
+   }
+  },
+  "3200201": {
+   "nome": "Alegre",
+   "pop": 30702,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 26397,
+     "v": {
+      "receita": 166049786.27,
+      "tributos": 15110545.82,
+      "iptu": 1920487.43,
+      "iss": 6599067.18,
+      "itbi": 692687.38,
+      "irrf": 2575649.96,
+      "outros_tributos": 3322653.87,
+      "transferencias": 124898589.73,
+      "fpm": 46126019.25,
+      "icms": 24270675.51,
+      "ipva": 2951001.72,
+      "itr": 26925.85,
+      "fundeb": 19018950.2,
+      "rcl": 144540880.14
+     },
+     "tipo": "simplificado",
+     "sha256": "53e359a3d4a2e078fd3710d481ffe1e036979bffedf4f8ac287d59ea587919ea"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 26397,
+     "v": {
+      "receita": 187671472.51,
+      "tributos": 16733565.69,
+      "iptu": 2262976.84,
+      "iss": 6781895.45,
+      "itbi": 689855.86,
+      "irrf": 3311552.12,
+      "outros_tributos": 3687285.42,
+      "transferencias": 139665178.44,
+      "fpm": 51567189.19,
+      "icms": 23533638.24,
+      "ipva": 3352396.99,
+      "itr": 31547.5,
+      "fundeb": 21484694.29,
+      "rcl": 161039454.05
+     },
+     "tipo": "simplificado",
+     "sha256": "3323213c1d3bcb0846ad6507860de7fee80be1b227656e777553131015ffae63"
+    }
+   }
+  },
+  "3200300": {
+   "nome": "Alfredo Chaves",
+   "pop": 14376,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 13303,
+     "v": {
+      "receita": 111075224.73,
+      "tributos": 16627039.56,
+      "iptu": 1528620.43,
+      "iss": 12306764.65,
+      "itbi": 508562.89,
+      "irrf": 1833050.38,
+      "outros_tributos": 450041.21,
+      "transferencias": 85900446.3,
+      "fpm": 29313850.47,
+      "icms": 23757355.11,
+      "ipva": 2773737.58,
+      "itr": 52604.92,
+      "fundeb": 15321638.57,
+      "rcl": 100381388.7
+     },
+     "tipo": "simplificado",
+     "sha256": "f0d713c49efb7d940465f6e07d982bc9a487d694ef5c388b115d9d5f6b1a09e7"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 13303,
+     "v": {
+      "receita": 124403471.72,
+      "tributos": 18775219.42,
+      "iptu": 1336517.71,
+      "iss": 14061647.22,
+      "itbi": 555064.4,
+      "irrf": 2256470.4,
+      "outros_tributos": 565519.69,
+      "transferencias": 95517662.1,
+      "fpm": 32229493.22,
+      "icms": 24887431.73,
+      "ipva": 3145623.71,
+      "itr": 44812.18,
+      "fundeb": 17417945.06,
+      "rcl": 112963462.83
+     },
+     "tipo": "simplificado",
+     "sha256": "1f19a6e057f86828827a447dec3b702af33602ef8cd62e295d3005c24f90f8ee"
+    }
+   }
+  },
+  "3200359": {
+   "nome": "Alto Rio Novo",
+   "pop": 7760,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 7438,
+     "v": {
+      "receita": 54764344.59,
+      "tributos": 2265307.86,
+      "iptu": 78778.3,
+      "iss": 1069354.06,
+      "itbi": 201754.14,
+      "irrf": 834517.08,
+      "outros_tributos": 80904.28,
+      "transferencias": 51460624.58,
+      "fpm": 17860825.5,
+      "icms": 12136771.57,
+      "ipva": 708020.38,
+      "itr": 6647.12,
+      "fundeb": 8282293.33,
+      "rcl": 49020425.87
+     },
+     "tipo": "simplificado",
+     "sha256": "cf24b2cf9ec21cb3fbec81d0e4774fe23342d090f1c3931abe371388792dc27a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 7438,
+     "v": {
+      "receita": 63748865.03,
+      "tributos": 2724102.02,
+      "iptu": 94381.12,
+      "iss": 1282563.77,
+      "itbi": 382599.03,
+      "irrf": 816851.16,
+      "outros_tributos": 147706.94,
+      "transferencias": 59221672.21,
+      "fpm": 19337695.9,
+      "icms": 14554184.38,
+      "ipva": 897635.6,
+      "itr": 7465.31,
+      "fundeb": 9923668.73,
+      "rcl": 57167725.08
+     },
+     "tipo": "simplificado",
+     "sha256": "5ba1c442b9f6bb13af5dc872199fa38598466ed2cfa927d31a6abde251d9127d"
+    }
+   }
+  },
+  "3200409": {
+   "nome": "Anchieta",
+   "pop": 33017,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 29613,
+     "v": {
+      "receita": 473700245.6,
+      "tributos": 73598782.5,
+      "iptu": 10523598.64,
+      "iss": 40532380.48,
+      "itbi": 3889933.35,
+      "irrf": 14665827.53,
+      "outros_tributos": 3987042.5,
+      "transferencias": 375479219.43,
+      "fpm": 41039390.62,
+      "icms": 220690443.19,
+      "ipva": 4480486.29,
+      "itr": 373461.03,
+      "fundeb": 45515827.35,
+      "rcl": 409113770.23
+     },
+     "tipo": "simplificado",
+     "sha256": "aa39ec556e6c66fd36a8c420be6adf95bf17243a26a43507d7c9ef03be964aa0"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 29613,
+     "v": {
+      "receita": 491569262.72,
+      "tributos": 93488376.41,
+      "iptu": 12168516.85,
+      "iss": 56164368.87,
+      "itbi": 4744828.83,
+      "irrf": 16021310.28,
+      "outros_tributos": 4389351.58,
+      "transferencias": 372215993.55,
+      "fpm": 51567189.19,
+      "icms": 195962533.08,
+      "ipva": 5099256.13,
+      "itr": 409363.36,
+      "fundeb": 53641107.88,
+      "rcl": 429151680.96
+     },
+     "tipo": "simplificado",
+     "sha256": "ed23d6f4eca2d3b244d19ea8b241baf75d1c9bb52cb9944a93f1ec3ad67aede9"
+    }
+   }
+  },
+  "3200508": {
+   "nome": "Apiacá",
+   "pop": 7462,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 7178,
+     "v": {
+      "receita": 46556027.75,
+      "tributos": 2715221.14,
+      "iptu": 299537.84,
+      "iss": 1246315.68,
+      "itbi": 227459.18,
+      "irrf": 539545.41,
+      "outros_tributos": 402363.03,
+      "transferencias": 42119419.38,
+      "fpm": 14378687.38,
+      "icms": 7740127.84,
+      "ipva": 1644968.96,
+      "itr": 8699.22,
+      "fundeb": 6288388.39,
+      "rcl": 42106477.79
+     },
+     "tipo": "completo",
+     "sha256": "738bd579df060283a1dae39eb67d926108ca18dcd4056ed951cec51045d23f65"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 7178,
+     "v": {
+      "receita": 80337138.01,
+      "tributos": 3092314.96,
+      "iptu": 285439.35,
+      "iss": 1202033.15,
+      "itbi": 223769.55,
+      "irrf": 957961.18,
+      "outros_tributos": 423111.73,
+      "transferencias": 74450613.52,
+      "fpm": 19337695.92,
+      "icms": 13369281.92,
+      "ipva": 1869416.88,
+      "itr": 9919.71,
+      "fundeb": 8800161.23,
+      "rcl": 73816607.5
+     },
+     "tipo": "completo",
+     "sha256": "7659471cdc47747c306a9c23cb865c4dba6e9c34fdcf46e1e060c972b4ec35ce"
+    }
+   }
+  },
+  "3200607": {
+   "nome": "Aracruz",
+   "pop": 103363,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 99336,
+     "v": {
+      "receita": 888895803.33,
+      "tributos": 178727924.23,
+      "iptu": 19863238.5,
+      "iss": 118669915.23,
+      "itbi": 8831623.27,
+      "irrf": 26738792.59,
+      "outros_tributos": 4624354.64,
+      "transferencias": 575483938.35,
+      "fpm": 92835911.87,
+      "icms": 196414084.05,
+      "ipva": 13470156.85,
+      "itr": 2467352.04,
+      "fundeb": 121064622.98,
+      "rcl": 778641514.71
+     },
+     "tipo": "completo",
+     "sha256": "87d978abdbf9284abba358f56e6d4a5cc305d1a40b886658ec99469cfdd3ea5a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 99336,
+     "v": {
+      "receita": 1101603333.98,
+      "tributos": 250428585.75,
+      "iptu": 26676870.97,
+      "iss": 178117810.24,
+      "itbi": 11592538.91,
+      "irrf": 28767046.12,
+      "outros_tributos": 5274319.51,
+      "transferencias": 661862845.89,
+      "fpm": 103134378.27,
+      "icms": 252120727.51,
+      "ipva": 15225500.76,
+      "itr": 2422872.48,
+      "fundeb": 128083666.18,
+      "rcl": 935198540.65
+     },
+     "tipo": "completo",
+     "sha256": "b608b1384533f27a00f0eef3a16458e00cd1b8fa0a25a598a407ed31e4e33f0d"
+    }
+   }
+  },
+  "3200706": {
+   "nome": "Atilio Vivacqua",
+   "pop": 11046,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 11218,
+     "v": {
+      "receita": 85742864.41,
+      "tributos": 4886123.53,
+      "iptu": 140136.4,
+      "iss": 3003003.61,
+      "itbi": 205274.54,
+      "irrf": 1216222.91,
+      "outros_tributos": 321486.07,
+      "transferencias": 77827639.65,
+      "fpm": 23443646.07,
+      "icms": 16375830.54,
+      "ipva": 1477947.84,
+      "itr": 16086.35,
+      "fundeb": 20166240.63,
+      "rcl": 77885153.17
+     },
+     "tipo": "completo",
+     "sha256": "48ac3be083de0ba4421ababa690cb0d9ca0f00915c4a1510b7b541d85b2e1111"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 11218,
+     "v": {
+      "receita": 98172883.15,
+      "tributos": 5474209.19,
+      "iptu": 167623.45,
+      "iss": 2650554.38,
+      "itbi": 256400.32,
+      "irrf": 1869344.92,
+      "outros_tributos": 530286.12,
+      "transferencias": 88579103.68,
+      "fpm": 25502303.26,
+      "icms": 22213926.54,
+      "ipva": 1142743.21,
+      "itr": 18921.76,
+      "fundeb": 22647471.63,
+      "rcl": 89156418.42
+     },
+     "tipo": "completo",
+     "sha256": "640c68748f909c1f20c7bfaadc600d7854c3e74cd4951f34636c9ff8e9864a43"
+    }
+   }
+  },
+  "3200805": {
+   "nome": "Baixo Guandu",
+   "pop": 32829,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 30676,
+     "v": {
+      "receita": 190894414.31,
+      "tributos": 23400639.4,
+      "iptu": 2695187.41,
+      "iss": 13341849.02,
+      "itbi": 1270056.85,
+      "irrf": 4306137.32,
+      "outros_tributos": 1787408.8,
+      "transferencias": 144753544.67,
+      "fpm": 46139481.32,
+      "icms": 30772919.65,
+      "ipva": 5879274.19,
+      "itr": 64877.31,
+      "fundeb": 30599837.8,
+      "rcl": 174955128.4
+     },
+     "tipo": "simplificado",
+     "sha256": "8530fd04ebc4038e2f8fb2b28fccb27c13f1e20677b9a5737443775038a63ee2"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 30676,
+     "v": {
+      "receita": 224081164.55,
+      "tributos": 26341099.82,
+      "iptu": 2960660.4,
+      "iss": 15938986.14,
+      "itbi": 1085718.07,
+      "irrf": 4672745.63,
+      "outros_tributos": 1682989.58,
+      "transferencias": 169022321.09,
+      "fpm": 51567189.19,
+      "icms": 30423837.31,
+      "ipva": 6787082.83,
+      "itr": 58305.13,
+      "fundeb": 33073788.81,
+      "rcl": 207328880.39
+     },
+     "tipo": "simplificado",
+     "sha256": "4651470b34ba995b55fe62051ddd3935890a4e52b979b98a77c5e735965a86be"
+    }
+   }
+  },
+  "3200904": {
+   "nome": "Barra de São Francisco",
+   "pop": 45415,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 40753,
+     "v": {
+      "receita": 232717546.82,
+      "tributos": 24765778.52,
+      "iptu": 4319588.32,
+      "iss": 11148077.94,
+      "itbi": 2041335.19,
+      "irrf": 4470465.25,
+      "outros_tributos": 2786311.82,
+      "transferencias": 187872016.0,
+      "fpm": 57803492.39,
+      "icms": 45860286.69,
+      "ipva": 6592620.82,
+      "itr": 57221.96,
+      "fundeb": 41603739.73,
+      "rcl": 199842928.51
+     },
+     "tipo": "completo",
+     "sha256": "4cb04b035eb9b3cdd952353745d76b88ff7d50054e575537e4aeaaed3b4f9c06"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 40753,
+     "v": {
+      "receita": 257269902.51,
+      "tributos": 30056480.36,
+      "iptu": 4923063.39,
+      "iss": 12717708.4,
+      "itbi": 1879633.81,
+      "irrf": 6801313.93,
+      "outros_tributos": 3734760.83,
+      "transferencias": 206130052.07,
+      "fpm": 64458986.49,
+      "icms": 45782585.24,
+      "ipva": 7972080.86,
+      "itr": 61212.59,
+      "fundeb": 47548219.31,
+      "rcl": 221150121.8
+     },
+     "tipo": "simplificado",
+     "sha256": "d226ed0636b3b0e8ee14d73a21621b39d4cc25a608660a7370c1c5c1493f3966"
+    }
+   }
+  },
+  "3201001": {
+   "nome": "Boa Esperança",
+   "pop": 14054,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 13134,
+     "v": {
+      "receita": 110461677.1,
+      "tributos": 6326773.79,
+      "iptu": 311908.99,
+      "iss": 2657522.95,
+      "itbi": 422732.02,
+      "irrf": 2032551.39,
+      "outros_tributos": 902058.44,
+      "transferencias": 91323813.55,
+      "fpm": 29313850.47,
+      "icms": 21734290.34,
+      "ipva": 1459850.34,
+      "itr": 66315.16,
+      "fundeb": 18441235.51,
+      "rcl": 92246284.96
+     },
+     "tipo": "simplificado",
+     "sha256": "6e818b32688fea4333cbf1f18efb5a7700e28a713127896dc831935482dd9604"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 13134,
+     "v": {
+      "receita": 125040320.47,
+      "tributos": 7625275.63,
+      "iptu": 427205.41,
+      "iss": 2600989.11,
+      "itbi": 800083.45,
+      "irrf": 2633593.46,
+      "outros_tributos": 1163404.2,
+      "transferencias": 102547998.79,
+      "fpm": 32229493.22,
+      "icms": 27409357.03,
+      "ipva": 1845826.78,
+      "itr": 80529.59,
+      "fundeb": 21234518.48,
+      "rcl": 104814312.03
+     },
+     "tipo": "simplificado",
+     "sha256": "43a28a7198c4c41a2a68a37d7e823055b9aec63a9de969d4147b91fcbc4faa93"
+    }
+   }
+  },
+  "3201100": {
+   "nome": "Bom Jesus do Norte",
+   "pop": 10820,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 9832,
+     "v": {
+      "receita": 67878597.56,
+      "tributos": 4253787.14,
+      "iptu": 292828.19,
+      "iss": 2137304.14,
+      "itbi": 168602.44,
+      "irrf": 1176828.21,
+      "outros_tributos": 478224.16,
+      "transferencias": 61727057.03,
+      "fpm": 23451693.31,
+      "icms": 8663935.42,
+      "ipva": 4160326.77,
+      "itr": 4254.42,
+      "fundeb": 10769203.37,
+      "rcl": 60748011.12
+     },
+     "tipo": "simplificado",
+     "sha256": "7e93d2cb17fb885095c36bbac1f4d30b82d83229f5a5bd2d19356a01fb79c13e"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 9832,
+     "v": {
+      "receita": 78710726.13,
+      "tributos": 4689272.54,
+      "iptu": 285912.98,
+      "iss": 1836439.26,
+      "itbi": 230412.03,
+      "irrf": 1805604.57,
+      "outros_tributos": 530903.7,
+      "transferencias": 71546774.24,
+      "fpm": 25783594.57,
+      "icms": 13930771.05,
+      "ipva": 5364581.49,
+      "itr": 4539.34,
+      "fundeb": 14231727.61,
+      "rcl": 70214604.28
+     },
+     "tipo": "completo",
+     "sha256": "9f8a55f8187e0064bb119c27969c196e9ba0aef2c7648be2149624e15c13b957"
+    }
+   }
+  },
+  "3201159": {
+   "nome": "Brejetuba",
+   "pop": 13718,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12933,
+     "v": {
+      "receita": 89002738.57,
+      "tributos": 4891232.2,
+      "iptu": 405957.27,
+      "iss": 2987347.58,
+      "itbi": 496118.62,
+      "irrf": 874458.18,
+      "outros_tributos": 127350.55,
+      "transferencias": 81490720.39,
+      "fpm": 23451016.86,
+      "icms": 21572920.79,
+      "ipva": 1440360.46,
+      "itr": 11658.28,
+      "fundeb": 14323132.45,
+      "rcl": 80096613.96
+     },
+     "tipo": "completo",
+     "sha256": "4a3cd196fee09e00fbacd21ce365ef5d24370dd61ee3083fff70d8beba2ef286"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12933,
+     "v": {
+      "receita": 104108491.69,
+      "tributos": 5458295.26,
+      "iptu": 561986.69,
+      "iss": 2662959.32,
+      "itbi": 386106.19,
+      "irrf": 1683919.81,
+      "outros_tributos": 163323.25,
+      "transferencias": 94931004.3,
+      "fpm": 32229493.22,
+      "icms": 22923054.0,
+      "ipva": 1859281.79,
+      "itr": 14414.35,
+      "fundeb": 18849728.05,
+      "rcl": 93322840.4
+     },
+     "tipo": "completo",
+     "sha256": "540a517c2a7d4cb065e199806b723842d56c8a97792f21eebb6dae0bb713bdb3"
+    }
+   }
+  },
+  "3201209": {
+   "nome": "Cachoeiro de Itapemirim",
+   "pop": 198342,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 196133,
+     "v": {
+      "receita": 914338555.46,
+      "tributos": 200833280.37,
+      "iptu": 45710866.81,
+      "iss": 86393070.8,
+      "itbi": 9007241.21,
+      "irrf": 30460747.42,
+      "outros_tributos": 29261354.13,
+      "transferencias": 611734489.87,
+      "fpm": 153952629.82,
+      "icms": 143016430.23,
+      "ipva": 29137637.88,
+      "itr": 232722.24,
+      "fundeb": 180193523.39,
+      "rcl": 821339612.64
+     },
+     "tipo": "completo",
+     "sha256": "242a60721b2fcace8e23440babe5c8a25e91a1d6041aa5e6cf8c9669028ecc2f"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 196133,
+     "v": {
+      "receita": 1067754935.53,
+      "tributos": 204817361.32,
+      "iptu": 44484760.26,
+      "iss": 89553362.55,
+      "itbi": 9244659.21,
+      "irrf": 31878057.08,
+      "outros_tributos": 29656522.22,
+      "transferencias": 676517570.63,
+      "fpm": 168399004.06,
+      "icms": 145952601.03,
+      "ipva": 32254117.28,
+      "itr": 246220.24,
+      "fundeb": 224474329.07,
+      "rcl": 889326163.96
+     },
+     "tipo": "completo",
+     "sha256": "09da4213ed49130f176ac6492ded0f69c4c1f913c91fc6377a5f1b6073b3bb91"
+    }
+   }
+  },
+  "3201308": {
+   "nome": "Cariacica",
+   "pop": 376200,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 375500,
+     "v": {
+      "receita": 1649560105.65,
+      "tributos": 295819474.91,
+      "iptu": 40024768.7,
+      "iss": 167702217.47,
+      "itbi": 9059066.67,
+      "irrf": 54480233.86,
+      "outros_tributos": 24553188.21,
+      "transferencias": 1180566739.39,
+      "fpm": 153952630.11,
+      "icms": 369428949.48,
+      "ipva": 47059030.34,
+      "itr": 72373.01,
+      "fundeb": 424530222.53,
+      "rcl": 1442328288.04
+     },
+     "tipo": "completo",
+     "sha256": "ab6b201a3b49092bb23afdb9fb4d32bd9871cfbc5fbbe64705ff683426700a9a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 375500,
+     "v": {
+      "receita": 1840931381.47,
+      "tributos": 331444924.18,
+      "iptu": 45914321.16,
+      "iss": 183715500.03,
+      "itbi": 16651322.64,
+      "irrf": 57511252.39,
+      "outros_tributos": 27652527.96,
+      "transferencias": 1303196880.55,
+      "fpm": 168399004.24,
+      "icms": 468476922.53,
+      "ipva": 53772990.86,
+      "itr": 221424.48,
+      "fundeb": 455889990.9,
+      "rcl": 1589449184.73
+     },
+     "tipo": "completo",
+     "sha256": "94a96da014674b4cd8f6f3bd7356d33b36d2f9b8f45cf77e3281fa6f33de7359"
+    }
+   }
+  },
+  "3201407": {
+   "nome": "Castelo",
+   "pop": 39575,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 39372,
+     "v": {
+      "receita": 203865184.99,
+      "tributos": 19606644.39,
+      "iptu": 2176450.29,
+      "iss": 9015891.13,
+      "itbi": 1741848.45,
+      "irrf": 2935406.07,
+      "outros_tributos": 3737048.45,
+      "transferencias": 172686400.51,
+      "fpm": 51964755.85,
+      "icms": 43003900.3,
+      "ipva": 7925062.4,
+      "itr": 34788.56,
+      "fundeb": 39003054.53,
+      "rcl": 184135431.67
+     },
+     "tipo": "simplificado",
+     "sha256": "1f488bf369e8d0df45721f15445ec883cea6c5bbb7ec28077a7144d7dfcadf35"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 39372,
+     "v": {
+      "receita": 233582284.88,
+      "tributos": 24209772.54,
+      "iptu": 2356755.68,
+      "iss": 10972825.71,
+      "itbi": 2015807.65,
+      "irrf": 3398552.77,
+      "outros_tributos": 5465830.73,
+      "transferencias": 195763417.38,
+      "fpm": 58013087.85,
+      "icms": 45437224.07,
+      "ipva": 9732917.25,
+      "itr": 35363.68,
+      "fundeb": 53687894.71,
+      "rcl": 212026884.75
+     },
+     "tipo": "simplificado",
+     "sha256": "cb33016f553eb2fd63da5b15bb90bfc59e12c13cd54a57baeb942ee19874d377"
+    }
+   }
+  },
+  "3201506": {
+   "nome": "Colatina",
+   "pop": 129301,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 124575,
+     "v": {
+      "receita": 819349822.47,
+      "tributos": 95941682.07,
+      "iptu": 14202843.59,
+      "iss": 48034952.87,
+      "itbi": 8299720.65,
+      "irrf": 22304812.44,
+      "outros_tributos": 3099352.52,
+      "transferencias": 621729275.74,
+      "fpm": 99667091.53,
+      "icms": 111062002.32,
+      "ipva": 19188102.62,
+      "itr": 100350.01,
+      "fundeb": 132719426.73,
+      "rcl": 774915767.21
+     },
+     "tipo": "completo",
+     "sha256": "1261781feb2341099b88eacc75a13df4d475d8872f56e028e4170628452601e9"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 124575,
+     "v": {
+      "receita": 917471179.78,
+      "tributos": 104724151.19,
+      "iptu": 19190615.01,
+      "iss": 53789938.17,
+      "itbi": 8986111.39,
+      "irrf": 19659257.41,
+      "outros_tributos": 3098229.21,
+      "transferencias": 669099094.44,
+      "fpm": 109580276.93,
+      "icms": 113408821.28,
+      "ipva": 22111388.14,
+      "itr": 106844.01,
+      "fundeb": 136398107.77,
+      "rcl": 870440011.36
+     },
+     "tipo": "completo",
+     "sha256": "9874f76b55318436d2ec56e604c1cb75663287236126ed2c6577f3fcc7c931ee"
+    }
+   }
+  },
+  "3201605": {
+   "nome": "Conceição da Barra",
+   "pop": 28923,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 27947,
+     "v": {
+      "receita": 213091856.38,
+      "tributos": 14629307.39,
+      "iptu": 1065209.22,
+      "iss": 9726770.74,
+      "itbi": 556945.18,
+      "irrf": 2926833.85,
+      "outros_tributos": 353548.4,
+      "transferencias": 178095006.61,
+      "fpm": 45871675.82,
+      "icms": 40585324.69,
+      "ipva": 2314332.89,
+      "itr": 1156989.97,
+      "fundeb": 46787018.95,
+      "rcl": 188666854.3
+     },
+     "tipo": "completo",
+     "sha256": "768cb33354fd94bd44387d51638db053d23e625da8d5f236375537c08845281b"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 27947,
+     "v": {
+      "receita": 235363820.14,
+      "tributos": 15990322.13,
+      "iptu": 1651548.55,
+      "iss": 9242431.1,
+      "itbi": 492940.43,
+      "irrf": 1700680.81,
+      "outros_tributos": 2902721.24,
+      "transferencias": 192244764.63,
+      "fpm": 50226984.81,
+      "icms": 33862106.53,
+      "ipva": 2661940.47,
+      "itr": 1185677.83,
+      "fundeb": 56400980.47,
+      "rcl": 202091044.72
+     },
+     "tipo": "completo",
+     "sha256": "bb02b05efff4251b10a10a7e27679867df8f47d6eb7ea7c5e660bd760b993210"
+    }
+   }
+  },
+  "3201704": {
+   "nome": "Conceição do Castelo",
+   "pop": 12472,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12219,
+     "v": {
+      "receita": 82826550.39,
+      "tributos": 5751713.38,
+      "iptu": 773025.5,
+      "iss": 2433192.98,
+      "itbi": 404250.03,
+      "irrf": 1534037.41,
+      "outros_tributos": 607207.46,
+      "transferencias": 74438720.0,
+      "fpm": 23433652.89,
+      "icms": 20870768.48,
+      "ipva": 1543367.11,
+      "itr": 26801.54,
+      "fundeb": 11996128.94,
+      "rcl": 74045112.11
+     },
+     "tipo": "simplificado",
+     "sha256": "3af72368f57e59427c1d0825b7183565e23b150c51c3f2a61bee6fdf43fa1533"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12219,
+     "v": {
+      "receita": 89346313.54,
+      "tributos": 5842330.94,
+      "iptu": 726276.66,
+      "iss": 2342164.71,
+      "itbi": 621711.28,
+      "irrf": 1845277.38,
+      "outros_tributos": 306900.91,
+      "transferencias": 79881702.47,
+      "fpm": 25770385.28,
+      "icms": 20881324.57,
+      "ipva": 1634054.63,
+      "itr": 28297.16,
+      "fundeb": 16078128.75,
+      "rcl": 80185092.47
+     },
+     "tipo": "simplificado",
+     "sha256": "6535d181713e7468b639528506147047a5674e70a4c95a56a3eb7bcaf8b02c51"
+    }
+   }
+  },
+  "3201803": {
+   "nome": "Divino de São Lourenço",
+   "pop": 5397,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 5089,
+     "v": {
+      "receita": 43871426.07,
+      "tributos": 2018863.24,
+      "iptu": 203665.83,
+      "iss": 634417.22,
+      "itbi": 265073.1,
+      "irrf": 785983.55,
+      "outros_tributos": 129723.54,
+      "transferencias": 40830676.44,
+      "fpm": 18151654.13,
+      "icms": 9632164.29,
+      "ipva": 421344.87,
+      "itr": 5825.44,
+      "fundeb": 4028693.17,
+      "rcl": 38705405.0
+     },
+     "tipo": "simplificado",
+     "sha256": "965eab730656fbaaeb3230b1b34f18e592f34d534087db918aad3feb52ae965e"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 5089,
+     "v": {
+      "receita": 47523746.7,
+      "tributos": 2307671.97,
+      "iptu": 220880.91,
+      "iss": 556900.15,
+      "itbi": 403105.64,
+      "irrf": 857241.06,
+      "outros_tributos": 269544.21,
+      "transferencias": 44200312.13,
+      "fpm": 19337695.92,
+      "icms": 10556952.17,
+      "ipva": 544238.85,
+      "itr": 6096.27,
+      "fundeb": 3665522.59,
+      "rcl": 41823019.14
+     },
+     "tipo": "completo",
+     "sha256": "0df3fdef371f542eaf141726a4acf1f72cb64e6a477ef25bbb849a3855026e45"
+    }
+   }
+  },
+  "3201902": {
+   "nome": "Domingos Martins",
+   "pop": 38236,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 35937,
+     "v": {
+      "receita": 253578387.82,
+      "tributos": 28914047.07,
+      "iptu": 4541603.09,
+      "iss": 13060468.47,
+      "itbi": 2763468.92,
+      "irrf": 3642724.48,
+      "outros_tributos": 4905782.11,
+      "transferencias": 199315385.17,
+      "fpm": 46902160.73,
+      "icms": 62612299.14,
+      "ipva": 5618231.9,
+      "itr": 95273.46,
+      "fundeb": 40512929.0,
+      "rcl": 218095644.04
+     },
+     "tipo": "simplificado",
+     "sha256": "6fc9003a084e58f4a58165097d8cd4685369e4bb8df7e0f131139eccb1782740"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 35937,
+     "v": {
+      "receita": 283985938.24,
+      "tributos": 34491862.74,
+      "iptu": 5125107.46,
+      "iss": 14831134.35,
+      "itbi": 4674064.26,
+      "irrf": 4440199.38,
+      "outros_tributos": 5421357.29,
+      "transferencias": 215963183.73,
+      "fpm": 58013087.85,
+      "icms": 59945703.99,
+      "ipva": 6466447.22,
+      "itr": 143092.51,
+      "fundeb": 46700302.5,
+      "rcl": 243183222.84
+     },
+     "tipo": "simplificado",
+     "sha256": "db26e1544dd45ecef8cbb44f27d3b10f6da2492980cc67ad72aa7baf14402e0f"
+    }
+   }
+  },
+  "3202009": {
+   "nome": "Dores do Rio Preto",
+   "pop": 6902,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 6669,
+     "v": {
+      "receita": 57519331.83,
+      "tributos": 3215576.86,
+      "iptu": 441636.93,
+      "iss": 1233397.83,
+      "itbi": 347118.31,
+      "irrf": 682499.48,
+      "outros_tributos": 510924.31,
+      "transferencias": 49607288.9,
+      "fpm": 17588310.26,
+      "icms": 13379492.84,
+      "ipva": 1781149.11,
+      "itr": 8120.05,
+      "fundeb": 6369245.19,
+      "rcl": 48319578.09
+     },
+     "tipo": "simplificado",
+     "sha256": "605df24e2cf27e40f46279052307f3b5ac5d0d4a7b71d7c937a026bed8a03a17"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 6669,
+     "v": {
+      "receita": 66117790.7,
+      "tributos": 3708859.26,
+      "iptu": 517387.93,
+      "iss": 1239401.39,
+      "itbi": 415808.14,
+      "irrf": 996803.18,
+      "outros_tributos": 539458.62,
+      "transferencias": 59042157.89,
+      "fpm": 19374271.94,
+      "icms": 19642282.33,
+      "ipva": 2344630.17,
+      "itr": 9139.65,
+      "fundeb": 7273356.12,
+      "rcl": 56921912.26
+     },
+     "tipo": "simplificado",
+     "sha256": "a95de06749e89d0137720eada70fd34e8b87610e82d422719d42754b1dd810cd"
+    }
+   }
+  },
+  "3202108": {
+   "nome": "Ecoporanga",
+   "pop": 22611,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 21995,
+     "v": {
+      "receita": 138216824.97,
+      "tributos": 8141487.83,
+      "iptu": 300546.27,
+      "iss": 2348346.79,
+      "itbi": 905158.39,
+      "irrf": 3863852.34,
+      "outros_tributos": 723584.04,
+      "transferencias": 123084750.73,
+      "fpm": 40287282.71,
+      "icms": 36368094.8,
+      "ipva": 1948717.89,
+      "itr": 258173.05,
+      "fundeb": 18417334.4,
+      "rcl": 123113696.96
+     },
+     "tipo": "simplificado",
+     "sha256": "0425cc6e6d91dc15eeca5e3abcf116ce4cdf2abce7484f132af4638cee20971a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 21995,
+     "v": {
+      "receita": 152328868.64,
+      "tributos": 9002831.48,
+      "iptu": 311324.8,
+      "iss": 2864706.77,
+      "itbi": 1373738.46,
+      "irrf": 3547978.96,
+      "outros_tributos": 905082.49,
+      "transferencias": 133756701.3,
+      "fpm": 43696355.57,
+      "icms": 32167379.41,
+      "ipva": 2359345.77,
+      "itr": 299040.8,
+      "fundeb": 19398091.47,
+      "rcl": 137471652.56
+     },
+     "tipo": "simplificado",
+     "sha256": "3ed03d95556b4028e8e2e9520824d8900489eba2c5c9b648cbc5a0e24505108d"
+    }
+   }
+  },
+  "3202207": {
+   "nome": "Fundão",
+   "pop": 18898,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 17884,
+     "v": {
+      "receita": 133417678.01,
+      "tributos": 18361987.99,
+      "iptu": 3266683.59,
+      "iss": 9041558.71,
+      "itbi": 1591131.2,
+      "irrf": 3628741.48,
+      "outros_tributos": 833873.01,
+      "transferencias": 100144232.47,
+      "fpm": 34632559.06,
+      "icms": 13599352.0,
+      "ipva": 2010254.6,
+      "itr": 70945.61,
+      "fundeb": 20740415.59,
+      "rcl": 115913849.8
+     },
+     "tipo": "simplificado",
+     "sha256": "99c9ced7a52f525dadb4e7447460d67395319c549f4237cbda1f115ad8bb7c09"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 17884,
+     "v": {
+      "receita": 164012713.01,
+      "tributos": 21735487.53,
+      "iptu": 3747839.54,
+      "iss": 11027383.61,
+      "itbi": 1933613.92,
+      "irrf": 4051749.2,
+      "outros_tributos": 974901.26,
+      "transferencias": 123451674.42,
+      "fpm": 38672163.64,
+      "icms": 20709115.82,
+      "ipva": 2272117.69,
+      "itr": 29881.53,
+      "fundeb": 22007140.52,
+      "rcl": 141224520.39
+     },
+     "tipo": "simplificado",
+     "sha256": "8ed6f2016844b01ba8b44c9d166672f80444ffa23b45afd29498bde26aff03c3"
+    }
+   }
+  },
+  "3202256": {
+   "nome": "Governador Lindenberg",
+   "pop": 11484,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 11073,
+     "v": {
+      "receita": 83413649.98,
+      "tributos": 3530249.3,
+      "iptu": 172810.06,
+      "iss": 1303175.3,
+      "itbi": 221116.26,
+      "irrf": 1427127.45,
+      "outros_tributos": 406020.23,
+      "transferencias": 75533818.01,
+      "fpm": 23451080.53,
+      "icms": 25364805.77,
+      "ipva": 1831972.18,
+      "itr": 20830.02,
+      "fundeb": 8063262.24,
+      "rcl": 73652156.63
+     },
+     "tipo": "simplificado",
+     "sha256": "2f7d24ff747147237c7a52ec2f35a2e9bbd6334fa6bc691eb1dfe5d679017988"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 11073,
+     "v": {
+      "receita": 97084170.59,
+      "tributos": 4553559.13,
+      "iptu": 185286.54,
+      "iss": 723030.0,
+      "itbi": 435634.38,
+      "irrf": 2243653.79,
+      "outros_tributos": 965954.42,
+      "transferencias": 87216918.91,
+      "fpm": 25783594.5,
+      "icms": 29890968.65,
+      "ipva": 2257148.54,
+      "itr": 21772.03,
+      "fundeb": 9559682.62,
+      "rcl": 85956762.2
+     },
+     "tipo": "simplificado",
+     "sha256": "4f31da2a88c2fa9fe71a3764e3a6ba345cadedb1559280fb0f1a6bf705d2edd5"
+    }
+   }
+  },
+  "3202306": {
+   "nome": "Guaçuí",
+   "pop": 31418,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 28727,
+     "v": {
+      "receita": 170958997.76,
+      "tributos": 14508160.72,
+      "iptu": 2745009.18,
+      "iss": 5566146.97,
+      "itbi": 1152862.5,
+      "irrf": 3430414.4,
+      "outros_tributos": 1613727.67,
+      "transferencias": 139401278.78,
+      "fpm": 46126018.32,
+      "icms": 17462807.89,
+      "ipva": 4766585.62,
+      "itr": 21992.81,
+      "fundeb": 41374587.43,
+      "rcl": 149610181.23
+     },
+     "tipo": "simplificado",
+     "sha256": "a652d6a15be37a18cceffc718f6e4f42330d5f30ede4b5d27b39eb981e0b9978"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 28727,
+     "v": {
+      "receita": 183441583.41,
+      "tributos": 15822796.64,
+      "iptu": 2887375.58,
+      "iss": 6477639.58,
+      "itbi": 1082922.67,
+      "irrf": 3639271.6,
+      "outros_tributos": 1735587.21,
+      "transferencias": 154882529.67,
+      "fpm": 51567189.19,
+      "icms": 20634732.36,
+      "ipva": 5672228.12,
+      "itr": 24122.62,
+      "fundeb": 43985458.97,
+      "rcl": 164936700.67
+     },
+     "tipo": "simplificado",
+     "sha256": "a61886db7581ef01ecd56152ecd9010ef419ca45a23d40d3454e7598124e6543"
+    }
+   }
+  },
+  "3202405": {
+   "nome": "Guarapari",
+   "pop": 136311,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 132915,
+     "v": {
+      "receita": 627657085.18,
+      "tributos": 167872203.78,
+      "iptu": 43240618.02,
+      "iss": 40901124.21,
+      "itbi": 33197358.04,
+      "irrf": 19304768.94,
+      "outros_tributos": 31228334.57,
+      "transferencias": 394911989.19,
+      "fpm": 99667091.53,
+      "icms": 37618097.12,
+      "ipva": 29552616.58,
+      "itr": 67310.48,
+      "fundeb": 166630526.96,
+      "rcl": 576859291.36
+     },
+     "tipo": "completo",
+     "sha256": "b75a0b376905715ce29595c5d53cc306d8c9cc1113308c5e818ff52acde7ab13"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 132915,
+     "v": {
+      "receita": 735538256.4,
+      "tributos": 188385191.08,
+      "iptu": 47991729.18,
+      "iss": 51589705.04,
+      "itbi": 33744262.9,
+      "irrf": 20844138.14,
+      "outros_tributos": 34215355.82,
+      "transferencias": 474747822.6,
+      "fpm": 116026175.61,
+      "icms": 44441677.85,
+      "ipva": 34176620.51,
+      "itr": 72692.26,
+      "fundeb": 183216347.5,
+      "rcl": 680728406.0
+     },
+     "tipo": "completo",
+     "sha256": "3d71626805e3f016f1d93fadeab094ef0a7c82dfe045049e03b6bd7cfc7bed33"
+    }
+   }
+  },
+  "3202454": {
+   "nome": "Ibatiba",
+   "pop": 27543,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 25296,
+     "v": {
+      "receita": 138047437.18,
+      "tributos": 9664382.31,
+      "iptu": 806266.99,
+      "iss": 3714729.09,
+      "itbi": 254261.13,
+      "irrf": 3867975.73,
+      "outros_tributos": 1021149.37,
+      "transferencias": 122744230.62,
+      "fpm": 41106313.68,
+      "icms": 17267938.15,
+      "ipva": 4224704.94,
+      "itr": 12968.96,
+      "fundeb": 39921160.96,
+      "rcl": 126260945.22
+     },
+     "tipo": "simplificado",
+     "sha256": "d0aeae0ad8e97c0a5b89882d755e785dcf5a2b2b71fd589a209a7ee0d5c1f19a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 25296,
+     "v": {
+      "receita": 150213553.78,
+      "tributos": 7918009.85,
+      "iptu": 458440.47,
+      "iss": 3723732.13,
+      "itbi": 260180.41,
+      "irrf": 2422352.79,
+      "outros_tributos": 1053304.05,
+      "transferencias": 135138253.91,
+      "fpm": 45121290.53,
+      "icms": 19180993.32,
+      "ipva": 5625202.87,
+      "itr": 12739.25,
+      "fundeb": 43372294.47,
+      "rcl": 137186209.73
+     },
+     "tipo": "simplificado",
+     "sha256": "32ed2b59701c23759170145de33102c7a7583e6b14e98d17e01a37eef0792be9"
+    }
+   }
+  },
+  "3202504": {
+   "nome": "Ibiraçu",
+   "pop": 12304,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12561,
+     "v": {
+      "receita": 91143533.04,
+      "tributos": 7851398.63,
+      "iptu": 442642.82,
+      "iss": 5009170.6,
+      "itbi": 437992.07,
+      "irrf": 1680014.02,
+      "outros_tributos": 281579.12,
+      "transferencias": 70360814.38,
+      "fpm": 23451080.39,
+      "icms": 11772830.91,
+      "ipva": 1839645.23,
+      "itr": 23692.76,
+      "fundeb": 10468731.49,
+      "rcl": 81145573.33
+     },
+     "tipo": "simplificado",
+     "sha256": "f8f23c8b72f48115f9a2a4eb8fe8f4c6df6fde6f287cb68d2f8a5a71e120f1ad"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12561,
+     "v": {
+      "receita": 102904618.54,
+      "tributos": 8654844.98,
+      "iptu": 520790.46,
+      "iss": 5789467.85,
+      "itbi": 244260.08,
+      "irrf": 1813632.19,
+      "outros_tributos": 286694.4,
+      "transferencias": 81769843.37,
+      "fpm": 25783594.6,
+      "icms": 17250958.0,
+      "ipva": 2102477.98,
+      "itr": 30023.72,
+      "fundeb": 11032373.99,
+      "rcl": 90826051.01
+     },
+     "tipo": "simplificado",
+     "sha256": "9e3fdf39adec9d69ffe12a89b0dff94aa153f38ff7f3f276ec707f47db6b3fcc"
+    }
+   }
+  },
+  "3202553": {
+   "nome": "Ibitirama",
+   "pop": 10015,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 9550,
+     "v": {
+      "receita": 65166215.97,
+      "tributos": 4302716.33,
+      "iptu": 152805.24,
+      "iss": 1507086.0,
+      "itbi": 297979.56,
+      "irrf": 1763414.8,
+      "outros_tributos": 581430.73,
+      "transferencias": 57926282.29,
+      "fpm": 17588310.26,
+      "icms": 12143266.63,
+      "ipva": 852173.75,
+      "itr": 9359.22,
+      "fundeb": 14800291.55,
+      "rcl": 59340445.06
+     },
+     "tipo": "simplificado",
+     "sha256": "27730870ab64b9888c963f576eda619a3f536cf50cf4a83ca4e1b91b530e305b"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 9550,
+     "v": {
+      "receita": 79019016.73,
+      "tributos": 5214754.92,
+      "iptu": 168639.6,
+      "iss": 1290302.4,
+      "itbi": 739353.52,
+      "irrf": 2482336.45,
+      "outros_tributos": 534122.95,
+      "transferencias": 70207144.05,
+      "fpm": 19337695.92,
+      "icms": 15987920.07,
+      "ipva": 1093480.27,
+      "itr": 9738.2,
+      "fundeb": 17904084.95,
+      "rcl": 72097507.6
+     },
+     "tipo": "simplificado",
+     "sha256": "fa9c4e6fb44257eab4b98a4d5dd686008ca32343603df1c21f6685e470b8e728"
+    }
+   }
+  },
+  "3202603": {
+   "nome": "Iconha",
+   "pop": 12790,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12055,
+     "v": {
+      "receita": 96711807.3,
+      "tributos": 8239841.03,
+      "iptu": 1168213.82,
+      "iss": 4037290.84,
+      "itbi": 263273.84,
+      "irrf": 1505585.88,
+      "outros_tributos": 1265476.65,
+      "transferencias": 76868422.13,
+      "fpm": 28609809.59,
+      "icms": 14895764.2,
+      "ipva": 3268398.88,
+      "itr": 12178.59,
+      "fundeb": 12122399.87,
+      "rcl": 84646908.33
+     },
+     "tipo": "simplificado",
+     "sha256": "cccad6387e85f0d6d7f65a7b931713ea296a47b1ab93f97fbb458ba5a4d11a51"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12055,
+     "v": {
+      "receita": 105774158.13,
+      "tributos": 9624332.02,
+      "iptu": 1363831.91,
+      "iss": 4215210.76,
+      "itbi": 275829.8,
+      "irrf": 1962808.16,
+      "outros_tributos": 1806651.39,
+      "transferencias": 85247682.22,
+      "fpm": 30844486.37,
+      "icms": 17674122.47,
+      "ipva": 3541384.51,
+      "itr": 13370.76,
+      "fundeb": 13253373.51,
+      "rcl": 94082437.32
+     },
+     "tipo": "simplificado",
+     "sha256": "cccb976e419e5a2c570b3e40873a71f2231fbe38d4633b54aa6c9c55d51bb96d"
+    }
+   }
+  },
+  "3202652": {
+   "nome": "Irupi",
+   "pop": 14647,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 13328,
+     "v": {
+      "receita": 86321152.09,
+      "tributos": 5175298.03,
+      "iptu": 251934.32,
+      "iss": 1670249.46,
+      "itbi": 311881.48,
+      "irrf": 1870746.93,
+      "outros_tributos": 1070485.84,
+      "transferencias": 78976414.24,
+      "fpm": 29313850.47,
+      "icms": 14980473.05,
+      "ipva": 1938882.8,
+      "itr": 10281.21,
+      "fundeb": 17166004.77,
+      "rcl": 77380589.21
+     },
+     "tipo": "completo",
+     "sha256": "9b61147c3a663a68ea89de50b5ff36be965210b0e0239ed5d9df43742c049eeb"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 13328,
+     "v": {
+      "receita": 97547331.79,
+      "tributos": 6263098.34,
+      "iptu": 401201.98,
+      "iss": 2141892.57,
+      "itbi": 371748.11,
+      "irrf": 2220082.48,
+      "outros_tributos": 1128173.2,
+      "transferencias": 88884161.85,
+      "fpm": 32245075.14,
+      "icms": 17683876.8,
+      "ipva": 2819106.72,
+      "itr": 26415.84,
+      "fundeb": 19696738.61,
+      "rcl": 87669442.67
+     },
+     "tipo": "simplificado",
+     "sha256": "d06343fc36ab5294b884d5c0084a68e4e7e80a5b6dd58fa87dad69858dd5a410"
+    }
+   }
+  },
+  "3202702": {
+   "nome": "Itaguaçu",
+   "pop": 14042,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 14368,
+     "v": {
+      "receita": 86302355.19,
+      "tributos": 5704917.53,
+      "iptu": 509756.69,
+      "iss": 2372749.28,
+      "itbi": 545567.65,
+      "irrf": 1577257.52,
+      "outros_tributos": 699586.39,
+      "transferencias": 74101702.26,
+      "fpm": 29313850.47,
+      "icms": 17531547.54,
+      "ipva": 1328092.58,
+      "itr": 17332.04,
+      "fundeb": 11390792.63,
+      "rcl": 77189108.13
+     },
+     "tipo": "simplificado",
+     "sha256": "5882fdd083db584b805789ab7d717446b3213c97b7bebe948d0d5507074efc9b"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 14368,
+     "v": {
+      "receita": 104204113.08,
+      "tributos": 5498542.65,
+      "iptu": 592057.23,
+      "iss": 1835681.63,
+      "itbi": 424998.01,
+      "irrf": 1642582.65,
+      "outros_tributos": 1003223.13,
+      "transferencias": 90841615.7,
+      "fpm": 32229493.22,
+      "icms": 22849396.41,
+      "ipva": 1552931.07,
+      "itr": 22041.33,
+      "fundeb": 14700309.55,
+      "rcl": 93505906.85
+     },
+     "tipo": "simplificado",
+     "sha256": "915653920a058412da147ebefe8184edfe9b138c56b5f7fb6a1230f8d39a3c03"
+    }
+   }
+  },
+  "3202801": {
+   "nome": "Itapemirim",
+   "pop": 44020,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 45801,
+     "v": {
+      "receita": 619538937.17,
+      "tributos": 31931356.42,
+      "iptu": 3531601.65,
+      "iss": 7033436.93,
+      "itbi": 1923441.22,
+      "irrf": 18155456.09,
+      "outros_tributos": 1287420.53,
+      "transferencias": 527703512.16,
+      "fpm": 52764930.83,
+      "icms": 197416114.78,
+      "ipva": 3925555.78,
+      "itr": 155379.64,
+      "fundeb": 59376382.95,
+      "rcl": 554277369.24
+     },
+     "tipo": "simplificado",
+     "sha256": "929841c1b05bb1c034da4dcb42852e76450d40e3ec2f1914a55128d3af9d2cc5"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 45801,
+     "v": {
+      "receita": 617959121.48,
+      "tributos": 27049825.74,
+      "iptu": 3642476.8,
+      "iss": 7778579.47,
+      "itbi": 2194016.3,
+      "irrf": 12255108.7,
+      "outros_tributos": 1179644.47,
+      "transferencias": 528711238.55,
+      "fpm": 58013087.85,
+      "icms": 191843785.6,
+      "ipva": 4677125.25,
+      "itr": 102366.68,
+      "fundeb": 64929474.2,
+      "rcl": 554971533.66
+     },
+     "tipo": "simplificado",
+     "sha256": "75e16e3206c61c8f39fdd9125225816819523aa406843f37a78f64b0e558583d"
+    }
+   }
+  },
+  "3202900": {
+   "nome": "Itarana",
+   "pop": 10975,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12452,
+     "v": {
+      "receita": 76966399.87,
+      "tributos": 7447366.0,
+      "iptu": 408925.94,
+      "iss": 5551543.99,
+      "itbi": 231849.13,
+      "irrf": 696413.42,
+      "outros_tributos": 558633.52,
+      "transferencias": 64034999.04,
+      "fpm": 23451080.39,
+      "icms": 18341862.9,
+      "ipva": 1673260.78,
+      "itr": 12641.61,
+      "fundeb": 7329970.11,
+      "rcl": 68661224.39
+     },
+     "tipo": "simplificado",
+     "sha256": "d0cfb23c3d90e9a10eb86d94b7f300d8846bd67397c85bbb83d91b48ebdb66a6"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12452,
+     "v": {
+      "receita": 83877257.52,
+      "tributos": 5797307.21,
+      "iptu": 506643.13,
+      "iss": 3306209.08,
+      "itbi": 245401.91,
+      "irrf": 1096138.23,
+      "outros_tributos": 642914.86,
+      "transferencias": 72668198.15,
+      "fpm": 25783594.57,
+      "icms": 22068805.7,
+      "ipva": 2032551.34,
+      "itr": 14579.76,
+      "fundeb": 8657344.86,
+      "rcl": 74386870.48
+     },
+     "tipo": "simplificado",
+     "sha256": "f4322800ad549704bc0ef55ce431769a810bd3ddb2b908e671a266c9b4401e4b"
+    }
+   }
+  },
+  "3203007": {
+   "nome": "Iúna",
+   "pop": 30556,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 27846,
+     "v": {
+      "receita": 141392323.75,
+      "tributos": 12832198.45,
+      "iptu": 1587129.09,
+      "iss": 5276444.11,
+      "itbi": 772156.11,
+      "irrf": 4029613.19,
+      "outros_tributos": 1166855.95,
+      "transferencias": 125288198.93,
+      "fpm": 41039390.62,
+      "icms": 24328804.37,
+      "ipva": 3481623.9,
+      "itr": 96706.69,
+      "fundeb": 30032393.69,
+      "rcl": 128305932.74
+     },
+     "tipo": "completo",
+     "sha256": "e21b21565efad40ff608c13c787b498c2a2cc1051aa5e7c114f283ef4faad075"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 27846,
+     "v": {
+      "receita": 156503900.11,
+      "tributos": 14724628.16,
+      "iptu": 1970282.23,
+      "iss": 5154514.22,
+      "itbi": 1309757.97,
+      "irrf": 4860011.86,
+      "outros_tributos": 1430061.88,
+      "transferencias": 138276988.55,
+      "fpm": 45121290.53,
+      "icms": 28146683.63,
+      "ipva": 4276878.28,
+      "itr": 86883.4,
+      "fundeb": 33976319.49,
+      "rcl": 141870979.27
+     },
+     "tipo": "simplificado",
+     "sha256": "d291ebadd5da866c14ebbf34189a6d46824ae1c28ce3b9a2175edd8c4004c935"
+    }
+   }
+  },
+  "3203056": {
+   "nome": "Jaguaré",
+   "pop": 31551,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 28911,
+     "v": {
+      "receita": 222590227.57,
+      "tributos": 15911915.43,
+      "iptu": 920630.38,
+      "iss": 7933501.37,
+      "itbi": 1017981.35,
+      "irrf": 5124335.86,
+      "outros_tributos": 915466.47,
+      "transferencias": 193810562.95,
+      "fpm": 46126019.25,
+      "icms": 55690539.11,
+      "ipva": 4220076.29,
+      "itr": 61610.62,
+      "fundeb": 48024200.57,
+      "rcl": 202087661.53
+     },
+     "tipo": "simplificado",
+     "sha256": "989921e5ec9727a4e4757dcae3b39dddab99ed75794bc88d33ae5f05270d8b57"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 28911,
+     "v": {
+      "receita": 255159376.59,
+      "tributos": 22111021.57,
+      "iptu": 1340653.81,
+      "iss": 11101701.55,
+      "itbi": 1776022.96,
+      "irrf": 7146825.99,
+      "outros_tributos": 745817.26,
+      "transferencias": 218066256.16,
+      "fpm": 51567189.19,
+      "icms": 62437312.61,
+      "ipva": 4985524.58,
+      "itr": 82465.19,
+      "fundeb": 56459771.04,
+      "rcl": 232225531.71
+     },
+     "tipo": "simplificado",
+     "sha256": "89d5c1c04eebc6be804da2d364e724793beea505384aece18fe0dc00574981ae"
+    }
+   }
+  },
+  "3203106": {
+   "nome": "Jerônimo Monteiro",
+   "pop": 12108,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 11627,
+     "v": {
+      "receita": 80915531.82,
+      "tributos": 4603650.38,
+      "iptu": 1057677.33,
+      "iss": 1626571.73,
+      "itbi": 257312.38,
+      "irrf": 1212035.9,
+      "outros_tributos": 450053.04,
+      "transferencias": 68304723.98,
+      "fpm": 23451080.39,
+      "icms": 10431160.28,
+      "ipva": 895297.09,
+      "itr": 14553.04,
+      "fundeb": 13953014.31,
+      "rcl": 72916442.25
+     },
+     "tipo": "simplificado",
+     "sha256": "48902ec73baf8e227bdb2979f99d7324ae000206a406bce95dbdfcd12d9cc17a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 11627,
+     "v": {
+      "receita": 106356107.8,
+      "tributos": 5362972.38,
+      "iptu": 1110864.73,
+      "iss": 530817.94,
+      "itbi": 334506.39,
+      "irrf": 2004752.52,
+      "outros_tributos": 1382030.8,
+      "transferencias": 92073526.83,
+      "fpm": 25783594.49,
+      "icms": 12158870.19,
+      "ipva": 1023093.85,
+      "itr": 15211.47,
+      "fundeb": 16570002.75,
+      "rcl": 97411260.4
+     },
+     "tipo": "simplificado",
+     "sha256": "2c7def43afb1db24d28b66f28053908e0f5fb3ec4d60f696ee381a9b826b1539"
+    }
+   }
+  },
+  "3203130": {
+   "nome": "João Neiva",
+   "pop": 14295,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 15431,
+     "v": {
+      "receita": 139409386.79,
+      "tributos": 18362578.15,
+      "iptu": 887091.44,
+      "iss": 12499644.77,
+      "itbi": 553377.08,
+      "irrf": 2958076.93,
+      "outros_tributos": 1464387.93,
+      "transferencias": 94903761.25,
+      "fpm": 34448546.13,
+      "icms": 19727532.96,
+      "ipva": 2151165.07,
+      "itr": 26788.11,
+      "fundeb": 15677915.39,
+      "rcl": 114268912.79
+     },
+     "tipo": "simplificado",
+     "sha256": "2b86ee8de12fd0922db6cf205ab09a6ccc8c56eb7ba635c573de272612db8238"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 15431,
+     "v": {
+      "receita": 152075621.35,
+      "tributos": 18853055.98,
+      "iptu": 1069123.09,
+      "iss": 12179024.14,
+      "itbi": 507508.69,
+      "irrf": 3242056.9,
+      "outros_tributos": 1855343.16,
+      "transferencias": 101759979.66,
+      "fpm": 37065800.63,
+      "icms": 21173023.27,
+      "ipva": 2364580.43,
+      "itr": 28922.43,
+      "fundeb": 16184682.25,
+      "rcl": 123240356.24
+     },
+     "tipo": "simplificado",
+     "sha256": "e2f54cd3702a4f5113973fab1a529b4a2309280880ae28f1f7fef97754335c6e"
+    }
+   }
+  },
+  "3203163": {
+   "nome": "Laranja da Terra",
+   "pop": 11597,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 11068,
+     "v": {
+      "receita": 78847569.2,
+      "tributos": 4576440.23,
+      "iptu": 322044.34,
+      "iss": 1507387.65,
+      "itbi": 309242.98,
+      "irrf": 1734577.29,
+      "outros_tributos": 703187.97,
+      "transferencias": 71420015.18,
+      "fpm": 23451080.39,
+      "icms": 19555912.06,
+      "ipva": 1109454.67,
+      "itr": 10941.56,
+      "fundeb": 11955373.51,
+      "rcl": 70409378.4
+     },
+     "tipo": "simplificado",
+     "sha256": "5f35712981eee8829eae8bbe2edd9c17b882d02a5b57a8f017326574c2835600"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 11068,
+     "v": {
+      "receita": 90262586.08,
+      "tributos": 4534712.53,
+      "iptu": 384618.83,
+      "iss": 1327416.99,
+      "itbi": 302386.39,
+      "irrf": 1956010.0,
+      "outros_tributos": 564280.32,
+      "transferencias": 81630683.34,
+      "fpm": 25783594.57,
+      "icms": 24089796.88,
+      "ipva": 1337140.32,
+      "itr": 10739.06,
+      "fundeb": 16116379.26,
+      "rcl": 80501760.97
+     },
+     "tipo": "simplificado",
+     "sha256": "eac555d35989c599fce7cdf0e219c53c6d96fb248db0b1549963cf554930c624"
+    }
+   }
+  },
+  "3203205": {
+   "nome": "Linhares",
+   "pop": 183797,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 171265,
+     "v": {
+      "receita": 1195951462.59,
+      "tributos": 184711106.35,
+      "iptu": 19711122.56,
+      "iss": 103375610.45,
+      "itbi": 16625094.64,
+      "irrf": 36103029.51,
+      "outros_tributos": 8896249.19,
+      "transferencias": 888559380.3,
+      "fpm": 153952570.11,
+      "icms": 241214246.84,
+      "ipva": 25936027.58,
+      "itr": 624618.85,
+      "fundeb": 207298225.39,
+      "rcl": 1082314249.63
+     },
+     "tipo": "completo",
+     "sha256": "ef32a9307f92a53b6b24af23ecd8c559c88420ed298a2aa0bb2b0384a72355be"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 171265,
+     "v": {
+      "receita": 1284196997.54,
+      "tributos": 195779231.6,
+      "iptu": 22015159.0,
+      "iss": 109071226.51,
+      "itbi": 19192307.78,
+      "irrf": 37105852.88,
+      "outros_tributos": 8394685.43,
+      "transferencias": 921086063.51,
+      "fpm": 168399004.23,
+      "icms": 249494642.79,
+      "ipva": 30474449.83,
+      "itr": 1043542.36,
+      "fundeb": 229827902.53,
+      "rcl": 1166478438.15
+     },
+     "tipo": "completo",
+     "sha256": "2fa634315b58c1fca3efcfcdb393c58f804ba657d612f4215d4ae6d8c77bdf6f"
+    }
+   }
+  },
+  "3203304": {
+   "nome": "Mantenópolis",
+   "pop": 13131,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12259,
+     "v": {
+      "receita": 82270350.97,
+      "tributos": 5879950.83,
+      "iptu": 694192.88,
+      "iss": 2439649.87,
+      "itbi": 395626.74,
+      "irrf": 1964865.78,
+      "outros_tributos": 385615.56,
+      "transferencias": 72518052.63,
+      "fpm": 28609809.59,
+      "icms": 12982001.97,
+      "ipva": 1850728.73,
+      "itr": 8639.51,
+      "fundeb": 11290004.94,
+      "rcl": 71914332.23
+     },
+     "tipo": "simplificado",
+     "sha256": "09da613348b83707ca78cf9dd00c455f2fc5e90554a5c4b78994138eaaf740e2"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12259,
+     "v": {
+      "receita": 92565998.88,
+      "tributos": 6524618.01,
+      "iptu": 689117.53,
+      "iss": 2031920.49,
+      "itbi": 588364.18,
+      "irrf": 2876903.78,
+      "outros_tributos": 338312.03,
+      "transferencias": 81547418.49,
+      "fpm": 30844486.37,
+      "icms": 17714700.7,
+      "ipva": 2234174.95,
+      "itr": 10049.13,
+      "fundeb": 14698555.15,
+      "rcl": 81130123.26
+     },
+     "tipo": "simplificado",
+     "sha256": "a697c58649e92c8f39170fb0c2e33ca2d27f94b4826e994323d6161c3da4dbf2"
+    }
+   }
+  },
+  "3203320": {
+   "nome": "Marataízes",
+   "pop": 45953,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 46198,
+     "v": {
+      "receita": 427827851.4,
+      "tributos": 37807104.74,
+      "iptu": 6512976.09,
+      "iss": 11252546.43,
+      "itbi": 1851967.73,
+      "irrf": 14172718.1,
+      "outros_tributos": 4016896.39,
+      "transferencias": 376673748.81,
+      "fpm": 52764930.83,
+      "icms": 31957592.72,
+      "ipva": 5683456.28,
+      "itr": 4954.37,
+      "fundeb": 67935619.13,
+      "rcl": 410648894.47
+     },
+     "tipo": "simplificado",
+     "sha256": "b932d6935b77c8cc225f80910118d3f2a1beb92f3e70b7b1e785d2e2cce78b3e"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 46198,
+     "v": {
+      "receita": 448129491.15,
+      "tributos": 36579238.62,
+      "iptu": 6625499.8,
+      "iss": 9064981.32,
+      "itbi": 2834653.42,
+      "irrf": 13708431.98,
+      "outros_tributos": 4345672.1,
+      "transferencias": 399647233.81,
+      "fpm": 64458986.49,
+      "icms": 32941156.42,
+      "ipva": 6522732.23,
+      "itr": 5284.63,
+      "fundeb": 76443015.41,
+      "rcl": 428643942.46
+     },
+     "tipo": "simplificado",
+     "sha256": "0e193cbc30c454d126055283e39ac5b41f22aaba54c358f5262cbe21b6a7c8e3"
+    }
+   }
+  },
+  "3203346": {
+   "nome": "Marechal Floriano",
+   "pop": 18964,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 19594,
+     "v": {
+      "receita": 122342190.97,
+      "tributos": 13539274.78,
+      "iptu": 1180422.06,
+      "iss": 6283191.98,
+      "itbi": 1005627.38,
+      "irrf": 3113667.57,
+      "outros_tributos": 1956365.79,
+      "transferencias": 104403049.41,
+      "fpm": 35176832.57,
+      "icms": 29415146.78,
+      "ipva": 2790962.0,
+      "itr": 22980.36,
+      "fundeb": 20363629.0,
+      "rcl": 109444122.14
+     },
+     "tipo": "completo",
+     "sha256": "f77febd5d94cc1e55767fdf920948edfac2b864e39809bdd36e31481a8406ada"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 19594,
+     "v": {
+      "receita": 139599119.93,
+      "tributos": 12534527.8,
+      "iptu": 1386147.36,
+      "iss": 5252688.92,
+      "itbi": 1203211.04,
+      "irrf": 2448030.57,
+      "outros_tributos": 2244449.91,
+      "transferencias": 118996452.41,
+      "fpm": 38675391.9,
+      "icms": 31328990.15,
+      "ipva": 3022784.79,
+      "itr": 22489.32,
+      "fundeb": 26325787.83,
+      "rcl": 125748815.03
+     },
+     "tipo": "simplificado",
+     "sha256": "b12246141e6a3b77967e724a3440d0d3885d1e7a8fe4d44909d9252c6ea34102"
+    }
+   }
+  },
+  "3203353": {
+   "nome": "Marilândia",
+   "pop": 13087,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 12975,
+     "v": {
+      "receita": 87834098.85,
+      "tributos": 4502616.1,
+      "iptu": 551346.36,
+      "iss": 1959400.54,
+      "itbi": 251527.99,
+      "irrf": 1299075.93,
+      "outros_tributos": 441265.28,
+      "transferencias": 78219535.83,
+      "fpm": 23451080.39,
+      "icms": 23861332.83,
+      "ipva": 2195289.02,
+      "itr": 32813.6,
+      "fundeb": 13293979.44,
+      "rcl": 78302097.96
+     },
+     "tipo": "simplificado",
+     "sha256": "f24bdc772a27e3602af3ff992d29a581af080e91ab7ab98424bdc1f14b70e061"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 12975,
+     "v": {
+      "receita": 106893517.65,
+      "tributos": 6279180.17,
+      "iptu": 696203.34,
+      "iss": 2246667.02,
+      "itbi": 610930.58,
+      "irrf": 1705931.67,
+      "outros_tributos": 1019447.56,
+      "transferencias": 94024162.35,
+      "fpm": 25783594.57,
+      "icms": 28426047.51,
+      "ipva": 2589583.26,
+      "itr": 20974.9,
+      "fundeb": 15855944.61,
+      "rcl": 95980581.33
+     },
+     "tipo": "simplificado",
+     "sha256": "f3871546d5c42b1099892d370585b7cd82c443e7c24e2750b39cf378c3421b14"
+    }
+   }
+  },
+  "3203403": {
+   "nome": "Mimoso do Sul",
+   "pop": 25088,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 24769,
+     "v": {
+      "receita": 167427066.01,
+      "tributos": 11795368.1,
+      "iptu": 831997.97,
+      "iss": 7623373.95,
+      "itbi": 358755.45,
+      "irrf": 2609912.24,
+      "outros_tributos": 371328.49,
+      "transferencias": 141429869.7,
+      "fpm": 41039707.28,
+      "icms": 24657010.13,
+      "ipva": 2677731.95,
+      "itr": 70788.31,
+      "fundeb": 20751808.28,
+      "rcl": 150870327.2
+     },
+     "tipo": "simplificado",
+     "sha256": "49d3ef4928be9675d69a5a99dee810d15d7f5898fd17eb579f0289402a385f3b"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 24769,
+     "v": {
+      "receita": 159824617.37,
+      "tributos": 9829268.85,
+      "iptu": 1485019.87,
+      "iss": 5652711.03,
+      "itbi": 591944.35,
+      "irrf": 1644449.94,
+      "outros_tributos": 455143.66,
+      "transferencias": 134818656.99,
+      "fpm": 45121290.53,
+      "icms": 26406013.8,
+      "ipva": 3107224.94,
+      "itr": 86999.62,
+      "fundeb": 21592046.34,
+      "rcl": 139359288.0
+     },
+     "tipo": "simplificado",
+     "sha256": "6fc7dfdbf90bde879da47f762faf66939835bb01878d0f5436f58510c8a5b631"
+    }
+   }
+  },
+  "3203502": {
+   "nome": "Montanha",
+   "pop": 19830,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 18851,
+     "v": {
+      "receita": 129499236.15,
+      "tributos": 10664845.75,
+      "iptu": 102494.14,
+      "iss": 6012041.51,
+      "itbi": 2168684.96,
+      "irrf": 1615103.86,
+      "outros_tributos": 766521.28,
+      "transferencias": 115566757.63,
+      "fpm": 31884967.05,
+      "icms": 27420830.94,
+      "ipva": 2382800.43,
+      "itr": 269311.42,
+      "fundeb": 24021032.5,
+      "rcl": 117028325.39
+     },
+     "tipo": "simplificado",
+     "sha256": "4ed207a47a0bb8f68d58f5f8c2a1dbee3e074d9e9667f67c434589c405a5ca73"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 18851,
+     "v": {
+      "receita": 148335733.95,
+      "tributos": 12495609.19,
+      "iptu": 314645.0,
+      "iss": 6716498.93,
+      "itbi": 2873976.91,
+      "irrf": 2306773.95,
+      "outros_tributos": 283714.4,
+      "transferencias": 131271464.35,
+      "fpm": 35683966.26,
+      "icms": 28993235.14,
+      "ipva": 3248329.6,
+      "itr": 292091.74,
+      "fundeb": 29092409.11,
+      "rcl": 134877845.13
+     },
+     "tipo": "simplificado",
+     "sha256": "dc1e7b03ec76fdf3f22a540e733d6a139bafc775710ebd1192c972991b1c4c01"
+    }
+   }
+  },
+  "3203601": {
+   "nome": "Mucurici",
+   "pop": 5653,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 5467,
+     "v": {
+      "receita": 56465299.96,
+      "tributos": 5044727.06,
+      "iptu": 113836.71,
+      "iss": 665655.83,
+      "itbi": 3586859.92,
+      "irrf": 606532.18,
+      "outros_tributos": 71842.42,
+      "transferencias": 49338288.65,
+      "fpm": 16930332.19,
+      "icms": 15206026.64,
+      "ipva": 581333.94,
+      "itr": 179543.94,
+      "fundeb": 5938640.27,
+      "rcl": 50044928.38
+     },
+     "tipo": "simplificado",
+     "sha256": "9255c39cad679d3ffce3457afe41f9d985153bcae9dd07ffdc4eeac424a8d537"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 5467,
+     "v": {
+      "receita": 64815747.96,
+      "tributos": 3499108.16,
+      "iptu": 105881.89,
+      "iss": 1034433.82,
+      "itbi": 1477849.61,
+      "irrf": 803179.97,
+      "outros_tributos": 77762.87,
+      "transferencias": 58355559.9,
+      "fpm": 18578951.58,
+      "icms": 17314709.19,
+      "ipva": 704424.81,
+      "itr": 314257.33,
+      "fundeb": 7494353.3,
+      "rcl": 57706566.27
+     },
+     "tipo": "simplificado",
+     "sha256": "988e481f939699379c611480f5d79137ac9a5562ca491d73571460eea3fc592a"
+    }
+   }
+  },
+  "3203700": {
+   "nome": "Muniz Freire",
+   "pop": 18809,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 18169,
+     "v": {
+      "receita": 120698507.38,
+      "tributos": 9062472.42,
+      "iptu": 909112.82,
+      "iss": 3194442.52,
+      "itbi": 455304.15,
+      "irrf": 3913134.09,
+      "outros_tributos": 590478.84,
+      "transferencias": 108098836.18,
+      "fpm": 35176620.55,
+      "icms": 26825649.71,
+      "ipva": 1658871.69,
+      "itr": 26726.78,
+      "fundeb": 20304386.18,
+      "rcl": 108541232.91
+     },
+     "tipo": "simplificado",
+     "sha256": "09120b35e4aa7be4941022288ce954c005a9ad145d3bc4db31bb5d1b3158ae7f"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 18169,
+     "v": {
+      "receita": 144306095.37,
+      "tributos": 10186675.56,
+      "iptu": 1496030.65,
+      "iss": 2810114.57,
+      "itbi": 750515.64,
+      "irrf": 4221499.65,
+      "outros_tributos": 908515.05,
+      "transferencias": 129408450.16,
+      "fpm": 38681606.76,
+      "icms": 28522481.7,
+      "ipva": 2012464.25,
+      "itr": 31718.76,
+      "fundeb": 27869935.44,
+      "rcl": 131224890.72
+     },
+     "tipo": "simplificado",
+     "sha256": "982eaf6454f9273f19ef98355b8dbf3a8bb99eae10c87214105d1aed86c4094c"
+    }
+   }
+  },
+  "3203809": {
+   "nome": "Muqui",
+   "pop": 14185,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 15736,
+     "v": {
+      "receita": 81798723.39,
+      "tributos": 5236270.78,
+      "iptu": 572304.27,
+      "iss": 2815983.61,
+      "itbi": 346121.4,
+      "irrf": 806654.24,
+      "outros_tributos": 695207.26,
+      "transferencias": 73895628.09,
+      "fpm": 29313850.47,
+      "icms": 13850438.0,
+      "ipva": 1195837.13,
+      "itr": 16662.11,
+      "fundeb": 12956540.41,
+      "rcl": 73434902.46
+     },
+     "tipo": "simplificado",
+     "sha256": "7f09b11fbf567e478f74bb78b869bc449d228c5c2a286eb9372fb15fad77ae54"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 15736,
+     "v": {
+      "receita": 94721853.02,
+      "tributos": 5295689.86,
+      "iptu": 539646.39,
+      "iss": 2972390.1,
+      "itbi": 234086.71,
+      "irrf": 1230507.04,
+      "outros_tributos": 319059.62,
+      "transferencias": 85962079.33,
+      "fpm": 32229493.22,
+      "icms": 18008487.55,
+      "ipva": 1429386.47,
+      "itr": 16428.91,
+      "fundeb": 15051191.05,
+      "rcl": 85030139.43
+     },
+     "tipo": "simplificado",
+     "sha256": "043a92cb6c8ad7eeb1641c670f95c51a881a6bd0efcb222c2fc7ed992db0e633"
+    }
+   }
+  },
+  "3203908": {
+   "nome": "Nova Venécia",
+   "pop": 52324,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 48220,
+     "v": {
+      "receita": 311628694.87,
+      "tributos": 28397986.21,
+      "iptu": 2565889.12,
+      "iss": 14937015.79,
+      "itbi": 2886864.08,
+      "irrf": 6394812.58,
+      "outros_tributos": 1613404.64,
+      "transferencias": 268474186.02,
+      "fpm": 63642228.98,
+      "icms": 67246055.79,
+      "ipva": 6771417.06,
+      "itr": 857019.49,
+      "fundeb": 66302994.07,
+      "rcl": 284933612.94
+     },
+     "tipo": "completo",
+     "sha256": "08a1a0b290cb0e4c507989bc38f73a86bfa7dc4c75a7fa0da9a800a750241367"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 48220,
+     "v": {
+      "receita": 346629456.54,
+      "tributos": 28555189.47,
+      "iptu": 3019288.84,
+      "iss": 15715811.55,
+      "itbi": 3454668.69,
+      "irrf": 4546743.5,
+      "outros_tributos": 1818676.89,
+      "transferencias": 301704452.03,
+      "fpm": 70904885.08,
+      "icms": 69459277.21,
+      "ipva": 8157434.25,
+      "itr": 468532.05,
+      "fundeb": 73916291.77,
+      "rcl": 318245530.68
+     },
+     "tipo": "completo",
+     "sha256": "08d0f102095e0f83897db43b249b421f862f1546d026233a837cef2861b72c81"
+    }
+   }
+  },
+  "3204005": {
+   "nome": "Pancas",
+   "pop": 19120,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 18923,
+     "v": {
+      "receita": 114266044.06,
+      "tributos": 7823858.0,
+      "iptu": 1200567.42,
+      "iss": 3465594.14,
+      "itbi": 634886.33,
+      "irrf": 1994440.31,
+      "outros_tributos": 528369.8,
+      "transferencias": 104186767.99,
+      "fpm": 35176620.55,
+      "icms": 23529679.23,
+      "ipva": 1740415.57,
+      "itr": 28434.48,
+      "fundeb": 15545226.92,
+      "rcl": 102769979.53
+     },
+     "tipo": "simplificado",
+     "sha256": "1df6130d189e666f5991804d1ed4f24ec110f0a3aa4c3463a031b06863b46006"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 18923,
+     "v": {
+      "receita": 131243538.64,
+      "tributos": 8592179.19,
+      "iptu": 1209948.76,
+      "iss": 3234368.95,
+      "itbi": 935671.49,
+      "irrf": 2624445.71,
+      "outros_tributos": 587744.28,
+      "transferencias": 119756465.36,
+      "fpm": 38675391.91,
+      "icms": 24477377.32,
+      "ipva": 2173682.71,
+      "itr": 34644.52,
+      "fundeb": 18922728.13,
+      "rcl": 118942762.17
+     },
+     "tipo": "simplificado",
+     "sha256": "f0a11fbb7ffc88ee953ff1309ad675feee2f1199dae947591dd8e453e3717859"
+    }
+   }
+  },
+  "3204054": {
+   "nome": "Pedro Canário",
+   "pop": 21923,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 21343,
+     "v": {
+      "receita": 151731762.01,
+      "tributos": 12475042.06,
+      "iptu": 996274.33,
+      "iss": 6422547.3,
+      "itbi": 958812.4,
+      "irrf": 3210201.06,
+      "outros_tributos": 887206.97,
+      "transferencias": 123050874.5,
+      "fpm": 40287282.71,
+      "icms": 16404699.06,
+      "ipva": 2592875.32,
+      "itr": 133013.58,
+      "fundeb": 28091913.11,
+      "rcl": 129490056.75
+     },
+     "tipo": "completo",
+     "sha256": "d9844f7aec351ef967d41383232cc2ca4d19fa420086c89f32cb3b4f031ee4b5"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 21343,
+     "v": {
+      "receita": 149001546.45,
+      "tributos": 12631417.16,
+      "iptu": 1455512.91,
+      "iss": 5052663.81,
+      "itbi": 853422.77,
+      "irrf": 3948715.76,
+      "outros_tributos": 1321101.91,
+      "transferencias": 128306683.16,
+      "fpm": 43696355.57,
+      "icms": 18802269.37,
+      "ipva": 2859640.87,
+      "itr": 219652.08,
+      "fundeb": 27662589.62,
+      "rcl": 134253231.48
+     },
+     "tipo": "simplificado",
+     "sha256": "46b17838acda266edd76117b3b8571a29e54e80a681233288adc1dd98a254678"
+    }
+   }
+  },
+  "3204104": {
+   "nome": "Pinheiros",
+   "pop": 24843,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 23674,
+     "v": {
+      "receita": 155232479.97,
+      "tributos": 16226915.19,
+      "iptu": 275431.27,
+      "iss": 7401122.98,
+      "itbi": 1219980.72,
+      "irrf": 3533165.83,
+      "outros_tributos": 3797214.39,
+      "transferencias": 134399138.27,
+      "fpm": 41039390.62,
+      "icms": 39447556.19,
+      "ipva": 2281698.8,
+      "itr": 384882.04,
+      "fundeb": 31766009.55,
+      "rcl": 139367010.51
+     },
+     "tipo": "completo",
+     "sha256": "780fd93cc68ddebcafbbfb955495b3e753f5f37d1540af93c2f71df3ac22061a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 23674,
+     "v": {
+      "receita": 178610106.15,
+      "tributos": 19420774.26,
+      "iptu": 332242.07,
+      "iss": 8772427.4,
+      "itbi": 2687182.22,
+      "irrf": 3422950.87,
+      "outros_tributos": 4205971.7,
+      "transferencias": 152041512.48,
+      "fpm": 45121290.53,
+      "icms": 42509514.45,
+      "ipva": 2664340.42,
+      "itr": 494291.98,
+      "fundeb": 38410030.38,
+      "rcl": 161347323.72
+     },
+     "tipo": "completo",
+     "sha256": "c921c8ba0e478d3624a441d72b1f11be25f4a3779e6a2317c460ff9ed8518997"
+    }
+   }
+  },
+  "3204203": {
+   "nome": "Piúma",
+   "pop": 23912,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 21124,
+     "v": {
+      "receita": 161320286.08,
+      "tributos": 21451957.43,
+      "iptu": 5854827.55,
+      "iss": 7039319.31,
+      "itbi": 1545801.55,
+      "irrf": 3790353.34,
+      "outros_tributos": 3221655.68,
+      "transferencias": 133324524.71,
+      "fpm": 35176620.55,
+      "icms": 13477518.7,
+      "ipva": 4154969.31,
+      "itr": 6929.84,
+      "fundeb": 37944801.46,
+      "rcl": 151377745.99
+     },
+     "tipo": "simplificado",
+     "sha256": "173bfc7e8708f2124ba4355d63cef0345de81661f30410529951e9b45b1e773f"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 21124,
+     "v": {
+      "receita": 179518213.71,
+      "tributos": 24814410.33,
+      "iptu": 6388002.37,
+      "iss": 8295762.8,
+      "itbi": 1922190.64,
+      "irrf": 4403572.05,
+      "outros_tributos": 3804882.47,
+      "transferencias": 147743591.8,
+      "fpm": 38675391.9,
+      "icms": 20536340.28,
+      "ipva": 5015456.95,
+      "itr": 8390.71,
+      "fundeb": 39245594.71,
+      "rcl": 167447259.74
+     },
+     "tipo": "simplificado",
+     "sha256": "ae35b795a2c1649bdf079e1deb34333c73c12442c48917efdfaf604d7fcb497b"
+    }
+   }
+  },
+  "3204252": {
+   "nome": "Ponto Belo",
+   "pop": 6671,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 6486,
+     "v": {
+      "receita": 51952802.25,
+      "tributos": 2510856.18,
+      "iptu": 34080.2,
+      "iss": 1035486.57,
+      "itbi": 674551.98,
+      "irrf": 590243.63,
+      "outros_tributos": 176493.8,
+      "transferencias": 47406530.16,
+      "fpm": 17588310.26,
+      "icms": 10892631.98,
+      "ipva": 814839.46,
+      "itr": 53356.08,
+      "fundeb": 7185275.81,
+      "rcl": 46380582.96
+     },
+     "tipo": "simplificado",
+     "sha256": "fe78d426287a302ae0da793ca729d2b36d8603894ab873832cc560ec9bc3a91a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 6486,
+     "v": {
+      "receita": 60575011.59,
+      "tributos": 2674996.01,
+      "iptu": 55235.65,
+      "iss": 940197.45,
+      "itbi": 378881.48,
+      "irrf": 891357.92,
+      "outros_tributos": 409323.51,
+      "transferencias": 55592271.41,
+      "fpm": 17215353.6,
+      "icms": 14883850.14,
+      "ipva": 1101356.88,
+      "itr": 85237.75,
+      "fundeb": 7951830.51,
+      "rcl": 53882084.72
+     },
+     "tipo": "simplificado",
+     "sha256": "2b84aed9569337258dc6edbde6c44023cf0e69d7811c9df79087325c27db0051"
+    }
+   }
+  },
+  "3204302": {
+   "nome": "Presidente Kennedy",
+   "pop": 14852,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 14718,
+     "v": {
+      "receita": 499340722.78,
+      "tributos": 55673420.06,
+      "iptu": 1098551.64,
+      "iss": 30332970.03,
+      "itbi": 392771.92,
+      "irrf": 23493337.71,
+      "outros_tributos": 355788.76,
+      "transferencias": 299495725.63,
+      "fpm": 29313850.47,
+      "icms": 20283800.35,
+      "ipva": 2518053.13,
+      "itr": 230715.06,
+      "fundeb": 23322769.13,
+      "rcl": 489360105.69
+     },
+     "tipo": "simplificado",
+     "sha256": "d509443f1ca18c93d992be25b7a76ef55098e02e604acc6e8242bd905f6e64f8"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 14718,
+     "v": {
+      "receita": 456870106.29,
+      "tributos": 62687839.04,
+      "iptu": 1218317.34,
+      "iss": 36971111.44,
+      "itbi": 518913.36,
+      "irrf": 23598212.26,
+      "outros_tributos": 381284.64,
+      "transferencias": 291815642.21,
+      "fpm": 32224681.14,
+      "icms": 22014850.8,
+      "ipva": 2801154.49,
+      "itr": 282602.97,
+      "fundeb": 28609856.08,
+      "rcl": 446038100.55
+     },
+     "tipo": "simplificado",
+     "sha256": "794dde4b5b7e7a29c979f2613a48125ae2b2683c9357ccaf3d4f031fd2a800fd"
+    }
+   }
+  },
+  "3204351": {
+   "nome": "Rio Bananal",
+   "pop": 20350,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 19035,
+     "v": {
+      "receita": 174278694.12,
+      "tributos": 12414960.64,
+      "iptu": 668544.1,
+      "iss": 4747377.95,
+      "itbi": 610145.84,
+      "irrf": 5681376.2,
+      "outros_tributos": 707516.55,
+      "transferencias": 136295368.71,
+      "fpm": 35176620.55,
+      "icms": 46831875.8,
+      "ipva": 3753301.02,
+      "itr": 104470.3,
+      "fundeb": 31100820.53,
+      "rcl": 143306817.41
+     },
+     "tipo": "simplificado",
+     "sha256": "7d79e5c8ba085f4e754e1048c47d6decc410e39f985dc22f4b0593b0320892d0"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 19035,
+     "v": {
+      "receita": 206620333.22,
+      "tributos": 16163124.66,
+      "iptu": 1483160.71,
+      "iss": 7759976.37,
+      "itbi": 1264488.09,
+      "irrf": 5068635.42,
+      "outros_tributos": 586864.07,
+      "transferencias": 149092724.67,
+      "fpm": 38675391.9,
+      "icms": 49121598.83,
+      "ipva": 5165199.47,
+      "itr": 54432.43,
+      "fundeb": 33246046.5,
+      "rcl": 160892134.31
+     },
+     "tipo": "simplificado",
+     "sha256": "fe330d390f89e89432b41f7ce187c7ef0a47a71a8c3fad04d9d04200872f17b1"
+    }
+   }
+  },
+  "3204401": {
+   "nome": "Rio Novo do Sul",
+   "pop": 11471,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 11017,
+     "v": {
+      "receita": 84171761.34,
+      "tributos": 6271123.91,
+      "iptu": 558640.01,
+      "iss": 3515045.26,
+      "itbi": 337741.65,
+      "irrf": 1232997.23,
+      "outros_tributos": 626699.76,
+      "transferencias": 70664753.99,
+      "fpm": 23451080.39,
+      "icms": 13441588.86,
+      "ipva": 1369293.6,
+      "itr": 18737.48,
+      "fundeb": 9509382.34,
+      "rcl": 73342791.86
+     },
+     "tipo": "completo",
+     "sha256": "0a3db5364ec1ad31f4c014e3b84e8d2ad1c85898d5e598e4275ec01d0a48a972"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 11017,
+     "v": {
+      "receita": 91356780.82,
+      "tributos": 5536027.22,
+      "iptu": 582703.98,
+      "iss": 2623552.73,
+      "itbi": 209784.24,
+      "irrf": 1440842.15,
+      "outros_tributos": 679144.12,
+      "transferencias": 78329077.1,
+      "fpm": 25783594.57,
+      "icms": 17617331.51,
+      "ipva": 1607597.97,
+      "itr": 17519.83,
+      "fundeb": 10381190.49,
+      "rcl": 80663436.59
+     },
+     "tipo": "simplificado",
+     "sha256": "c8705ca3ce8dd49a5bb38f98797aecaa0d833e3d246f9402482c03ccf512726c"
+    }
+   }
+  },
+  "3204500": {
+   "nome": "Santa Leopoldina",
+   "pop": 13813,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 15830,
+     "v": {
+      "receita": 94558398.6,
+      "tributos": 4982101.59,
+      "iptu": 185497.99,
+      "iss": 2226241.86,
+      "itbi": 439459.77,
+      "irrf": 1747801.93,
+      "outros_tributos": 383100.04,
+      "transferencias": 80666302.73,
+      "fpm": 23451080.39,
+      "icms": 27259664.59,
+      "ipva": 1144854.38,
+      "itr": 60792.34,
+      "fundeb": 12728123.24,
+      "rcl": 79084777.65
+     },
+     "tipo": "simplificado",
+     "sha256": "677604d3bd5c93e227cbd3d9333f2c1badf6859f272c1192712f5e4da6640042"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 15830,
+     "v": {
+      "receita": 110601842.51,
+      "tributos": 8146539.89,
+      "iptu": 198283.36,
+      "iss": 4558112.12,
+      "itbi": 995579.63,
+      "irrf": 1954065.98,
+      "outros_tributos": 440498.8,
+      "transferencias": 93412482.46,
+      "fpm": 32229493.22,
+      "icms": 29177161.43,
+      "ipva": 1365822.75,
+      "itr": 63168.68,
+      "fundeb": 12972553.5,
+      "rcl": 93629577.05
+     },
+     "tipo": "simplificado",
+     "sha256": "3b98aed9ddf808181cf0f7b483bb459452a9ca108568aacb7e0caa57f06ffb3c"
+    }
+   }
+  },
+  "3204559": {
+   "nome": "Santa Maria de Jetibá",
+   "pop": 45575,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 46523,
+     "v": {
+      "receita": 307196169.16,
+      "tributos": 23422271.13,
+      "iptu": 2789675.6,
+      "iss": 9185687.09,
+      "itbi": 1583377.28,
+      "irrf": 6390138.23,
+      "outros_tributos": 3473392.93,
+      "transferencias": 260182562.19,
+      "fpm": 52764931.83,
+      "icms": 121828999.25,
+      "ipva": 8545514.28,
+      "itr": 118557.3,
+      "fundeb": 31911715.02,
+      "rcl": 256529539.2
+     },
+     "tipo": "simplificado",
+     "sha256": "70a1e7ff5cd82e54e188bbd24dab18bca12833fdf6ee2159e5438ed9921f9dbd"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 46523,
+     "v": {
+      "receita": 360398280.7,
+      "tributos": 29436581.82,
+      "iptu": 4070866.37,
+      "iss": 10600205.9,
+      "itbi": 1974375.71,
+      "irrf": 8312801.13,
+      "outros_tributos": 4478332.71,
+      "transferencias": 291012637.09,
+      "fpm": 64458986.49,
+      "icms": 124234536.33,
+      "ipva": 11146675.29,
+      "itr": 122937.71,
+      "fundeb": 41858982.36,
+      "rcl": 295683752.51
+     },
+     "tipo": "simplificado",
+     "sha256": "7390fb196376168409259d195dd8de17194cb1891681890e435ebf624b13dd6c"
+    }
+   }
+  },
+  "3204609": {
+   "nome": "Santa Teresa",
+   "pop": 23872,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 25755,
+     "v": {
+      "receita": 161799910.37,
+      "tributos": 16083616.91,
+      "iptu": 1729609.29,
+      "iss": 9968335.18,
+      "itbi": 1764365.26,
+      "irrf": 1801885.86,
+      "outros_tributos": 819421.32,
+      "transferencias": 138730287.43,
+      "fpm": 40287282.71,
+      "icms": 32625156.63,
+      "ipva": 3930826.91,
+      "itr": 63295.76,
+      "fundeb": 21953623.43,
+      "rcl": 147088790.5
+     },
+     "tipo": "simplificado",
+     "sha256": "79689a628ba14c4b26b53e74de3c8d680a122134b110de792bc03e72b41a5b67"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 25755,
+     "v": {
+      "receita": 182527080.1,
+      "tributos": 17148417.69,
+      "iptu": 1794744.74,
+      "iss": 10791924.54,
+      "itbi": 2001054.2,
+      "irrf": 1834865.91,
+      "outros_tributos": 725828.3,
+      "transferencias": 155223849.01,
+      "fpm": 45121290.53,
+      "icms": 37131175.45,
+      "ipva": 4488088.27,
+      "itr": 88353.58,
+      "fundeb": 25005005.82,
+      "rcl": 166024509.92
+     },
+     "tipo": "simplificado",
+     "sha256": "56a8887114aa39c36acef7dd38999f6e14943d24a00cde023dbd7bb1c376793f"
+    }
+   }
+  },
+  "3204658": {
+   "nome": "São Domingos do Norte",
+   "pop": 9051,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 8588,
+     "v": {
+      "receita": 72072974.98,
+      "tributos": 4264031.87,
+      "iptu": 218344.07,
+      "iss": 2054531.55,
+      "itbi": 230101.96,
+      "irrf": 1434849.7,
+      "outros_tributos": 326204.59,
+      "transferencias": 64859584.66,
+      "fpm": 17588310.26,
+      "icms": 20956606.56,
+      "ipva": 1339327.1,
+      "itr": 16322.16,
+      "fundeb": 12287277.18,
+      "rcl": 64367581.11
+     },
+     "tipo": "simplificado",
+     "sha256": "d258161b7e4116c895d147a2e732dd9f5130f29757e54d654ecdeb2a35e47336"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 8588,
+     "v": {
+      "receita": 81259433.31,
+      "tributos": 4438514.51,
+      "iptu": 279126.2,
+      "iss": 1911176.51,
+      "itbi": 287722.97,
+      "irrf": 1626781.0,
+      "outros_tributos": 333707.83,
+      "transferencias": 73318549.01,
+      "fpm": 19337695.92,
+      "icms": 23747013.2,
+      "ipva": 1599328.5,
+      "itr": 20793.98,
+      "fundeb": 14470940.59,
+      "rcl": 72660723.52
+     },
+     "tipo": "simplificado",
+     "sha256": "a4cf2f70895e57be6b3426a9a7b394acc60cba58dc288679da55508aa9d39507"
+    }
+   }
+  },
+  "3204708": {
+   "nome": "São Gabriel da Palha",
+   "pop": 34272,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 34198,
+     "v": {
+      "receita": 201195293.97,
+      "tributos": 15849143.34,
+      "iptu": 1144292.86,
+      "iss": 5869331.7,
+      "itbi": 1546654.5,
+      "irrf": 4381678.77,
+      "outros_tributos": 2907185.51,
+      "transferencias": 164551865.79,
+      "fpm": 51964755.85,
+      "icms": 41518615.15,
+      "ipva": 4917436.04,
+      "itr": 20422.66,
+      "fundeb": 34340139.56,
+      "rcl": 174652834.24
+     },
+     "tipo": "simplificado",
+     "sha256": "0eca1ff0508600364e4992c98290b57df0cf852da4b32e013f044c4f003f465c"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 34198,
+     "v": {
+      "receita": 215359850.04,
+      "tributos": 17728243.48,
+      "iptu": 1353255.01,
+      "iss": 6963458.94,
+      "itbi": 1771556.62,
+      "irrf": 3960216.89,
+      "outros_tributos": 3679756.02,
+      "transferencias": 172509339.38,
+      "fpm": 56548224.76,
+      "icms": 40717541.04,
+      "ipva": 5701068.9,
+      "itr": 22541.3,
+      "fundeb": 36408598.34,
+      "rcl": 189785525.49
+     },
+     "tipo": "simplificado",
+     "sha256": "9cbd4dfed2fc546d49eacd52d2d2d6dff2b4575b633927220fc394d89f554b07"
+    }
+   }
+  },
+  "3204807": {
+   "nome": "São José do Calçado",
+   "pop": 11411,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 10875,
+     "v": {
+      "receita": 109770405.26,
+      "tributos": 5268709.84,
+      "iptu": 616127.35,
+      "iss": 2239672.13,
+      "itbi": 179581.12,
+      "irrf": 1706643.78,
+      "outros_tributos": 526685.46,
+      "transferencias": 97325497.92,
+      "fpm": 23451080.39,
+      "icms": 12137454.16,
+      "ipva": 1196744.58,
+      "itr": 13164.35,
+      "fundeb": 17778677.48,
+      "rcl": 98312913.11
+     },
+     "tipo": "completo",
+     "sha256": "605169f758db2fd3880b932ef033f050f9690d4afcc382da3ed95f21355271ed"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 10875,
+     "v": {
+      "receita": 103356840.32,
+      "tributos": 5276476.47,
+      "iptu": 547796.2,
+      "iss": 1784876.21,
+      "itbi": 330476.88,
+      "irrf": 2023764.76,
+      "outros_tributos": 589562.42,
+      "transferencias": 86684037.4,
+      "fpm": 25783594.57,
+      "icms": 16094784.17,
+      "ipva": 1453860.95,
+      "itr": 12586.52,
+      "fundeb": 18944980.95,
+      "rcl": 86363724.7
+     },
+     "tipo": "completo",
+     "sha256": "b3251e9c444da93419e4e5e3f23d7d910c7a113b05850eac46ab86d10a29144c"
+    }
+   }
+  },
+  "3204906": {
+   "nome": "São Mateus",
+   "pop": 134423,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 122386,
+     "v": {
+      "receita": 615994678.27,
+      "tributos": 104867756.46,
+      "iptu": 8202679.33,
+      "iss": 64325538.21,
+      "itbi": 7316606.0,
+      "irrf": 17269651.18,
+      "outros_tributos": 7753281.74,
+      "transferencias": 450138348.66,
+      "fpm": 104520946.87,
+      "icms": 99874361.8,
+      "ipva": 17465704.24,
+      "itr": 821137.47,
+      "fundeb": 138874413.42,
+      "rcl": 572968122.21
+     },
+     "tipo": "completo",
+     "sha256": "5df199f25990333255281ad156593b0ed858598112b53911f6ae86e510a84a31"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 122386,
+     "v": {
+      "receita": 687498265.42,
+      "tributos": 122094530.33,
+      "iptu": 13145328.02,
+      "iss": 73686420.68,
+      "itbi": 8513845.54,
+      "irrf": 18292460.88,
+      "outros_tributos": 8456475.21,
+      "transferencias": 493649117.91,
+      "fpm": 116026175.61,
+      "icms": 112485444.63,
+      "ipva": 19277094.4,
+      "itr": 828449.94,
+      "fundeb": 151100567.71,
+      "rcl": 639684639.34
+     },
+     "tipo": "completo",
+     "sha256": "494182b8d2fd91b560f62acfe63a508a915c1ae9599ece6d357ed459b7be05cc"
+    }
+   }
+  },
+  "3204955": {
+   "nome": "São Roque do Canaã",
+   "pop": 11256,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 10594,
+     "v": {
+      "receita": 79996775.71,
+      "tributos": 6228057.21,
+      "iptu": 312545.39,
+      "iss": 3464793.86,
+      "itbi": 216914.32,
+      "irrf": 1745001.36,
+      "outros_tributos": 488802.28,
+      "transferencias": 70967522.7,
+      "fpm": 23451080.39,
+      "icms": 15412770.83,
+      "ipva": 1359942.61,
+      "itr": 20686.39,
+      "fundeb": 10352242.11,
+      "rcl": 72340696.19
+     },
+     "tipo": "simplificado",
+     "sha256": "51ddb656056fdfb0b237f4043ba7df7fe8eba937ae540cc9709c26bcef494db7"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 10594,
+     "v": {
+      "receita": 85431178.17,
+      "tributos": 5939813.86,
+      "iptu": 445385.33,
+      "iss": 2902578.51,
+      "itbi": 191063.5,
+      "irrf": 1804049.12,
+      "outros_tributos": 596737.4,
+      "transferencias": 76434335.15,
+      "fpm": 25783594.57,
+      "icms": 16889535.4,
+      "ipva": 1549328.39,
+      "itr": 23481.08,
+      "fundeb": 17934548.09,
+      "rcl": 77089735.57
+     },
+     "tipo": "simplificado",
+     "sha256": "76486663e2dacd44eb3b52508eb0e98fc7f93ef8267dbf4596c760c2156e8621"
+    }
+   }
+  },
+  "3205002": {
+   "nome": "Serra",
+   "pop": 579720,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 546405,
+     "v": {
+      "receita": 2675680258.55,
+      "tributos": 751729465.03,
+      "iptu": 114758808.08,
+      "iss": 427223528.58,
+      "itbi": 58197111.2,
+      "irrf": 100954896.38,
+      "outros_tributos": 50595120.79,
+      "transferencias": 1738934294.99,
+      "fpm": 153952630.11,
+      "icms": 762014485.94,
+      "ipva": 63616390.08,
+      "itr": 214129.19,
+      "fundeb": 485707653.35,
+      "rcl": 2422666721.38
+     },
+     "tipo": "completo",
+     "sha256": "4235ba2ba05d39746daf0209aa84a1f9e696914cd7b36d44cf73df861da157b0"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 546405,
+     "v": {
+      "receita": 2910546190.81,
+      "tributos": 808120239.7,
+      "iptu": 135437313.58,
+      "iss": 446265244.66,
+      "itbi": 60116070.43,
+      "irrf": 103652281.49,
+      "outros_tributos": 62649329.54,
+      "transferencias": 1911533761.57,
+      "fpm": 168399004.15,
+      "icms": 819273142.24,
+      "ipva": 70998493.03,
+      "itr": 149532.99,
+      "fundeb": 517626574.49,
+      "rcl": 2632175128.19
+     },
+     "tipo": "completo",
+     "sha256": "1e33aef09660396c3f8ff2ad40f27b295d7cb8b6a759528ef8dd6bfff5910604"
+    }
+   }
+  },
+  "3205010": {
+   "nome": "Sooretama",
+   "pop": 28668,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 27255,
+     "v": {
+      "receita": 198091115.11,
+      "tributos": 12098457.42,
+      "iptu": 245775.24,
+      "iss": 7052017.69,
+      "itbi": 753475.91,
+      "irrf": 3144332.96,
+      "outros_tributos": 902855.62,
+      "transferencias": 176916342.93,
+      "fpm": 46126019.25,
+      "icms": 37777502.48,
+      "ipva": 2562491.16,
+      "itr": 79050.14,
+      "fundeb": 54333789.62,
+      "rcl": 181547012.81
+     },
+     "tipo": "simplificado",
+     "sha256": "c3fc7f2327f118f88bddf0d3986611642c7e3fc5a2ab306e7adc599ffe3be8c1"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 27255,
+     "v": {
+      "receita": 218741379.97,
+      "tributos": 11171436.49,
+      "iptu": 376452.98,
+      "iss": 4805517.7,
+      "itbi": 851833.74,
+      "irrf": 4704703.06,
+      "outros_tributos": 432929.01,
+      "transferencias": 196619062.93,
+      "fpm": 50122290.15,
+      "icms": 44036791.42,
+      "ipva": 3125036.37,
+      "itr": 85750.83,
+      "fundeb": 49737644.92,
+      "rcl": 200218400.63
+     },
+     "tipo": "simplificado",
+     "sha256": "57bb45171bc1046a9f8dc045bf31f416ae223c7840684a76585228c440008afa"
+    }
+   }
+  },
+  "3205036": {
+   "nome": "Vargem Alta",
+   "pop": 20390,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 22285,
+     "v": {
+      "receita": 130822796.66,
+      "tributos": 10022340.38,
+      "iptu": 1227665.61,
+      "iss": 4368301.86,
+      "itbi": 639530.48,
+      "irrf": 2084161.37,
+      "outros_tributos": 1702681.06,
+      "transferencias": 109420193.16,
+      "fpm": 35176620.55,
+      "icms": 25210219.66,
+      "ipva": 2651418.22,
+      "itr": 21983.64,
+      "fundeb": 24387534.71,
+      "rcl": 115677955.13
+     },
+     "tipo": "simplificado",
+     "sha256": "a9dc5f006270a28eb22e6435ebbc30d5b0916a77089f4034bda56cbdaf161b59"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 22285,
+     "v": {
+      "receita": 143950430.74,
+      "tributos": 12562932.89,
+      "iptu": 1476058.8,
+      "iss": 5454149.69,
+      "itbi": 688157.14,
+      "irrf": 3197802.38,
+      "outros_tributos": 1746764.88,
+      "transferencias": 118049218.43,
+      "fpm": 38675391.9,
+      "icms": 25734108.87,
+      "ipva": 3149448.16,
+      "itr": 17785.46,
+      "fundeb": 27402673.91,
+      "rcl": 127397763.26
+     },
+     "tipo": "simplificado",
+     "sha256": "27e7ff241dfa2ee47eef07be6856b3a782a41042f8e228a8f9c57fa058fb2a0f"
+    }
+   }
+  },
+  "3205069": {
+   "nome": "Venda Nova do Imigrante",
+   "pop": 25395,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 23964,
+     "v": {
+      "receita": 142687108.37,
+      "tributos": 18611445.33,
+      "iptu": 1477173.02,
+      "iss": 9861379.8,
+      "itbi": 1306762.73,
+      "irrf": 2575436.32,
+      "outros_tributos": 3390693.46,
+      "transferencias": 118034458.22,
+      "fpm": 41039390.62,
+      "icms": 31294159.47,
+      "ipva": 5972228.53,
+      "itr": 26221.41,
+      "fundeb": 17905215.92,
+      "rcl": 127703305.39
+     },
+     "tipo": "simplificado",
+     "sha256": "b8505c1afe3b418d8a0044a5b0609c062ec0e80da4e483aa2dcf7c09fed3121f"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 23964,
+     "v": {
+      "receita": 173235640.57,
+      "tributos": 21986720.31,
+      "iptu": 1721550.52,
+      "iss": 12045346.62,
+      "itbi": 1570253.18,
+      "irrf": 3193831.3,
+      "outros_tributos": 3455738.69,
+      "transferencias": 142814369.68,
+      "fpm": 45121290.53,
+      "icms": 37713111.06,
+      "ipva": 5900692.64,
+      "itr": 33170.34,
+      "fundeb": 26571042.03,
+      "rcl": 156324494.08
+     },
+     "tipo": "simplificado",
+     "sha256": "47a77459879a0a346402a4f4450ea510e26b091a7a03b9d6b4c105feceaea4f9"
+    }
+   }
+  },
+  "3205101": {
+   "nome": "Viana",
+   "pop": 79043,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 71443,
+     "v": {
+      "receita": 531246951.93,
+      "tributos": 72306726.92,
+      "iptu": 9605873.0,
+      "iss": 39499880.61,
+      "itbi": 3620092.49,
+      "irrf": 11734728.42,
+      "outros_tributos": 7846152.4,
+      "transferencias": 416617579.29,
+      "fpm": 76216011.17,
+      "icms": 146460170.35,
+      "ipva": 9433379.46,
+      "itr": 69865.08,
+      "fundeb": 115507172.38,
+      "rcl": 465492070.58
+     },
+     "tipo": "completo",
+     "sha256": "aad3c06089313d1ec8322f1b5f524a4ac045d2ee1293bc3191bdf7f0519bccd8"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 71443,
+     "v": {
+      "receita": 592841846.37,
+      "tributos": 76538705.49,
+      "iptu": 10274914.36,
+      "iss": 39733642.16,
+      "itbi": 5454676.27,
+      "irrf": 12409788.76,
+      "outros_tributos": 8665683.94,
+      "transferencias": 472764171.22,
+      "fpm": 83796682.44,
+      "icms": 189879922.94,
+      "ipva": 11419231.96,
+      "itr": 83443.85,
+      "fundeb": 121915212.59,
+      "rcl": 517027922.96
+     },
+     "tipo": "completo",
+     "sha256": "42b47c93de362532269706a1cea33a4ed7ed5442b75482a5161c1b752aac38e1"
+    }
+   }
+  },
+  "3205150": {
+   "nome": "Vila Pavão",
+   "pop": 9319,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 8890,
+     "v": {
+      "receita": 65122547.9,
+      "tributos": 2843150.45,
+      "iptu": 236755.66,
+      "iss": 1205327.42,
+      "itbi": 247648.72,
+      "irrf": 974402.05,
+      "outros_tributos": 179016.6,
+      "transferencias": 59288039.82,
+      "fpm": 17588310.26,
+      "icms": 16242641.32,
+      "ipva": 1014399.31,
+      "itr": 45638.55,
+      "fundeb": 11317043.34,
+      "rcl": 58431652.96
+     },
+     "tipo": "completo",
+     "sha256": "fa80c5ebedb6ac5b957786c2af9edf584b3a90d9af932f5b2ccc6caa956accc9"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 8890,
+     "v": {
+      "receita": 79992585.01,
+      "tributos": 3682010.99,
+      "iptu": 296140.59,
+      "iss": 1351394.55,
+      "itbi": 271596.54,
+      "irrf": 1461711.5,
+      "outros_tributos": 301167.81,
+      "transferencias": 71397198.6,
+      "fpm": 19337695.92,
+      "icms": 20718346.0,
+      "ipva": 1210463.76,
+      "itr": 72590.67,
+      "fundeb": 16757163.06,
+      "rcl": 72067502.73
+     },
+     "tipo": "completo",
+     "sha256": "a3f4f9755372eba779bcf3befc637d48480349356343ecc7ccb37f7996b6faaf"
+    }
+   }
+  },
+  "3205176": {
+   "nome": "Vila Valério",
+   "pop": 14267,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 14764,
+     "v": {
+      "receita": 114260531.39,
+      "tributos": 9106902.65,
+      "iptu": 83165.65,
+      "iss": 4906572.87,
+      "itbi": 545120.52,
+      "irrf": 2718465.43,
+      "outros_tributos": 853578.18,
+      "transferencias": 103535172.62,
+      "fpm": 29313850.47,
+      "icms": 33812037.96,
+      "ipva": 2216113.32,
+      "itr": 43799.39,
+      "fundeb": 19966515.33,
+      "rcl": 101644138.12
+     },
+     "tipo": "simplificado",
+     "sha256": "f76085227c8e28047815e98aadc70e8ea0fcc8b6c4ba17d1f799ebe13167b676"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 14764,
+     "v": {
+      "receita": 130318806.2,
+      "tributos": 11588851.89,
+      "iptu": 88977.33,
+      "iss": 6554746.88,
+      "itbi": 603411.95,
+      "irrf": 3674931.9,
+      "outros_tributos": 666783.83,
+      "transferencias": 116611131.51,
+      "fpm": 32229493.22,
+      "icms": 39403191.86,
+      "ipva": 3452735.18,
+      "itr": 48442.35,
+      "fundeb": 25171232.7,
+      "rcl": 115863985.86
+     },
+     "tipo": "simplificado",
+     "sha256": "039ec104f1696a684cec6fd53dc23181b0f27894d0be2e1ddbf42dddfed12db3"
+    }
+   }
+  },
+  "3205200": {
+   "nome": "Vila Velha",
+   "pop": 506779,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 493242,
+     "v": {
+      "receita": 2195501572.13,
+      "tributos": 751009685.38,
+      "iptu": 144871788.12,
+      "iss": 358955709.31,
+      "itbi": 81710503.98,
+      "irrf": 73757568.87,
+      "outros_tributos": 91714115.1,
+      "transferencias": 1159808198.41,
+      "fpm": 153952630.11,
+      "icms": 258009623.15,
+      "ipva": 76523696.49,
+      "itr": 91949.99,
+      "fundeb": 394905120.69,
+      "rcl": 1955416473.75
+     },
+     "tipo": "completo",
+     "sha256": "9aae0c075f134ae7fa4dfb54d72c16b60904bdf2e56bd3b03d30e6ebac60744d"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 493242,
+     "v": {
+      "receita": 2475012527.8,
+      "tributos": 848708927.6,
+      "iptu": 166717516.2,
+      "iss": 388515895.07,
+      "itbi": 95723469.92,
+      "irrf": 88113404.53,
+      "outros_tributos": 109638641.88,
+      "transferencias": 1303715042.34,
+      "fpm": 168399004.29,
+      "icms": 372576174.63,
+      "ipva": 83798133.58,
+      "itr": 87282.36,
+      "fundeb": 431224328.04,
+      "rcl": 2182776890.15
+     },
+     "tipo": "completo",
+     "sha256": "4daea9590711041fcef0dddd04d38d977225b088a73b8b358a5b98f39c69ed44"
+    }
+   }
+  },
+  "3205309": {
+   "nome": "Vitória",
+   "pop": 343378,
+   "anos": {
+    "2024": {
+     "s": "ok",
+     "pop": 331785,
+     "v": {
+      "receita": 3471985450.21,
+      "tributos": 1329931668.46,
+      "iptu": 122921976.59,
+      "iss": 876784227.0,
+      "itbi": 97981308.0,
+      "irrf": 149435901.3,
+      "outros_tributos": 82808255.57,
+      "transferencias": 1659389538.34,
+      "fpm": 340228541.17,
+      "icms": 718115128.86,
+      "ipva": 80557204.86,
+      "itr": 23042.75,
+      "fundeb": 303786072.41,
+      "rcl": 3059440448.53
+     },
+     "tipo": "completo",
+     "sha256": "a708df08f14480975a45b99ab6aed606372a60403697f766b2c3531f32335b9a"
+    },
+    "2025": {
+     "s": "ok",
+     "pop": 331785,
+     "v": {
+      "receita": 3757211529.58,
+      "tributos": 1451483083.94,
+      "iptu": 124645887.07,
+      "iss": 975566574.76,
+      "itbi": 101183427.48,
+      "irrf": 164525313.73,
+      "outros_tributos": 85561880.9,
+      "transferencias": 1683769239.73,
+      "fpm": 416130528.82,
+      "icms": 612877455.15,
+      "ipva": 85767144.6,
+      "itr": 7604.63,
+      "fundeb": 346518937.54,
+      "rcl": 3254143515.86
+     },
+     "tipo": "completo",
+     "sha256": "23d1484cad99cd43d77131ead946a56ad4741ae66a1604b86ddb3eae7d58542f"
+    }
+   }
+  }
+ }
+}
