@@ -53,6 +53,20 @@
           <select id="parl-ano"></select>
         </label>
       </div>
+      <p class="ranking-titulo" data-campo="parl-resumo-titulo"></p>
+      <dl class="numeros" id="parl-resumo">
+        <div id="parl-resumo-cota"><dt><a href="#cota">Gasto da cota</a></dt><dd>…</dd></div>
+        <div id="parl-resumo-emendas"><dt><a href="#emendas">Emendas pagas</a></dt><dd>…</dd></div>
+      </dl>
+
+      <section id="cota" class="bloco" aria-labelledby="cota-titulo">
+        <h2 id="cota-titulo">Cota parlamentar</h2>
+        <p class="intro">Reembolso de despesas do mandato: passagens, escritório no estado, combustível, divulgação e outras. Usar a cota dentro do limite é permitido por lei.</p>
+        <dl class="numeros" id="parl-cota"></dl>
+        <h3 data-campo="parl-cota-grupos-titulo" hidden>Com o que gastou</h3>
+        <ul class="barras" id="parl-cota-grupos" hidden></ul>
+        <p class="nota" data-campo="parl-cota-nota"></p>
+      </section>
 
       <section id="emendas" class="bloco" aria-labelledby="emendas-titulo">
         <h2 id="emendas-titulo">Emendas parlamentares</h2>
@@ -64,13 +78,6 @@
         <ul class="barras" id="parl-cidades"></ul>
         <button type="button" class="botao" id="parl-cidades-todas" hidden></button>
         <p class="nota" data-campo="parl-nota"></p>
-      </section>
-
-      <section id="cota" class="bloco" aria-labelledby="cota-titulo">
-        <h2 id="cota-titulo">Cota parlamentar</h2>
-        <p class="intro">Reembolso de despesas do mandato: passagens, escritório no estado, combustível, divulgação e outras. Usar a cota dentro do limite é permitido por lei.</p>
-        <dl class="numeros" id="parl-cota"></dl>
-        <p class="nota" data-campo="parl-cota-nota"></p>
       </section>
 
       <details class="entenda">

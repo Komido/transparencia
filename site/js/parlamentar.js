@@ -63,6 +63,7 @@ function desenharEmendas(ano) {
       ? `${f.numero(x.cidades.length)} ${x.cidades.length === 1 ? 'cidade recebeu' : 'cidades receberam'} por meio da prefeitura`
       : 'Nenhuma cidade identificada']);
   } else linha(rotAno, f.moeda(0, 0), ['Nenhuma emenda individual paga neste ano']);
+  resumo('parl-resumo-emendas', x && x.pago > 0 ? valorGrande(x.pago) : f.moeda(0, 0), 'em dinheiro de hoje');
   const todos = anos.reduce((s, a) => s + (doAno(a)?.pago ?? 0), 0);
   linha(`De ${Math.min(...anos)} a ${emAndamento}`, valorGrande(todos), ['Soma dos anos, em dinheiro de hoje']);
 
@@ -104,19 +105,32 @@ function desenharEmendas(ano) {
   $('#parl-baixar').hidden = false;
 }
 
+// Um número do resumo do topo: o valor e uma linha de detalhe.
+function resumo(id, valor, detalhe) {
+  const div = document.getElementById(id);
+  div.hidden = false;
+  div.querySelectorAll('dd').forEach((dd) => dd.remove());
+  el('dd', null, valor, div);
+  if (detalhe) el('dd', 'detalhe', detalhe, div);
+}
+
 async function desenharCota(ano) {
   const { p } = estado;
   const dl = $('#parl-cota');
+  const grupos = $('#parl-cota-grupos');
   dl.replaceChildren();
+  grupos.replaceChildren();
+  grupos.hidden = campo('parl-cota-grupos-titulo')[0].hidden = true;
   definir('parl-cota-nota', '');
   const secao = $('#cota');
-  if (!p[2]) { secao.hidden = true; return; }
+  if (!p[2]) { secao.hidden = true; $('#parl-resumo-cota').hidden = true; return; }
   secao.hidden = false;
   let cota;
   try {
     cota = await carregarCotaAno(ano);
   } catch {
     definir('parl-cota-nota', `Sem dado da cota em ${ano}.`);
+    resumo('parl-resumo-cota', 'sem dado', null);
     return;
   }
   if (Number($('#parl-ano').value) !== ano) return;
@@ -125,8 +139,10 @@ async function desenharCota(ano) {
   const achado = (casa?.parlamentares ?? []).find((x) => semAcento(x.nome) === alvo && x.uf === p[4]);
   if (!achado) {
     definir('parl-cota-nota', `Nenhum reembolso da cota em ${ano} nas listas oficiais.`);
+    resumo('parl-resumo-cota', f.moeda(0, 0), 'nenhum reembolso no ano');
     return;
   }
+  resumo('parl-resumo-cota', f.reaisCompacto(achado.total), 'valor da época');
   const div = el('div', null, null, dl);
   el('dt', null, `Gasto da cota em ${ano}`, div);
   el('dd', null, f.reaisCompacto(achado.total), div);
@@ -139,11 +155,18 @@ async function desenharCota(ano) {
     el('dd', null, f.reaisCompacto(m), div2);
     el('dd', 'detalhe', 'Mesmo limite de gasto, porque o limite muda conforme o estado', div2);
   }
-  definir('parl-cota-nota', `Valores da época, como reembolsados. Gasto alto não quer dizer irregularidade. Mais detalhes na seção da cota da página inicial.`);
+  // Com o que gastou: cada tipo de despesa, do maior para o menor.
+  const itens = cota.grupos.map((g, i) => [g.nome, achado.grupos?.[i] ?? 0]).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  if (itens.length && achado.total > 0) {
+    itens.forEach(([nome, v]) => barra(grupos, { nome, valor: `${f.reaisCompacto(v)} · ${f.parteDoTotal((v / achado.total) * 100)}`, pct: (v / achado.total) * 100 }));
+    grupos.hidden = campo('parl-cota-grupos-titulo')[0].hidden = false;
+  }
+  definir('parl-cota-nota', `Valores da época, como reembolsados ${p[2] === 'senado' ? 'pelo Senado' : 'pela Câmara'}. Gasto alto não quer dizer irregularidade, e gasto baixo não quer dizer mais trabalho. Mais detalhes na seção da cota da página inicial.`);
 }
 
 function desenhar() {
   const ano = Number($('#parl-ano').value);
+  definir('parl-resumo-titulo', `Resumo de ${ano}`);
   desenharEmendas(ano);
   desenharCota(ano);
   const q = new URLSearchParams(location.search);
