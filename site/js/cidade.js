@@ -496,7 +496,15 @@ async function desenharEmendas(ano, moradores) {
     if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
     if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
   }
-  notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram. Parte das emendas é paga por meio do Banco do Brasil, e o arquivo oficial não diz para qual cidade foi; esse dinheiro também não entra, então o valor real pode ser maior. Atualização: ${f.dataCurta(d.atualizado)}.`);
+  // Pagamentos registrados ao Banco do Brasil, sem a cidade: quase todos de
+  // 2023 e 2024. O aviso aparece só no ano em que isso pesa (o arquivo traz o
+  // total do país por ano); em arquivo antigo, sem esse total, aviso geral.
+  const anoNota = anoLista ?? ano;
+  const banco = d.banco?.[String(anoNota)];
+  const avisoBanco = d.banco === undefined
+    ? ' Parte das emendas é paga por meio do Banco do Brasil, e o arquivo oficial não diz para qual cidade foi; esse dinheiro também não entra, então o valor real pode ser maior.'
+    : (banco >= 1e9 ? ` Em ${anoNota}, ${f.reaisPorExtenso(banco)} em emendas do país inteiro (a maior parte de saúde) foram registrados como pagos ao Banco do Brasil, sem dizer a cidade; esse dinheiro não entra aqui, então o valor de ${anoNota} pode ser maior.` : '');
+  notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram.${avisoBanco} Atualização: ${f.dataCurta(d.atualizado)}.`);
   definir('mun-emendas-nota', notas.join(' '));
   caixa.hidden = false;
 }

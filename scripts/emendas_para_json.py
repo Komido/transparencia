@@ -46,8 +46,14 @@ suplente que não usou a cota) fica como "Câmara ou Senado".
 
 Limite conhecido: parte das emendas é paga ao Banco do Brasil (CNPJ
 00.000.000/0001-91, cidade "Brasília"), sem dizer qual prefeitura, estado ou
-entidade recebeu; em 17/11/2026 eram R$ 33,98 bilhões desde 2023. Esse
-dinheiro não entra na conta por cidade, que por isso é um piso.
+entidade recebeu; em 17/11/2026 eram R$ 33,98 bilhões desde 2023, quase
+tudo em 2023 (R$ 14,46 bi) e 2024 (R$ 19,27 bi), e só R$ 0,15 bi em 2025.
+Conferido nas outras tabelas do mesmo arquivo: o arquivo principal traz
+esses códigos de emenda, mas com lugar de aplicação "Múltiplo", "Nacional"
+ou só o estado, e município "Sem informação"; a tabela de convênios cobre
+3% do valor. A maior parte é de saúde (atenção básica e hospitais). Esse
+dinheiro não entra na conta por cidade, que nesses anos é um piso; o total
+de cada ano vai no arquivo ("banco") para o site avisar.
 """
 
 import collections
@@ -444,6 +450,9 @@ def main():
             "nomes": list(nomes_uf[uf]),
             "cargos": [cargo_do_autor(bruto_do_autor.get(n, n), cota) for n in nomes_uf[uf]],
             "paginas": [paginas.get(chave_do_parlamentar(bruto_do_autor.get(n, n)), "") for n in nomes_uf[uf]],
+            # Total do país pago ao Banco do Brasil em cada ano, sem dizer
+            # quem recebeu: o site avisa só nos anos em que isso pesa.
+            "banco": {str(a): round(pelo_banco.get(a, 0.0)) for a in anos},
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")

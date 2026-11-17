@@ -277,6 +277,7 @@ export async function carregarEmendasUf(uf) {
     || !Array.isArray(d.nomes) || !d.nomes.every(ehTexto)
     || (d.cargos !== undefined && (!Array.isArray(d.cargos) || d.cargos.length !== d.nomes.length || !d.cargos.every((c) => typeof c === 'string')))
     || (d.paginas !== undefined && (!Array.isArray(d.paginas) || d.paginas.length !== d.nomes.length || !d.paginas.every((c) => c === '' || ehEndereco(c))))
+    || (d.banco !== undefined && (!d.banco || typeof d.banco !== 'object' || !Object.entries(d.banco).every(([a, v]) => /^\d{4}$/.test(a) && Number.isFinite(v) && v >= 0)))
     || !d.cidades || typeof d.cidades !== 'object') {
     falhar(`emendas de ${uf}`);
   }
