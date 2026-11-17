@@ -1992,7 +1992,7 @@ function montarMunicipios(ctx) {
       const x = daCidade[String(a)];
       if (!x || !(x[0] > 0)) return null;
       const fator = fatorParaHoje(ctx, a) ?? 1;
-      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator]);
+      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '']);
       return { pago: x[0] * fator, emendas: x[1], autores: lista.length, lista };
     };
     const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'}${x.autores ? ` de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}` : ''}`;
@@ -2033,12 +2033,13 @@ function montarMunicipios(ctx) {
       titulo.textContent = `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
       // Todos os autores; os 6 primeiros aparecem logo, o resto com o botão.
       const VISIVEIS = 6;
-      lista.lista.forEach(([autor, valor], k) => {
+      lista.lista.forEach(([autor, valor, cargo], k) => {
         const pct = lista.pago > 0 ? (valor / lista.pago) * 100 : 0;
         const li = el('li', null, null, barras);
         li.hidden = k >= VISIVEIS;
         const topo = el('div', 'barra-topo', null, li);
-        el('span', 'barra-nome', autor, topo);
+        const nomeEl = el('span', 'barra-nome', autor, topo);
+        if (cargo) el('span', 'barra-explica', cargo, nomeEl);
         // Entre 1 e 10 milhões, com uma casa: "R$ 1,4 mi", não "R$ 1 mi".
         const valorCurto = valor >= 1e6 && valor < 1e7 ? `R$\u00A0${f.numero(valor / 1e6, 1)} mi` : f.reaisCompacto(valor);
         el('span', 'barra-valor', `${valorCurto} · ${f.parteDoTotal(pct)}`, topo);
@@ -2065,7 +2066,7 @@ function montarMunicipios(ctx) {
       if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
       if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
     }
-    notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram. Atualização: ${f.dataCurta(d.atualizado)}.`);
+    notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram. Parte das emendas é paga por meio do Banco do Brasil, e o arquivo oficial não diz para qual cidade foi; esse dinheiro também não entra, então o valor real pode ser maior. Atualização: ${f.dataCurta(d.atualizado)}.`);
     definir('mun-emendas-nota', notas.join(' '));
     caixa.hidden = false;
   }

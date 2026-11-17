@@ -261,7 +261,8 @@ export async function buscarOnde() {
 
 // Emendas parlamentares pagas à prefeitura e aos fundos municipais, por ano
 // de pagamento (scripts/emendas_para_json.py).
-// nomes: os autores do estado, uma vez cada.
+// nomes: os autores do estado, uma vez cada; cargos: o cargo de cada um
+// ("Câmara · PT-MG", "Bancada do estado"...), na mesma ordem.
 // cidades: { codigo IBGE: { ano: [pago, emendas, [[índice em nomes, valor], ...]] } },
 // com todos os autores, do que mais mandou ao que menos mandou.
 const CAMPOS_EMENDAS = ['pago', 'emendas', 'autores'];
@@ -274,6 +275,7 @@ export async function carregarEmendasUf(uf) {
   if (!d || d.uf !== uf || !ehData(d.atualizado) || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_EMENDAS)
     || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
     || !Array.isArray(d.nomes) || !d.nomes.every(ehTexto)
+    || (d.cargos !== undefined && (!Array.isArray(d.cargos) || d.cargos.length !== d.nomes.length || !d.cargos.every((c) => typeof c === 'string')))
     || !d.cidades || typeof d.cidades !== 'object') {
     falhar(`emendas de ${uf}`);
   }
