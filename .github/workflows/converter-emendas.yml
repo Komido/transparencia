@@ -1,0 +1,48 @@
+name: Emendas parlamentares por cidade (Portal da Transparência)
+
+# Baixa o arquivo único de emendas parlamentares do Portal da Transparência
+# (sem chave), soma por cidade e ano o valor pago e os autores que mais
+# mandaram (scripts/emendas_para_json.py) e grava site/dados/emendas/UF.json.
+# Nada passa pelo banco. O Portal atualiza o arquivo algumas vezes por mês;
+# uma vez por semana basta. Quem dispara é o agendador do banco (pg_cron,
+# etl.disparar_github); ver supabase/migrations/20261117030000_disparo_emendas.sql.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: emendas
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Somar as emendas por cidade
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/emendas_para_json.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/emendas \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/emendas)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/emendas
+          git commit -q -m "Atualiza emendas parlamentares por cidade"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
