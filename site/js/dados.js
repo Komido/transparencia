@@ -276,6 +276,7 @@ export async function carregarEmendasUf(uf) {
     || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
     || !Array.isArray(d.nomes) || !d.nomes.every(ehTexto)
     || (d.cargos !== undefined && (!Array.isArray(d.cargos) || d.cargos.length !== d.nomes.length || !d.cargos.every((c) => typeof c === 'string')))
+    || (d.paginas !== undefined && (!Array.isArray(d.paginas) || d.paginas.length !== d.nomes.length || !d.paginas.every((c) => c === '' || ehEndereco(c))))
     || !d.cidades || typeof d.cidades !== 'object') {
     falhar(`emendas de ${uf}`);
   }
@@ -288,6 +289,45 @@ export async function carregarEmendasUf(uf) {
       || !Object.entries(anos).every(([a, x]) => d.anos.includes(Number(a)) && ehAno(x))) {
       falhar(`emendas da cidade ${cod}`);
     }
+  }
+  return d;
+}
+
+// Deputados e senadores com página (scripts/emendas_para_json.py):
+// [endereço, nome, casa, partido, UF, emendas pagas nos anos do site].
+const CAMPOS_PARLAMENTARES = ['endereco', 'nome', 'casa', 'partido', 'uf', 'emendas_pagas'];
+const ehEndereco = (v) => typeof v === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v);
+export async function carregarIndiceParlamentares() {
+  const resposta = await fetch('/dados/parlamentares/indice.json', { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar os parlamentares (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !ehData(d.atualizado) || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_PARLAMENTARES)
+    || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
+    || !Array.isArray(d.parlamentares) || d.parlamentares.length < 500
+    || !d.parlamentares.every((x) => Array.isArray(x) && x.length === 6 && ehEndereco(x[0]) && ehTexto(x[1])
+      && ['camara', 'senado', ''].includes(x[2]) && typeof x[3] === 'string' && (x[4] === '' || /^[A-Z]{2}$/.test(x[4]))
+      && Number.isFinite(x[5]))) {
+    falhar('lista de parlamentares');
+  }
+  return d;
+}
+
+// Emendas de um parlamentar: por ano, o total, por tipo de recebedor e as
+// cidades (prefeitura e fundos municipais).
+const TIPOS_RECEBEDOR = ['prefeituras', 'estados', 'entidades', 'banco', 'outros'];
+export async function carregarEmendasParlamentar(endereco) {
+  if (!ehEndereco(endereco)) falhar('parlamentar: endereço');
+  const resposta = await fetch(`/dados/parlamentares/emendas/${endereco}.json`, { credentials: 'same-origin' });
+  if (!resposta.ok) throw new Error(`Falha ao carregar as emendas de ${endereco} (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  const ehAno = (x) => x && Number.isFinite(x.pago) && Array.isArray(x.tipos) && x.tipos.length === TIPOS_RECEBEDOR.length
+    && x.tipos.every(Number.isFinite) && Array.isArray(x.cidades)
+    && x.cidades.every((c) => Array.isArray(c) && c.length === 2 && /^[0-9]{7}$/.test(c[0]) && Number.isFinite(c[1]) && c[1] > 0);
+  if (!d || d.endereco !== endereco || !ehTexto(d.nome) || !ehData(d.atualizado)
+    || JSON.stringify(d.tipos) !== JSON.stringify(TIPOS_RECEBEDOR)
+    || !d.anos || typeof d.anos !== 'object' || !Object.entries(d.anos).every(([a, x]) => /^\d{4}$/.test(a) && ehAno(x))) {
+    falhar(`emendas de ${endereco}`);
   }
   return d;
 }

@@ -282,6 +282,18 @@
           <li><strong>Inflação e período:</strong> os valores são corrigidos pelo IPCA para dinheiro de hoje, pela média do ano do pagamento. O site guarda os últimos quatro anos; a planilha para baixar traz os valores da época e o fator de correção. O arquivo é atualizado pelo Portal uma vez por mês, e o site o confere toda semana.</li>
         </ul>
 
+        <h2 id="parlamentares">Emendas de cada deputado e senador</h2>
+        <p>Na seção do Congresso, e no endereço próprio de cada um (como /parlamentar/nikolas-ferreira-mg), aparece o que foi pago das emendas individuais de cada deputado federal e senador, ano a ano, para que tipo de recebedor e quais cidades receberam.</p>
+        <ul>
+          <li><strong>Fonte:</strong> o mesmo arquivo de emendas por favorecido do Portal da Transparência usado nas cidades, desta vez com todos os recebedores, não só as prefeituras.</li>
+          <li><strong>Quem aparece:</strong> todos os deputados federais e senadores das listas da cota parlamentar desde 2023 e todos os autores de emenda individual paga desde 2023. O partido e o estado são os do ano mais recente nessas listas. Quem não está nelas (ex-parlamentar, suplente que não usou a cota) aparece sem partido e sem estado, como "Câmara ou Senado". Emendas de bancada, de comissão e de relator são decididas em grupo e não entram na conta de ninguém.</li>
+          <li><strong>Ligação entre o autor e a lista oficial:</strong> pelo nome, sem acento e sem diferença de maiúsculas; prefixos como "Dep." são ignorados. Em 2023, sete nomes eram iguais aos de mais de um parlamentar (por exemplo, quem passou da Câmara ao Senado, ou dois deputados com o mesmo nome no Piauí); nesses casos as emendas ficam juntas na mesma página, porque o arquivo não permite separar.</li>
+          <li><strong>Tipos de recebedor:</strong> pela natureza jurídica de quem recebeu. Prefeituras e órgãos municipais (município, fundos, autarquias e fundações municipais); governos e órgãos dos estados; entidades sem fins lucrativos (associações, fundações privadas, organizações religiosas e sociais, serviços sociais autônomos e sindicatos); o que foi pago ao Banco do Brasil sem dizer quem recebeu; e o resto (empresas, consórcios, órgãos federais e outros).</li>
+          <li><strong>Cidades:</strong> só o que foi pago à prefeitura e aos fundos municipais, ligado ao código do IBGE do mesmo jeito que na conta por cidade. Por isso, a soma das cidades pode ser menor que o total pago a prefeituras e órgãos municipais.</li>
+          <li><strong>Cota parlamentar:</strong> o total reembolsado no ano, pela lista da cota da mesma casa, com o mesmo nome e estado; detalhes na seção da cota.</li>
+          <li><strong>Inflação:</strong> valores de emenda corrigidos pelo IPCA para dinheiro de hoje, pela média do ano do pagamento. A cota aparece no valor da época.</li>
+        </ul>
+
         <h2 id="dinheiro">Salário líquido, juros e inflação</h2>
         <ul>
           <li><strong>Salário líquido:</strong> tabelas oficiais do ano, gravadas em <a href="dados/folha.json">dados/folha.json</a> e conferidas nas páginas do INSS e da Receita Federal (data no arquivo). INSS do empregado progressivo por faixa, até o teto. Imposto de Renda pela tabela mensal sobre o salário menos a dedução maior entre o INSS mais R$ 189,59 por dependente e o desconto simplificado de R$ 607,20; depois, a redução da Lei 15.270/2025, calculada sobre o salário bruto: até R$ 5.000 o imposto zera; de R$ 5.000,01 a R$ 7.350, a redução é R$ 978,62 − 0,133145 × salário. Conferido com o exemplo da Receita: salário de R$ 6.000, INSS de R$ 641,51, redução de R$ 179,75 e imposto de R$ 385,10. Se o ano mudar e o arquivo não for atualizado, a página avisa.</li>

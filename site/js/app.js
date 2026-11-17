@@ -4,7 +4,7 @@ import { montarIndice, acompanharLeitura } from './indice.js';
 import { slugDaCidade, caminhoDaCidade, slugDoCaminho } from './endereco.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
-import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde } from './dados.js';
+import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde, carregarIndiceParlamentares, carregarEmendasParlamentar } from './dados.js';
 
 const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const campo = (nome) => document.querySelectorAll(`[data-campo="${nome}"]`);
@@ -2003,7 +2003,7 @@ function montarMunicipios(ctx) {
       const x = daCidade[String(a)];
       if (!x || !(x[0] > 0)) return null;
       const fator = fatorParaHoje(ctx, a) ?? 1;
-      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '']);
+      const lista = x[2].map(([i, v]) => [d.nomes[i], v * fator, d.cargos?.[i] ?? '', d.paginas?.[i] ?? '']);
       return { pago: x[0] * fator, emendas: x[1], autores: lista.length, lista };
     };
     const quantas = (x) => `${f.numero(x.emendas)} ${x.emendas === 1 ? 'emenda' : 'emendas'}${x.autores ? ` de ${f.numero(x.autores)} ${x.autores === 1 ? 'autor' : 'autores'}` : ''}`;
@@ -2044,12 +2044,22 @@ function montarMunicipios(ctx) {
       titulo.textContent = `Quem mandou dinheiro em ${anoLista}${anoLista === emAndamento ? ' (até agora)' : ''}, do maior para o menor`;
       // Todos os autores; os 6 primeiros aparecem logo, o resto com o botão.
       const VISIVEIS = 6;
-      lista.lista.forEach(([autor, valor, cargo], k) => {
+      lista.lista.forEach(([autor, valor, cargo, pagina], k) => {
         const pct = lista.pago > 0 ? (valor / lista.pago) * 100 : 0;
         const li = el('li', null, null, barras);
         li.hidden = k >= VISIVEIS;
         const topo = el('div', 'barra-topo', null, li);
-        const nomeEl = el('span', 'barra-nome', autor, topo);
+        const nomeEl = el('span', 'barra-nome', null, topo);
+        if (pagina) {
+          // Leva à página do parlamentar; na mesma página, sem recarregar.
+          const a = el('a', null, autor, nomeEl);
+          a.href = `/parlamentar/${pagina}`;
+          a.addEventListener('click', (ev) => {
+            if (!abrirParlamentar) return;
+            ev.preventDefault();
+            abrirParlamentar(pagina);
+          });
+        } else nomeEl.textContent = autor;
         if (cargo) el('span', 'barra-explica', cargo, nomeEl);
         // Entre 1 e 10 milhões, com uma casa: "R$ 1,4 mi", não "R$ 1 mi".
         const valorCurto = valor >= 1e6 && valor < 1e7 ? `R$\u00A0${f.numero(valor / 1e6, 1)} mi` : f.reaisCompacto(valor);
@@ -2128,6 +2138,331 @@ function montarMunicipios(ctx) {
       })) : [],
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Emendas de cada deputado e senador (scripts/emendas_para_json.py).
+// Endereço próprio: /parlamentar/nome-uf (montado pelo Worker).
+// ---------------------------------------------------------------------------
+
+const TIPOS_RECEBEDOR_TEXTO = {
+  prefeituras: ['Prefeituras e órgãos municipais', 'prefeitura, fundos municipais de saúde e outros'],
+  estados: ['Governos e órgãos dos estados', 'governo do estado, secretarias e fundos estaduais'],
+  entidades: ['Entidades sem fins lucrativos', 'associações, fundações e santas casas'],
+  banco: ['Pago por meio do Banco do Brasil', 'o arquivo oficial não diz quem recebeu'],
+  outros: ['Empresas e outros', 'empresas, consórcios e órgãos federais'],
+};
+const NOME_CASA = { camara: 'Câmara dos Deputados', senado: 'Senado', '': 'Câmara ou Senado' };
+let abrirParlamentar = null;
+
+function montarParlamentares(ctx) {
+  const entrada = $('#parl-busca');
+  const listaSug = $('#parl-sugestoes');
+  const selAno = $('#parl-ano');
+  if (!entrada || !listaSug || !selAno) return;
+  const estado = { indice: null, carregando: null, nomes: [], atual: null, dados: null, cidades: null, sugestoes: [], ativa: -1 };
+
+  const carregar = () => {
+    if (!estado.carregando) {
+      estado.carregando = carregarIndiceParlamentares().then((d) => {
+        if (!d) { $('#parlamentares').hidden = true; return null; }
+        estado.indice = d;
+        estado.nomes = d.parlamentares.map((p) => semAcento(`${p[1]} ${p[4]}`));
+        selAno.replaceChildren();
+        [...d.anos].reverse().forEach((a) => { el('option', null, String(a), selAno).value = String(a); });
+        // O último ano completo, se houver; o ano em andamento fica na lista.
+        const anoAtual = new Date().getFullYear();
+        if (d.anos.includes(anoAtual - 1)) selAno.value = String(anoAtual - 1);
+        definir('parl-atualizado', f.dataCurta(d.atualizado));
+        return d;
+      }).catch((erro) => {
+        console.error(erro);
+        estado.carregando = null;
+        throw erro;
+      });
+    }
+    return estado.carregando;
+  };
+  // Nomes das cidades, para a lista de cidades de cada parlamentar.
+  const nomesDasCidades = async () => {
+    if (!estado.cidades) {
+      const d = await carregarIndiceMunicipios();
+      estado.cidades = new Map(d.cidades.map((c) => [String(c[0]).padStart(7, '0'), [c[1], c[2]]]));
+    }
+    return estado.cidades;
+  };
+  const rotulo = (p) => (p[2] ? `${NOME_CASA[p[2]]} · ${p[3] ? `${p[3]}-` : ''}${p[4]}` : 'Câmara ou Senado');
+
+  // Busca por nome --------------------------------------------------------
+  const fechar = () => {
+    listaSug.hidden = true;
+    entrada.setAttribute('aria-expanded', 'false');
+    entrada.removeAttribute('aria-activedescendant');
+    estado.ativa = -1;
+  };
+  const marcar = (i) => {
+    estado.ativa = i;
+    [...listaSug.children].forEach((li, k) => li.setAttribute('aria-selected', k === i ? 'true' : 'false'));
+    if (i >= 0) entrada.setAttribute('aria-activedescendant', `parl-op-${i}`);
+  };
+  const sugerir = () => {
+    const q = semAcento(entrada.value);
+    if (!estado.indice || q.length < 2) { fechar(); return; }
+    const comeca = [];
+    const contem = [];
+    estado.nomes.forEach((n, i) => {
+      if (n.startsWith(q)) comeca.push(i);
+      else if (n.includes(` ${q}`) || (q.length >= 4 && n.includes(q))) contem.push(i);
+    });
+    estado.sugestoes = [...comeca, ...contem].slice(0, 8).map((i) => estado.indice.parlamentares[i]);
+    listaSug.replaceChildren();
+    if (!estado.sugestoes.length) {
+      const li = el('li', 'sugestao-nada', 'Nenhum deputado ou senador com esse nome', listaSug);
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-disabled', 'true');
+    }
+    estado.sugestoes.forEach((p, k) => {
+      const li = el('li', null, p[1], listaSug);
+      li.id = `parl-op-${k}`;
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', 'false');
+      el('small', null, ` ${rotulo(p)}`, li);
+      li.addEventListener('mousedown', (ev) => { ev.preventDefault(); escolher(p, { rolar: true }); });
+    });
+    listaSug.hidden = false;
+    entrada.setAttribute('aria-expanded', 'true');
+    marcar(-1);
+  };
+  entrada.addEventListener('focus', () => { carregar().catch(() => {}); });
+  entrada.addEventListener('input', () => { carregar().then(sugerir).catch(() => {}); });
+  entrada.addEventListener('keydown', (ev) => {
+    const n = estado.sugestoes.length;
+    if (ev.key === 'ArrowDown' && n) { ev.preventDefault(); if (listaSug.hidden) sugerir(); marcar((estado.ativa + 1) % n); }
+    else if (ev.key === 'ArrowUp' && n) { ev.preventDefault(); marcar((estado.ativa - 1 + n) % n); }
+    else if (ev.key === 'Enter' && !listaSug.hidden && n) { ev.preventDefault(); escolher(estado.sugestoes[Math.max(0, estado.ativa)], { rolar: true }); }
+    else if (ev.key === 'Escape') fechar();
+  });
+  entrada.addEventListener('blur', () => setTimeout(fechar, 100));
+  selAno.addEventListener('change', () => { if (estado.atual) { desenhar(); guardar(); } else desenharEstado(); });
+
+  // Endereço da página: /parlamentar/endereco?ano=AAAA#parlamentares.
+  const guardar = () => {
+    const p = estado.atual;
+    const q = new URLSearchParams(location.search);
+    q.delete('cidade');
+    q.set('ano', selAno.value);
+    history.replaceState(null, '', `/parlamentar/${p[0]}?${q}#parlamentares`);
+    const sigla = p[4] ? ` (${p[3] ? `${p[3]}-` : ''}${p[4]})` : '';
+    document.title = `${p[1]}${sigla}: emendas parlamentares | Arrecadômetro Brasil`;
+    const h1 = $('.abertura h1');
+    if (h1) h1.textContent = `Emendas de ${p[1]}${sigla}`;
+  };
+
+  async function escolher(p, { rolar = false, link = true } = {}) {
+    fechar();
+    entrada.value = p[1];
+    estado.atual = p;
+    $('#parl-estado').hidden = true;
+    if (rolar) $('#parlamentares').scrollIntoView({ block: 'start' });
+    try {
+      estado.dados = await carregarEmendasParlamentar(p[0]);
+    } catch (erro) {
+      console.error(erro);
+      estado.dados = null;
+    }
+    if (estado.atual !== p) return;
+    desenhar();
+    if (link) guardar();
+  }
+  abrirParlamentar = (endereco) => carregar().then((d) => {
+    const p = d?.parlamentares.find((x) => x[0] === endereco);
+    if (p) escolher(p, { rolar: true });
+  });
+
+  // Sem parlamentar escolhido: os do estado da cidade escolhida -----------
+  function desenharEstado() {
+    const caixa = $('#parl-estado');
+    const uf = lugar.municipio?.uf;
+    if (estado.atual || !uf || !estado.indice) { caixa.hidden = true; return; }
+    const doEstado = estado.indice.parlamentares.filter((p) => p[4] === uf && p[2]).sort((a, b) => b[5] - a[5]);
+    if (!doEstado.length) { caixa.hidden = true; return; }
+    const anos = estado.indice.anos;
+    definir('parl-estado-titulo', `Deputados federais e senadores de ${uf}, pelo total de emendas pagas de ${Math.min(...anos)} a ${Math.max(...anos)}`);
+    const lista = $('#parl-estado-lista');
+    lista.replaceChildren();
+    const maior = Math.max(1, doEstado[0][5]);
+    const VISIVEIS = 10;
+    doEstado.forEach((p, k) => {
+      const li = el('li', null, null, lista);
+      li.hidden = k >= VISIVEIS;
+      const topo = el('div', 'barra-topo', null, li);
+      const nomeEl = el('span', 'barra-nome', null, topo);
+      const a = el('a', null, p[1], nomeEl);
+      a.href = `/parlamentar/${p[0]}`;
+      a.addEventListener('click', (ev) => { ev.preventDefault(); escolher(p, { rolar: true }); });
+      el('span', 'barra-explica', rotulo(p), nomeEl);
+      el('span', 'barra-valor', f.reaisCompacto(p[5]), topo);
+      const trilho = el('div', 'barra-trilho', null, li);
+      trilho.setAttribute('aria-hidden', 'true');
+      el('div', 'barra', null, trilho).style.width = `${Math.max(1, (p[5] / maior) * 100)}%`;
+    });
+    const bt = $('#parl-estado-todos');
+    bt.hidden = doEstado.length <= VISIVEIS;
+    let aberto = false;
+    bt.textContent = `Ver todos os ${doEstado.length}`;
+    bt.onclick = () => {
+      aberto = !aberto;
+      [...lista.children].forEach((li, k) => { li.hidden = !aberto && k >= VISIVEIS; });
+      bt.textContent = aberto ? `Mostrar só os ${VISIVEIS} primeiros` : `Ver todos os ${doEstado.length}`;
+    };
+    caixa.hidden = false;
+  }
+  aoMudarLugar(() => { carregar().then(desenharEstado).catch(() => {}); });
+
+  // Parlamentar escolhido -------------------------------------------------
+  async function desenhar() {
+    const p = estado.atual;
+    const d = estado.dados;
+    $('#parl-vazio').hidden = true;
+    $('#parl-detalhe').hidden = false;
+    const cab = $('[data-campo="parl-cabeca"]');
+    cab.replaceChildren();
+    el('strong', null, p[1], cab);
+    el('span', null, ` · ${rotulo(p)}`, cab);
+    const ano = Number(selAno.value);
+    const anos = estado.indice.anos;
+    const emAndamento = Math.max(...anos);
+    const doAno = (a) => {
+      const x = d?.anos?.[String(a)];
+      if (!x) return null;
+      const fator = fatorParaHoje(ctx, a) ?? 1;
+      return { pago: x.pago * fator, tipos: x.tipos.map((v) => v * fator), cidades: x.cidades.map(([c, v]) => [c, v * fator]) };
+    };
+    const x = doAno(ano);
+    const dl = $('#parl-numeros');
+    dl.replaceChildren();
+    const linha = (rotuloLinha, valor, detalhes) => {
+      const div = el('div', null, null, dl);
+      el('dt', null, rotuloLinha, div);
+      el('dd', null, valor, div);
+      detalhes.forEach((t) => el('dd', 'detalhe', t, div));
+    };
+    const rotuloAno = (a) => (a === emAndamento ? `Emendas pagas em ${a} (ano em andamento)` : `Emendas pagas em ${a}`);
+    const valorGrande = (v) => (v >= 1e6 ? f.reaisPorExtenso(v) : f.reaisCompacto(v));
+    if (x && x.pago > 0) linha(rotuloAno(ano), valorGrande(x.pago), [x.cidades.length ? `${f.numero(x.cidades.length)} ${x.cidades.length === 1 ? 'cidade recebeu' : 'cidades receberam'} por meio da prefeitura` : 'Nenhuma cidade identificada']);
+    else linha(rotuloAno(ano), f.moeda(0, 0), ['Nenhuma emenda individual paga neste ano']);
+    const todos = anos.map((a) => doAno(a)?.pago ?? 0).reduce((s1, v) => s1 + v, 0);
+    linha(`De ${Math.min(...anos)} a ${emAndamento}`, valorGrande(todos), ['Soma dos anos, em dinheiro de hoje']);
+    // Cota parlamentar do mesmo ano, pela lista da Câmara ou do Senado.
+    if (p[2]) {
+      carregarCotaAno(ano).then((cota) => {
+        if (estado.atual !== p || Number(selAno.value) !== ano) return;
+        const alvo = semAcento(p[1]);
+        const achado = (cota[p[2]]?.parlamentares ?? []).find((x) => semAcento(x.nome) === alvo && x.uf === p[4]);
+        if (!achado) return;
+        linha(`Cota parlamentar em ${ano}`, f.reaisCompacto(achado.total), ['Reembolso de despesas do mandato, no valor da época', 'Detalhes na seção da cota, logo abaixo']);
+      }).catch(() => {});
+    }
+
+    // Para quem foi pago.
+    const tipos = $('#parl-tipos');
+    tipos.replaceChildren();
+    const temTipos = x && x.pago > 0;
+    campo('parl-tipos-titulo')[0].hidden = tipos.hidden = !temTipos;
+    if (temTipos) {
+      d.tipos.forEach((t, i) => {
+        const v = x.tipos[i];
+        if (!(v > 0)) return;
+        const pct = (v / x.pago) * 100;
+        const li = el('li', null, null, tipos);
+        const topo = el('div', 'barra-topo', null, li);
+        const nomeEl = el('span', 'barra-nome', TIPOS_RECEBEDOR_TEXTO[t][0], topo);
+        el('span', 'barra-explica', TIPOS_RECEBEDOR_TEXTO[t][1], nomeEl);
+        const valorCurto = v >= 1e6 && v < 1e7 ? `R$\u00A0${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v);
+        el('span', 'barra-valor', `${valorCurto} · ${f.parteDoTotal(pct)}`, topo);
+        const trilho = el('div', 'barra-trilho', null, li);
+        trilho.setAttribute('aria-hidden', 'true');
+        el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+      });
+    }
+
+    // Cidades.
+    const cidades = $('#parl-cidades');
+    const botao = $('#parl-cidades-todas');
+    cidades.replaceChildren();
+    botao.hidden = true;
+    const temCidades = Boolean(x?.cidades.length);
+    campo('parl-cidades-titulo')[0].hidden = cidades.hidden = !temCidades;
+    if (temCidades) {
+      definir('parl-cidades-titulo', `Cidades que receberam em ${ano}, da que mais recebeu para a que menos recebeu`);
+      let nomes;
+      try { nomes = await nomesDasCidades(); } catch { nomes = new Map(); }
+      if (estado.atual !== p || Number(selAno.value) !== ano) return;
+      const VISIVEIS = 6;
+      x.cidades.forEach(([cod, v], k) => {
+        const pct = (v / x.pago) * 100;
+        const li = el('li', null, null, cidades);
+        li.hidden = k >= VISIVEIS;
+        const topo = el('div', 'barra-topo', null, li);
+        const nomeEl = el('span', 'barra-nome', null, topo);
+        const [nomeCidade, ufCidade] = nomes.get(cod) ?? [cod, ''];
+        const a = el('a', null, ufCidade ? `${nomeCidade} (${ufCidade})` : nomeCidade, nomeEl);
+        if (ufCidade) a.href = caminhoDaCidade(nomeCidade, ufCidade);
+        const valorCurto = v >= 1e6 && v < 1e7 ? `R$ ${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v);
+        el('span', 'barra-valor', `${valorCurto} · ${f.parteDoTotal(pct)}`, topo);
+        const trilho = el('div', 'barra-trilho', null, li);
+        trilho.setAttribute('aria-hidden', 'true');
+        el('div', 'barra', null, trilho).style.width = `${Math.max(1, pct)}%`;
+      });
+      if (x.cidades.length > VISIVEIS) {
+        let aberto = false;
+        const rotular = () => {
+          botao.textContent = aberto ? `Mostrar só as ${VISIVEIS} que mais receberam` : `Ver todas as ${f.numero(x.cidades.length)} cidades`;
+          botao.setAttribute('aria-expanded', String(aberto));
+        };
+        botao.onclick = () => {
+          aberto = !aberto;
+          [...cidades.children].forEach((li, k) => { li.hidden = !aberto && k >= VISIVEIS; });
+          rotular();
+        };
+        rotular();
+        botao.hidden = false;
+      }
+    }
+    definir('parl-nota', `Emendas individuais de ${p[1]} pagas em ${ano}, em dinheiro de hoje (IPCA). A porcentagem é do total pago no ano. Emendas de bancada e de comissão não entram. Fonte: Portal da Transparência, atualização: ${f.dataCurta(d?.atualizado ?? estado.indice.atualizado)}.`);
+    $('#parl-baixar').hidden = !d;
+  }
+
+  registrarDownload('parlamentar', () => {
+    const p = estado.atual;
+    const d = estado.dados;
+    const nomes = estado.cidades ?? new Map();
+    const linhas = [];
+    if (p && d) {
+      for (const [a, x] of Object.entries(d.anos)) {
+        d.tipos.forEach((t, i) => linhas.push([a, p[1], 'tipo de recebedor', TIPOS_RECEBEDOR_TEXTO[t][0], '', x.tipos[i], arred(fatorParaHoje(ctx, Number(a)) ?? 1, 6)]));
+        x.cidades.forEach(([cod, v]) => linhas.push([a, p[1], 'cidade', nomes.get(cod)?.join(' - ') ?? '', cod, v, arred(fatorParaHoje(ctx, Number(a)) ?? 1, 6)]));
+      }
+    }
+    return {
+      nome: `emendas-${p?.[0] ?? 'parlamentar'}.csv`,
+      cabecalhos: ['ano', 'parlamentar', 'tipo da linha', 'recebedor ou cidade', 'codigo_ibge', 'pago_reais_da_epoca', 'fator para dinheiro de hoje (IPCA)'],
+      linhas,
+    };
+  });
+
+  // Ao abrir: /parlamentar/endereco abre o parlamentar; sem ele, a lista do
+  // estado da cidade escolhida, quando houver.
+  const m = /^\/parlamentar\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(location.pathname);
+  carregar().then((d) => {
+    if (!d) return;
+    const p = m ? d.parlamentares.find((x) => x[0] === m[1]) : null;
+    if (p) {
+      const ano = new URLSearchParams(location.search).get('ano');
+      if (ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
+      escolher(p).then(() => reposicionarNaSecao());
+    } else desenharEstado();
+  }).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -4297,7 +4632,7 @@ async function iniciar() {
       if (ehCapital && cidade.codigo !== m.codigo && (pelaPessoa || !lerCidadeGuardada())) escolherCidade(m.codigo);
     });
     const etapas = [iniciarContador, montarNovidades, montarOrcamento, montarResumo, montarCompras, montarCombustiveis, montarSalario, montarArrecadacao,
-      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarCota, montarDinheiro,
+      montarComposicao, montarComposicaoEstados, montarGastos, montarMinisterios, montarCartao, montarViagens, montarContas, montarEstados, montarMunicipios, montarParlamentares, montarCota, montarDinheiro,
       montarDolar, montarIR, montarAvisos, montarFontes];
     for (const etapa of etapas) {
       try {

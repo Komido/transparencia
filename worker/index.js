@@ -10,6 +10,7 @@
 //                    título, descrição e endereço da cidade, para que ela
 //                    possa ser encontrada em buscadores e compartilhada.
 //                    Os números continuam sendo montados no navegador.
+//   /parlamentar/nome-uf  o mesmo, para cada deputado e senador.
 //   /sitemap.xml     a lista das páginas, para os buscadores.
 //   /robots.txt      as regras para os buscadores.
 //
@@ -75,6 +76,36 @@ async function cidades(env, url) {
   return cidadesEmCache;
 }
 
+// Parlamentares: dados/parlamentares/indice.json, lido uma vez por instância.
+let parlamentaresEmCache = null;
+
+async function parlamentares(env, url) {
+  if (parlamentaresEmCache) return parlamentaresEmCache;
+  const r = await env.ASSETS.fetch(new Request(new URL('/dados/parlamentares/indice.json', url)));
+  if (!r.ok) throw new Error(`índice de parlamentares: HTTP ${r.status}`);
+  const d = await r.json();
+  const porEndereco = new Map();
+  for (const p of d.parlamentares ?? []) {
+    if (Array.isArray(p) && typeof p[0] === 'string' && typeof p[1] === 'string') {
+      porEndereco.set(p[0], { nome: p[1], casa: p[2], partido: p[3], uf: p[4] });
+    }
+  }
+  parlamentaresEmCache = { porEndereco, atualizado: /^\d{4}-\d{2}-\d{2}$/.test(d.atualizado ?? '') ? d.atualizado : null };
+  return parlamentaresEmCache;
+}
+
+const CASA = { camara: 'Câmara dos Deputados', senado: 'Senado' };
+
+export function textosDoParlamentar(p, endereco, origem) {
+  const sigla = p.uf ? ` (${p.partido ? `${p.partido}-` : ''}${p.uf})` : '';
+  return {
+    titulo: `${p.nome}${sigla}: emendas parlamentares | Arrecadômetro Brasil`,
+    tituloCurto: `Emendas de ${p.nome}${sigla}`,
+    descricao: `Para onde ${p.nome}${CASA[p.casa] ? ` (${CASA[p.casa]})` : ''} mandou emendas parlamentares: quanto foi pago a cada ano, a que tipo de recebedor e quais cidades receberam, com dados oficiais.`,
+    endereco: `${origem}/parlamentar/${endereco}`,
+  };
+}
+
 export function textosDaCidade(c, origem) {
   const lugar = `${c.nome} (${c.uf})`;
   return {
@@ -85,28 +116,40 @@ export function textosDaCidade(c, origem) {
   };
 }
 
-function naoEncontrada() {
+function naoEncontrada(oQue = 'Cidade não encontrada', texto = 'Este endereço não corresponde a nenhuma das 5.570 cidades do país.', link = 'Escolher a cidade') {
   const html = `<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Cidade não encontrada | Arrecadômetro Brasil</title>
+  <title>${escapar(oQue)} | Arrecadômetro Brasil</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/estilo.css">
 </head>
 <body>
   <main class="conteiner">
     <div class="abertura">
-      <h1>Cidade não encontrada</h1>
-      <p>Este endereço não corresponde a nenhuma das 5.570 cidades do país. <a href="/">Escolher a cidade</a></p>
+      <h1>${escapar(oQue)}</h1>
+      <p>${escapar(texto)} <a href="/">${escapar(link)}</a></p>
     </div>
   </main>
 </body>
 </html>
 `;
   return new Response(html, { status: 404, headers: comCabecalhos({ 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' }) });
+}
+
+async function paginaDoParlamentar(request, env, url) {
+  const m = /^\/parlamentar\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(url.pathname.toLowerCase());
+  const naoAchou = () => naoEncontrada('Parlamentar não encontrado', 'Este endereço não corresponde a nenhum deputado federal ou senador com emendas ou cota desde 2023.', 'Voltar ao início');
+  if (!m) return naoAchou();
+  const certo = `/parlamentar/${m[1]}`;
+  if (url.pathname !== certo) return Response.redirect(`${url.origin}${certo}${url.search}`, 301);
+  const { porEndereco } = await parlamentares(env, url);
+  const p = porEndereco.get(m[1]);
+  if (!p) return naoAchou();
+  return reescrever(request, env, url, textosDoParlamentar(p, m[1], url.origin));
 }
 
 async function paginaDaCidade(request, env, url) {
@@ -118,9 +161,13 @@ async function paginaDaCidade(request, env, url) {
   const { porSlug } = await cidades(env, url);
   const c = porSlug.get(slug);
   if (!c) return naoEncontrada();
+  return reescrever(request, env, url, textosDaCidade(c, url.origin));
+}
+
+// A página inicial com título, descrição, manchete e endereço próprios.
+async function reescrever(request, env, url, t) {
   const base = await env.ASSETS.fetch(new Request(new URL('/', url)));
   if (!base.ok) return base;
-  const t = textosDaCidade(c, url.origin);
   const pagina = new HTMLRewriter()
     .on('title', { element(e) { e.setInnerContent(t.titulo); } })
     .on('meta[name="description"]', { element(e) { e.setAttribute('content', t.descricao); } })
@@ -145,7 +192,11 @@ async function paginaDaCidade(request, env, url) {
 async function mapaDoSite(env, url) {
   const { porSlug, atualizado } = await cidades(env, url);
   const quando = atualizado ? `<lastmod>${atualizado}</lastmod>` : '';
-  const enderecos = [`${url.origin}/`, `${url.origin}/metodologia.html`, ...[...porSlug.keys()].map((s) => `${url.origin}/cidade/${s}`)];
+  let deputados = [];
+  try {
+    deputados = [...(await parlamentares(env, url)).porEndereco.keys()].map((e) => `${url.origin}/parlamentar/${e}`);
+  } catch { /* sem a lista de parlamentares, o mapa sai só com as cidades */ }
+  const enderecos = [`${url.origin}/`, `${url.origin}/metodologia.html`, ...[...porSlug.keys()].map((s) => `${url.origin}/cidade/${s}`), ...deputados];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${
     enderecos.map((e) => `<url><loc>${escapar(e)}</loc>${quando}</url>`).join('\n')}\n</urlset>\n`;
   return new Response(xml, { headers: comCabecalhos({ 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' }) });
@@ -175,6 +226,7 @@ export default {
     }
     if (url.pathname === '/api/onde') return new Response(JSON.stringify(onde(request.cf)), { headers: CABECALHOS_API });
     if (url.pathname.toLowerCase().startsWith('/cidade/')) return paginaDaCidade(request, env, url);
+    if (url.pathname.toLowerCase().startsWith('/parlamentar/')) return paginaDoParlamentar(request, env, url);
     if (url.pathname === '/sitemap.xml') return mapaDoSite(env, url);
     if (url.pathname === '/robots.txt') return regrasParaBuscadores(url);
     // Qualquer outro endereço que não é arquivo: a mesma resposta de antes (404).
