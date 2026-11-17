@@ -60,35 +60,43 @@ jobs:
           pedir "bolsa-familia-por-municipio?mesAno=202001&codigoIbge=3550308&pagina=1"
           pedir "bpc-por-municipio?mesAno=201501&codigoIbge=3550308&pagina=1"
 
-      # SIOPE (FNDE): percentual aplicado em educação por município. Serviço
-      # OData do FNDE; lista as consultas e testa os indicadores do Acre.
-      - name: SIOPE, catálogo e indicadores
+      # TSE: candidatos eleitos (prefeitos em 2024 e 2020, governadores em
+      # 2022 e 2026). Formato, colunas, código da cidade e situação de eleito.
+      - name: TSE, candidatos
         continue-on-error: true
         run: |
           set -u
-          base="https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata"
-          echo "=== catálogo"
-          curl -sS --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o meta.xml -w "HTTP %{http_code} %{size_download} bytes\n" "${base}/\$metadata" || true
-          grep -o 'EntitySet Name="[^"]*"\|FunctionImport Name="[^"]*"\|Function Name="[^"]*"' meta.xml | sort -u | head -40 || true
-          grep -o '<Parameter Name="[^"]*" Type="[^"]*"' meta.xml | sort -u | head -20 || true
-          for ent in Indicadores_Siope Dados_Gerais_Siope; do
-            echo "=== ${ent}"
-            curl -sS --max-time 120 -A "Mozilla/5.0 (X11; Linux x86_64)" -o resp.json -w "HTTP %{http_code} %{size_download} bytes\n" \
-              "${base}/${ent}(Ano_Consulta=@Ano_Consulta,Num_Peri=@Num_Peri,Sig_UF=@Sig_UF)?@Ano_Consulta=2024&@Num_Peri=6&@Sig_UF='AC'&\$top=40&\$format=json" || true
-            python3 - resp.json <<'PY'
-          import json, sys
-          try:
-              d = json.load(open(sys.argv[1]))
-          except Exception as e:
-              print("não é JSON:", e, open(sys.argv[1], errors="replace").read()[:500]); sys.exit()
-          v = d.get("value", [])
-          print("linhas:", len(v))
-          if v:
-              print("colunas:", sorted(v[0].keys()))
-          for x in v[:40]:
-              print({k: x[k] for k in x if k in ("NOM_MUNI", "COD_MUNI", "DS_TIPO", "NOM_ITEM", "NOM_INDI", "VAL_INDI", "VAL_DECL", "NUM_PERI", "ANO")})
+          mkdir -p /tmp/tse && cd /tmp/tse
+          for ano in 2024 2022 2026 2020; do
+            url="https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_${ano}.zip"
+            echo "=== ${url}"
+            curl -sS --max-time 600 -o "c${ano}.zip" -w "HTTP %{http_code} %{size_download} bytes\n" "$url" || continue
+            unzip -l "c${ano}.zip" | head -8
+            unzip -l "c${ano}.zip" | tail -2
+            python3 - "c${ano}.zip" "$ano" <<'PY'
+          import collections, csv, io, sys, zipfile
+          z = zipfile.ZipFile(sys.argv[1]); ano = sys.argv[2]
+          nomes = [n for n in z.namelist() if n.lower().endswith(".csv")]
+          alvo = next((n for n in nomes if n.endswith("_BRASIL.csv")), None) or next((n for n in nomes if n.endswith("_AC.csv")), nomes[0])
+          print("arquivo lido:", alvo)
+          bruto = z.read(alvo)
+          for cod in ("utf-8", "latin-1"):
+              try:
+                  texto = bruto.decode(cod); print("codificação:", cod); break
+              except UnicodeDecodeError:
+                  continue
+          linhas = list(csv.DictReader(io.StringIO(texto), delimiter=";"))
+          print("colunas:", list(linhas[0].keys()))
+          print("linhas:", len(linhas))
+          print("cargos:", collections.Counter(l.get("DS_CARGO") for l in linhas).most_common(10))
+          print("situação no turno:", collections.Counter(l.get("DS_SIT_TOT_TURNO") for l in linhas).most_common(12))
+          cargo = "PREFEITO" if ano in ("2024", "2020") else "GOVERNADOR"
+          eleitos = [l for l in linhas if l.get("DS_CARGO") == cargo and l.get("DS_SIT_TOT_TURNO", "").startswith("ELEITO")]
+          print(f"{cargo} eleitos neste arquivo:", len(eleitos))
+          for l in eleitos[:6]:
+              print({k: l.get(k) for k in ("ANO_ELEICAO", "NR_TURNO", "SG_UF", "SG_UE", "NM_UE", "DS_CARGO", "NM_URNA_CANDIDATO", "SG_PARTIDO", "NM_PARTIDO", "NR_PARTIDO", "DS_SIT_TOT_TURNO", "DS_COMPOSICAO_COLIGACAO", "DS_COMPOSICAO_FEDERACAO", "SG_FEDERACAO")})
           PY
-            sleep 2
+            rm -f "c${ano}.zip"
           done
 
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
