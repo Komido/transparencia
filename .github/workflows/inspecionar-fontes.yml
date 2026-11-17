@@ -60,20 +60,35 @@ jobs:
           pedir "bolsa-familia-por-municipio?mesAno=202001&codigoIbge=3550308&pagina=1"
           pedir "bpc-por-municipio?mesAno=201501&codigoIbge=3550308&pagina=1"
 
-      # Os mesmos benefícios em arquivo mensal com todas as cidades (sem chave).
-      # Só cabeçalhos: nome do arquivo para onde o Portal redireciona e tamanho.
-      - name: Portal da Transparência, arquivos mensais de benefícios (cabeçalhos)
+      # SIOPE (FNDE): percentual aplicado em educação por município. Serviço
+      # OData do FNDE; lista as consultas e testa os indicadores do Acre.
+      - name: SIOPE, catálogo e indicadores
         continue-on-error: true
         run: |
           set -u
-          for base in novo-bolsa-familia bpc auxilio-brasil bolsa-familia-pagamentos; do
-            for mes in 202609 202610; do
-              url="https://portaldatransparencia.gov.br/download-de-dados/${base}/${mes}"
-              echo "=== ${url}"
-              curl -sS -I -L --max-time 60 -A "Mozilla/5.0 (X11; Linux x86_64)" "$url" \
-                | grep -i "^HTTP\|^location\|^content-length\|^content-type\|^last-modified" || true
-              sleep 3
-            done
+          base="https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata"
+          echo "=== catálogo"
+          curl -sS --max-time 90 -A "Mozilla/5.0 (X11; Linux x86_64)" -o meta.xml -w "HTTP %{http_code} %{size_download} bytes\n" "${base}/\$metadata" || true
+          grep -o 'EntitySet Name="[^"]*"\|FunctionImport Name="[^"]*"\|Function Name="[^"]*"' meta.xml | sort -u | head -40 || true
+          grep -o '<Parameter Name="[^"]*" Type="[^"]*"' meta.xml | sort -u | head -20 || true
+          for ent in Indicadores_Siope Dados_Gerais_Siope; do
+            echo "=== ${ent}"
+            curl -sS --max-time 120 -A "Mozilla/5.0 (X11; Linux x86_64)" -o resp.json -w "HTTP %{http_code} %{size_download} bytes\n" \
+              "${base}/${ent}(Ano_Consulta=@Ano_Consulta,Num_Peri=@Num_Peri,Sig_UF=@Sig_UF)?@Ano_Consulta=2024&@Num_Peri=6&@Sig_UF='AC'&\$top=40&\$format=json" || true
+            python3 - resp.json <<'PY'
+          import json, sys
+          try:
+              d = json.load(open(sys.argv[1]))
+          except Exception as e:
+              print("não é JSON:", e, open(sys.argv[1], errors="replace").read()[:500]); sys.exit()
+          v = d.get("value", [])
+          print("linhas:", len(v))
+          if v:
+              print("colunas:", sorted(v[0].keys()))
+          for x in v[:40]:
+              print({k: x[k] for k in x if k in ("NOM_MUNI", "COD_MUNI", "DS_TIPO", "NOM_ITEM", "NOM_INDI", "VAL_INDI", "VAL_DECL", "NUM_PERI", "ANO")})
+          PY
+            sleep 2
           done
 
       - name: Lei 9.250/1995 (isenção do IR de 1996 a 2000)
