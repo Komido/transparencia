@@ -24,64 +24,63 @@ jobs:
           python3 -m pip install --quiet openpyxl==3.1.5
 
       # Tesouro Transparente: série "Emendas Parlamentares Individuais e de
-      # bancada" (transferências de emendas a estados e municípios, base para
-      # a receita corrente líquida). Colunas, totais por ano e tipo e, para
-      # 2023 e 2024, quanto do que o Portal registrou como pago ao Banco do
-      # Brasil tem par aqui por código de emenda. Só totais e colunas.
-      - name: Tesouro, emendas individuais e de bancada por ente
+      # bancada" (uma linha por ordem bancária, com o código IBGE do ente)
+      # contra o Portal (pagamentos por favorecido), por ano: o Tesouro cobre
+      # o que o Portal registrou como pago ao Banco do Brasil? Só totais.
+      - name: Tesouro contra Portal, emendas individuais e de bancada por ano
         continue-on-error: true
         run: |
           set -u
           mkdir -p /tmp/te && cd /tmp/te
           AGENTE="ArrecadometroBrasil/1.0 (dados publicos; github.com/Komido/transparencia)"
-          curl -sSL --max-time 900 -A "$AGENTE" -o tesouro.csv -w "Tesouro: HTTP %{http_code} %{content_type} %{size_download} bytes\n" \
+          curl -sSL --max-time 900 -A "$AGENTE" -o tesouro.csv -w "Tesouro: HTTP %{http_code} %{size_download} bytes\n" \
             "https://www.tesourotransparente.gov.br/ckan/dataset/83e419da-1552-46bf-bfc3-05160b2c46c9/resource/66d69917-a5d8-4500-b4b2-ef1f5d062430/download/emendas-parlamentares.csv"
           curl -sSL --max-time 900 -A "$AGENTE" -o em.zip -w "Portal: HTTP %{http_code} %{size_download} bytes\n" \
             "https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/emendas-parlamentares/EmendasParlamentares.zip"
-          head -c 600 tesouro.csv | iconv -f latin1 -t utf-8 2>/dev/null; echo
           python3 - tesouro.csv em.zip <<'PY'
-          import collections, csv, io, sys, zipfile
-          bruto = open(sys.argv[1], "rb").read()
-          for cod in ("utf-8-sig", "latin-1"):
-              try:
-                  texto = bruto.decode(cod); break
-              except UnicodeDecodeError:
-                  continue
-          sep = ";" if texto[:2000].count(";") > texto[:2000].count(",") else ","
-          r = csv.DictReader(io.StringIO(texto), delimiter=sep)
-          linhas = list(r)
-          print(f"Tesouro: {len(linhas):,} linhas, separador {sep!r}, colunas: {r.fieldnames}")
-          for c in r.fieldnames:
-              vals = collections.Counter(l[c] for l in linhas)
-              if len(vals) <= 40: print(f"  {c}: {vals.most_common(12)}")
-              else: print(f"  {c}: {len(vals):,} valores distintos; exemplos {list(vals)[:4]}")
+          import collections, csv, io, sys, unicodedata, zipfile
           def num(t):
-              t = (t or "").strip().replace("R$", "").strip()
+              t = (t or "").strip()
               if "," in t: t = t.replace(".", "").replace(",", ".")
               try: return float(t)
               except ValueError: return 0.0
-          col_val = [c for c in r.fieldnames if "valor" in c.lower()]
-          col_ano = [c for c in r.fieldnames if "ano" in c.lower() or "exerc" in c.lower() or "data" in c.lower() or "mes" in c.lower() or "mês" in c.lower()]
-          col_cod = [c for c in r.fieldnames if "emenda" in c.lower()]
-          print("colunas de valor:", col_val, "de período:", col_ano, "de emenda:", col_cod)
-          if col_val and col_ano:
-              tot = collections.Counter()
-              for l in linhas:
-                  per = l[col_ano[0]].strip()
-                  ano = next((per[i:i+4] for i in range(len(per)-3) if per[i:i+4].isdigit() and per[i:i+4].startswith("20")), "?")
-                  tot[ano] += num(l[col_val[0]])
-              print("total por ano (" + col_ano[0] + ", " + col_val[0] + "):", {a: round(v / 1e9, 3) for a, v in sorted(tot.items())})
-          # Cruzamento com o Portal (pagos ao BB em 2023-2024), por código.
+          def sem(t): return "".join(c for c in unicodedata.normalize("NFD", t or "") if not unicodedata.combining(c)).upper().strip()
+          bruto = open(sys.argv[1], "rb").read()
+          try: texto = bruto.decode("utf-8-sig")
+          except UnicodeDecodeError: texto = bruto.decode("latin-1")
+          te = collections.Counter(); te_cid = collections.Counter(); te_valores = []
+          for l in csv.DictReader(io.StringIO(texto), delimiter=";"):
+              a = int(l["Ano"]); v = num(l["Valor"])
+              if a < 2023: continue
+              te[(a, l["Tipo Ente"], l["Nome Emenda"], l["Transferência Especial"])] += v
+              if l["Código IBGE"] in ("3101607", "3550308", "3125200"):
+                  te_cid[(a, l["Código IBGE"], l["Nome Emenda"], l["Transferência Especial"])] += v
+              if len(te_valores) < 5: te_valores.append(l["Valor"])
+          print("exemplos de valor no Tesouro:", te_valores)
+          print("\n## Tesouro, por ano, tipo de ente, tipo de emenda, transferência especial (R$ bi)")
+          for k in sorted(te): print(" ", k, round(te[k] / 1e9, 3))
           z = zipfile.ZipFile(sys.argv[2])
           fav = [n for n in z.namelist() if "PorFavorecido" in n][0]
-          bb = collections.defaultdict(float)
+          po = collections.Counter(); po_cid = collections.Counter()
+          alvo = {("MG", "ALFENAS"): "3101607", ("SP", "SAO PAULO"): "3550308", ("MG", "FAMA"): "3125200"}
           for l in csv.DictReader(io.TextIOWrapper(z.open(fav), encoding="latin-1", newline=""), delimiter=";"):
               am = (l["Ano/Mês"] or "").strip()
-              if am[:4] in ("2023", "2024") and "".join(c for c in l["Código do Favorecido"] if c.isdigit()) == "00000000000191":
-                  bb[l["Código da Emenda"].strip()] += num(l["Valor Recebido"])
-          if col_cod:
-              cods = {(l[col_cod[0]] or "").strip() for l in linhas}
-              print("exemplos de código no Tesouro:", list(cods)[:6])
-              comum = set(bb) & cods
-              print(f"BB 2023-2024: {len(bb):,} códigos, R$ {sum(bb.values())/1e9:.2f} bi; com par no Tesouro: {len(comum):,}, R$ {sum(bb[c] for c in comum)/1e9:.2f} bi")
+              if len(am) < 4 or int(am[:4]) < 2023: continue
+              a = int(am[:4]); v = num(l["Valor Recebido"]); tipo = l["Tipo de Emenda"].strip()
+              if not (tipo.startswith("Emenda Individual") or tipo == "Emenda de Bancada"): continue
+              grupo = "Bancada" if tipo == "Emenda de Bancada" else ("Individual especial" if "Especiais" in tipo else "Individual finalidade")
+              cnpj = "".join(c for c in l["Código do Favorecido"] if c.isdigit())
+              nat = l.get("Natureza Jurídica") or ""
+              if cnpj == "00000000000191": dest = "Banco do Brasil"
+              elif nat in ("Município", "Fundo Público da Administração Direta Municipal"): dest = "prefeitura e fundos"
+              elif "Estad" in nat or "Distrito Federal" in nat: dest = "estado"
+              else: dest = "outros"
+              po[(a, grupo, dest)] += v
+              cod = alvo.get((l["UF Favorecido"].strip(), sem(l["Município Favorecido"])))
+              if cod and dest == "prefeitura e fundos": po_cid[(a, cod, grupo)] += v
+          print("\n## Portal, emendas individuais e de bancada, por ano, grupo e destino (R$ bi)")
+          for k in sorted(po): print(" ", k, round(po[k] / 1e9, 3))
+          print("\n## Cidades: Tesouro (por tipo e transferência especial) e Portal (prefeitura e fundos), R$ milhões")
+          for k in sorted(te_cid): print("  Tesouro", k, round(te_cid[k] / 1e6, 2))
+          for k in sorted(po_cid): print("  Portal ", k, round(po_cid[k] / 1e6, 2))
           PY
