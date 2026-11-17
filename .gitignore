@@ -1,3 +1,5 @@
 # Capturas de tela feitas para conferir o layout; não fazem parte do site.
 prints/
 __pycache__/
+# Arquivos locais do wrangler dev
+.wrangler/

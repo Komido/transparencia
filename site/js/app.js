@@ -1,6 +1,7 @@
 import * as c from './calculos.js';
 import * as f from './formato.js';
 import { montarIndice, acompanharLeitura } from './indice.js';
+import { slugDaCidade, caminhoDaCidade, slugDoCaminho } from './endereco.js';
 import * as t from './textos.js';
 import { criarGrafico, preencherTabela, baixarCSV } from './graficos.js';
 import { carregarPainel, carregarIndiceCidades, carregarCidade, carregarIndiceCota, carregarCotaAno, carregarPortal, carregarIndiceMunicipios, carregarMunicipiosUf, carregarFolha, carregarAgenda, carregarBeneficiosUf, carregarGovernantesUf, carregarEmendasUf, buscarOnde } from './dados.js';
@@ -1660,30 +1661,40 @@ function montarMunicipios(ctx) {
   entrada.addEventListener('blur', () => setTimeout(fecharSugestoes, 100));
   selAno.addEventListener('change', () => { if (estado.cidade) { desenhar(); guardarNoEndereco(); } });
 
-  // Link direto: ?cidade=CODIGO_IBGE&ano=AAAA#municipios abre a cidade e o
-  // ano; a escolha feita na página vai para o endereço, para poder ser
-  // compartilhada.
+  // Endereço de cada cidade: /cidade/nome-uf (montado pelo Worker com o
+  // título da cidade), com ?ano=AAAA. O link antigo ?cidade=CODIGO_IBGE
+  // continua abrindo a cidade. A escolha feita na página vai para o
+  // endereço, para poder ser compartilhada, e o título e a manchete mudam.
   const guardarNoEndereco = () => {
     if (!estado.cidade) return;
+    const { nome, uf } = estado.cidade;
     const p = new URLSearchParams(location.search);
-    p.set('cidade', String(estado.cidade.codigo).padStart(7, '0'));
+    p.delete('cidade');
     p.set('ano', selAno.value);
-    history.replaceState(null, '', `${location.pathname}?${p}#municipios`);
+    history.replaceState(null, '', `${caminhoDaCidade(nome, uf)}?${p}#municipios`);
+    document.title = `${nome} (${uf}): contas da prefeitura, emendas e Bolsa Família | Arrecadômetro Brasil`;
+    const h1 = $('.abertura h1');
+    if (h1) h1.textContent = `O dinheiro público de ${nome} (${uf})`;
   };
-  // Ao abrir: a cidade do link; sem ela, a guardada de outra visita; sem
-  // nenhuma das duas, a sugestão pelo endereço de internet.
+  // Ao abrir: a cidade do endereço (/cidade/nome-uf ou ?cidade=); sem ela,
+  // a guardada de outra visita; sem nenhuma das duas, a sugestão pelo
+  // endereço de internet.
   const pedido = new URLSearchParams(location.search);
-  const codigoPedido = /^[0-9]{7}$/.test(pedido.get('cidade') ?? '') ? pedido.get('cidade') : null;
-  const codigoGuardado = codigoPedido ? null : lerMunicipioGuardado();
-  if (codigoPedido || codigoGuardado) {
+  const slugPedido = slugDoCaminho(location.pathname);
+  const codigoPedido = !slugPedido && /^[0-9]{7}$/.test(pedido.get('cidade') ?? '') ? pedido.get('cidade') : null;
+  const codigoGuardado = slugPedido || codigoPedido ? null : lerMunicipioGuardado();
+  if (slugPedido || codigoPedido || codigoGuardado) {
     carregarIndice().then((d) => {
-      const c = d.cidades.find((x) => x[0] === Number(codigoPedido ?? codigoGuardado));
-      if (!c) return codigoPedido ? null : sugerirPeloIp();
+      const c = slugPedido
+        ? d.cidades.find((x) => slugDaCidade(x[1], x[2]) === slugPedido)
+        : d.cidades.find((x) => x[0] === Number(codigoPedido ?? codigoGuardado));
+      if (!c) return slugPedido || codigoPedido ? null : sugerirPeloIp();
       const ano = pedido.get('ano');
-      if (codigoPedido && ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
       // A cidade do link abre depois do salto do navegador para #municipios:
       // volta à seção. A guardada abre sem mexer na rolagem nem no endereço.
-      return escolher(c, { link: Boolean(codigoPedido) }).then(() => { if (codigoPedido) reposicionarNaSecao(); });
+      const doEndereco = Boolean(slugPedido || codigoPedido);
+      if (doEndereco && ano && [...selAno.options].some((o) => o.value === ano)) selAno.value = ano;
+      return escolher(c, { link: doEndereco }).then(() => { if (doEndereco) reposicionarNaSecao(); });
     }).catch(() => {});
   } else {
     sugerirPeloIp().catch(() => {});

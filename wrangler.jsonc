@@ -1,7 +1,8 @@
 // Publicação na Cloudflare (Workers com arquivos estáticos).
 // O site é a pasta site/, entregue direto da rede da Cloudflare, sem custo por
-// requisição. O único código no servidor é worker/index.js, que só roda em
-// /api/onde (a cidade provável de quem acessa, sem guardar nada).
+// requisição. O único código no servidor é worker/index.js, que só roda na
+// sugestão de cidade (/api/onde), nas páginas das cidades (/cidade/...) e no
+// sitemap.xml e robots.txt.
 // Os cabeçalhos de segurança dos arquivos ficam em site/_headers.
 {
   "name": "arrecadometro-brasil",
@@ -10,12 +11,13 @@
   "workers_dev": true,
   // Sem endereços extras de prévia para cada versão publicada.
   "preview_urls": false,
-  // Só para /api/onde (cidade provável pelo IP, sem guardar nada); os
+  // Só para os endereços abaixo (ver o começo de worker/index.js); os
   // arquivos de site/ continuam sendo entregues sem passar pelo código.
   "main": "worker/index.js",
   "assets": {
     "directory": "./site",
     "binding": "ASSETS",
-    "not_found_handling": "none"
+    "not_found_handling": "none",
+    "run_worker_first": ["/api/*", "/cidade/*", "/sitemap.xml", "/robots.txt"]
   }
 }

@@ -64,14 +64,14 @@ export function validarPainel(d) {
   return d;
 }
 
-export async function carregarPainel(url = 'dados/painel.json') {
+export async function carregarPainel(url = '/dados/painel.json') {
   const resposta = await fetch(url, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar os dados (HTTP ${resposta.status})`);
   return validarPainel(await resposta.json());
 }
 
 // Índice das capitais com números próprios: [{codigo, nome, uf, aluguel}].
-export async function carregarIndiceCidades(url = 'dados/cidades/indice.json') {
+export async function carregarIndiceCidades(url = '/dados/cidades/indice.json') {
   const resposta = await fetch(url, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar as cidades (HTTP ${resposta.status})`);
   const d = await resposta.json();
@@ -97,14 +97,14 @@ export function validarCidade(c, codigo, n) {
 
 export async function carregarCidade(codigo, n) {
   if (!/^[0-9]{7}$/.test(codigo)) falhar('código da cidade');
-  const resposta = await fetch(`dados/cidades/${codigo}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/cidades/${codigo}.json`, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar a cidade (HTTP ${resposta.status})`);
   return validarCidade(await resposta.json(), codigo, n);
 }
 
 // Cota parlamentar: resumo por ano gerado por scripts/cota_para_json.py.
 export async function carregarIndiceCota() {
-  const resposta = await fetch('dados/cota/indice.json', { credentials: 'same-origin' });
+  const resposta = await fetch('/dados/cota/indice.json', { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar a cota parlamentar (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2000 && a <= 2100)) {
@@ -132,7 +132,7 @@ function validarCasa(casa, nGrupos, nome) {
 
 export async function carregarCotaAno(ano) {
   if (!Number.isInteger(ano)) falhar('ano da cota');
-  const resposta = await fetch(`dados/cota/${ano}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/cota/${ano}.json`, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar a cota de ${ano} (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || d.ano !== ano || !Array.isArray(d.grupos) || !d.grupos.every((g) => g && ehTexto(g.id) && ehTexto(g.nome))) falhar('cota do ano');
@@ -145,7 +145,7 @@ export async function carregarCotaAno(ano) {
 // por scripts/portal_para_json.py.
 export async function carregarPortal(nome) {
   if (!['cartao', 'ministerios', 'viagens'].includes(nome)) falhar('base do Portal da Transparência');
-  const resposta = await fetch(`dados/portal/${nome}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/portal/${nome}.json`, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar ${nome} (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2000 && a <= 2100)) falhar(`${nome}: anos`);
@@ -162,7 +162,7 @@ const SITUACOES_PREFEITURA = ['ok', 'nao_fecha', 'sem_relatorio', 'formato', 'er
 const SITUACOES_DESPESA = ['ok', 'nao_fecha', 'formato', 'sem_anexo', 'erro'];
 
 export async function carregarIndiceMunicipios() {
-  const resposta = await fetch('dados/municipios/indice.json', { credentials: 'same-origin' });
+  const resposta = await fetch('/dados/municipios/indice.json', { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar a lista de cidades (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every((a) => Number.isInteger(a) && a >= 2015 && a <= 2100)) falhar('prefeituras: anos');
@@ -177,7 +177,7 @@ export async function carregarIndiceMunicipios() {
 
 export async function carregarMunicipiosUf(uf, nCampos, nDespesa = 0) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('prefeituras: UF');
-  const resposta = await fetch(`dados/municipios/${uf}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/municipios/${uf}.json`, { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar as prefeituras de ${uf} (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || d.uf !== uf || !Array.isArray(d.municipios)) falhar(`prefeituras de ${uf}`);
@@ -196,7 +196,7 @@ export async function carregarMunicipiosUf(uf, nCampos, nDespesa = 0) {
 
 // Tabelas oficiais de INSS e Imposto de Renda do ano (dados/folha.json).
 export async function carregarFolha() {
-  const resposta = await fetch('dados/folha.json', { credentials: 'same-origin' });
+  const resposta = await fetch('/dados/folha.json', { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar as tabelas do salário (HTTP ${resposta.status})`);
   const d = await resposta.json();
   const faixasOk = (fs, comDeducao) => Array.isArray(fs) && fs.length >= 2 && fs.every((x, i) => x
@@ -213,7 +213,7 @@ export async function carregarFolha() {
 
 // Próximas divulgações do IBGE (dados/agenda.json, scripts/agenda_ibge.py).
 export async function carregarAgenda() {
-  const resposta = await fetch('dados/agenda.json', { credentials: 'same-origin' });
+  const resposta = await fetch('/dados/agenda.json', { credentials: 'same-origin' });
   if (!resposta.ok) throw new Error(`Falha ao carregar a agenda (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || !Array.isArray(d.itens) || !d.itens.every((x) => x && ehData(x.data) && ehTexto(x.nome)
@@ -226,7 +226,7 @@ export async function carregarAgenda() {
 const CAMPOS_BENEFICIOS = ['nbf_valor', 'nbf_qtd', 'bpc_valor', 'bpc_qtd'];
 export async function carregarBeneficiosUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('benefícios: UF');
-  const resposta = await fetch(`dados/beneficios/${uf}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/beneficios/${uf}.json`, { credentials: 'same-origin' });
   // Sem arquivo ainda (antes da primeira coleta): sem dado, sem erro.
   if (resposta.status === 404) return null;
   if (!resposta.ok) throw new Error(`Falha ao carregar os benefícios de ${uf} (HTTP ${resposta.status})`);
@@ -249,7 +249,7 @@ export async function carregarBeneficiosUf(uf) {
 // desenvolve, por exemplo) ou sem resposta válida: null, sem erro.
 export async function buscarOnde() {
   try {
-    const resposta = await fetch('api/onde', { credentials: 'same-origin', cache: 'no-store' });
+    const resposta = await fetch('/api/onde', { credentials: 'same-origin', cache: 'no-store' });
     if (!resposta.ok) return null;
     const d = await resposta.json();
     if (!d || d.pais !== 'BR' || !/^[A-Z]{2}$/.test(d.uf ?? '')) return null;
@@ -297,7 +297,7 @@ const ehEleito = (x) => Array.isArray(x) && x.length === 7 && Number.isInteger(x
   && (x[2] === 0 || x[2] === 1) && ehTexto(x[3]) && (x[4] === 0 || x[4] === 1) && ehTexto(x[5]) && typeof x[6] === 'string';
 export async function carregarGovernantesUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('governantes: UF');
-  const resposta = await fetch(`dados/governantes/${uf}.json`, { credentials: 'same-origin' });
+  const resposta = await fetch(`/dados/governantes/${uf}.json`, { credentials: 'same-origin' });
   if (resposta.status === 404) return null;
   if (!resposta.ok) throw new Error(`Falha ao carregar os eleitos de ${uf} (HTTP ${resposta.status})`);
   const d = await resposta.json();

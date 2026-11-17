@@ -5,19 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Arrecadômetro Brasil</title>
   <meta name="description" content="O dinheiro público da sua cidade, do seu estado e do Brasil em linguagem simples: contas e gastos de todas as prefeituras, emendas parlamentares, Bolsa Família, contas dos estados, impostos, salário e preços, com dados oficiais.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Arrecadômetro Brasil">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:title" content="O dinheiro público da sua cidade, do seu estado e do Brasil">
+  <meta property="og:description" content="Contas e gastos de todas as prefeituras, emendas parlamentares, Bolsa Família, contas dos estados, impostos, salário e preços, com dados oficiais e em linguagem simples.">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1c1c1b" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="dados/painel.json" as="fetch" type="application/json" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/estilo.css">
-  <script type="module" src="js/app.js"></script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/dados/painel.json" as="fetch" type="application/json" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/estilo.css">
+  <script type="module" src="/js/app.js"></script>
 </head>
 <body>
   <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
   <header class="topo">
     <div class="conteiner topo-linha">
-      <a class="marca" href="./">Arrecadômetro Brasil</a>
+      <a class="marca" href="/">Arrecadômetro Brasil</a>
       <details class="secoes" id="secoes">
         <summary>Seções</summary>
         <nav class="secoes-painel" aria-label="Seções do site">
@@ -83,7 +88,7 @@
               <ul>
                 <li><a href="#avisos">Avisos sobre os dados</a></li>
                 <li><a href="#fontes">Fontes e atualização</a></li>
-                <li><a href="metodologia.html">Metodologia</a></li>
+                <li><a href="/metodologia.html">Metodologia</a></li>
               </ul>
             </div>
           </div>
@@ -96,7 +101,7 @@
     <div class="inicio-grade">
       <div class="abertura">
         <h1>O dinheiro público da sua cidade, do seu estado e do Brasil</h1>
-        <p>Em linguagem simples, só com dados oficiais e a mesma regra para todos os governos e partidos. <a href="metodologia.html">Como calculamos</a></p>
+        <p>Em linguagem simples, só com dados oficiais e a mesma regra para todos os governos e partidos. <a href="/metodologia.html">Como calculamos</a></p>
         <div class="escolha-cidade">
           <div class="campo busca-cidade">
             <label for="mun-busca">Qual é a sua cidade?</label>
@@ -1111,7 +1116,7 @@
               <ul class="lista-fontes" id="lista-fontes"></ul>
             </div>
           </details>
-          <p class="fonte">Todos os dados desta página: <a href="dados/painel.json" download>painel.json</a>. Versão dos dados: <code data-campo="versao">sem dado</code>. Como cada número é calculado: <a href="metodologia.html">metodologia</a>.</p>
+          <p class="fonte">Todos os dados desta página: <a href="/dados/painel.json" download>painel.json</a>. Versão dos dados: <code data-campo="versao">sem dado</code>. Como cada número é calculado: <a href="/metodologia.html">metodologia</a>.</p>
         </section>
       </div>
     </div>
@@ -1120,7 +1125,7 @@
   <footer class="rodape">
     <div class="conteiner">
       <p>Arrecadômetro Brasil. Projeto independente, sem vínculo com governos ou partidos.</p>
-      <p>Dados atualizados em <span data-campo="atualizado-em">sem dado</span>. <a href="metodologia.html">Metodologia</a></p>
+      <p>Dados atualizados em <span data-campo="atualizado-em">sem dado</span>. <a href="/metodologia.html">Metodologia</a></p>
       <p>Textos sob licença <a href="https://creativecommons.org/licenses/by/4.0/deed.pt" rel="license noopener">CC BY 4.0</a>. Código sob licença MIT, aberto em <a href="https://github.com/Komido/transparencia" rel="noopener">github.com/Komido/transparencia</a>. Os dados pertencem às fontes oficiais citadas.</p>
     </div>
   </footer>
