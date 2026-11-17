@@ -23,74 +23,49 @@ jobs:
           sudo apt-get install -y -qq poppler-utils > /dev/null
           python3 -m pip install --quiet openpyxl==3.1.5
 
-      # Câmara e Senado: arquivos de votações, votos, projetos e autores, para
-      # a página de cada parlamentar.
-      - name: Câmara dos Deputados, arquivos anuais
-        continue-on-error: true
-        run: |
-          set -u
-          mkdir -p /tmp/cam && cd /tmp/cam
-          base="https://dadosabertos.camara.leg.br/arquivos"
-          for nome in "deputados/csv/deputados.csv" \
-                      "votacoes/csv/votacoes-2025.csv" \
-                      "votacoesVotos/csv/votacoesVotos-2025.csv" \
-                      "votacoesProposicoes/csv/votacoesProposicoes-2025.csv" \
-                      "votacoesObjetos/csv/votacoesObjetos-2025.csv" \
-                      "proposicoes/csv/proposicoes-2025.csv" \
-                      "proposicoesAutores/csv/proposicoesAutores-2025.csv"; do
-            arq=$(basename "$nome")
-            echo "=== $nome"
-            curl -sSL --max-time 300 -A "ArrecadometroBrasil/1.0 (dados publicos)" -o "$arq" -w "HTTP %{http_code} %{size_download} bytes\n" "$base/$nome" || continue
-            python3 - "$arq" <<'PY'
-          import collections, csv, sys
-          csv.field_size_limit(10**8)
-          with open(sys.argv[1], encoding="utf-8-sig", errors="replace") as fh:
-              leitor = csv.DictReader(fh, delimiter=";")
-              linhas = list(leitor)
-          print("linhas", len(linhas), "colunas", leitor.fieldnames)
-          for l in linhas[:2]:
-              print({k: (v[:120] if v else v) for k, v in l.items() if v})
-          for col in ("siglaOrgao", "voto", "siglaTipo", "tipoAutor", "codTipoAutor", "aprovacao", "descricaoTipo"):
-              if leitor.fieldnames and col in leitor.fieldnames:
-                  print(f"  {col}:", collections.Counter(l[col] for l in linhas).most_common(15))
-          PY
-          done
-
-      - name: Senado Federal, votações e senadores
+      # Senado: o serviço novo de votações (com os votos de cada senador), o de
+      # processos por autor e a lista atual de senadores com partido.
+      - name: Senado Federal, serviços novos
         continue-on-error: true
         run: |
           set -u
           mkdir -p /tmp/sen && cd /tmp/sen
           for url in \
-            "https://legis.senado.leg.br/dadosabertos/plenario/lista/votacao/20250301/20250331.json" \
             "https://legis.senado.leg.br/dadosabertos/votacao?dataInicio=2025-03-01&dataFim=2025-03-31" \
-            "https://legis.senado.leg.br/dadosabertos/votacao.json?dataInicio=2025-03-01&dataFim=2025-03-31" \
-            "https://legis.senado.leg.br/dadosabertos/senador/lista/legislatura/57.json" \
-            "https://legis.senado.leg.br/dadosabertos/senador/5012/autorias.json" \
-            "https://legis.senado.leg.br/dadosabertos/processo?codigoParlamentarAutor=5012&dataApresentacaoInicio=2025-01-01" \
-            "https://legis.senado.leg.br/dadosabertos/senador/5012/votacoes.json?ano=2025"; do
+            "https://legis.senado.leg.br/dadosabertos/votacao?dataInicio=2025-01-01&dataFim=2025-12-31" \
+            "https://legis.senado.leg.br/dadosabertos/votacao?codigoParlamentar=5012&dataInicio=2025-01-01&dataFim=2025-12-31" \
+            "https://legis.senado.leg.br/dadosabertos/processo?codigoParlamentarAutor=5012&dataInicioApresentacao=2025-01-01&dataFimApresentacao=2025-12-31" \
+            "https://legis.senado.leg.br/dadosabertos/processo?codigoParlamentarAutor=5012&ano=2025" \
+            "https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json"; do
             echo "=== $url"
-            curl -sSL --max-time 120 -A "ArrecadometroBrasil/1.0 (dados publicos)" -H "Accept: application/json" -o r.json -w "HTTP %{http_code} %{size_download} bytes %{content_type}\n" "$url" || continue
+            curl -sSL --max-time 180 -A "ArrecadometroBrasil/1.0 (dados publicos)" -H "Accept: application/json" -o r.json -w "HTTP %{http_code} %{size_download} bytes\n" "$url" || continue
             python3 - r.json <<'PY'
-          import json, sys
+          import collections, json, sys
           bruto = open(sys.argv[1], "rb").read()
           try:
               d = json.loads(bruto)
           except Exception as erro:
               print("não é JSON:", erro, bruto[:300]); raise SystemExit
-          def mostrar(x, nivel=0, chave="raiz"):
-              if nivel > 5:
-                  return
-              if isinstance(x, dict):
-                  print("  " * nivel + f"{chave}: dict {list(x)[:14]}")
-                  for k, v in list(x.items())[:6]:
-                      mostrar(v, nivel + 1, k)
-              elif isinstance(x, list):
-                  print("  " * nivel + f"{chave}: lista de {len(x)}")
-                  if x:
-                      mostrar(x[0], nivel + 1, "[0]")
-              else:
-                  print("  " * nivel + f"{chave}: {str(x)[:100]}")
-          mostrar(d)
+          if isinstance(d, list):
+              print("lista de", len(d))
+              if d and isinstance(d[0], dict):
+                  print("chaves:", list(d[0].keys()))
+                  x = d[0]
+                  print({k: (str(v)[:160]) for k, v in x.items() if not isinstance(v, (list, dict))})
+                  for k, v in x.items():
+                      if isinstance(v, list):
+                          print(f"  {k}: lista de {len(v)}; primeiro:", json.dumps(v[0], ensure_ascii=False)[:500] if v else None)
+                      elif isinstance(v, dict):
+                          print(f"  {k}:", json.dumps(v, ensure_ascii=False)[:500])
+                  for campo in ("tipoDocumento", "siglaTipoDeliberacao", "casaSessao", "resultadoVotacao", "votacaoSecreta"):
+                      if campo in x:
+                          print(f"  {campo}:", collections.Counter(str(i.get(campo)) for i in d).most_common(10))
+                  datas = [i.get("dataApresentacao") or i.get("dataSessao") for i in d]
+                  datas = [str(t) for t in datas if t]
+                  if datas:
+                      print("  datas de", min(datas), "a", max(datas))
+          else:
+              print(json.dumps(d, ensure_ascii=False)[:1500])
           PY
           done
+
