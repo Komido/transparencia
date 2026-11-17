@@ -10,8 +10,8 @@ parlamentares (sem chave):
 Conferido em 17/11/2026 (inspeção pelo GitHub): zip de 47 MB com 6 arquivos;
 o principal, EmendasParlamentares.csv (latin-1, ";", 94.929 linhas, anos
 2014 a 2026), traz por emenda e lugar de aplicação: código, ano, tipo,
-autor, código IBGE do município (-1 quando o destino é o estado, o país ou
-vários lugares), função e os valores empenhado, liquidado, pago e de restos
+autor, código IBGE do município (-1 ou "Sem informação" quando o destino é
+o estado, o país ou vários lugares), função e os valores empenhado, liquidado, pago e de restos
 a pagar.
 
 Valor pago = "Valor Pago" (no ano da emenda) + "Valor Restos A Pagar Pagos"
@@ -120,7 +120,10 @@ def main():
         if ano < PRIMEIRO_ANO:
             continue
         cod = (l["Código Município IBGE"] or "").strip()
-        if cod in ("", "-1"):
+        # Sem cidade: "-1", vazio ou "Sem informação" (conferido em 17/11/2026).
+        if cod in ("", "-1") or not cod.isdigit():
+            if cod not in ("", "-1", "Sem informação"):
+                falhar(f"linha {n}: código IBGE {cod!r}")
             sem_cidade[ano] += valor_pago
             continue
         if len(cod) != 7 or not cod.isdigit() or cod[:2] not in UF_DO_CODIGO:
