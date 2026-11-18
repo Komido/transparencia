@@ -403,7 +403,7 @@ function desenharMinimos(r, ano) {
     if (!x) return;
     const [pct, base] = x;
     const dif = base > 0 && bases[chave] > 0 ? (Math.abs(base - bases[chave]) / Math.max(base, bases[chave])) * 100 : null;
-    const plausivel = pct >= 1 && pct <= (chave === 'fundeb' ? 150 : 100) && !(dif > 20);
+    const plausivel = pct >= 1 && pct <= (chave === 'fundeb' ? 150 : 100) && !(dif > 20) && !(base != null && base <= 0);
     const div = el('div', null, null, dl);
     el('dt', null, rotulo, div);
     if (!plausivel) {

@@ -163,8 +163,10 @@ const SITUACOES_DESPESA = ['ok', 'nao_fecha', 'formato', 'sem_anexo', 'erro'];
 // Mínimos da Constituição (Anexo 14): situação e [percentual, base, mínimo]
 // de educação, FUNDEB e saúde, cada um podendo faltar.
 const SITUACOES_MINIMOS = ['ok', 'sem_linhas', 'sem_anexo', 'erro'];
+// A base pode vir negativa no relatório (erro de preenchimento: Santo Antônio
+// do Planalto/RS, 2025); a página mostra "número fora do padrão".
 const ehMinimo = (x) => x === null || (Array.isArray(x) && x.length === 3 && Number.isFinite(x[0]) && x[0] >= 0
-  && (x[1] === null || (Number.isFinite(x[1]) && x[1] >= 0)) && (x[2] === null || Number.isFinite(x[2])));
+  && (x[1] === null || Number.isFinite(x[1])) && (x[2] === null || Number.isFinite(x[2])));
 
 export async function carregarIndiceMunicipios() {
   const resposta = await fetch('/dados/municipios/indice.json', { credentials: 'same-origin' });
