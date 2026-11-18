@@ -84,6 +84,17 @@ CATEGORIAS = [
 ]
 INDICE = {k: i for i, (k, _) in enumerate(CATEGORIAS)}
 
+# Onde o tribunal não separa o subsídio dos vereadores do salário dos
+# servidores (PE e CE: o mesmo elemento 11, sem subelemento próprio), as duas
+# primeiras categorias viram uma só.
+CATEGORIAS_SEM_SUBSIDIO = [("salarios", "Salários de vereadores e servidores, com encargos")] + CATEGORIAS[2:]
+INDICE_SEM_SUBSIDIO = {k: i for i, (k, _) in enumerate(CATEGORIAS_SEM_SUBSIDIO)}
+
+
+def categoria_sem_subsidio(cat):
+    """Categoria de categoria() para a lista sem subsídio separado."""
+    return "salarios" if cat in ("vereadores", "pessoal") else cat
+
 
 def falhar(mensagem):
     print(f"ERRO: {mensagem}", file=sys.stderr)
@@ -282,6 +293,49 @@ def conferir_com_siconfi(cidades, anos, municipios=MUNICIPIOS, minimo=300):
               f"{perto:.0%} das {len(razoes)} cidades entre 0,8 e 1,25")
         if not 0.8 <= med <= 1.2:
             falhar(f"em {ano}, o total das câmaras no Tribunal de Contas não bate com o SICONFI (mediana {med:.3f})")
+
+
+def custo_no_tesouro(municipios=MUNICIPIOS):
+    """{código IBGE: {ano: custo da função Legislativa no SICONFI}}, só relatórios válidos."""
+    try:
+        m = json.load(open(municipios, encoding="utf-8"))
+    except OSError:
+        return {}
+    i_cam = m["campos_despesa"].index("camara")
+    saida = {}
+    for r in m["municipios"]:
+        for ano, a in (r.get("a") or {}).items():
+            if a.get("ds") == "ok" and a.get("d") and a["d"][i_cam] and a["d"][i_cam] > 0:
+                saida.setdefault(str(r["c"]), {})[ano] = a["d"][i_cam]
+    return saida
+
+
+def separar_incompletas(cidades, liquidado, anos, municipios, limite=0.5):
+    """Tira de "cidades" as câmaras cujo pagamento no tribunal parece faltar:
+    pago zerado com despesa liquidada, ou total abaixo de metade do custo
+    informado ao Tesouro. Devolve {código: {ano: motivo}} para a página
+    explicar em vez de mostrar uma divisão por tipo enganosa."""
+    tesouro = custo_no_tesouro(municipios)
+    fora = {}
+    for cod in list(cidades):
+        for ano in anos:
+            a = str(ano)
+            if a not in cidades[cod]:
+                continue
+            total = cidades[cod][a][0]
+            sic = tesouro.get(cod, {}).get(a)
+            motivo = None
+            if total <= 0 and liquidado.get(cod, {}).get(a, 0) > 0:
+                motivo = "pago_zerado"
+            elif sic and total < limite * sic:
+                motivo = "incompleto"
+            if motivo:
+                fora.setdefault(cod, {})[a] = motivo
+                print(f"  {a}: câmara {cod} fora ({motivo}): pago R$ {total / 1e6:.2f} mi, Tesouro R$ {(sic or 0) / 1e6:.2f} mi")
+                del cidades[cod][a]
+        if not cidades[cod]:
+            del cidades[cod]
+    return fora
 
 
 def gravar_json(caminho, dados):
