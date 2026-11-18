@@ -468,12 +468,18 @@ function desenharCamara(r, ano) {
 
 // Em que a Câmara gastou, pelo tipo de despesa de cada pagamento (Tribunal de
 // Contas do estado). Só onde o tribunal publica os lançamentos: por enquanto,
-// SP e RS. Sem nomes de pessoas.
-const UFS_COM_CAMARAS = new Set(['SP', 'RS']);
-const TRIBUNAL = { SP: 'Tribunal de Contas do Estado de São Paulo', RS: 'Tribunal de Contas do Estado do Rio Grande do Sul' };
+// SP, RS, PE e CE. Sem nomes de pessoas.
+const UFS_COM_CAMARAS = new Set(['SP', 'RS', 'PE', 'CE']);
+const TRIBUNAL = {
+  SP: 'Tribunal de Contas do Estado de São Paulo',
+  RS: 'Tribunal de Contas do Estado do Rio Grande do Sul',
+  PE: 'Tribunal de Contas do Estado de Pernambuco',
+  CE: 'Tribunal de Contas do Estado do Ceará',
+};
 const CAPITAL_SP = '3550308';
 const TIPOS_CAMARA = {
   vereadores: 'o subsídio pago a cada vereador',
+  salarios: 'subsídio dos vereadores e salário dos servidores da Câmara, com 13º, férias e contribuições à previdência',
   pessoal: 'servidores da Câmara e contribuições à previdência, inclusive sobre o salário dos vereadores',
   diarias: 'valor por dia de viagem a serviço, de vereadores e servidores',
   viagens: 'passagens, pedágios, táxi e outros deslocamentos',
@@ -485,6 +491,12 @@ const TIPOS_CAMARA = {
 
 // Câmaras pequenas gastam poucos milhões: "R$ 1,4 mi", não "R$ 1 mi".
 const milhoes = (v) => (Math.abs(v) >= 1e6 && Math.abs(v) < 1e8 ? `R$\u00A0${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v));
+
+function textoCamaraFora(motivo, tribunal, ano) {
+  return motivo === 'pago_zerado'
+    ? `O ${tribunal} publica as despesas desta Câmara em ${ano}, mas com o valor pago zerado. Sem o que foi de fato pago, a divisão por tipo de despesa não aparece aqui.`
+    : `Os pagamentos desta Câmara que o ${tribunal} publica para ${ano} somam menos da metade do custo que a prefeitura informou ao Tesouro Nacional. Como os dados do tribunal parecem incompletos, a divisão por tipo de despesa não aparece aqui.`;
+}
 
 async function desenharCamaraTipos(ano) {
   const caixa = $('#mun-camara-tipos');
@@ -511,7 +523,19 @@ async function desenharCamaraTipos(ano) {
   }
   const porAno = d.cidades[codigo7] ?? {};
   const anosCom = d.anos.filter((a) => porAno[String(a)]?.[0] > 0).sort((a, b) => a - b);
-  if (!anosCom.length) return;
+  const tribunal = d.tribunal ?? TRIBUNAL[uf];
+  // Câmara que o tribunal publica sem os pagamentos (PE e CE): explica em vez
+  // de esconder o bloco.
+  const fora = d.fora?.[codigo7] ?? {};
+  if (!anosCom.length) {
+    const anoFora = fora[String(ano)] ? ano : Number(Object.keys(fora).sort().pop());
+    if (!fora[String(anoFora)]) return;
+    definir('mun-camara-tipos-titulo', `Em que a Câmara gastou em ${anoFora}`);
+    definir('mun-camara-tipos-nota', textoCamaraFora(fora[String(anoFora)], tribunal, anoFora));
+    campo('mun-camara-tipos-conferencia')[0].hidden = true;
+    mostrar();
+    return;
+  }
   // Sem o ano escolhido no tribunal: o mais recente até ele, ou o primeiro que houver.
   const anoUsado = anosCom.includes(ano) ? ano : (anosCom.filter((a) => a < ano).pop() ?? anosCom[0]);
   const [total, partes] = porAno[String(anoUsado)];
@@ -521,16 +545,22 @@ async function desenharCamaraTipos(ano) {
     .sort((a, b) => (a.k === 'outros') - (b.k === 'outros') || b.valor - a.valor);
   const soma = itens.reduce((s, x) => s + x.valor, 0);
   if (!(soma > 0)) return;
+  const motivo = fora[String(ano)];
+  const porque = motivo === 'pago_zerado' ? `o Tribunal de Contas publica ${ano} com o valor pago zerado`
+    : motivo === 'incompleto' ? `os pagamentos de ${ano} no Tribunal de Contas parecem incompletos`
+      : d.anos.includes(ano) ? `o Tribunal de Contas não traz pagamentos desta Câmara em ${ano}` : `o Tribunal de Contas ainda não publicou ${ano}`;
   definir('mun-camara-tipos-titulo', anoUsado === ano
     ? `Em que a Câmara gastou em ${anoUsado}`
-    : `Em que a Câmara gastou em ${anoUsado} (${d.anos.includes(ano) ? `o Tribunal de Contas não traz pagamentos desta Câmara em ${ano}` : `o Tribunal de Contas ainda não publicou ${ano}`})`);
+    : `Em que a Câmara gastou em ${anoUsado} (${porque})`);
   for (const x of itens) {
     const pct = (x.valor / soma) * 100;
     barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
   }
-  const semSubsidio = !itens.some((x) => x.k === 'vereadores');
+  const separaSubsidio = d.categorias.some(([k]) => k === 'vereadores');
+  const semSubsidio = separaSubsidio && !itens.some((x) => x.k === 'vereadores');
   definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
-    + `Fonte: ${d.tribunal ?? TRIBUNAL[uf]}, cada pagamento da Câmara pelo tipo de despesa.`
+    + `Fonte: ${tribunal}, cada pagamento da Câmara pelo tipo de despesa.`
+    + (separaSubsidio ? '' : ` O ${tribunal} registra o salário dos vereadores (subsídio) no mesmo código do salário dos servidores, por isso os dois aparecem juntos.`)
     + (semSubsidio ? ' Neste ano, a Câmara não registrou nenhum pagamento como salário de vereador (subsídio); ele pode ter sido lançado junto com o dos servidores.' : ''));
   desenharConferenciaCamara(d, anoUsado, total, fator);
   mostrar();

@@ -354,10 +354,12 @@ export async function carregarStf() {
   return d;
 }
 
-// Gastos das câmaras municipais por tipo de despesa (Tribunal de Contas de
-// SP e do RS; scripts/camaras_sp_para_json.py e camaras_rs_para_json.py):
-// {anos, categorias: [[chave, rótulo]], cidades: {código: {ano: [total pago,
-// [por categoria]]}}}, em reais da época. Por enquanto só SP e RS.
+// Gastos das câmaras municipais por tipo de despesa (Tribunais de Contas de
+// SP, RS, PE e CE; scripts/camaras_UF_para_json.py): {anos, categorias:
+// [[chave, rótulo]], cidades: {código: {ano: [total pago, [por categoria]]}},
+// fora?: {código: {ano: motivo}}}, em reais da época. "fora" lista as câmaras
+// que o tribunal publica sem os pagamentos (PE e CE).
+const MOTIVOS_FORA = ['pago_zerado', 'incompleto'];
 export async function carregarCamarasUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('câmaras: UF');
   const resposta = await fetch(`/dados/camaras/${uf}.json`, { credentials: 'same-origin' });
@@ -379,6 +381,15 @@ export async function carregarCamarasUf(uf) {
     if (!/^[0-9]{7}$/.test(cod) || !anos || typeof anos !== 'object'
       || !Object.entries(anos).every(([a, x]) => d.anos.includes(Number(a)) && ehAno(x))) {
       falhar(`câmara da cidade ${cod}`);
+    }
+  }
+  if (d.fora !== undefined) {
+    if (!d.fora || typeof d.fora !== 'object') falhar(`câmaras de ${uf}: fora`);
+    for (const [cod, anos] of Object.entries(d.fora)) {
+      if (!/^[0-9]{7}$/.test(cod) || !anos || typeof anos !== 'object'
+        || !Object.entries(anos).every(([a, m]) => /^[0-9]{4}$/.test(a) && MOTIVOS_FORA.includes(m))) {
+        falhar(`câmara fora da conta ${cod}`);
+      }
     }
   }
   return d;
