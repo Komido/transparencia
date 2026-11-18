@@ -131,129 +131,60 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # Segunda rodada (18/11): a primeira mostrou que o TCE-PE tem a lista
-          # de unidades com a natureza "Câmara Municipal" e que o TCE-CE tem o
-          # balancete mensal da despesa por órgão e elemento. Agora: quantas
-          # câmaras, como ligar ao IBGE, subelemento do salário dos vereadores,
-          # consulta do estado inteiro pela função Legislativa (PE), e se o
-          # pago do balancete bate com as notas de pagamento e com o Tesouro (CE).
-          titulo("TCE-PE: câmaras na lista de unidades e ligação com o IBGE")
+          # Terceira rodada (18/11): a API nova do TCE-CE traz o mesmo balanço
+          # mensal da despesa? E, em PE, quantas câmaras separam o salário dos
+          # vereadores num subelemento próprio (janeiro, o mês mais pesado).
+          titulo("TCE-CE: API nova, métodos e parâmetros")
+          CEN = "https://api-dados-abertos.tce.ce.gov.br/sim/"
+          yml, _ = pegar(CEN + "openapi_prod.yaml", tempo=240)
+          if yml:
+              linhas = yml.splitlines()
+              caminhos = [(i, l.strip().rstrip(":")) for i, l in enumerate(linhas) if re.match(r"^  /\S+:\s*$", l)]
+              print(f"  {len(caminhos)} caminhos: {[c for _, c in caminhos]}")
+              m = re.search(r"servers:\s*\n((?:\s+-.*\n|\s+\w+:.*\n)+)", yml)
+              print("  servidores:", m.group(1)[:400] if m else "?")
+              for j, (i, c) in enumerate(caminhos):
+                  if re.search(r"balancete_despesa_orcamentaria|/orgaos|/municipios$", c):
+                      fim = caminhos[j + 1][0] if j + 1 < len(caminhos) else i + 200
+                      bloco = "\n".join(linhas[i:fim])
+                      print(f"\n  --- {c} ---\n" + bloco[:3500])
+          for q in ("municipios", "orgaos?codigo_municipio=003&exercicio_orcamento=202500",
+                    "balancete_despesa_orcamentaria?codigo_municipio=003&exercicio_orcamento=202500&codigo_orgao=01&data_referencia=202512"):
+              html, _ = pegar(CEN + q, "application/json", tempo=240)
+              if html:
+                  d = como_json(html)
+                  if d is None: print("  começo:", html[:600]); continue
+                  if isinstance(d, dict): print("  chaves de topo:", {k: (type(v).__name__) for k, v in d.items()})
+                  regs = registros(d)[0]
+                  print(f"  {len(regs)} registros; campos: {list(regs[0].keys()) if regs else None}")
+                  for r in regs[:2]: print("   ", json.dumps(r, ensure_ascii=False)[:700])
+                  if "balancete" in q and regs:
+                      for c in ("valor_pago_ate_mes", "valor_estornos_pagos_ate_mes"):
+                          print(f"   soma {c}: {sum(float(str(r.get(c) or 0)) for r in regs):,.2f}")
+                  print("  começo bruto:", html[:300])
+
+          titulo("TCE-PE: janeiro de 2025, função Legislativa, subelementos do salário")
           PE = "https://sistemas.tce.pe.gov.br/DadosAbertos/"
-          html, _ = pegar(PE + "UnidadesJurisdicionadas!json")
-          ujs = registros(como_json(html))[0] if html else []
-          print("  naturezas:", collections.Counter(r.get("NATUREZA") for r in ujs if (r.get("ESFERA") or "").strip() == "Municipal").most_common(30))
-          camaras = [r for r in ujs if (r.get("NATUREZA") or "").startswith("Câmara")]
-          print(f"  câmaras: {len(camaras)}; situações: {collections.Counter(r.get('SITUACAO') for r in camaras)}; poder: {collections.Counter(r.get('PODER') for r in camaras)}")
-          por_muni = collections.Counter(r.get("CODIGOMUNICIPIO") for r in camaras if r.get("SITUACAO") == "Ativa")
-          print("  municípios com mais de uma câmara ativa:", [(k, v) for k, v in por_muni.items() if v > 1])
-          for r in camaras[:3]: print("   ", json.dumps(r, ensure_ascii=False))
-          html, _ = pegar(PE + "Municipios!json?UNIDADEFEDERATIVA=PE")
-          mun = registros(como_json(html))[0] if html else []
-          print(f"  municípios de PE: {len(mun)}; exemplos: {mun[:3]}")
-          ibge = {r.get("CODIGO"): r.get("CODIGOIBGE") for r in mun}
-          sem = [r.get("MUNICIPIO") for r in camaras if r.get("SITUACAO") == "Ativa" and r.get("CODIGOMUNICIPIO") not in ibge]
-          print(f"  câmaras ativas sem código IBGE pela tabela de municípios: {len(sem)} {sem[:10]}")
-          sem_camara = [r.get("MUNICIPIO") for r in mun if r.get("CODIGO") not in por_muni]
-          print(f"  municípios de PE sem câmara ativa na lista: {len(sem_camara)} {sem_camara[:10]}")
-
-          titulo("TCE-PE: despesas de uma câmara grande e de uma pequena (2025)")
-          recife = [r for r in camaras if r.get("MUNICIPIO") == "Recife" and r.get("SITUACAO") == "Ativa"]
-          pequena = [r for r in camaras if r.get("MUNICIPIO") == "Abreu e Lima" and r.get("SITUACAO") == "Ativa"]
-          for r in (recife[:1] + pequena[:1]):
-              ug = r.get("ID_UNIDADE_GESTORA")
-              print(f"\n  >>> {r.get('ORGAO')} (unidade {ug}, município {r.get('CODIGOMUNICIPIO')})")
-              html, _ = pegar(PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA=2025", "application/json", tempo=300)
-              regs = registros(como_json(html))[0] if html else []
-              if not regs: continue
-              print(f"  {len(regs)} empenhos; empenhado {sum(num(x.get('VALOREMPENHADO')) for x in regs):,.2f}; liquidado {sum(num(x.get('VALORLIQUIDADO')) for x in regs):,.2f}; pago {sum(num(x.get('VALORPAGO')) for x in regs):,.2f}")
-              print("  pago por modalidade:", somar_por(regs, lambda x: x.get("MODALIDADE"), "VALORPAGO"))
-              print("  pago por função:", somar_por(regs, lambda x: x.get("FUNCAO"), "VALORPAGO"))
-              print("  pago por grupo (NATUREZA):", somar_por(regs, lambda x: x.get("NATUREZA"), "VALORPAGO"))
-              print("  pago por elemento e subelemento:")
-              for k, v in somar_por(regs, lambda x: (x.get("ELEMENTODESPESA"), x.get("SUBELEMENTODESPESA")), "VALORPAGO")[:40]:
-                  print(f"    {v:16,.2f}  {k}")
-              print("  pago por mês do empenho:", sorted(somar_por(regs, lambda x: int(x.get("MESREFERENCIA") or 0), "VALORPAGO")))
-              html, _ = pegar(PE + f"TransferenciasConcedidasMunicipais!json?ID_UG_BENEFICIADA={ug}&ANO_REFERENCIA=2025", "application/json")
-              tr = registros(como_json(html))[0] if html else []
-              if tr:
-                  print(f"  repasses recebidos em 2025: {len(tr)}; soma {sum(num(x.get('VALOR_MENSAL_CONCEDIDO')) for x in tr):,.2f}; tipos {collections.Counter(x.get('DESCRICAO_TIPO_TRANSFERENCIA') for x in tr)}; de {collections.Counter(x.get('NOME_UG_TRANSFERIDORA') for x in tr)}")
-          if pequena:
-              html, _ = pegar(PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={pequena[0].get('ID_UNIDADE_GESTORA')}&ANOREFERENCIA=2024", "application/json", tempo=300)
-              regs = registros(como_json(html))[0] if html else []
-              print(f"  2024, câmara pequena: {len(regs)} empenhos; pago {sum(num(x.get('VALORPAGO')) for x in regs):,.2f}")
-
-          titulo("TCE-PE: estado inteiro pela função Legislativa, um mês (2025, março)")
-          html, _ = pegar(PE + "DespesasMunicipais!json?FUNCAO=Legislativa&ANOREFERENCIA=2025&MESREFERENCIA=3", "application/json", tempo=300)
+          html, _ = pegar(PE + "DespesasMunicipais!json?FUNCAO=Legislativa&ANOREFERENCIA=2025&MESREFERENCIA=1", "application/json", tempo=420)
           if html:
               d = como_json(html)
               print("  cabeçalho:", {k: v for k, v in (d or {}).get("resposta", {}).items() if k != "conteudo"})
-              regs = registros(d)[0] or []
-              ugs = collections.Counter(r.get("ID_UNIDADE_GESTORA") for r in regs)
-              nat = {r.get("ID_UNIDADE_GESTORA"): r.get("NATUREZA") for r in ujs}
-              print(f"  {len(regs)} empenhos de {len(ugs)} unidades; natureza das unidades: {collections.Counter(nat.get(u) for u in ugs)}")
-              print(f"  pago: {sum(num(r.get('VALORPAGO')) for r in regs):,.2f}")
-
-          # ------------------------------------------------------------------
-          titulo("TCE-CE: API nova, especificação")
-          CEN = "https://api-dados-abertos.tce.ce.gov.br/sim/"
-          html, _ = pegar(CEN + "swagger-initializer.js")
-          if html:
-              print("  ", html[:1500])
-              for u in re.findall(r'url\s*:\s*["\']([^"\']+)["\']', html):
-                  spec, _ = pegar(urllib.parse.urljoin(CEN, u), "application/json", tempo=240)
-                  d = como_json(spec) if spec else None
-                  if isinstance(d, dict):
-                      print("  servidores:", d.get("servers") or d.get("host"), d.get("basePath"))
-                      caminhos = d.get("paths") or {}
-                      print(f"  {len(caminhos)} caminhos:")
-                      for c, ops in caminhos.items():
-                          params = [x.get("name") for op in ops.values() if isinstance(op, dict) for x in op.get("parameters", []) if isinstance(x, dict)]
-                          print(f"    {c} {params[:20]}")
-                  elif spec:
-                      print("  começo:", spec[:800])
-
-          titulo("TCE-CE: balancete da câmara contra notas de pagamento e Tesouro")
-          CE = "https://api.tce.ce.gov.br/index.php/sim/1_0/"
-          html, _ = pegar(CE + "tipos_unidades_administrativas.json", "application/json")
-          if html: mostrar_registros(html)
-          for cod, nome in (("057", "Fortaleza"), ("003", "Acarape")):
-              for ano, ref in ((2025, "202512"), (2024, "202412")):
-                  html, _ = pegar(CE + f"balancete_despesa_orcamentaria.json?codigo_municipio={cod}&exercicio_orcamento={ano}00&codigo_orgao=01&data_referencia={ref}", "application/json")
-                  regs = registros(como_json(html))[0] if html else []
-                  if not regs: continue
-                  campos = ("valor_empenhado_ate_mes", "valor_anulacoes_empenhos_ate_mes", "valor_liquidado_ate_mes", "valor_estornos_liquidacao_ate_mes", "valor_pago_ate_mes", "valor_estornos_pagos_ate_mes")
-                  print(f"  {nome} {ano}: {len(regs)} linhas; tipos de balancete {collections.Counter(r.get('tipo_balancete') for r in regs)}")
-                  for c in campos: print(f"    {c}: {sum(num(r.get(c)) for r in regs):,.2f}")
-                  print("    pago por elemento:", [(k, round(v)) for k, v in somar_por(regs, lambda x: x.get("codigo_elemento_despesa"), "valor_pago_ate_mes")])
-                  intra = sum(num(r.get("valor_pago_ate_mes")) for r in regs if str(r.get("codigo_elemento_despesa", ""))[2:4] == "91")
-                  print(f"    pago intra-orçamentário (modalidade 91): {intra:,.2f}")
-                  if ano == 2025:
-                      html, _ = pegar(CE + f"notas_pagamentos.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao=01", "application/json")
-                      np_ = registros(como_json(html))[0] if html else []
-                      ok = [r for r in np_ if str(r.get("estado_de_estornado")) != "1"]
-                      no_ano = [r for r in ok if str(r.get("data_referencia", "")).startswith("2025")]
-                      print(f"    notas de pagamento não estornadas: {sum(num(r.get('valor_nota_pagamento')) for r in ok):,.2f}; só as de 2025: {sum(num(r.get('valor_nota_pagamento')) for r in no_ano):,.2f}")
-          # Último mês disponível de 2026 e balancete sem filtro de órgão.
-          for ref in ("202610", "202609", "202608"):
-              html, _ = pegar(CE + f"balancete_despesa_orcamentaria.json?codigo_municipio=003&exercicio_orcamento=202600&codigo_orgao=01&data_referencia={ref}", "application/json")
-              if html:
-                  regs = registros(como_json(html))[0] or []
-                  print(f"  Acarape 2026 até {ref}: {len(regs)} linhas; pago {sum(num(r.get('valor_pago_ate_mes')) for r in regs):,.2f}")
-                  break
-          html, _ = pegar(CE + "balancete_despesa_orcamentaria.json?codigo_municipio=003&exercicio_orcamento=202500&data_referencia=202512", "application/json")
-          if html:
-              regs = registros(como_json(html))[0] or []
-              print(f"  Acarape 2025 sem filtro de órgão: {len(regs)} linhas; órgãos {collections.Counter(r.get('codigo_orgao') for r in regs)}")
-
-          titulo("TCE-CE: código da câmara em uma amostra de municípios")
-          html, _ = pegar(CE + "municipios.json", "application/json")
-          muni = registros(como_json(html))[0] if html else []
-          amostra = muni[::18][:11]
-          for r in amostra:
-              html, _ = pegar(CE + f"orgaos.json?codigo_municipio={r.get('codigo_municipio')}&exercicio_orcamento=202500", "application/json", mostrar=False)
-              org = registros(como_json(html))[0] if html else []
-              cam = [(o.get("codigo_orgao"), o.get("codigo_tipo_unidade"), o.get("nome_orgao")) for o in (org or []) if o.get("codigo_tipo_unidade") == "02" or re.search(r"C[AÂ]MARA|LEGISLAT", str(o.get("nome_orgao", "")), re.I)]
-              print(f"  {r.get('nome_municipio')} ({r.get('geoibgeId')}): {len(org or [])} órgãos; câmara: {cam}")
+              regs = registros(d)[0]
+              ugs = collections.defaultdict(set)
+              for r in regs:
+                  if (r.get("ELEMENTODESPESA") or "").lower().startswith("vencimentos"):
+                      ugs[r.get("ID_UNIDADE_GESTORA")].add((r.get("SUBELEMENTODESPESA") or "").strip().upper())
+              subs = collections.Counter(x for v in ugs.values() for x in v)
+              print(f"  {len(regs)} empenhos; {len(ugs)} unidades com Vencimentos; subelementos (nº de unidades): {subs.most_common(30)}")
+              com_subsidio = [u for u, v in ugs.items() if any("SUBS" in x for x in v)]
+              print(f"  unidades com subelemento de subsídio: {len(com_subsidio)}")
+              zerado = collections.Counter(r.get("ID_UNIDADE_GESTORA") for r in regs if float(r.get("VALORPAGO") or 0) == 0 and float(r.get("VALORLIQUIDADO") or 0) > 0)
+              print(f"  unidades com empenho liquidado e pago zero: {len(zerado)}; exemplos {zerado.most_common(8)}")
+              print("  elementos (pago):", sorted(((k, round(v)) for k, v in collections.Counter({}).items()), key=lambda x: -x[1])[:5])
+              el = collections.defaultdict(float)
+              for r in regs: el[r.get("ELEMENTODESPESA")] += float(r.get("VALORPAGO") or 0)
+              print("  pago por elemento:", sorted(((k, round(v)) for k, v in el.items()), key=lambda x: -x[1])[:40])
+              print("  modalidades:", collections.Counter(r.get("MODALIDADE") for r in regs).most_common(6))
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
