@@ -14,221 +14,106 @@ permissions:
 jobs:
   inspecionar:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-
-      # STF: composição e quem indicou cada ministro (site do STF), placar de
-      # cada aprovação no Senado (dados abertos do Senado) e onde estão os
-      # gastos do STF (portal de transparência do STF e o arquivo anual
-      # "Orçamento da despesa" do Portal da Transparência, que cobre o
-      # orçamento federal inteiro). Só leitura, respeitando o robots.txt.
-      - name: Gastos do STF, colunas da aba detalhada da planilha da LC 200
-        continue-on-error: true
+      # Placar da aprovação de Gilmar Mendes pelo Senado (2002), que não veio
+      # na busca de votações usada para os outros ministros. Procura a
+      # mensagem presidencial (MSF) de 2002 nos dados abertos do Senado, a
+      # tramitação dela e as votações do plenário de abril a junho de 2002.
+      # Só leitura, respeitando o robots.txt.
+      - name: Placar de Gilmar Mendes no Senado (2002)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           python3 - <<'PY'
-          import collections, csv, html.parser, io, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
+          import json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
 
           AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
-          PALAVRAS = re.compile(r"dado|abert|conjunto|despes|empenh|pagament|folha|pessoal|remunera|c[aâ]mara|legislat|vereador|api|csv|zip|json|xls|download|sicom|capmg|fiscaliz|dicion|layout|leiaute", re.I)
-          vistos = set()
-          robots = {}
+          BASE = "https://legis.senado.leg.br"
+          API = BASE + "/dadosabertos"
 
-          class Pagina(html.parser.HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.links, self.scripts, self.titulo, self.texto = [], [], "", []
-                  self._a = None; self._t = []; self._titulo = False
-              def handle_starttag(self, tag, attrs):
-                  a = dict(attrs)
-                  if tag == "a" and a.get("href"): self._a = a["href"]; self._t = []
-                  if tag == "script" and a.get("src"): self.scripts.append(a["src"])
-                  if tag == "title": self._titulo = True
-              def handle_endtag(self, tag):
-                  if tag == "a" and self._a is not None:
-                      self.links.append((self._a, " ".join("".join(self._t).split())[:90])); self._a = None
-                  if tag == "title": self._titulo = False
-              def handle_data(self, d):
-                  if self._a is not None: self._t.append(d)
-                  if self._titulo: self.titulo += d
-                  if d.strip(): self.texto.append(d.strip())
-
-          atraso = {}
-          def baixar(url, limite=5_000_000):
-              time.sleep(atraso.get(urllib.parse.urlsplit(url).netloc, 2))
-              pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "*/*"})
+          def baixar(url, aceitar="application/json", limite=20_000_000):
+              time.sleep(2)
+              pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": aceitar})
               try:
                   with urllib.request.urlopen(pedido, timeout=90) as r:
-                      return r.status, r.headers.get("Content-Type", ""), r.geturl(), r.read(limite)
+                      return r.status, r.headers.get("Content-Type", ""), r.read(limite)
               except urllib.error.HTTPError as e:
-                  return e.code, e.headers.get("Content-Type", ""), url, e.read(20000)
+                  return e.code, e.headers.get("Content-Type", ""), e.read(20000)
 
-          def permitido(url):
-              p = urllib.parse.urlsplit(url); base = f"{p.scheme}://{p.netloc}"
-              if base not in robots:
-                  rp = urllib.robotparser.RobotFileParser()
-                  try:
-                      st, _, _, corpo = baixar(base + "/robots.txt", 200_000)
-                      linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
-                      print(f"\nrobots.txt de {p.netloc}: HTTP {st}" + ("".join("\n    " + l for l in linhas[:30]) if linhas else ""))
-                      rp.parse(linhas)
-                      # Respeita o Crawl-Delay e trata qualquer bloco "User-agent: *"
-                      # com "Disallow: /" como proibição total (o leitor do Python
-                      # só olha o primeiro bloco).
-                      atraso[p.netloc] = max(2, float(rp.crawl_delay(AGENTE) or 0))
-                      grupo, proibe = None, False
-                      for l in linhas:
-                          k, _, v = l.split("#")[0].partition(":")
-                          k, v = k.strip().lower(), v.strip()
-                          if k == "user-agent": grupo = v
-                          elif k == "disallow" and grupo == "*" and v == "/": proibe = True
-                      if proibe:
-                          print("    (um bloco para todos os robôs proíbe o site inteiro: nada será lido)")
-                          robots[base] = "proibido"
-                          return False
-                  except Exception as e:
-                      print(f"\nrobots.txt de {p.netloc}: erro {e!r}"); rp = None
-                  robots[base] = rp
-              rp = robots[base]
-              if rp == "proibido": return False
-              return rp is None or rp.can_fetch(AGENTE, url)
+          st, _, corpo = baixar(BASE + "/robots.txt", "text/plain")
+          linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
+          print(f"robots.txt: HTTP {st}")
+          for l in linhas[:30]: print("   ", l)
+          rp = urllib.robotparser.RobotFileParser(); rp.parse(linhas)
+          grupo, proibe = None, False
+          for l in linhas:
+              k, _, v = l.split("#")[0].partition(":")
+              k, v = k.strip().lower(), v.strip()
+              if k == "user-agent": grupo = v
+              elif k == "disallow" and grupo == "*" and v == "/": proibe = True
+          if proibe: raise SystemExit("robots.txt proíbe o site inteiro; nada será lido")
 
-          def ver(url, seguir=False, limite=5_000_000, maximo_links=70):
-              if url in vistos: return None
-              vistos.add(url)
-              if not permitido(url):
+          def pegar(url):
+              if not rp.can_fetch(AGENTE, url):
                   print(f"\n### {url}\n  robots.txt não permite; pulado"); return None
-              try:
-                  st, tipo, final, corpo = baixar(url, limite)
-              except Exception as e:
-                  print(f"\n### {url}\n  erro: {e!r}"); return None
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              if "json" in tipo or corpo[:1] in (b"[", b"{"):
-                  try:
-                      d = json.loads(corpo.decode("utf-8-sig", "replace"))
-                      if isinstance(d, list):
-                          print(f"  lista com {len(d)} itens; primeiros: {json.dumps(d[:3], ensure_ascii=False)[:1200]}")
-                      else:
-                          print(f"  objeto: {json.dumps(d, ensure_ascii=False)[:1500]}")
-                      return d
-                  except Exception as e:
-                      print(f"  não é JSON válido ({e}); início: {corpo[:300]!r}"); return None
-              if "html" not in tipo:
-                  print(f"  início: {corpo[:400]!r}"); return None
-              p = Pagina(); p.feed(corpo.decode("utf-8", "replace"))
-              print(f"  título: {' '.join(p.titulo.split())[:120]}")
-              links = []
-              for href, texto in p.links:
-                  absoluto = urllib.parse.urljoin(final, href.strip())
-                  if absoluto.startswith("http") and (PALAVRAS.search(absoluto) or PALAVRAS.search(texto)) and absoluto not in [l for l, _ in links]:
-                      links.append((absoluto, texto))
-              print(f"  links no total: {len(p.links)}; ligados ao assunto: {len(links)}")
-              for l, t in links[:maximo_links]: print(f"    {t[:60]!r} -> {l}")
-              if len(p.links) < 8:
-                  print(f"  poucos links (página montada por script?). scripts: {p.scripts[:12]}")
-                  print(f"  texto: {' | '.join(p.texto)[:800]}")
-              if seguir:
-                  host = urllib.parse.urlsplit(final).netloc
-                  proximos = [l for l, _ in links if urllib.parse.urlsplit(l).netloc == host and not re.search(r"\.(zip|csv|xlsx?|pdf)(\?|$)", l, re.I)]
-                  for l in proximos[:12]: ver(l)
-              return None
+              st, tipo, corpo = baixar(url)
+              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes")
+              if st != 200: print("  ", corpo[:400]); return None
+              try: return json.loads(corpo.decode("utf-8-sig", "replace"))
+              except Exception: print("  não é JSON:", corpo[:400]); return None
 
-          def ckan(base, termos):
-              for t in termos:
-                  d = ver(f"{base}/api/3/action/package_search?q={urllib.parse.quote(t)}&rows=15", limite=8_000_000)
-                  if not isinstance(d, dict) or not d.get("success"): continue
-                  print(f"  CKAN {base}, busca {t!r}: {d['result'].get('count')} conjuntos")
-                  for p in d["result"].get("results", []):
-                      print(f"    conjunto {p.get('name')!r}: {p.get('title')!r}")
-                      for r in p.get("resources", [])[:8]:
-                          print(f"      {r.get('format')!s:6} {r.get('size')!s:>12}  {r.get('name')!r}  {r.get('url')}")
+          def itens(d):
+              # A API devolve listas em formatos variados; acha a maior lista de dicionários.
+              melhor = []
+              def andar(x):
+                  nonlocal melhor
+                  if isinstance(x, list):
+                      if x and all(isinstance(i, dict) for i in x) and len(x) > len(melhor): melhor = x
+                      for i in x: andar(i)
+                  elif isinstance(x, dict):
+                      for v in x.values(): andar(v)
+              andar(d); return melhor
 
-          def estado(titulo, raizes, base_ckan=None, termos=("despesa", "empenho", "pagamento")):
-              print("\n" + "=" * 70 + f"\n{titulo}\n" + "=" * 70)
-              for u in raizes: ver(u, seguir=True, maximo_links=50)
-              if base_ckan: ckan(base_ckan, termos)
+          def tem_gilmar(x): return "GILMAR" in json.dumps(x, ensure_ascii=False).upper()
 
-          def texto(url, n=3000, maximo_links=40):
-              if url in vistos or not permitido(url): return
-              vistos.add(url)
-              try:
-                  st, tipo, final, corpo = baixar(url)
-              except Exception as e:
-                  print(f"\n### {url}\n  erro: {e!r}"); return
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              if "html" in tipo:
-                  pg = Pagina(); pg.feed(corpo.decode("utf-8", "replace"))
-                  print("  " + " | ".join(pg.texto)[:n])
-                  ligados = [(urllib.parse.urljoin(final, h), t) for h, t in pg.links if PALAVRAS.search(h + " " + t)]
-                  for l, t in ligados[:maximo_links]: print(f"    {t[:60]!r} -> {l}")
-              else:
-                  print(f"  início: {corpo[:n]!r}")
+          # 1) Processos: mensagens presidenciais de 2002 que citam Gilmar.
+          ids = []
+          d = pegar(f"{API}/processo?sigla=MSF&ano=2002")
+          lista = itens(d) if d is not None else []
+          print(f"  {len(lista)} processos MSF de 2002")
+          if lista: print("  campos do primeiro:", sorted(lista[0].keys()))
+          for p in lista:
+              if tem_gilmar(p):
+                  print("  ACHADO:", json.dumps(p, ensure_ascii=False)[:800])
+                  for k in ("id", "idProcesso", "codigoMateria"):
+                      if p.get(k): ids.append(p[k]); break
 
-          PALAVRAS = re.compile(r"ministr|composi|biografi|curr[ií]cul|transpar|or[cç]ament|despes|execu|remunera|di[aá]ria|passage|csv|xls|dados|abert|download", re.I)
+          # 2) Busca antiga por palavra-chave, caso a nova não traga.
+          d = pegar(f"{API}/materia/pesquisa/lista?sigla=MSF&ano=2002&palavraChave=GILMAR")
+          for m in (itens(d) if d is not None else []):
+              print("  matéria:", json.dumps(m, ensure_ascii=False)[:800])
 
-          import subprocess
-          import zipfile, xml.etree.ElementTree as ET
-          NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
-          def ler_xlsx(caminho):
-              """[(aba, [linhas])] lendo o XML do xlsx, sem bibliotecas de fora."""
-              z = zipfile.ZipFile(caminho)
-              compart = []
-              if "xl/sharedStrings.xml" in z.namelist():
-                  for si in ET.fromstring(z.read("xl/sharedStrings.xml")).findall("m:si", NS):
-                      compart.append("".join(t.text or "" for t in si.iter("{%s}t" % NS["m"])))
-              livro = ET.fromstring(z.read("xl/workbook.xml"))
-              nomes = [sh.get("name") for sh in livro.find("m:sheets", NS)]
-              abas = sorted([n for n in z.namelist() if re.match(r"xl/worksheets/sheet\d+\.xml$", n)], key=lambda n: int(re.findall(r"\d+", n)[-1]))
-              saida = []
-              for nome, arq in zip(nomes, abas):
-                  linhas = []
-                  for row in ET.fromstring(z.read(arq)).iter("{%s}row" % NS["m"]):
-                      vals = []
-                      for c in row.findall("m:c", NS):
-                          v = c.find("m:v", NS)
-                          t = c.get("t")
-                          if v is None:
-                              ist = c.find("m:is", NS)
-                              vals.append("".join(x.text or "" for x in ist.iter("{%s}t" % NS["m"])) if ist is not None else None)
-                          elif t == "s":
-                              vals.append(compart[int(v.text)])
-                          else:
-                              vals.append(v.text)
-                      linhas.append(vals)
-                  saida.append((nome, linhas))
-              return saida
-          print("=" * 70 + "\nTesouro: planilha da LC 200 de 2025, aba detalhada, só o STF\n" + "=" * 70)
-          url = "https://www.tesourotransparente.gov.br/ckan/dataset/8675a0a4-31c5-4593-a24d-fb8e17376eca/resource/f40d5431-058d-48b8-9ab6-065fb0fce5b3/download/limite-gastos-lc200dez25.xlsx"
-          st, tipo, final, corpo = baixar(url, 80_000_000)
-          open("/tmp/lc200.xlsx", "wb").write(corpo)
-          abas = ler_xlsx("/tmp/lc200.xlsx")
-          for titulo, linhas in abas:
-              print(f"  aba {titulo!r}: {len(linhas)} linhas; primeira: {linhas[0][:30] if linhas else []}")
-          titulo, linhas = max(abas, key=lambda a: len(a[1]))
-          cab = [str(c) for c in linhas[0]]
-          print(f"\n  aba detalhada {titulo!r}, colunas ({len(cab)}): {cab}")
-          stf = [l for l in linhas[1:] if any(str(c) == "10000" for c in l[:6]) or any("SUPREMO" in str(c).upper() for c in l[:8])]
-          print(f"  linhas do STF: {len(stf)}")
-          for l in stf[:6]: print("    ", dict(zip(cab, l)))
-          def num(x):
-              try: return float(x)
-              except (TypeError, ValueError): return None
-          numericas = [k for k, nome in enumerate(cab) if stf and all(num(l[k]) is not None for l in stf[:50] if k < len(l)) and not re.search(r"COD|ANO|MES", nome, re.I)]
-          print(f"  colunas numéricas: {[cab[k] for k in numericas]}")
-          for k in numericas:
-              tot = sum(num(l[k]) or 0 for l in stf if k < len(l))
-              print(f"    soma {cab[k]}: {tot:,.2f}")
-          for chave in [k for k, nome in enumerate(cab) if re.search(r"GND|GRUPO|NATUREZA|CATEG|RESULTADO|RP|FONTE|UNIDADE|UO|MES", nome, re.I) and not re.search(r"^COD|_COD", nome, re.I)]:
-              agrup = collections.Counter()
-              for l in stf:
-                  for k in numericas[:1]:
-                      agrup[l[chave] if chave < len(l) else None] += num(l[k]) or 0
-              print(f"  por {cab[chave]}: {[(a, round(v / 1e6, 1)) for a, v in agrup.most_common(15)]}")
-          for titulo2, linhas2 in abas:
-              for l in linhas2:
-                  if l and "Supremo" in str(l[0]):
-                      vals = [num(x) for x in l[1:13]]
-                      print(f"  {titulo2!r}: {l[0]} | soma dos 12 meses (R$ mi): {sum(v or 0 for v in vals):.1f}")
+          # 3) Tramitação de cada processo achado: só os informes sobre votação.
+          for i in ids[:3]:
+              d = pegar(f"{API}/processo/{i}")
+              if d is None: continue
+              texto = json.dumps(d, ensure_ascii=False)
+              print("  identificação:", re.findall(r'"identificacao": "([^"]+)"', texto)[:3])
+              for m in re.finditer(r'\{[^{}]*"descricao": "([^"]*)"[^{}]*\}', texto):
+                  desc = m.group(1)
+                  if re.search(r"vot|aprov|plen|sim|n[ãa]o|escrut|sabatina|parecer", desc, re.I):
+                      data = re.search(r'"data": "([^"]+)"', m.group(0))
+                      print(f"   {data.group(1) if data else '?'} | {desc[:600]}")
+
+          # 4) Votações do plenário entre abril e junho de 2002.
+          for ini, fim in (("2002-04-01", "2002-04-30"), ("2002-05-01", "2002-05-31"), ("2002-06-01", "2002-06-30")):
+              d = pegar(f"{API}/votacao?dataInicio={ini}&dataFim={fim}")
+              lista = itens(d) if d is not None else []
+              print(f"  {len(lista)} votações")
+              if lista: print("  campos da primeira:", sorted(lista[0].keys())[:40])
+              for v in lista:
+                  if tem_gilmar(v) or "MSF" in json.dumps(v, ensure_ascii=False):
+                      resumo = {k: v.get(k) for k in v if k in ("dataSessao", "identificacao", "descricaoVotacao", "ementa", "resultadoVotacao", "votacaoSecreta", "totalVotosSim", "totalVotosNao", "totalVotosAbstencao", "codigoSessaoVotacao", "idProcesso", "sigla", "numero", "ano")}
+                      print("  VOTAÇÃO:", json.dumps(resumo, ensure_ascii=False)[:900])
           PY
