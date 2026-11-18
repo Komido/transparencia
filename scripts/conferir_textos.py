@@ -9,6 +9,12 @@ foi reescrita), termina com erro, e a tarefa do GitHub falha: é o sinal para
 reler a fonte e atualizar o texto. O salário mínimo e o limite do BPC não
 estão aqui, porque o site já os calcula pela série oficial do Banco Central.
 
+Também confere a composição do STF mostrada na Entenda ("Quem está no STF
+hoje"): a lista de ministros da página oficial de composição atual tem de ser
+a mesma do site, com o mesmo presidente e vice-presidente. Se alguém entrar
+ou sair, a tarefa falha para a lista ser refeita a partir das fontes
+oficiais (tabela da linha sucessória e páginas dos ministros).
+
 Uso: python3 scripts/conferir_textos.py
 """
 
@@ -36,6 +42,35 @@ CONFERIR = [
     (f"{INSS}/beneficio-assistencial-a-pessoa-com-deficiencia-bpc-loas", "BPC: pessoa com deficiência",
      ["2 anos", "1/4 do salário mínimo|¼ de salário mínimo|¼ do salário mínimo"]),
 ]
+
+
+STF = ("https://portal.stf.jus.br/textos/verTexto.asp?servico=bibliotecaConsultaProdutoBibliotecaPastaMinistro"
+       "&pagina=ComposicaoAtual")
+# Páginas dos ministros ligadas na composição atual, como aparecem nos links.
+STF_MINISTROS = {"GilmarMendes", "CarmenLucia", "DiasToffoli", "LuizFux", "EdsonFachin", "AlexandreMoraes",
+                 "NunesMarques", "AndreMendonca", "CristianoZanin", "FlavioDino"}
+STF_CARGOS = ["Edson Fachin (Presidente)", "Alexandre de Moraes (Vice-Presidente)"]
+
+
+def conferir_stf(problemas):
+    print(f"== STF: composição atual\n   {STF}")
+    try:
+        req = urllib.request.Request(STF, headers={"User-Agent": AGENTE})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            bruto = resp.read().decode("utf-8", errors="replace")
+    except Exception as erro:  # noqa: BLE001
+        problemas.append(f"STF: a página de composição não abriu ({erro})")
+        return
+    achados = set(re.findall(r"pagina=([A-Za-z]+)Principal", bruto))
+    texto = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", bruto)))
+    print(f"   ministros na página: {sorted(achados)}")
+    if achados != STF_MINISTROS:
+        problemas.append(f"STF: a composição mudou (saíram {sorted(STF_MINISTROS - achados)}, entraram {sorted(achados - STF_MINISTROS)})")
+    for cargo in STF_CARGOS:
+        achou = cargo in texto
+        print(f"   {'ok   ' if achou else 'SUMIU'} {cargo}")
+        if not achou:
+            problemas.append(f"STF: não achei \"{cargo}\" em {STF}")
 
 
 def texto_da_pagina(url):
@@ -68,6 +103,7 @@ def main():
             print(f"   {'ok   ' if achou else 'SUMIU'} {esperado}")
             if not achou:
                 problemas.append(f"{assunto}: não achei \"{esperado}\" em {url}")
+    conferir_stf(problemas)
     if problemas:
         print("\nRegras a reler e, se mudaram, atualizar em site/entenda.html:")
         for p in problemas:
