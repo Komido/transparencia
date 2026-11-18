@@ -23,7 +23,7 @@ jobs:
       # gastos do STF (portal de transparência do STF e o arquivo anual
       # "Orçamento da despesa" do Portal da Transparência, que cobre o
       # orçamento federal inteiro). Só leitura, respeitando o robots.txt.
-      - name: STF, composição, votações no Senado e fonte dos gastos
+      - name: STF, segunda rodada (Senado mês a mês, composição, SIOP)
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -168,80 +168,32 @@ jobs:
 
           PALAVRAS = re.compile(r"ministr|composi|biografi|curr[ií]cul|transpar|or[cç]ament|despes|execu|remunera|di[aá]ria|passage|csv|xls|dados|abert|download", re.I)
 
-          print("=" * 70 + "\nSenado: aprovações de ministros do STF (votações secretas; quais campos trazem o placar?)\n" + "=" * 70)
-          for ano in (2002, 2006, 2009, 2011, 2015, 2017, 2020, 2021, 2023, 2026):
-              url = f"https://legis.senado.leg.br/dadosabertos/votacao?dataInicio={ano}-01-01&dataFim={ano}-12-31"
-              if not permitido(url): print(f"  {ano}: robots.txt não permite"); continue
-              try:
-                  time.sleep(2)
-                  pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "application/json"})
-                  with urllib.request.urlopen(pedido, timeout=300) as r:
-                      lista = json.loads(r.read().decode("utf-8"))
-              except Exception as e:
-                  print(f"  {ano}: erro {e!r}"); continue
-              achou = 0
-              for v in lista if isinstance(lista, list) else []:
-                  t = json.dumps({k: x for k, x in v.items() if k != "votos"}, ensure_ascii=False)
-                  if re.search(r"Supremo Tribunal Federal|\(STF\)", t) and (v.get("identificacao") or "").startswith(("MSF", "MEN", "OFS")):
-                      achou += 1
-                      campos = {k: x for k, x in v.items() if k != "votos" and not isinstance(x, (list, dict))}
-                      votos = v.get("votos") or []
-                      siglas = collections.Counter((x.get("siglaVotoParlamentar") or "").strip() for x in votos)
-                      print(f"  {ano}: {json.dumps(campos, ensure_ascii=False)[:1500]}")
-                      print(f"     votos individuais: {len(votos)}; siglas: {siglas.most_common(8)}")
-              print(f"  {ano}: {len(lista) if isinstance(lista, list) else '?'} votações; ligadas ao STF: {achou}")
+          print("=" * 70 + "\nSenado: 2002, 2009 e 2020, mês a mês (a resposta do ano inteiro veio cortada)\n" + "=" * 70)
+          import calendar
+          for ano in (2002, 2009, 2020):
+              for mes in range(1, 13):
+                  fim = calendar.monthrange(ano, mes)[1]
+                  url = f"https://legis.senado.leg.br/dadosabertos/votacao?dataInicio={ano}-{mes:02d}-01&dataFim={ano}-{mes:02d}-{fim}"
+                  try:
+                      time.sleep(2)
+                      pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "application/json"})
+                      with urllib.request.urlopen(pedido, timeout=300) as r:
+                          lista = json.loads(r.read().decode("utf-8"))
+                  except Exception as e:
+                      print(f"  {ano}-{mes:02d}: erro {e!r}"); continue
+                  for v in lista if isinstance(lista, list) else []:
+                      t = json.dumps({k: x for k, x in v.items() if k != "votos"}, ensure_ascii=False)
+                      if re.search(r"Supremo Tribunal Federal", t) and (v.get("identificacao") or "").startswith("MSF"):
+                          print(f"  {v.get('dataSessao')} | {v.get('identificacao')} | {(v.get('descricaoVotacao') or '')[:120]} | "
+                                f"{v.get('resultadoVotacao')} | {v.get('totalVotosSim')}-{v.get('totalVotosNao')}-{v.get('totalVotosAbstencao')} | secreta {v.get('votacaoSecreta')}")
 
-          print("\n" + "=" * 70 + "\nSTF: composição e biografias\n" + "=" * 70)
-          ver("https://portal.stf.jus.br/", seguir=False, maximo_links=60)
-          for u in ("https://portal.stf.jus.br/ostf/ministros/", "https://portal.stf.jus.br/textos/verTexto.asp?servico=sobreStfComposicaoComposicaoPlenariaApresentacao",
-                    "https://portal.stf.jus.br/textos/verTexto.asp?servico=sobreStfComposicaoMinistroApresentacao"):
-              texto(u, n=4000, maximo_links=60)
+          print("\n" + "=" * 70 + "\nSTF: composição atual e linha sucessória\n" + "=" * 70)
+          for u in ("https://portal.stf.jus.br/textos/verTexto.asp?servico=bibliotecaConsultaProdutoBibliotecaPastaMinistro&pagina=ComposicaoAtual",
+                    "https://portal.stf.jus.br/textos/verTexto.asp?servico=sobreStfComposicaoMinistroApresentacao&pagina=linhasucessoria"):
+              texto(u, n=6000, maximo_links=60)
 
-          print("\n" + "=" * 70 + "\nSTF: transparência (onde estão os gastos)\n" + "=" * 70)
-          texto("https://portal.stf.jus.br/transparencia/", n=2500, maximo_links=80)
-
-          print("\n" + "=" * 70 + "\nPortal da Transparência: orçamento da despesa (todos os Poderes?)\n" + "=" * 70)
-          import zipfile
-          url = "https://portaldatransparencia.gov.br/download-de-dados/orcamento-despesa/2025"
-          if permitido(url):
-              try:
-                  pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE})
-                  with urllib.request.urlopen(pedido, timeout=600) as r, open("/tmp/orc.zip", "wb") as fh:
-                      print(f"  {r.status} {r.geturl()}")
-                      while (b := r.read(1 << 20)): fh.write(b)
-                  z = zipfile.ZipFile("/tmp/orc.zip")
-                  for i in z.infolist(): print(f"  dentro do zip: {i.filename}, {i.file_size / 1e6:.0f} MB")
-                  nome = z.infolist()[0].filename
-                  bruto = z.open(nome).read(4000)
-                  cod = "latin-1"
-                  try: bruto.decode("utf-8-sig"); cod = "utf-8-sig"
-                  except UnicodeDecodeError: pass
-                  leitor = csv.reader(io.TextIOWrapper(z.open(nome), encoding=cod, newline=""), delimiter=";")
-                  cabec = next(leitor); print(f"  colunas: {cabec}")
-                  I = {c: i for i, c in enumerate(cabec)}
-                  org = next((c for c in cabec if "ÓRGÃO SUPERIOR" in c.upper() and "NOME" in c.upper()), None)
-                  valores = [c for c in cabec if "ORÇAMENTO" in c.upper() or "VALOR" in c.upper()]
-                  poderes = collections.Counter(); stf = collections.Counter(); linhas = 0
-                  def num(t):
-                      t = (t or "").strip().replace(".", "").replace(",", ".")
-                      try: return float(t)
-                      except ValueError: return 0.0
-                  for l in leitor:
-                      linhas += 1
-                      o = l[I[org]] if org else ""
-                      poderes[o] += 1
-                      if "SUPREMO" in o.upper():
-                          el = next((l[I[c]] for c in cabec if "ELEMENTO" in c.upper() and "NOME" in c.upper()), "") or next((l[I[c]] for c in cabec if "GRUPO" in c.upper() and "NOME" in c.upper()), "")
-                          for c in valores: stf[(c, el)] += num(l[I[c]])
-                  print(f"  linhas: {linhas}; órgãos superiores ({len(poderes)}): {sorted(poderes)[:80]}")
-                  tot = collections.Counter()
-                  for (c, el), v in stf.items(): tot[c] += v
-                  print(f"  STF, totais por coluna de valor (R$ mi): {[(c, round(v / 1e6, 1)) for c, v in tot.items()]}")
-                  realizado = next((c for c in valores if "REALIZ" in c.upper() or "PAGO" in c.upper()), valores[-1] if valores else None)
-                  print(f"  STF por elemento ({realizado}):")
-                  for (c, el), v in sorted(((k, v) for k, v in stf.items() if k[0] == realizado), key=lambda x: -x[1])[:20]:
-                      print(f"    {v / 1e6:9.1f}  {el}")
-              except Exception as e:
-                  print(f"  erro: {e!r}")
-          print(f"\npedidos feitos: {len(vistos) + len(robots)}")
+          print("\n" + "=" * 70 + "\nOrçamento federal de todos os Poderes: SIOP (dados abertos)\n" + "=" * 70)
+          PALAVRAS = re.compile(r"dados|abert|download|sparql|csv|xls|or[cç]ament|execu|acesso p", re.I)
+          for u in ("https://www.siop.planejamento.gov.br/", "https://www1.siop.planejamento.gov.br/", "https://www.gov.br/planejamento/pt-br/assuntos/orcamento/dados-abertos"):
+              texto(u, n=1500, maximo_links=40)
           PY
