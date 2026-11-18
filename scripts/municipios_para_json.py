@@ -585,9 +585,17 @@ def minimos_do_site(reg):
     return saida
 
 
+# Mediana máxima da diferença entre as bases antes de parar a atualização.
+# Em SP e MG (18/11/2026), a mediana foi de 0,2% a 0,3% na educação, 0,6% a
+# 0,9% na saúde e 0,6% a 1,6% no FUNDEB, cuja base inclui rendimentos e a
+# complementação da União e por isso bate menos.
+LIMITE_CONFERENCIA = {"educacao": 0.02, "saude": 0.03, "fundeb": 0.05}
+
+
 def conferir_minimos(por_uf, anos):
     """Mediana da diferença entre a base declarada no Anexo 14 e a do Anexo 3.
-    Se passar de 2% num ano com muitas cidades, a atualização para."""
+    Se passar do LIMITE_CONFERENCIA num ano com muitas cidades, a atualização
+    para."""
     for ano in anos:
         difs = {chave: [] for chave, _ in MINIMOS}
         for d in por_uf.values():
@@ -608,7 +616,7 @@ def conferir_minimos(por_uf, anos):
             ate5 = sum(1 for x in xs if x <= 0.05) / len(xs)
             print(f"  {ano} {chave}: base do Anexo 14 contra o Anexo 3, mediana {med:.2%}; "
                   f"{ate2:.0%} até 2%, {ate5:.0%} até 5%, em {len(xs)} cidades")
-            if med > 0.02:
+            if med > LIMITE_CONFERENCIA[chave]:
                 falhar(f"{ano}: a base de {chave} do Anexo 14 não bate com o Anexo 3 (mediana {med:.2%})")
 
 
