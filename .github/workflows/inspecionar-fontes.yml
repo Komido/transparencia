@@ -21,7 +21,7 @@ jobs:
       # Tesouro (SICONFI). Confere em uma amostra variada se o anexo vem nos
       # dois tipos de relatório e se a base de cálculo implícita bate com o
       # Anexo 3. Só leitura, respeitando o robots.txt e o Crawl-Delay.
-      - name: Anexo 14 do RREO, educação, FUNDEB e saúde das prefeituras
+      - name: SIOPE (API do FNDE) e SIOPS (downloads), mínimos das prefeituras
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -85,42 +85,34 @@ jobs:
               texto = corpo.decode("utf-8", "replace") if b"\xc3" in corpo else corpo.decode("latin-1", "replace")
               for l in texto.splitlines()[:4]: print("     |", l[:400])
 
-          # Achado da primeira execução: o FNDE e o OpenDataSUS não têm mais
-          # o CKAN (redirecionam; o dados.gov.br pede login), mas o Anexo 14 do
-          # RREO no Tesouro traz os percentuais de educação, FUNDEB e saúde.
-          # Agora: o Anexo 14 aparece no relatório simplificado? Em quantas
-          # cidades de uma amostra variada? E a base de cálculo implícita
-          # (valor ÷ percentual) bate com impostos e repasses do Anexo 3?
-          API = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rreo"
-          TIPOS = ("RREO", "RREO Simplificado")
-          AMOSTRA = ["3550308", "3304557", "2927408", "2304400", "4314902", "1721000",
-                     "3101607", "3500105", "2100055", "2600054", "4300034", "3143104",
-                     "3100104", "1700251", "5200050", "2200053", "1100015", "1501402"]
-          TEMA = re.compile(r"ensino|fundeb|sa[uú]de", re.I)
+          # SIOPE pela API OData do FNDE (plataforma Olinda, serviço
+          # DADOS_ABERTOS_SIOPE, recurso Indicadores_Siope) e SIOPS pelos
+          # downloads do Fundo Nacional de Saúde e do gov.br: o que existe, em
+          # que formato, e se traz o percentual de cada prefeitura.
+          for url in ("https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/",
+                      "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/$metadata",
+                      "https://www.fnde.gov.br/olinda-ide/servico"):
+              if not permitido(url):
+                  print(f"\n### {url}\n  robots.txt não permite"); continue
+              st, cab, final, corpo = baixar(url, limite=400_000)
+              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
+              print("  ", corpo.decode("utf-8", "replace")[:3000])
 
-          def anexo(ano, cod, tipo, nome):
-              q = urllib.parse.urlencode({"an_exercicio": ano, "nr_periodo": 6, "co_tipo_demonstrativo": tipo,
-                                          "no_anexo": nome, "co_esfera": "M", "id_ente": cod}, quote_via=urllib.parse.quote)
-              url = f"{API}?{q}"
-              if not permitido(url): return None
-              st, _, _, corpo = baixar(url, "application/json")
-              if st != 200: print(f"    {nome} {tipo}: HTTP {st}"); return None
-              try: return json.loads(corpo.decode("utf-8")).get("items") or []
-              except Exception: return None
+          def links(url, padrao):
+              if not permitido(url):
+                  print(f"\n### {url}\n  robots.txt não permite"); return
+              st, cab, final, corpo = baixar(url, limite=3_000_000)
+              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
+              texto = corpo.decode("utf-8", "replace")
+              achados = []
+              for m in re.finditer(r'href="([^"]+)"[^>]*>(.*?)</a>', texto, re.S):
+                  href, rotulo = m.group(1), re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
+                  if re.search(padrao, href + " " + rotulo, re.I):
+                      achados.append((rotulo[:120], urllib.parse.urljoin(final, href)))
+              for r in achados[:60]: print("   ", r)
+              print(f"   ({len(achados)} links)")
 
-          # Cidades grandes que vieram sem as linhas de educação e saúde na
-          # coleta: todas as linhas do Anexo 14 de 2025, para ver se o texto é
-          # outro.
-          for cod in ("3509502", "3518800", "3525904"):
-              for tipo in TIPOS:
-                  itens = anexo(2025, cod, tipo, "RREO-Anexo 14")
-                  if not itens: continue
-                  print(f"\n{cod} ({tipo}): {len(itens)} linhas")
-                  vistos = set()
-                  for i in itens:
-                      chave = (i.get("cod_conta"), i.get("conta"))
-                      if chave in vistos: continue
-                      vistos.add(chave)
-                      print(f"   {i.get('cod_conta')} | {(i.get('conta') or '')[:140]}")
-                  break
+          links("https://portalfns.saude.gov.br/siops/siops-downloads/", r"siops|csv|zip|indicador|munic")
+          links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops/demonstrativos-e-dados-informados/demonstrativos/municipios", r"csv|zip|xls|indicador|download|dados")
+          links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops", r"csv|zip|xls|indicador|download|dados abertos")
           PY
