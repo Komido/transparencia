@@ -37,7 +37,7 @@ jobs:
               if faixa: cab["Range"] = f"bytes=0-{faixa - 1}"
               pedido = urllib.request.Request(url, headers=cab, method=metodo)
               try:
-                  with urllib.request.urlopen(pedido, timeout=90) as r:
+                  with urllib.request.urlopen(pedido, timeout=240) as r:
                       return r.status, dict(r.headers), r.geturl(), (r.read(limite) if metodo == "GET" else b"")
               except urllib.error.HTTPError as e:
                   return e.code, dict(e.headers or {}), url, e.read(3000)
@@ -101,31 +101,23 @@ jobs:
               enc = "utf-8" if "utf-8" in tipo.lower() else "latin-1"
               return corpo.decode(enc, "replace"), final
 
-          texto, final = pagina("http://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM")
-          defs = []
-          if texto:
-              for m in re.finditer(r'(?:href|action)="([^"]+)"[^>]*>(.*?)</', texto, re.S | re.I):
-                  href, rotulo = m.group(1), re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
-                  url = urllib.parse.urljoin(final, href)
-                  print("   ", rotulo[:120], "|", url)
-                  if ".def" in url.lower(): defs.append(url)
-          for url in defs[:3]:
+          for url in ("https://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM",
+                      "http://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM"):
               texto, final = pagina(url)
-              if not texto: continue
-              acao = re.search(r'<form[^>]*action="([^"]+)"', texto, re.I)
-              print("   form action:", acao and urllib.parse.urljoin(final, acao.group(1)))
-              for sel in re.finditer(r'<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', texto, re.S | re.I):
-                  opcoes = re.findall(r'<option[^>]*value="([^"]*)"[^>]*>([^<]*)', sel.group(2), re.I)
-                  print(f"   select {sel.group(1)}: {len(opcoes)} opções; primeiras: {[(v, r.strip()) for v, r in opcoes[:25]]}")
-              for inp in re.finditer(r'<input[^>]*>', texto, re.I):
-                  print("   ", inp.group(0)[:160])
+              if texto and len(texto) > 200:
+                  for m in re.finditer(r'(?:href|action)="([^"]+)"[^>]*>(.*?)</', texto, re.S | re.I):
+                      print("   ", re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()[:120], "|", urllib.parse.urljoin(final, m.group(1)))
+                  break
 
-          # Relatório antigo de indicadores por município (PHP).
+          # Página antiga de indicadores por município: links e texto.
           texto, final = pagina("http://siops.datasus.gov.br/relindicadoresmun2.php?escmun=3")
           if texto:
-              for sel in re.finditer(r'<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', texto, re.S | re.I):
-                  opcoes = re.findall(r'<option[^>]*value="([^"]*)"[^>]*>([^<]*)', sel.group(2), re.I)
-                  print(f"   select {sel.group(1)}: {len(opcoes)} opções; primeiras: {[(v, r.strip()) for v, r in opcoes[:15]]}")
-              acao = re.search(r'<form[^>]*action="([^"]+)"', texto, re.I)
-              print("   form action:", acao and acao.group(1))
+              print("   tags de formulário:", re.findall(r"<(form|select|input|option)[^>]{0,120}", texto, re.I)[:40])
+              for m in re.finditer(r'href="([^"]+)"[^>]*>(.*?)</a>', texto, re.S | re.I):
+                  href = m.group(1)
+                  if re.search(r"rel|indic|munic|uf|php", href, re.I):
+                      print("   link:", re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()[:80], "|", urllib.parse.urljoin(final, href))
+              corpo = re.sub(r"<script.*?</script>|<style.*?</style>", " ", texto, flags=re.S | re.I)
+              corpo = re.sub(r"<[^>]+>", " ", corpo)
+              print("   texto:", re.sub(r"\s+", " ", corpo)[:3000])
           PY
