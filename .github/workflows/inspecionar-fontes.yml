@@ -23,7 +23,7 @@ jobs:
       # gastos do STF (portal de transparência do STF e o arquivo anual
       # "Orçamento da despesa" do Portal da Transparência, que cobre o
       # orçamento federal inteiro). Só leitura, respeitando o robots.txt.
-      - name: STF, segunda rodada (Senado mês a mês, composição, SIOP)
+      - name: STF, terceira rodada (linha sucessória, ministros, Senado 2002)
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -168,32 +168,54 @@ jobs:
 
           PALAVRAS = re.compile(r"ministr|composi|biografi|curr[ií]cul|transpar|or[cç]ament|despes|execu|remunera|di[aá]ria|passage|csv|xls|dados|abert|download", re.I)
 
-          print("=" * 70 + "\nSenado: 2002, 2009 e 2020, mês a mês (a resposta do ano inteiro veio cortada)\n" + "=" * 70)
-          import calendar
-          for ano in (2002, 2009, 2020):
-              for mes in range(1, 13):
-                  fim = calendar.monthrange(ano, mes)[1]
-                  url = f"https://legis.senado.leg.br/dadosabertos/votacao?dataInicio={ano}-{mes:02d}-01&dataFim={ano}-{mes:02d}-{fim}"
+          import calendar, subprocess
+          print("=" * 70 + "\nSenado: junho e dezembro de 2002, em quinzenas\n" + "=" * 70)
+          for mes in (5, 6, 12):
+              fim = calendar.monthrange(2002, mes)[1]
+              for d0, d1 in ((1, 15), (16, fim)):
+                  url = f"https://legis.senado.leg.br/dadosabertos/votacao?dataInicio=2002-{mes:02d}-{d0:02d}&dataFim=2002-{mes:02d}-{d1:02d}"
                   try:
                       time.sleep(2)
                       pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": "application/json"})
                       with urllib.request.urlopen(pedido, timeout=300) as r:
                           lista = json.loads(r.read().decode("utf-8"))
                   except Exception as e:
-                      print(f"  {ano}-{mes:02d}: erro {e!r}"); continue
+                      print(f"  2002-{mes:02d} {d0}-{d1}: erro {e!r}"); continue
+                  n = 0
                   for v in lista if isinstance(lista, list) else []:
                       t = json.dumps({k: x for k, x in v.items() if k != "votos"}, ensure_ascii=False)
-                      if re.search(r"Supremo Tribunal Federal", t) and (v.get("identificacao") or "").startswith("MSF"):
-                          print(f"  {v.get('dataSessao')} | {v.get('identificacao')} | {(v.get('descricaoVotacao') or '')[:120]} | "
+                      if re.search(r"Supremo|Gilmar", t):
+                          n += 1
+                          print(f"  {v.get('dataSessao')} | {v.get('identificacao')} | {(v.get('descricaoVotacao') or '')[:160]} | "
                                 f"{v.get('resultadoVotacao')} | {v.get('totalVotosSim')}-{v.get('totalVotosNao')}-{v.get('totalVotosAbstencao')} | secreta {v.get('votacaoSecreta')}")
+                  print(f"  2002-{mes:02d} {d0}-{d1}: {len(lista) if isinstance(lista, list) else '?'} votações, {n} citam o STF")
 
-          print("\n" + "=" * 70 + "\nSTF: composição atual e linha sucessória\n" + "=" * 70)
-          for u in ("https://portal.stf.jus.br/textos/verTexto.asp?servico=bibliotecaConsultaProdutoBibliotecaPastaMinistro&pagina=ComposicaoAtual",
-                    "https://portal.stf.jus.br/textos/verTexto.asp?servico=sobreStfComposicaoMinistroApresentacao&pagina=linhasucessoria"):
-              texto(u, n=6000, maximo_links=60)
+          print("\n" + "=" * 70 + "\nSTF: tabela da linha sucessória (PDF oficial)\n" + "=" * 70)
+          subprocess.run(["sudo", "apt-get", "install", "-y", "-qq", "poppler-utils"], capture_output=True)
+          url = "https://www.stf.jus.br/arquivo/cms/sobreStfComposicaoMinistroApresentacao/anexo/linha_sucessoria_tabela_atual_18out2025.pdf"
+          if permitido(url):
+              try:
+                  st, tipo, final, corpo = baixar(url, 20_000_000)
+                  open("/tmp/linha.pdf", "wb").write(corpo)
+                  txt = subprocess.run(["pdftotext", "-layout", "/tmp/linha.pdf", "-"], capture_output=True, text=True).stdout
+                  linhas = [l for l in txt.splitlines() if l.strip()]
+                  print(f"  HTTP {st}, {len(corpo)} bytes, {len(linhas)} linhas de texto; as últimas 70:")
+                  for l in linhas[-70:]: print("   ", l[:220])
+              except Exception as e:
+                  print(f"  erro {e!r}")
 
-          print("\n" + "=" * 70 + "\nOrçamento federal de todos os Poderes: SIOP (dados abertos)\n" + "=" * 70)
-          PALAVRAS = re.compile(r"dados|abert|download|sparql|csv|xls|or[cç]ament|execu|acesso p", re.I)
-          for u in ("https://www.siop.planejamento.gov.br/", "https://www1.siop.planejamento.gov.br/", "https://www.gov.br/planejamento/pt-br/assuntos/orcamento/dados-abertos"):
-              texto(u, n=1500, maximo_links=40)
+          print("\n" + "=" * 70 + "\nSTF: página de cada ministro (nascimento, posse, indicação)\n" + "=" * 70)
+          for nome in ("EdsonFachin", "AlexandreMoraes", "GilmarMendes", "CarmenLucia", "DiasToffoli", "LuizFux",
+                       "NunesMarques", "AndreMendonca", "CristianoZanin", "FlavioDino"):
+              url = f"https://portal.stf.jus.br/textos/verTexto.asp?servico=bibliotecaConsultaProdutoBibliotecaPastaMinistro&pagina={nome}Principal"
+              if not permitido(url): print(f"  {nome}: robots.txt não permite"); continue
+              try:
+                  st, tipo, final, corpo = baixar(url)
+              except Exception as e:
+                  print(f"  {nome}: erro {e!r}"); continue
+              pg = Pagina(); pg.feed(corpo.decode("utf-8", "replace"))
+              texto_pg = " | ".join(pg.texto)
+              trechos = [m.group(0) for m in re.finditer(r"[^|]{0,90}(nasc|Nasc|posse|Posse|indicad|Indicad|nomead|Nomead)[^|]{0,140}", texto_pg)]
+              print(f"  {nome}: HTTP {st}; {len(trechos)} trechos")
+              for t in trechos[:6]: print("     ", t.strip()[:240])
           PY
