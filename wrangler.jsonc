@@ -5,6 +5,12 @@
 // /alfenas-mg, e o endereço antigo /cidade/...), nas dos parlamentares
 // (/parlamentar/...) e no sitemap.xml e robots.txt.
 // Os cabeçalhos de segurança dos arquivos ficam em site/_headers.
+// A publicação é feita pelo build da Cloudflare a cada envio ao GitHub. No
+// painel (Configurações > Compilações > Compilar caminhos de inspeção), só
+// site/*, worker/* e wrangler.jsonc disparam build, desde 18/11/2026: envio
+// que muda só dados-fonte/, scripts/, supabase/ ou as tarefas do GitHub não
+// gasta minutos de build. Envio com 20 commits ou 3.000 arquivos ou mais
+// sempre faz build (regra da Cloudflare).
 {
   "name": "arrecadometro-brasil",
   "compatibility_date": "2026-11-13",
