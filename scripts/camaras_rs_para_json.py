@@ -130,8 +130,11 @@ def baixar(url, destino, tamanho):
 
 
 def chave(nome):
-    """'Sant'Ana do Livramento' -> 'SANT ANA DO LIVRAMENTO'."""
+    """"Sant'Ana do Livramento" e "SANTANA DO LIVRAMENTO" -> "SANTANA DO LIVRAMENTO".
+    O apóstrofo some sem deixar espaço: o tribunal escreve sem ele (conferido
+    em 18/11/2026, a única das 497 câmaras que não casava)."""
     t = "".join(c for c in unicodedata.normalize("NFD", nome or "") if not unicodedata.combining(c)).upper()
+    t = re.sub(r"['\u2019`´]", "", t)
     return " ".join(re.sub(r"[^A-Z0-9]+", " ", t).split())
 
 
