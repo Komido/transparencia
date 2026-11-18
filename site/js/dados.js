@@ -300,9 +300,9 @@ export async function carregarEmendasUf(uf) {
 }
 
 // Gastos das câmaras municipais por tipo de despesa (Tribunal de Contas de
-// SP; scripts/camaras_sp_para_json.py): {anos, categorias: [[chave, rótulo]],
-// cidades: {código: {ano: [total pago, [por categoria]]}}}, em reais da
-// época. Por enquanto só existe para SP.
+// SP e do RS; scripts/camaras_sp_para_json.py e camaras_rs_para_json.py):
+// {anos, categorias: [[chave, rótulo]], cidades: {código: {ano: [total pago,
+// [por categoria]]}}}, em reais da época. Por enquanto só SP e RS.
 export async function carregarCamarasUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('câmaras: UF');
   const resposta = await fetch(`/dados/camaras/${uf}.json`, { credentials: 'same-origin' });
@@ -310,6 +310,7 @@ export async function carregarCamarasUf(uf) {
   if (!resposta.ok) throw new Error(`Falha ao carregar os gastos das câmaras de ${uf} (HTTP ${resposta.status})`);
   const d = await resposta.json();
   if (!d || d.uf !== uf || !ehData(d.atualizado) || !ehLinkSeguro(d.fonte)
+    || (d.tribunal !== undefined && !ehTexto(d.tribunal))
     || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
     || !Array.isArray(d.categorias) || !d.categorias.length
     || !d.categorias.every((c) => Array.isArray(c) && c.length === 2 && ehTexto(c[0]) && ehTexto(c[1]))

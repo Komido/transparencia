@@ -384,8 +384,9 @@ function desenharCamara(r, ano) {
 
 // Em que a Câmara gastou, pelo tipo de despesa de cada pagamento (Tribunal de
 // Contas do estado). Só onde o tribunal publica os lançamentos: por enquanto,
-// SP. Sem nomes de pessoas.
-const UFS_COM_CAMARAS = new Set(['SP']);
+// SP e RS. Sem nomes de pessoas.
+const UFS_COM_CAMARAS = new Set(['SP', 'RS']);
+const TRIBUNAL = { SP: 'Tribunal de Contas do Estado de São Paulo', RS: 'Tribunal de Contas do Estado do Rio Grande do Sul' };
 const CAPITAL_SP = '3550308';
 const TIPOS_CAMARA = {
   vereadores: 'o subsídio pago a cada vereador',
@@ -450,7 +451,7 @@ async function desenharCamaraTipos(ano) {
   const custoTesouro = iCam >= 0 && sic?.ds === 'ok' ? sic.d?.[iCam] : null;
   const longe = custoTesouro > 0 && (total / custoTesouro < 0.8 || total / custoTesouro > 1.25);
   definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
-    + 'Fonte: Tribunal de Contas do Estado de São Paulo, cada pagamento da Câmara pelo tipo de despesa. '
+    + `Fonte: ${d.tribunal ?? TRIBUNAL[uf]}, cada pagamento da Câmara pelo tipo de despesa. `
     + (longe
       ? `Neste ano, o total é bem diferente do custo que a prefeitura informou ao Tesouro (${f.reaisPorExtenso(custoTesouro * fator)}); o site mostra cada número como a fonte publicou.`
       : 'Pode diferir um pouco do custo informado pela prefeitura ao Tesouro, que conta a despesa liquidada, não a paga.')
