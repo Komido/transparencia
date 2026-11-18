@@ -160,6 +160,11 @@ export async function carregarPortal(nome) {
 // scripts/municipios_para_json.py (Tesouro, RREO Anexo 3 de cada prefeitura).
 const SITUACOES_PREFEITURA = ['ok', 'nao_fecha', 'sem_relatorio', 'formato', 'erro', 'df'];
 const SITUACOES_DESPESA = ['ok', 'nao_fecha', 'formato', 'sem_anexo', 'erro'];
+// Mínimos da Constituição (Anexo 14): situação e [percentual, base, mínimo]
+// de educação, FUNDEB e saúde, cada um podendo faltar.
+const SITUACOES_MINIMOS = ['ok', 'sem_linhas', 'sem_anexo', 'erro'];
+const ehMinimo = (x) => x === null || (Array.isArray(x) && x.length === 3 && Number.isFinite(x[0]) && x[0] >= 0
+  && (x[1] === null || (Number.isFinite(x[1]) && x[1] >= 0)) && (x[2] === null || Number.isFinite(x[2])));
 
 export async function carregarIndiceMunicipios() {
   const resposta = await fetch('/dados/municipios/indice.json', { credentials: 'same-origin' });
@@ -189,6 +194,8 @@ export async function carregarMunicipiosUf(uf, nCampos, nDespesa = 0) {
       if (r.p != null && !Number.isInteger(r.p)) falhar(`população de prefeitura de ${uf}`);
       if (r.ds != null && !SITUACOES_DESPESA.includes(r.ds)) falhar(`situação das despesas de prefeitura de ${uf}`);
       if (r.d != null && (!nDespesa || !Array.isArray(r.d) || r.d.length !== nDespesa || !r.d.every(ehNumeroOuNulo))) falhar(`despesas de prefeitura de ${uf}`);
+      if (r.ms != null && !SITUACOES_MINIMOS.includes(r.ms)) falhar(`situação dos mínimos de prefeitura de ${uf}`);
+      if (r.mi != null && (!Array.isArray(r.mi) || r.mi.length !== 3 || !r.mi.every(ehMinimo))) falhar(`mínimos de prefeitura de ${uf}`);
     }
   }
   return d;

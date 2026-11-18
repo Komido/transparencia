@@ -114,6 +114,7 @@ function desenhar() {
     + (!r?.v && situacao !== 'df' && !outros.length ? ' Os outros anos também estão sem dado.' : '');
   selo.classList.toggle('aviso', situacao !== 'ok');
   desenharDespesas(r, ano);
+  desenharMinimos(r, ano);
   desenharCamara(r, ano);
   desenharEmendas(ano, r?.p || m?.p);
   const caixaContas = $('#mun-contas');
@@ -346,6 +347,87 @@ function desenharDespesas(r, ano) {
     if (det.length) el('dd', 'detalhe', det.join(' · '), div);
   }
   definir('mun-despesas-nota', `${nome} gastou ${f.reaisPorExtenso(hoje(total))} em ${ano}, em dinheiro de hoje. Mediana das cidades com despesas conferidas no mesmo ano${medFaixa.nd ? ` (${f.numero(medFaixa.nd)} do mesmo tamanho)` : ''}.`);
+}
+
+// Mínimos da Constituição (RREO, Anexo 14): o que a prefeitura declarou ter
+// aplicado em educação, no salário dos profissionais da educação (FUNDEB) e
+// em saúde. A base de cada conta (valor ÷ percentual) é conferida com a parte
+// de receitas do mesmo relatório (Anexo 3), como no script.
+// O mínimo é sempre o da Constituição e da lei: o campo "mínimo" do anexo
+// vem errado em parte dos relatórios (em reais, 0,25 em vez de 25 ou vazio).
+const MINIMOS = [
+  ['educacao', 'Educação', 'dos impostos e repasses', 25],
+  ['fundeb', 'Salário dos profissionais da educação', 'do FUNDEB', 70],
+  ['saude', 'Saúde', 'dos impostos e repasses', 15],
+];
+// Parte do FPM que são as parcelas extras de 1%, fora da base da saúde
+// (LC 141/2012); mesma conta de fpm_extra em scripts/municipios_para_json.py.
+function fpmExtra(ano) {
+  const setembro = ano < 2022 ? 0 : ano < 2024 ? 0.25 : ano === 2024 ? 0.5 : 1;
+  const extras = (ano >= 2008 ? 1 : 0) + (ano >= 2015 ? 1 : 0) + setembro;
+  return extras / (22.5 + extras);
+}
+
+function desenharMinimos(r, ano) {
+  const caixa = $('#mun-minimos');
+  caixa.hidden = true;
+  if (estado.cidade.uf === 'DF' || !r?.ms) return;
+  const dl = $('#mun-minimos-numeros');
+  dl.replaceChildren();
+  const conferencia = campo('mun-minimos-conferencia')[0];
+  conferencia.hidden = true;
+  definir('mun-minimos-titulo', `Os mínimos da Constituição em ${ano}`);
+  const fonte = 'Fonte: relatório da prefeitura ao Tesouro Nacional (RREO, Anexo 14), com os números que ela declarou. '
+    + 'Quem confere é o Tribunal de Contas, ao julgar as contas do prefeito, e o resultado dele pode ser outro.';
+  if (r.ms !== 'ok' || !r.mi?.some(Boolean)) {
+    definir('mun-minimos-nota', r.ms === 'erro'
+      ? `Não foi possível ler essa parte do relatório de ${ano} (RREO, Anexo 14) no Tesouro Nacional.`
+      : `O relatório de ${ano} da prefeitura que está no Tesouro Nacional (RREO, Anexo 14) não traz os percentuais de educação e saúde.`);
+    caixa.hidden = false;
+    return;
+  }
+  // Bases pela parte de receitas (Anexo 3). Servem para a conferência e para
+  // reconhecer número fora do padrão (valor em reais no campo do percentual,
+  // 0,25 em vez de 25%): base implícita mais de 20% longe da do Anexo 3.
+  const v = r.v ? Object.fromEntries(estado.indice.campos.map((k, i) => [k, r.v[i] ?? 0])) : null;
+  const bases = {};
+  if (v) {
+    bases.educacao = ['iptu', 'iss', 'itbi', 'irrf', 'fpm', 'icms', 'ipva', 'itr'].reduce((a, k) => a + v[k], 0);
+    bases.saude = bases.educacao - v.fpm * fpmExtra(ano);
+    bases.fundeb = v.fundeb;
+  }
+  const diferencas = [];
+  let foraDoPadrao = false;
+  MINIMOS.forEach(([chave, rotulo, deQue, minimo], i) => {
+    const x = r.mi[i];
+    if (!x) return;
+    const [pct, base] = x;
+    const dif = base > 0 && bases[chave] > 0 ? (Math.abs(base - bases[chave]) / Math.max(base, bases[chave])) * 100 : null;
+    const plausivel = pct >= 1 && pct <= (chave === 'fundeb' ? 150 : 100) && !(dif > 20);
+    const div = el('div', null, null, dl);
+    el('dt', null, rotulo, div);
+    if (!plausivel) {
+      foraDoPadrao = true;
+      el('dd', null, 'número fora do padrão', div);
+      el('dd', 'detalhe', `mínimo de ${minimo}%; o site não diz se a prefeitura cumpriu`, div);
+      return;
+    }
+    el('dd', null, `${f.numero(pct, 1)}% ${deQue}`, div);
+    el('dd', 'detalhe', `mínimo de ${minimo}%: ${pct >= minimo ? 'acima do mínimo' : 'abaixo do mínimo'}`, div);
+    // A página mostra a conferência só de educação e saúde; a base do
+    // FUNDEB inclui rendimentos e a complementação da União e bate menos.
+    if (dif != null && chave !== 'fundeb') diferencas.push([rotulo, dif]);
+  });
+  if (diferencas.length) {
+    const partes = diferencas.map(([rotulo, d]) => `${rotulo.toLowerCase()}, ${textoDiferenca(d)}${d > 5 ? ' (diferente; o site mostra o número declarado)' : ''}`);
+    conferencia.textContent = 'Conferência cruzada: o valor sobre o qual a prefeitura calculou cada percentual '
+      + 'foi comparado com os impostos e repasses que ela informou na parte de receitas do mesmo relatório. '
+      + `Diferença: ${partes.join('; ')}.`;
+    conferencia.hidden = false;
+  }
+  const aviso = foraDoPadrao ? ' Número fora do padrão: provável erro de preenchimento, como um valor em reais no campo do percentual ou 0,25 em vez de 25%. O site não corrige o dado.' : '';
+  definir('mun-minimos-nota', `${fonte}${aviso}`);
+  caixa.hidden = false;
 }
 
 // Quanto custou a Câmara de Vereadores no ano (função Legislativa do RREO
