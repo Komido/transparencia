@@ -315,9 +315,13 @@ def montar():
               "todos_os_meses": meses,
               "totais": {m: {p: {"valor": todos[m]["totais"][p]["valor"], "qtd": todos[m]["totais"][p]["qtd"]}
                              for p in PROGRAMAS} for m in meses}}
+    # Com a série completa desde PRIMEIRO_MES, existe o arquivo de cada cidade
+    # (montar_cidades): a página só o procura quando este campo diz que sim.
+    serie_completa = all(m in todos for m in meses_entre(PRIMEIRO_MES, ultimo))
     for uf, municipios in sorted(por_uf.items()):
         gravar_json(f"{DESTINO}/{uf}.json", {"uf": uf, "atualizado": indice["atualizado"], "campos": CAMPOS,
-                                             "meses": no_site, "municipios": municipios})
+                                             "meses": no_site, "serie_completa": serie_completa,
+                                             "municipios": municipios})
     gravar_json(f"{DESTINO}/indice.json", indice, compacto=False)
     print(f"montados {len(por_uf)} estados; meses no site {no_site[0]} a {no_site[-1]}; {len(meses)} meses gravados")
 

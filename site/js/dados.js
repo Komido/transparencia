@@ -244,6 +244,23 @@ export async function carregarBeneficiosUf(uf) {
   return d;
 }
 
+// Série inteira do Bolsa Família e do BPC de uma cidade, desde março de 2023
+// (scripts/beneficios_para_json.py --cidades): {inicio: 'AAAA-MM', campos,
+// s: [[nbf_valor, nbf_qtd, bpc_valor, bpc_qtd] ou null, um por mês]}, em
+// reais da época. Só existe com a série completa; sem ele, null, sem erro.
+export async function carregarSerieBeneficios(cod) {
+  if (!/^[0-9]{7}$/.test(cod)) falhar('série de benefícios: código');
+  const resposta = await fetch(`/dados/beneficios/cidades/${cod}.json`, { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar a série de benefícios (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  if (!d || !ehMes(d.inicio) || JSON.stringify(d.campos) !== JSON.stringify(CAMPOS_BENEFICIOS) || !Array.isArray(d.s) || !d.s.length
+    || !d.s.every((x) => x === null || (Array.isArray(x) && x.length === 4 && x.every((v) => v === null || (Number.isFinite(v) && v >= 0))))) {
+    falhar(`série de benefícios da cidade ${cod}`);
+  }
+  return d;
+}
+
 // Cidade e estado prováveis de quem acessa, pelo endereço de internet
 // (worker/index.js, em /api/onde). Fora da Cloudflare (no computador de quem
 // desenvolve, por exemplo) ou sem resposta válida: null, sem erro.

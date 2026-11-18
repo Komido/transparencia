@@ -6,7 +6,9 @@
 import * as f from './formato.js';
 import {
   carregarPainel, carregarIndiceMunicipios, carregarMunicipiosUf, carregarBeneficiosUf, carregarEmendasUf, carregarVereadoresUf, carregarCamarasUf,
+  carregarSerieBeneficios,
 } from './dados.js';
+import { criarGrafico } from './graficos.js';
 import { caminhoDaCidade, slugDaCidade, slugDoCaminho } from './endereco.js';
 import {
   $, el, campo, definir, inflacao, fatorParaHoje, fatorMesParaHoje, mesAnterior, arred, definirTopicos, registrarDownload, montarBusca,
@@ -752,6 +754,75 @@ async function desenharBeneficios() {
     : '';
   definir('mun-beneficios-nota', `Fonte: Portal da Transparência, pagamentos de ${nome} (${uf}) por mês. Atualização: ${f.dataCurta(d.atualizado)}.${aviso}${avisoBpc}`);
   vazio.hidden = true;
+  caixa.hidden = false;
+  // O arquivo da cidade só existe com a série completa desde março de 2023.
+  if (d.serie_completa === true) desenharSeriesBeneficios();
+}
+
+// Bolsa Família e BPC mês a mês desde março de 2023, pelo arquivo da cidade,
+// que só existe com a série completa. Dois gráficos de uma linha cada, sem
+// eixo duplo: famílias e pessoas. O valor pago fica na dica, em dinheiro de
+// hoje, porque o reajuste muda o valor sem mudar o número de famílias.
+async function desenharSeriesBeneficios() {
+  const caixa = $('#mun-beneficios-series');
+  caixa.hidden = true;
+  const { codigo7, nome } = estado.cidade;
+  let d = null;
+  try { d = await carregarSerieBeneficios(codigo7); } catch (erro) { console.error(erro); }
+  if (!d) return;
+  const primeiro = d.s.findIndex((x) => x && (x[1] > 0 || x[3] > 0));
+  if (primeiro < 0 || d.s.length - primeiro < 6) return;
+  const s = d.s.slice(primeiro);
+  const rotulos = s.map((_, k) => mesAnterior(d.inicio, -(primeiro + k)));
+  const ctx = estado.ctx;
+  const hoje = (v, mes) => v * (fatorMesParaHoje(ctx, mes) ?? 1);
+  const compacto = (v) => (v >= 1e6 ? `${f.numero(v / 1e6, 1)} mi` : v >= 1e4 ? `${f.numero(v / 1e3, 0)} mil` : f.numero(v));
+  const eixoX = (rot, i) => (i === 0 && !rot.endsWith('-01') ? f.mesCurto(rot) : rot.endsWith('-01') ? rot.slice(0, 4) : null);
+  const ultimo = rotulos[rotulos.length - 1];
+  const extremos = (valores, unidade) => {
+    const i0 = valores.findIndex((v) => v != null);
+    const i1 = valores.length - 1 - [...valores].reverse().findIndex((v) => v != null);
+    return `de ${f.numero(valores[i0])} ${unidade} em ${f.mesCurto(rotulos[i0])} a ${f.numero(valores[i1])} em ${f.mesCurto(rotulos[i1])}`;
+  };
+
+  const familias = s.map((x) => (x?.[1] > 0 ? x[1] : null));
+  definir('mun-bf-serie-titulo', `Famílias no Bolsa Família, mês a mês, desde ${f.mesLongo(rotulos[0])}`);
+  criarGrafico($('#mun-bf-grafico'), {
+    tipo: 'linhas',
+    rotulos,
+    series: [{ nome: 'Famílias', valores: familias, classe: 'serie-1' }],
+    formatoY: (v, eixo) => (v == null ? 'sem dado' : eixo ? compacto(v) : `${f.numero(v)} famílias`),
+    rotuloEixoX: eixoX,
+    tituloTooltip: (i) => f.mesLongo(rotulos[i]),
+    extraTooltip: (i) => {
+      const x = s[i];
+      if (!(x?.[0] > 0) || !(x[1] > 0)) return null;
+      const valor = hoje(x[0], rotulos[i]);
+      return `${valorGrande(valor)} pagos, média de ${f.moeda(valor / x[1], 0)} por família`;
+    },
+    descricao: `Famílias no Bolsa Família em ${nome}, ${extremos(familias, 'famílias')}.`,
+  });
+
+  const pessoas = s.map((x, i) => (x?.[2] > 0 ? pessoasNoBpc(x[2], x[3], rotulos[i]) : null));
+  const temBpc = pessoas.some((v) => v != null);
+  campo('mun-bpc-serie-titulo')[0].hidden = !temBpc;
+  $('#mun-bpc-grafico').hidden = !temBpc;
+  if (temBpc) {
+    definir('mun-bpc-serie-titulo', `Pessoas no BPC, mês a mês, desde ${f.mesLongo(rotulos[0])}`);
+    criarGrafico($('#mun-bpc-grafico'), {
+      tipo: 'linhas',
+      rotulos,
+      series: [{ nome: 'Pessoas', valores: pessoas, classe: 'serie-1' }],
+      formatoY: (v, eixo) => (v == null ? 'sem dado' : eixo ? compacto(v) : `${f.numero(v)} pessoas`),
+      rotuloEixoX: eixoX,
+      tituloTooltip: (i) => f.mesLongo(rotulos[i]),
+      extraTooltip: (i) => (s[i]?.[2] > 0 ? `${valorGrande(hoje(s[i][2], rotulos[i]))} pagos` : null),
+      descricao: `Pessoas no BPC em ${nome}, ${extremos(pessoas, 'pessoas')}.`,
+    });
+  }
+  const reajuste = ultimo >= '2026-10' ? ' O valor do Bolsa Família subiu 15,04% em outubro de 2026; o número de famílias não muda com isso.' : '';
+  definir('mun-beneficios-series-nota', 'Cada ponto é um mês de pagamento; toque ou passe o mouse para ver o valor pago, em dinheiro de hoje (IPCA). '
+    + `O Novo Bolsa Família começou em março de 2023.${reajuste}`);
   caixa.hidden = false;
 }
 

@@ -1395,6 +1395,10 @@ a.botao { text-decoration: none; }
 .votos-da-proposta .item-voto { font-size: var(--fs-2); }
 
 /* Ministros do STF (Entenda): tabela no computador, um cartão por ministro no celular. */
+/* Séries do Bolsa Família e do BPC na página da cidade: um gráfico embaixo
+   do outro, com respiro antes do título do segundo. */
+#mun-beneficios-series .grafico + .ranking-titulo { margin-top: var(--e-4); }
+
 /* Quadro "Como conferimos" (metodologia): tabela no computador, cartões no
    celular, com o rótulo em cima do texto, que é longo. */
 .tabela-cartoes { width: 100%; border-collapse: collapse; font-size: var(--fs-2); margin: 0 0 var(--e-3); overflow-wrap: normal; }
