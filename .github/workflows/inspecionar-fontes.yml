@@ -23,7 +23,7 @@ jobs:
       # gastos do STF (portal de transparência do STF e o arquivo anual
       # "Orçamento da despesa" do Portal da Transparência, que cobre o
       # orçamento federal inteiro). Só leitura, respeitando o robots.txt.
-      - name: Gastos do STF, planilha da LC 200 e RGF do STF
+      - name: Gastos do STF, colunas da aba detalhada da planilha da LC 200
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -199,38 +199,36 @@ jobs:
                       linhas.append(vals)
                   saida.append((nome, linhas))
               return saida
-          print("=" * 70 + "\nTesouro: Despesas e Transferências Totais da União (valor pago), 2025\n" + "=" * 70)
+          print("=" * 70 + "\nTesouro: planilha da LC 200 de 2025, aba detalhada, só o STF\n" + "=" * 70)
           url = "https://www.tesourotransparente.gov.br/ckan/dataset/8675a0a4-31c5-4593-a24d-fb8e17376eca/resource/f40d5431-058d-48b8-9ab6-065fb0fce5b3/download/limite-gastos-lc200dez25.xlsx"
-          try:
-              st, tipo, final, corpo = baixar(url, 60_000_000)
-              open("/tmp/lc200.xlsx", "wb").write(corpo)
-              for titulo, linhas in ler_xlsx("/tmp/lc200.xlsx"):
-                  print(f"\n  aba {titulo!r}: {len(linhas)} linhas")
-                  for l in linhas[:8]: print("    ", [c for c in l if c is not None][:14])
-                  for n, l in enumerate(linhas):
-                      t = " ".join(str(c) for c in l if c is not None)
-                      if re.search(r"Supremo|Judici", t, re.I): print(f"    linha {n}: {[c for c in l if c is not None][:16]}")
-          except Exception as e:
-              print(f"  erro: {e!r}")
-
-          print("\n" + "=" * 70 + "\nSICONFI: RGF da União, Judiciário, só o STF (paginando)\n" + "=" * 70)
-          API = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt"
-          base = "rgf?an_exercicio=2025&in_periodicidade=Q&nr_periodo=3&co_tipo_demonstrativo=RGF&no_anexo=RGF-Anexo%2001&co_esfera=U&co_poder=J&id_ente=1"
-          todas, offset = [], 0
-          while True:
-              time.sleep(2)
-              pedido = urllib.request.Request(f"{API}/{base}&offset={offset}", headers={"User-Agent": AGENTE, "Accept": "application/json"})
-              with urllib.request.urlopen(pedido, timeout=120) as r:
-                  d = json.loads(r.read().decode("utf-8"))
-              itens = d.get("items") or []
-              todas += itens
-              if not d.get("hasMore") or not itens or offset > 60000: break
-              offset += len(itens)
-          inst = collections.Counter(x.get("instituicao") for x in todas)
-          print(f"  {len(todas)} linhas; {len(inst)} instituições: {sorted(inst)}")
-          stf = [x for x in todas if "Supremo" in str(x.get("instituicao"))]
+          st, tipo, final, corpo = baixar(url, 80_000_000)
+          open("/tmp/lc200.xlsx", "wb").write(corpo)
+          abas = ler_xlsx("/tmp/lc200.xlsx")
+          for titulo, linhas in abas:
+              print(f"  aba {titulo!r}: {len(linhas)} linhas; primeira: {linhas[0][:30] if linhas else []}")
+          titulo, linhas = max(abas, key=lambda a: len(a[1]))
+          cab = [str(c) for c in linhas[0]]
+          print(f"\n  aba detalhada {titulo!r}, colunas ({len(cab)}): {cab}")
+          stf = [l for l in linhas[1:] if any(str(c) == "10000" for c in l[:6]) or any("SUPREMO" in str(c).upper() for c in l[:8])]
           print(f"  linhas do STF: {len(stf)}")
-          for x in stf:
-              if re.search(r"TOTAL|DESPESA L|RECEITA CORRENTE|LIMITE|%", str(x.get("conta")), re.I) and x.get("coluna") in ("TOTAL (ÚLTIMOS 12 MESES) (a)", "VALOR", "% SOBRE A RCL AJUSTADA", "%", None) or "TOTAL" in str(x.get("coluna")).upper():
-                  print(f"    {x.get('conta')} | {x.get('coluna')} | {x.get('valor')}")
+          for l in stf[:6]: print("    ", dict(zip(cab, l)))
+          def num(x):
+              try: return float(x)
+              except (TypeError, ValueError): return None
+          numericas = [k for k, nome in enumerate(cab) if stf and all(num(l[k]) is not None for l in stf[:50] if k < len(l)) and not re.search(r"COD|ANO|MES", nome, re.I)]
+          print(f"  colunas numéricas: {[cab[k] for k in numericas]}")
+          for k in numericas:
+              tot = sum(num(l[k]) or 0 for l in stf if k < len(l))
+              print(f"    soma {cab[k]}: {tot:,.2f}")
+          for chave in [k for k, nome in enumerate(cab) if re.search(r"GND|GRUPO|NATUREZA|CATEG|RESULTADO|RP|FONTE|UNIDADE|UO|MES", nome, re.I) and not re.search(r"^COD|_COD", nome, re.I)]:
+              agrup = collections.Counter()
+              for l in stf:
+                  for k in numericas[:1]:
+                      agrup[l[chave] if chave < len(l) else None] += num(l[k]) or 0
+              print(f"  por {cab[chave]}: {[(a, round(v / 1e6, 1)) for a, v in agrup.most_common(15)]}")
+          for titulo2, linhas2 in abas:
+              for l in linhas2:
+                  if l and "Supremo" in str(l[0]):
+                      vals = [num(x) for x in l[1:13]]
+                      print(f"  {titulo2!r}: {l[0]} | soma dos 12 meses (R$ mi): {sum(v or 0 for v in vals):.1f}")
           PY
