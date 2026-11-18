@@ -16,111 +16,113 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      # Placar da aprovação de Gilmar Mendes pelo Senado (2002), que não veio
-      # na busca de votações usada para os outros ministros. Procura a
-      # mensagem presidencial (MSF) de 2002 nos dados abertos do Senado, a
-      # tramitação dela e as votações do plenário de abril a junho de 2002.
-      # Só leitura, respeitando o robots.txt.
-      - name: Placar de Gilmar Mendes no Senado (2002)
+      # Mínimos constitucionais das prefeituras: 25% dos impostos em educação
+      # (SIOPE, FNDE) e 15% em saúde (SIOPS, Ministério da Saúde). Procura os
+      # conjuntos nos portais de dados abertos (CKAN do FNDE, do OpenDataSUS e
+      # do dados.gov.br), lista arquivos, formato, tamanho e data, e lê só o
+      # começo dos arquivos promissores para ver as colunas. Também confere
+      # quais anexos do RREO de algumas cidades estão na API do Tesouro.
+      # Só leitura, respeitando o robots.txt e o Crawl-Delay de cada site.
+      - name: SIOPE e SIOPS, onde estão os percentuais de cada prefeitura
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           python3 - <<'PY'
-          import json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
+          import io, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser, zipfile
 
           AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
-          BASE = "https://legis.senado.leg.br"
-          API = BASE + "/dadosabertos"
+          robots, atraso = {}, {}
 
-          def baixar(url, aceitar="application/json", limite=20_000_000):
-              time.sleep(2)
-              pedido = urllib.request.Request(url, headers={"User-Agent": AGENTE, "Accept": aceitar})
+          def baixar(url, aceitar="*/*", limite=5_000_000, faixa=None, metodo="GET"):
+              time.sleep(atraso.get(urllib.parse.urlsplit(url).netloc, 2))
+              cab = {"User-Agent": AGENTE, "Accept": aceitar}
+              if faixa: cab["Range"] = f"bytes=0-{faixa - 1}"
+              pedido = urllib.request.Request(url, headers=cab, method=metodo)
               try:
                   with urllib.request.urlopen(pedido, timeout=90) as r:
-                      return r.status, r.headers.get("Content-Type", ""), r.read(limite)
+                      return r.status, dict(r.headers), r.geturl(), (r.read(limite) if metodo == "GET" else b"")
               except urllib.error.HTTPError as e:
-                  return e.code, e.headers.get("Content-Type", ""), e.read(20000)
+                  return e.code, dict(e.headers or {}), url, e.read(3000)
               except Exception as e:
-                  return 0, "", repr(e).encode()
+                  return 0, {}, url, repr(e).encode()
 
-          st, _, corpo = baixar(BASE + "/robots.txt", "text/plain")
-          linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
-          print(f"robots.txt: HTTP {st}")
-          for l in linhas[:30]: print("   ", l)
-          rp = urllib.robotparser.RobotFileParser(); rp.parse(linhas)
-          grupo, proibe = None, False
-          for l in linhas:
-              k, _, v = l.split("#")[0].partition(":")
-              k, v = k.strip().lower(), v.strip()
-              if k == "user-agent": grupo = v
-              elif k == "disallow" and grupo == "*" and v == "/": proibe = True
-          if proibe: raise SystemExit("robots.txt proíbe o site inteiro; nada será lido")
+          def permitido(url):
+              p = urllib.parse.urlsplit(url); base = f"{p.scheme}://{p.netloc}"
+              if base not in robots:
+                  st, _, _, corpo = baixar(base + "/robots.txt", "text/plain", 200_000)
+                  linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
+                  print(f"\nrobots.txt de {p.netloc}: HTTP {st}" + "".join("\n    " + l for l in linhas[:25]))
+                  rp = urllib.robotparser.RobotFileParser(); rp.parse(linhas)
+                  atraso[p.netloc] = max(2, float(rp.crawl_delay(AGENTE) or 0))
+                  grupo, proibe = None, False
+                  for l in linhas:
+                      k, _, v = l.split("#")[0].partition(":")
+                      k, v = k.strip().lower(), v.strip()
+                      if k == "user-agent": grupo = v
+                      elif k == "disallow" and grupo == "*" and v == "/": proibe = True
+                  robots[base] = "proibido" if proibe else rp
+                  if proibe: print("    (um bloco para todos os robôs proíbe o site inteiro: nada será lido)")
+              rp = robots[base]
+              return rp != "proibido" and rp.can_fetch(AGENTE, url)
 
-          def pegar(url):
-              if not rp.can_fetch(AGENTE, url):
+          def pegar_json(url):
+              if not permitido(url):
                   print(f"\n### {url}\n  robots.txt não permite; pulado"); return None
-              st, tipo, corpo = baixar(url)
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes")
-              if st != 200: print("  ", corpo[:400]); return None
+              st, cab, final, corpo = baixar(url, "application/json")
+              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
+              if st != 200: print("  ", corpo[:300]); return None
               try: return json.loads(corpo.decode("utf-8-sig", "replace"))
-              except Exception: print("  não é JSON:", corpo[:400]); return None
+              except Exception: print("  não é JSON:", corpo[:300]); return None
 
-          def itens(d):
-              # A API devolve listas em formatos variados; acha a maior lista de dicionários.
-              melhor = []
-              def andar(x):
-                  nonlocal melhor
-                  if isinstance(x, list):
-                      if x and all(isinstance(i, dict) for i in x) and len(x) > len(melhor): melhor = x
-                      for i in x: andar(i)
-                  elif isinstance(x, dict):
-                      for v in x.values(): andar(v)
-              andar(d); return melhor
+          def espiar(url):
+              """Tamanho, data e o começo do arquivo (colunas), sem baixar tudo."""
+              if not permitido(url):
+                  print(f"    {url}: robots.txt não permite"); return
+              st, cab, final, _ = baixar(url, metodo="HEAD")
+              print(f"    HEAD {url}: HTTP {st} | {cab.get('Content-Type', '')} | {cab.get('Content-Length', '?')} bytes | {cab.get('Last-Modified', '')}")
+              st, cab, final, corpo = baixar(url, faixa=8000, limite=8000)
+              if st not in (200, 206): print(f"    começo: HTTP {st}"); return
+              if corpo[:2] == b"PK":
+                  print("    é zip; o começo não mostra as colunas"); return
+              texto = corpo.decode("utf-8", "replace") if b"\xc3" in corpo else corpo.decode("latin-1", "replace")
+              for l in texto.splitlines()[:4]: print("     |", l[:400])
 
-          def tem_gilmar(x): return "GILMAR" in json.dumps(x, ensure_ascii=False).upper()
+          PALAVRAS = re.compile(r"siope|siops|educa|sa[uú]de|mde|ensino|indicador|munic|percentual|aplica", re.I)
 
-          # Achados da primeira execução: MSF 129/2002, processo 2694474,
-          # matéria 50137, aprovada no plenário em 22/05/2002.
-          PROC, MAT, DIA = 2694474, 50137, "2002-05-22"
+          def ckan(base, termo):
+              d = pegar_json(f"{base}/api/3/action/package_search?q={urllib.parse.quote(termo)}&rows=40")
+              res = (d or {}).get("result") or {}
+              pacotes = res.get("results") or []
+              print(f"  {res.get('count', 0)} conjuntos para '{termo}'")
+              espiados = 0
+              for p in pacotes:
+                  print(f"\n  * {p.get('title')} [{p.get('name')}] | org {((p.get('organization') or {}).get('title'))} | modificado {p.get('metadata_modified', '')[:10]}")
+                  for r in (p.get("resources") or [])[:25]:
+                      print(f"      - {r.get('name')} | {r.get('format')} | {r.get('size') or ''} | {(r.get('last_modified') or r.get('created') or '')[:10]} | {r.get('url')}")
+                  for r in (p.get("resources") or []):
+                      nome = f"{r.get('name')} {r.get('url')}"
+                      if espiados < 6 and (r.get("format") or "").upper() in ("CSV", "ZIP", "TXT", "JSON") and re.search(r"202[3-5]", nome) and PALAVRAS.search(nome):
+                          espiar(r.get("url")); espiados += 1
 
-          def andar(x, achar, caminho=""):
-              if isinstance(x, dict):
-                  achar(x, caminho)
-                  for k, v in x.items(): andar(v, achar, f"{caminho}/{k}")
-              elif isinstance(x, list):
-                  for i in x: andar(i, achar, caminho)
+          # 1) Portais CKAN: FNDE, OpenDataSUS e dados.gov.br.
+          for base, termos in (("https://www.fnde.gov.br/dadosabertos", ("siope",)),
+                               ("https://opendatasus.saude.gov.br", ("siops",)),
+                               ("https://dados.gov.br", ("siope", "siops"))):
+              for t in termos:
+                  try: ckan(base, t)
+                  except Exception as e: print(f"  erro em {base} ({t}): {e!r}")
 
-          VOTO = re.compile(r"vot|aprov|plen[áa]r|sim\b|escrut|sabatina|parecer|resultado|placar", re.I)
-
-          # 1) Tramitação: todo texto que fale de votação, com a data.
-          d = pegar(f"{API}/processo/{PROC}")
-          if d is not None:
-              print("  chaves:", sorted(d.keys()) if isinstance(d, dict) else type(d))
-              def informe(o, caminho):
-                  for campo in ("descricao", "texto", "descricaoSituacao", "descricaoAcao", "textoInformeLegislativo"):
-                      t = o.get(campo)
-                      if isinstance(t, str) and VOTO.search(t):
-                          print(f"   [{caminho}] {o.get('data') or o.get('dataInicio') or ''} | {t[:700]}")
-                  if o.get("url") or o.get("urlDocumento"):
-                      print(f"   doc [{caminho}] {o.get('tipoDocumento') or o.get('tipo') or ''} | {o.get('descricao') or o.get('ementa') or ''} | {o.get('url') or o.get('urlDocumento')}")
-              andar(d, informe)
-
-          # 2) Votações ligadas ao processo ou daquele dia (sem a lista de votos).
-          for url in (f"{API}/votacao?idProcesso={PROC}", f"{API}/votacao?codigoMateria={MAT}",
-                      f"{API}/votacao?dataInicio={DIA}&dataFim={DIA}",
-                      f"{API}/materia/votacoes/{MAT}",
-                      f"{API}/plenario/lista/votacao/{DIA.replace('-', '')}/{DIA.replace('-', '')}"):
-              d = pegar(url)
-              if d is None: continue
-              lista = d if isinstance(d, list) else []
-              if not lista:
-                  def votacao(o, caminho):
-                      if any(k in o for k in ("totalVotosSim", "TotalVotosSim", "QuantidadeVotosSim", "Resultado", "resultadoVotacao", "DescricaoVotacao")):
-                          lista.append(o)
-                  andar(d, votacao)
-              print(f"  {len(lista)} votações")
-              for v in lista:
-                  if not isinstance(v, dict): continue
-                  resumo = {k: x for k, x in v.items() if not isinstance(x, (list, dict))}
-                  print("  ", json.dumps(resumo, ensure_ascii=False)[:1200])
+          # 2) Tesouro (SICONFI): quais anexos do RREO do 6º bimestre de 2025
+          #    existem para algumas cidades, nos dois tipos de relatório.
+          API = "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/rreo"
+          for cod in ("3550308", "3304557", "3101607", "3143104"):
+              for tipo in ("RREO", "RREO Simplificado"):
+                  q = urllib.parse.urlencode({"an_exercicio": 2025, "nr_periodo": 6, "co_tipo_demonstrativo": tipo, "id_ente": cod})
+                  d = pegar_json(f"{API}?{q}")
+                  itens = (d or {}).get("items") or []
+                  anexos = sorted({i.get("anexo") for i in itens})
+                  print(f"  {cod} {tipo}: {len(itens)} linhas; anexos {anexos}")
+                  for i in itens:
+                      if re.search(r"educa|ensino|sa[uú]de|ASPS|MDE", f"{i.get('anexo')} {i.get('conta')} {i.get('coluna')}", re.I) and re.search(r"%|percent|aplica", f"{i.get('conta')} {i.get('coluna')}", re.I):
+                          print(f"     {i.get('anexo')} | {i.get('conta')[:120]} | {i.get('coluna')[:60]} | {i.get('valor')}")
           PY
