@@ -94,15 +94,16 @@ def sem_acento(texto):
     return "".join(c for c in unicodedata.normalize("NFD", texto or "") if not unicodedata.combining(c)).upper()
 
 
-def categoria(elemento):
+def categoria(elemento, subsidio=("75",)):
     """Elemento de despesa (8 dígitos: categoria, grupo, modalidade, elemento,
-    subelemento) para a categoria do site."""
+    subelemento) para a categoria do site. O subelemento do subsídio dos
+    vereadores muda de um tribunal para outro: 75 no TCE-SP, 74 no TCE-RS."""
     cod = (elemento or "").strip()[:8]
     if len(cod) < 6 or not cod[:6].isdigit():
         return "outros"
     grupo, elem, sub = cod[1], cod[4:6], cod[6:8]
     if grupo == "1":
-        return "vereadores" if elem == "11" and sub == "75" else "pessoal"
+        return "vereadores" if elem == "11" and sub in subsidio else "pessoal"
     if grupo == "3":
         if elem == "14" or (elem == "36" and sub == "02"):
             return "diarias"
@@ -256,12 +257,12 @@ def somar(caminho, ano):
     return por_cidade
 
 
-def conferir_com_siconfi(cidades, anos):
-    """Mediana da razão entre o pago (TCE-SP) e a função Legislativa (SICONFI)."""
+def conferir_com_siconfi(cidades, anos, municipios=MUNICIPIOS, minimo=300):
+    """Mediana da razão entre o pago (Tribunal de Contas) e a função Legislativa (SICONFI)."""
     try:
-        m = json.load(open(MUNICIPIOS, encoding="utf-8"))
+        m = json.load(open(municipios, encoding="utf-8"))
     except OSError:
-        print("  sem site/dados/municipios/SP.json para conferir")
+        print(f"  sem {municipios} para conferir")
         return
     i_cam = m["campos_despesa"].index("camara")
     for ano in anos:
@@ -272,15 +273,15 @@ def conferir_com_siconfi(cidades, anos):
             tce = cidades.get(str(r["c"]), {}).get(str(ano))
             if sic and sic > 0 and tce and tce[0] > 0:
                 razoes.append(tce[0] / sic)
-        if len(razoes) < 300:
+        if len(razoes) < minimo:
             print(f"  {ano}: só {len(razoes)} cidades com as duas fontes; conferência pulada")
             continue
         med = statistics.median(razoes)
         perto = sum(1 for x in razoes if 0.8 <= x <= 1.25) / len(razoes)
-        print(f"  {ano}: TCE-SP (pago) / SICONFI (liquidado, função Legislativa): mediana {med:.3f}; "
+        print(f"  {ano}: Tribunal de Contas (pago) / SICONFI (liquidado, função Legislativa): mediana {med:.3f}; "
               f"{perto:.0%} das {len(razoes)} cidades entre 0,8 e 1,25")
         if not 0.8 <= med <= 1.2:
-            falhar(f"em {ano}, o total das câmaras no TCE-SP não bate com o SICONFI (mediana {med:.3f})")
+            falhar(f"em {ano}, o total das câmaras no Tribunal de Contas não bate com o SICONFI (mediana {med:.3f})")
 
 
 def gravar_json(caminho, dados):
@@ -342,6 +343,7 @@ def main():
     gravar_json(DESTINO, {
         "uf": "SP",
         "versao": VERSAO_DA_CONTA,
+        "tribunal": "Tribunal de Contas do Estado de São Paulo",
         "atualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "fonte": PAGINA,
         "arquivos": arquivos,
