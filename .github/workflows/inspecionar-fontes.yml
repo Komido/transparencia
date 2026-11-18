@@ -40,6 +40,8 @@ jobs:
                       return r.status, r.headers.get("Content-Type", ""), r.read(limite)
               except urllib.error.HTTPError as e:
                   return e.code, e.headers.get("Content-Type", ""), e.read(20000)
+              except Exception as e:
+                  return 0, "", repr(e).encode()
 
           st, _, corpo = baixar(BASE + "/robots.txt", "text/plain")
           linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
@@ -77,43 +79,48 @@ jobs:
 
           def tem_gilmar(x): return "GILMAR" in json.dumps(x, ensure_ascii=False).upper()
 
-          # 1) Processos: mensagens presidenciais de 2002 que citam Gilmar.
-          ids = []
-          d = pegar(f"{API}/processo?sigla=MSF&ano=2002")
-          lista = itens(d) if d is not None else []
-          print(f"  {len(lista)} processos MSF de 2002")
-          if lista: print("  campos do primeiro:", sorted(lista[0].keys()))
-          for p in lista:
-              if tem_gilmar(p):
-                  print("  ACHADO:", json.dumps(p, ensure_ascii=False)[:800])
-                  for k in ("id", "idProcesso", "codigoMateria"):
-                      if p.get(k): ids.append(p[k]); break
+          # Achados da primeira execução: MSF 129/2002, processo 2694474,
+          # matéria 50137, aprovada no plenário em 22/05/2002.
+          PROC, MAT, DIA = 2694474, 50137, "2002-05-22"
 
-          # 2) Busca antiga por palavra-chave, caso a nova não traga.
-          d = pegar(f"{API}/materia/pesquisa/lista?sigla=MSF&ano=2002&palavraChave=GILMAR")
-          for m in (itens(d) if d is not None else []):
-              print("  matéria:", json.dumps(m, ensure_ascii=False)[:800])
+          def andar(x, achar, caminho=""):
+              if isinstance(x, dict):
+                  achar(x, caminho)
+                  for k, v in x.items(): andar(v, achar, f"{caminho}/{k}")
+              elif isinstance(x, list):
+                  for i in x: andar(i, achar, caminho)
 
-          # 3) Tramitação de cada processo achado: só os informes sobre votação.
-          for i in ids[:3]:
-              d = pegar(f"{API}/processo/{i}")
+          VOTO = re.compile(r"vot|aprov|plen[áa]r|sim\b|escrut|sabatina|parecer|resultado|placar", re.I)
+
+          # 1) Tramitação: todo texto que fale de votação, com a data.
+          d = pegar(f"{API}/processo/{PROC}")
+          if d is not None:
+              print("  chaves:", sorted(d.keys()) if isinstance(d, dict) else type(d))
+              def informe(o, caminho):
+                  for campo in ("descricao", "texto", "descricaoSituacao", "descricaoAcao", "textoInformeLegislativo"):
+                      t = o.get(campo)
+                      if isinstance(t, str) and VOTO.search(t):
+                          print(f"   [{caminho}] {o.get('data') or o.get('dataInicio') or ''} | {t[:700]}")
+                  if o.get("url") or o.get("urlDocumento"):
+                      print(f"   doc [{caminho}] {o.get('tipoDocumento') or o.get('tipo') or ''} | {o.get('descricao') or o.get('ementa') or ''} | {o.get('url') or o.get('urlDocumento')}")
+              andar(d, informe)
+
+          # 2) Votações ligadas ao processo ou daquele dia (sem a lista de votos).
+          for url in (f"{API}/votacao?idProcesso={PROC}", f"{API}/votacao?codigoMateria={MAT}",
+                      f"{API}/votacao?dataInicio={DIA}&dataFim={DIA}",
+                      f"{API}/materia/votacoes/{MAT}",
+                      f"{API}/plenario/lista/votacao/{DIA.replace('-', '')}/{DIA.replace('-', '')}"):
+              d = pegar(url)
               if d is None: continue
-              texto = json.dumps(d, ensure_ascii=False)
-              print("  identificação:", re.findall(r'"identificacao": "([^"]+)"', texto)[:3])
-              for m in re.finditer(r'\{[^{}]*"descricao": "([^"]*)"[^{}]*\}', texto):
-                  desc = m.group(1)
-                  if re.search(r"vot|aprov|plen|sim|n[ãa]o|escrut|sabatina|parecer", desc, re.I):
-                      data = re.search(r'"data": "([^"]+)"', m.group(0))
-                      print(f"   {data.group(1) if data else '?'} | {desc[:600]}")
-
-          # 4) Votações do plenário entre abril e junho de 2002.
-          for ini, fim in (("2002-04-01", "2002-04-30"), ("2002-05-01", "2002-05-31"), ("2002-06-01", "2002-06-30")):
-              d = pegar(f"{API}/votacao?dataInicio={ini}&dataFim={fim}")
-              lista = itens(d) if d is not None else []
+              lista = d if isinstance(d, list) else []
+              if not lista:
+                  def votacao(o, caminho):
+                      if any(k in o for k in ("totalVotosSim", "TotalVotosSim", "QuantidadeVotosSim", "Resultado", "resultadoVotacao", "DescricaoVotacao")):
+                          lista.append(o)
+                  andar(d, votacao)
               print(f"  {len(lista)} votações")
-              if lista: print("  campos da primeira:", sorted(lista[0].keys())[:40])
               for v in lista:
-                  if tem_gilmar(v) or "MSF" in json.dumps(v, ensure_ascii=False):
-                      resumo = {k: v.get(k) for k in v if k in ("dataSessao", "identificacao", "descricaoVotacao", "ementa", "resultadoVotacao", "votacaoSecreta", "totalVotosSim", "totalVotosNao", "totalVotosAbstencao", "codigoSessaoVotacao", "idProcesso", "sigla", "numero", "ano")}
-                      print("  VOTAÇÃO:", json.dumps(resumo, ensure_ascii=False)[:900])
+                  if not isinstance(v, dict): continue
+                  resumo = {k: x for k, x in v.items() if not isinstance(x, (list, dict))}
+                  print("  ", json.dumps(resumo, ensure_ascii=False)[:1200])
           PY
