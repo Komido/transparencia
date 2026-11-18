@@ -156,12 +156,12 @@ function desenhar() {
 
   // De onde veio cada R$ 100: ordem fixa, impostos da cidade primeiro.
   const itens = [
-    { nome: 'Impostos e taxas da cidade', explica: `IPTU ${f.reaisCompacto(hoje(v.iptu))} · ISS ${f.reaisCompacto(hoje(v.iss))} · ITBI ${f.reaisCompacto(hoje(v.itbi))} · IR dos servidores ${f.reaisCompacto(hoje(v.irrf))}`, valor: v.tributos },
-    { nome: 'FPM (repasse da União)', explica: 'parte do Imposto de Renda e do IPI dividida entre as cidades', valor: v.fpm },
-    { nome: 'ICMS (parte do imposto do estado)', explica: 'um quarto do ICMS fica com as cidades', valor: v.icms },
-    { nome: 'FUNDEB (educação)', explica: 'fundo da educação básica, pelo número de alunos', valor: v.fundeb },
-    { nome: 'IPVA (parte do imposto dos carros)', explica: 'metade do IPVA dos carros da cidade', valor: v.ipva },
-    { nome: 'Outros repasses', explica: 'SUS, assistência social, merenda, ITR e outros', valor: outrosRepasses },
+    { nome: 'Impostos e taxas da cidade', explica: `IPTU, sobre imóveis, ${f.reaisCompacto(hoje(v.iptu))} · ISS, sobre serviços, ${f.reaisCompacto(hoje(v.iss))} · ITBI, sobre a venda de imóveis, ${f.reaisCompacto(hoje(v.itbi))} · Imposto de Renda dos servidores ${f.reaisCompacto(hoje(v.irrf))}`, valor: v.tributos },
+    { nome: 'FPM (Fundo de Participação dos Municípios)', explica: 'parte do Imposto de Renda e do IPI, o imposto sobre produtos industrializados, que o governo federal divide entre as cidades', valor: v.fpm },
+    { nome: 'ICMS (parte do imposto do estado)', explica: 'um quarto do ICMS, o imposto estadual sobre mercadorias e serviços, fica com as cidades', valor: v.icms },
+    { nome: 'FUNDEB (fundo da educação básica)', explica: 'fundo que junta parte dos impostos e devolve às cidades pelo número de alunos', valor: v.fundeb },
+    { nome: 'IPVA (parte do imposto sobre veículos)', explica: 'metade do imposto pago pelos donos de carros e motos da cidade', valor: v.ipva },
+    { nome: 'Outros repasses', explica: 'SUS (Sistema Único de Saúde), assistência social, merenda, imposto sobre terras rurais (ITR) e outros', valor: outrosRepasses },
     { nome: 'Outras receitas da prefeitura', explica: 'aplicações financeiras, serviços e contribuições', valor: outrasReceitas },
   ].filter((x) => x.valor > 0);
   const lista = $('#mun-barras');
@@ -226,7 +226,7 @@ async function desenharGoverno() {
   const mandato = d && Object.entries(d.eleicoes).find(([, e]) => e.cargo === 'prefeito' && e.inicio <= ano && ano <= e.fim);
   const eleitos = mandato ? (d.prefeitos[codigo7] ?? []).filter((x) => String(x[0]) === mandato[0]) : [];
   if (!eleitos.length) {
-    vazio.textContent = d ? 'O arquivo do TSE não traz o prefeito eleito para o mandato deste ano.' : 'Não foi possível carregar os eleitos agora. Tente de novo mais tarde.';
+    vazio.textContent = d ? 'O arquivo do Tribunal Superior Eleitoral (TSE) não traz o prefeito eleito para o mandato deste ano.' : 'Não foi possível carregar os eleitos agora. Tente de novo mais tarde.';
     vazio.hidden = false;
     return;
   }
@@ -272,7 +272,7 @@ async function desenharVereadores() {
     const sigla = el('span', 'pessoa-detalhe', x[2], li);
     if (d.partidos?.[x[2]]) sigla.title = d.partidos[x[2]];
   });
-  definir('mun-vereadores-nota', `Fonte: TSE, dados abertos. O TSE registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
+  definir('mun-vereadores-nota', `Fonte: Tribunal Superior Eleitoral (TSE), dados abertos. O tribunal registra quem foi eleito, não quem está no cargo hoje: se um vereador saiu e o suplente assumiu, a troca não aparece. O que cada vereador faz (projetos, votos, presença) só é publicado pela Câmara Municipal de ${nome}; cada câmara publica do seu jeito, e não há uma base nacional com isso.`);
   caixa.hidden = false;
 }
 
@@ -357,7 +357,7 @@ function desenharDespesas(r, ano) {
 // vem errado em parte dos relatórios (em reais, 0,25 em vez de 25 ou vazio).
 const MINIMOS = [
   ['educacao', 'Educação', 'dos impostos e repasses', 25],
-  ['fundeb', 'Salário dos profissionais da educação', 'do FUNDEB', 70],
+  ['fundeb', 'Salário dos profissionais da educação', 'do FUNDEB, o fundo da educação básica', 70],
   ['saude', 'Saúde', 'dos impostos e repasses', 15],
 ];
 // Parte do FPM que são as parcelas extras de 1%, fora da base da saúde
@@ -377,12 +377,12 @@ function desenharMinimos(r, ano) {
   const conferencia = campo('mun-minimos-conferencia')[0];
   conferencia.hidden = true;
   definir('mun-minimos-titulo', `Os mínimos da Constituição em ${ano}`);
-  const fonte = 'Fonte: relatório da prefeitura ao Tesouro Nacional (RREO, Anexo 14), com os números que ela declarou. '
+  const fonte = 'Fonte: Relatório Resumido da Execução Orçamentária (RREO), as contas que a prefeitura entrega ao Tesouro Nacional a cada dois meses; Anexo 14, com os números que ela declarou. '
     + 'Quem confere é o Tribunal de Contas, ao julgar as contas do prefeito, e o resultado dele pode ser outro.';
   if (r.ms !== 'ok' || !r.mi?.some(Boolean)) {
     definir('mun-minimos-nota', r.ms === 'erro'
-      ? `Não foi possível ler essa parte do relatório de ${ano} (RREO, Anexo 14) no Tesouro Nacional.`
-      : `O relatório de ${ano} da prefeitura que está no Tesouro Nacional (RREO, Anexo 14) não traz os percentuais de educação e saúde.`);
+      ? `Não foi possível ler essa parte das contas de ${ano} que a prefeitura entregou ao Tesouro Nacional (Relatório Resumido da Execução Orçamentária, Anexo 14).`
+      : `As contas de ${ano} que a prefeitura entregou ao Tesouro Nacional (Relatório Resumido da Execução Orçamentária, Anexo 14) não trazem os percentuais de educação e saúde.`);
     caixa.hidden = false;
     return;
   }
@@ -704,7 +704,7 @@ async function desenharEmendas(ano, moradores) {
       botaoTodos.hidden = false;
     }
     const nomes = lista.lista.map(([a]) => a);
-    if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo STF em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
+    if (nomes.includes('Relator Geral')) notas.push('Relator Geral: emendas do relator do orçamento, proibidas pelo Supremo Tribunal Federal (STF) em dezembro de 2022; depois disso, é pagamento de compromisso antigo.');
     if (nomes.includes('Sem informação')) notas.push('Sem informação: o arquivo não traz o autor.');
   }
   // Pagamentos registrados ao Banco do Brasil, sem a cidade: quase todos de
@@ -903,7 +903,7 @@ async function desenharSeriesBeneficios() {
     });
   }
   const reajuste = ultimo >= '2026-10' ? ' O valor do Bolsa Família subiu 15,04% em outubro de 2026; o número de famílias não muda com isso.' : '';
-  definir('mun-beneficios-series-nota', 'Cada ponto é um mês de pagamento; toque ou passe o mouse para ver o valor pago, em dinheiro de hoje (IPCA). '
+  definir('mun-beneficios-series-nota', 'Cada ponto é um mês de pagamento; toque ou passe o mouse para ver o valor pago, em dinheiro de hoje (corrigido pelo IPCA, o índice oficial de inflação). '
     + `O Novo Bolsa Família começou em março de 2023.${reajuste}`);
   caixa.hidden = false;
 }

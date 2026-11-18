@@ -1605,7 +1605,7 @@ async function montarDinheiro(ctx) {
       const antiga = folha.ano < new Date().getFullYear();
       definir('din-salario-nota', antiga
         ? `Atenção: estas são as tabelas de ${folha.ano}; as de ${new Date().getFullYear()} ainda não foram atualizadas no site.`
-        : `Tabelas de ${folha.ano}. O INSS paga aposentadoria, auxílio-doença e outros benefícios. Parte do Imposto de Renda vai para estados e prefeituras, pelo FPE e pelo FPM.${ir.simplificado ? ' Neste salário, o desconto simplificado dá menos imposto que deduzir o INSS e os dependentes, e é ele que a empresa usa.' : ''}`);
+        : `Tabelas de ${folha.ano}. O INSS paga aposentadoria, auxílio-doença e outros benefícios. Parte do Imposto de Renda vai para estados e prefeituras, pelos fundos de participação dos estados (FPE) e dos municípios (FPM).${ir.simplificado ? ' Neste salário, o desconto simplificado dá menos imposto que deduzir o INSS e os dependentes, e é ele que a empresa usa.' : ''}`);
     };
     entrada.addEventListener('input', desenharSalario);
     selDep.addEventListener('change', desenharSalario);
@@ -2171,7 +2171,7 @@ function montarDolar(ctx) {
   });
 
   if (faltantes.length) {
-    const nota = el('p', 'nota', `Sem valor em dinheiro de hoje em ${faltantes.map(f.mesCurto).join(', ')}: o governo dos Estados Unidos (BLS) não publicou a inflação desse mês.`);
+    const nota = el('p', 'nota', `Sem valor em dinheiro de hoje em ${faltantes.map(f.mesCurto).join(', ')}: o órgão de estatísticas do trabalho dos Estados Unidos (BLS) não publicou a inflação desse mês.`);
     $('#grafico-dolar').after(nota);
   }
 
@@ -2864,14 +2864,14 @@ function indicadoresDoAno(ctx) {
   const lista = [
     {
       id: 'salario', grupo: 'bolso', nome: 'Salário mínimo', curto: 'salário mínimo', secao: '#salario', dica: 'em dinheiro de hoje',
-      explica: 'quanto vale em dinheiro de hoje (corrigido pela inflação, INPC)',
+      explica: 'quanto vale em dinheiro de hoje (corrigido pelo INPC, a inflação das famílias de renda mais baixa)',
       valores: sm.real, tipo: 'media', maiorMelhor: true, formato: (v) => f.moeda(v, 0),
       causas: [salario, { rotulo: 'os preços (INPC)', serie: inpc }],
     },
     {
       id: 'cestas', grupo: 'bolso', nome: 'Cestas básicas por salário mínimo', curto: 'cestas básicas por salário', secao: '#compras',
       nomeCurto: 'Cestas básicas', dica: 'quantas o salário mínimo compra',
-      explica: 'quantas cestas do DIEESE um salário mínimo compra',
+      explica: 'quantas cestas básicas um salário mínimo compra (cesta calculada pelo DIEESE, instituto de pesquisa dos sindicatos)',
       valores: s.cesta_total ? c.quantidadeComprada(s.salario_minimo, s.cesta_total) : null,
       tipo: 'media', maiorMelhor: true, formato: (v) => f.numero(v, 2),
       causas: [salario, { rotulo: 'a cesta básica', serie: s.cesta_total }],
@@ -2889,7 +2889,7 @@ function indicadoresDoAno(ctx) {
     {
       id: 'inflacao', grupo: 'bolso', nome: 'Inflação', curto: 'inflação', secao: null, meta: t.META_INFLACAO,
       dica: `em 12 meses; meta: ${f.porcentagem(t.META_INFLACAO.centro, 0)} ao ano`,
-      explica: 'quanto os preços subiram em 12 meses (IPCA)',
+      explica: 'quanto os preços subiram em 12 meses (IPCA, o índice oficial de inflação)',
       valores: s.ipca_var, tipo: 'acumulado', maiorMelhor: false, formato: (v) => f.porcentagem(v, 1),
     },
     {
@@ -2949,7 +2949,7 @@ function indicadoresDoAno(ctx) {
     // bolso, e decidir isso é opinião. Mostra o número e a direção.
     {
       id: 'impostos', grupo: 'pais', nome: 'Impostos federais', curto: 'impostos federais', secao: '#arrecadacao', neutro: true,
-      explica: 'quanto o governo federal arrecadou em impostos e contribuições em 12 meses, em % de tudo o que o país produz em um ano (o PIB); sem a contribuição ao INSS, para comparar anos de forma justa',
+      explica: 'quanto o governo federal arrecadou em impostos e contribuições em 12 meses, em % de tudo o que o país produz em um ano (o PIB); sem a contribuição ao INSS, a previdência que paga aposentadorias, para comparar anos de forma justa',
       dica: 'em 12 meses, em % do que o país produz',
       valores: c.razaoDozeMeses(ctx.comparavel, s.pib_mensal), tipo: 'doze', maiorMelhor: true,
       fluxo: { num: ctx.comparavel, den: s.pib_mensal },
@@ -3601,7 +3601,7 @@ function montarFontes(ctx) {
       el('div', 'status', `${s.nome}${s.codigo ? ` (${s.codigo})` : ''}: dado até ${f.mesCurto(s.ultimo_periodo)}`, li);
     }
     if (fonte.id === 'rfb_arrecadacao') {
-      el('div', 'status', `Arrecadação mensal por UF e tributo: ${f.mesCurto(d.arrecadacao.primeiro_periodo)} a ${f.mesCurto(d.arrecadacao.ultimo_periodo)}`, li);
+      el('div', 'status', `Arrecadação mensal por estado e tributo: ${f.mesCurto(d.arrecadacao.primeiro_periodo)} a ${f.mesCurto(d.arrecadacao.ultimo_periodo)}`, li);
     }
     if (fonte.id === 'rfb_irpf') {
       el('div', 'status', `${d.ir_tabela.length} tabelas mensais, de ${f.mesCurto(d.ir_tabela[0].inicio)} a ${f.mesCurto(d.ir_tabela[d.ir_tabela.length - 1].inicio)}`, li);

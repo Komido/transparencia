@@ -25,6 +25,28 @@ const valorGrande = (v) => (v >= 1e6 ? f.reaisPorExtenso(v) : f.reaisCompacto(v)
 const estado = { indice: null, ctx: null, p: null, d: null, cidades: null, atv: null };
 
 // "Deputada federal · PT-MG", "Senador · PSD-MG"; sem a lista oficial, a casa.
+// Tipos de proposta da Câmara e do Senado: a sigla vem com o nome por extenso,
+// para quem não conhece o processo legislativo. Tipo desconhecido fica como
+// a fonte escreveu.
+const TIPOS_PROPOSICAO = {
+  PL: 'projeto de lei', PLP: 'projeto de lei complementar', PLN: 'projeto de lei do Congresso, sobre o orçamento',
+  PLS: 'projeto de lei do Senado', PLV: 'projeto de lei de conversão de uma medida provisória',
+  PEC: 'proposta de emenda à Constituição', PDL: 'projeto de decreto legislativo', PDS: 'projeto de decreto legislativo',
+  PRC: 'projeto de resolução da Câmara', PRS: 'projeto de resolução do Senado', MPV: 'medida provisória',
+  REQ: 'requerimento', RQS: 'requerimento', RIC: 'requerimento de informação', INC: 'indicação',
+  REP: 'representação, pedido de punição de parlamentar', MSC: 'mensagem do presidente da República',
+  VET: 'veto do presidente', PFC: 'proposta de fiscalização e controle', SUG: 'sugestão',
+  EMC: 'emenda apresentada em comissão', EMP: 'emenda apresentada no Plenário', TVR: 'concessão de rádio ou TV',
+};
+const comTipo = (titulo) => {
+  const m = /^([A-Z]{2,4}) (\d+\/\d{4})(.*)$/.exec(titulo || '');
+  const nome = m && TIPOS_PROPOSICAO[m[1]];
+  if (!nome) return titulo;
+  // "(Fase 1 - CD)": CD e SF são a Câmara dos Deputados e o Senado Federal.
+  const resto = m[3].replace(/\bCD\b/, 'Câmara dos Deputados').replace(/\bSF\b/, 'Senado Federal');
+  return `${m[1]} ${m[2]} (${nome})${resto}`;
+};
+
 function cargo(p) {
   const sexo = p[7] ?? estado.atv?.sexo ?? '';
   const casa = p[2];
@@ -136,7 +158,7 @@ async function desenharVotacoes(ano) {
   const ordem = [...grupos.values()].reverse();
   campo('parl-votacoes-titulo')[0].hidden = !ordem.length;
   ordem.forEach(({ v, itens }) => {
-    const li = item(lista, { titulo: v[2] || 'Votação', href: v[8] ? linkProposicao(casa, v[8]) : null, texto: v[3] });
+    const li = item(lista, { titulo: comTipo(v[2]) || 'Votação', href: v[8] ? linkProposicao(casa, v[8]) : null, texto: v[3] });
     const sub = el('ul', 'votos-da-proposta', null, li);
     itens.reverse().forEach(([x, cod]) => {
       const voto = VOTO_TEXTO[cod] ?? (cod.startsWith('x:') ? `Não votou (${AUSENCIA_SENADO[cod.slice(2)] ?? cod.slice(2)})` : 'Outro registro');
@@ -181,7 +203,7 @@ function desenharProjetos(ano) {
   const lista = $('#parl-projetos');
   lista.replaceChildren();
   doAno.forEach((x) => item(lista, {
-    titulo: x[1],
+    titulo: comTipo(x[1]),
     href: linkProposicao(casa, x[0]),
     lado: x[6] === 1 ? 'Autor principal' : 'Coautor',
     texto: x[3],
@@ -267,7 +289,7 @@ function desenharEmendas(ano) {
       encurtarLista(lista, botao, 6, { abrir: `Ver todas as ${f.numero(x.cidades.length)} cidades`, fechar: 'Mostrar só as 6 que mais receberam' });
     });
   }
-  definir('parl-nota', `Emendas individuais de ${p[1]} pagas em ${ano}, em dinheiro de hoje (IPCA). A porcentagem é do total pago no ano. Emendas de bancada e de comissão não entram.`);
+  definir('parl-nota', `Emendas individuais de ${p[1]} pagas em ${ano}, em dinheiro de hoje (corrigido pelo IPCA, o índice oficial de inflação). A porcentagem é do total pago no ano. Emendas de bancada e de comissão não entram.`);
   $('#parl-baixar').hidden = false;
 }
 
