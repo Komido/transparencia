@@ -1393,3 +1393,21 @@ a.botao { text-decoration: none; }
 .votos-da-proposta { list-style: none; margin: var(--e-1) 0 0; padding: 0 0 0 var(--e-3); border-left: 2px solid var(--borda); display: grid; gap: var(--e-1); }
 .votacoes .votos-da-proposta li { display: flex; justify-content: space-between; align-items: baseline; gap: var(--e-3); padding: 2px 0; border-top: 0; }
 .votos-da-proposta .item-voto { font-size: var(--fs-2); }
+
+/* Ministros do STF (Entenda): tabela no computador, um cartão por ministro no celular. */
+.tabela-stf { width: 100%; border-collapse: collapse; font-size: var(--fs-2); margin: 0 0 var(--e-3); }
+.tabela-stf th, .tabela-stf td { text-align: left; vertical-align: top; padding: var(--e-2) var(--e-3) var(--e-2) 0; border-top: 1px solid var(--borda); }
+.tabela-stf thead th { border-top: 0; font-size: var(--fs-1); font-weight: 600; color: var(--tinta-2); }
+.tabela-stf tbody th { font-weight: 600; }
+.tabela-stf .papel { display: block; font-size: var(--fs-1); font-weight: 400; color: var(--tinta-2); }
+.tabela-stf .numero { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 640px) {
+  .tabela-stf thead { display: none; }
+  .tabela-stf, .tabela-stf tbody, .tabela-stf tr, .tabela-stf th, .tabela-stf td { display: block; }
+  .tabela-stf tr { border-top: 1px solid var(--borda); padding: var(--e-2) 0; }
+  .tabela-stf th, .tabela-stf td { border: 0; padding: 1px 0; }
+  .tabela-stf tbody th { font-size: var(--fs-3); margin-bottom: 2px; }
+  .tabela-stf td { display: flex; justify-content: space-between; gap: var(--e-3); }
+  .tabela-stf td::before { content: attr(data-rotulo); color: var(--tinta-2); font-size: var(--fs-1); }
+  .tabela-stf .papel { display: inline; margin-left: 6px; }
+}
