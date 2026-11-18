@@ -66,16 +66,17 @@ jobs:
               rp = robots[base]
               return rp != "proibido" and rp.can_fetch(AGENTE, url)
 
-          def pegar(url, aceitar="*/*", mostrar=True):
+          def pegar(url, aceitar="*/*", mostrar=True, tempo=180):
               if not permitido(url):
                   print(f"\n### {url}\n  robots.txt não permite; pulado"); return None, None
-              st, cab, final, corpo, seg = baixar(url, aceitar)
+              st, cab, final, corpo, seg = baixar(url, aceitar, tempo=tempo)
               if mostrar:
                   print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes | {seg:.1f} s" + (f" | foi para {final}" if final != url else ""))
               if st != 200:
                   print("  ", corpo[:400]); return None, None
               tipo = cab.get("Content-Type", "").lower()
-              enc = "utf-8" if "utf-8" in tipo or b"\xc3" in corpo[:200000] else "latin-1"
+              m = re.search(r"charset=([\w-]+)", tipo)
+              enc = m.group(1) if m else ("utf-8" if b"\xc3" in corpo[:200000] else "latin-1")
               return corpo.decode(enc, "replace"), final
 
           def texto_da_pagina(html, limite=8000):
@@ -97,8 +98,8 @@ jobs:
                   for k, v in dado.items():
                       if isinstance(v, dict):
                           r, c = registros(v)
-                          if r is not None: return r, f"{k}.{c}"
-              return None, None
+                          if r: return r, f"{k}.{c}"
+              return [], None
 
           def mostrar_registros(texto, campos_soma=(), contar=()):
               dado = como_json(texto)
@@ -107,7 +108,7 @@ jobs:
               if isinstance(dado, dict):
                   print("  chaves de topo:", {k: (type(v).__name__, (len(v) if hasattr(v, '__len__') else v)) for k, v in list(dado.items())[:12]})
               regs, onde = registros(dado)
-              if regs is None:
+              if not regs:
                   print("  sem lista de registros; começo:", texto[:800]); return []
               print(f"  {len(regs)} registros (em {onde}); campos: {list(regs[0].keys())}")
               for r in regs[:2]: print("   exemplo:", json.dumps(r, ensure_ascii=False)[:900])
@@ -120,148 +121,139 @@ jobs:
 
           def titulo(t): print("\n" + "=" * 72 + "\n" + t + "\n" + "=" * 72)
 
+          def num(v):
+              try: return float(str(v or 0).replace(",", "."))
+              except ValueError: return 0.0
+
+          def somar_por(regs, chave, valor):
+              c = collections.defaultdict(float)
+              for r in regs: c[chave(r)] += num(r.get(valor))
+              return sorted(c.items(), key=lambda x: -x[1])
+
           # ------------------------------------------------------------------
-          titulo("TCE-PE: lista completa de entidades da API")
+          # Segunda rodada (18/11): a primeira mostrou que o TCE-PE tem a lista
+          # de unidades com a natureza "Câmara Municipal" e que o TCE-CE tem o
+          # balancete mensal da despesa por órgão e elemento. Agora: quantas
+          # câmaras, como ligar ao IBGE, subelemento do salário dos vereadores,
+          # consulta do estado inteiro pela função Legislativa (PE), e se o
+          # pago do balancete bate com as notas de pagamento e com o Tesouro (CE).
+          titulo("TCE-PE: câmaras na lista de unidades e ligação com o IBGE")
           PE = "https://sistemas.tce.pe.gov.br/DadosAbertos/"
-          html, final = pegar(PE + "Exemplo!listar")
-          entidades = {}
+          html, _ = pegar(PE + "UnidadesJurisdicionadas!json")
+          ujs = registros(como_json(html))[0] if html else []
+          print("  naturezas:", collections.Counter(r.get("NATUREZA") for r in ujs if (r.get("ESFERA") or "").strip() == "Municipal").most_common(30))
+          camaras = [r for r in ujs if (r.get("NATUREZA") or "").startswith("Câmara")]
+          print(f"  câmaras: {len(camaras)}; situações: {collections.Counter(r.get('SITUACAO') for r in camaras)}; poder: {collections.Counter(r.get('PODER') for r in camaras)}")
+          por_muni = collections.Counter(r.get("CODIGOMUNICIPIO") for r in camaras if r.get("SITUACAO") == "Ativa")
+          print("  municípios com mais de uma câmara ativa:", [(k, v) for k, v in por_muni.items() if v > 1])
+          for r in camaras[:3]: print("   ", json.dumps(r, ensure_ascii=False))
+          html, _ = pegar(PE + "Municipios!json?UNIDADEFEDERATIVA=PE")
+          mun = registros(como_json(html))[0] if html else []
+          print(f"  municípios de PE: {len(mun)}; exemplos: {mun[:3]}")
+          ibge = {r.get("CODIGO"): r.get("CODIGOIBGE") for r in mun}
+          sem = [r.get("MUNICIPIO") for r in camaras if r.get("SITUACAO") == "Ativa" and r.get("CODIGOMUNICIPIO") not in ibge]
+          print(f"  câmaras ativas sem código IBGE pela tabela de municípios: {len(sem)} {sem[:10]}")
+          sem_camara = [r.get("MUNICIPIO") for r in mun if r.get("CODIGO") not in por_muni]
+          print(f"  municípios de PE sem câmara ativa na lista: {len(sem_camara)} {sem_camara[:10]}")
+
+          titulo("TCE-PE: despesas de uma câmara grande e de uma pequena (2025)")
+          recife = [r for r in camaras if r.get("MUNICIPIO") == "Recife" and r.get("SITUACAO") == "Ativa"]
+          pequena = [r for r in camaras if r.get("MUNICIPIO") == "Abreu e Lima" and r.get("SITUACAO") == "Ativa"]
+          for r in (recife[:1] + pequena[:1]):
+              ug = r.get("ID_UNIDADE_GESTORA")
+              print(f"\n  >>> {r.get('ORGAO')} (unidade {ug}, município {r.get('CODIGOMUNICIPIO')})")
+              html, _ = pegar(PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA=2025", "application/json", tempo=300)
+              regs = registros(como_json(html))[0] if html else []
+              if not regs: continue
+              print(f"  {len(regs)} empenhos; empenhado {sum(num(x.get('VALOREMPENHADO')) for x in regs):,.2f}; liquidado {sum(num(x.get('VALORLIQUIDADO')) for x in regs):,.2f}; pago {sum(num(x.get('VALORPAGO')) for x in regs):,.2f}")
+              print("  pago por modalidade:", somar_por(regs, lambda x: x.get("MODALIDADE"), "VALORPAGO"))
+              print("  pago por função:", somar_por(regs, lambda x: x.get("FUNCAO"), "VALORPAGO"))
+              print("  pago por grupo (NATUREZA):", somar_por(regs, lambda x: x.get("NATUREZA"), "VALORPAGO"))
+              print("  pago por elemento e subelemento:")
+              for k, v in somar_por(regs, lambda x: (x.get("ELEMENTODESPESA"), x.get("SUBELEMENTODESPESA")), "VALORPAGO")[:40]:
+                  print(f"    {v:16,.2f}  {k}")
+              print("  pago por mês do empenho:", sorted(somar_por(regs, lambda x: int(x.get("MESREFERENCIA") or 0), "VALORPAGO")))
+              html, _ = pegar(PE + f"TransferenciasConcedidasMunicipais!json?ID_UG_BENEFICIADA={ug}&ANO_REFERENCIA=2025", "application/json")
+              tr = registros(como_json(html))[0] if html else []
+              if tr:
+                  print(f"  repasses recebidos em 2025: {len(tr)}; soma {sum(num(x.get('VALOR_MENSAL_CONCEDIDO')) for x in tr):,.2f}; tipos {collections.Counter(x.get('DESCRICAO_TIPO_TRANSFERENCIA') for x in tr)}; de {collections.Counter(x.get('NOME_UG_TRANSFERIDORA') for x in tr)}")
+          if pequena:
+              html, _ = pegar(PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={pequena[0].get('ID_UNIDADE_GESTORA')}&ANOREFERENCIA=2024", "application/json", tempo=300)
+              regs = registros(como_json(html))[0] if html else []
+              print(f"  2024, câmara pequena: {len(regs)} empenhos; pago {sum(num(x.get('VALORPAGO')) for x in regs):,.2f}")
+
+          titulo("TCE-PE: estado inteiro pela função Legislativa, um mês (2025, março)")
+          html, _ = pegar(PE + "DespesasMunicipais!json?FUNCAO=Legislativa&ANOREFERENCIA=2025&MESREFERENCIA=3", "application/json", tempo=300)
           if html:
-              for m in re.finditer(r'href="[^"]*dadosAbertos\.id=(\d+)"[^>]*>(.*?)</a>', html, re.S | re.I):
-                  nome = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
-                  entidades[nome] = int(m.group(1))
-              print(f"  {len(entidades)} entidades:")
-              for nome, i in sorted(entidades.items(), key=lambda x: x[1]): print(f"    {i:3d} {nome}")
-              print("  texto da página (para ver grupos e descrições):", texto_da_pagina(html, 6000))
-
-          titulo("TCE-PE: documentação das entidades que ligam unidade, Câmara e município")
-          interessa = [n for n in entidades if re.search(r"Unidade|Municip|Jurisdic|Orgao|Órg|Ente|Resumo|Limite|Transferencia|DespesasMunicipais|Liquidac|Pagamento", n, re.I)]
-          for nome in interessa:
-              html, _ = pegar(PE + f"Exemplo!detalhar?dadosAbertos.id={entidades[nome]}")
-              if html:
-                  t = texto_da_pagina(html, 9000)
-                  i = t.find("Entidade:")
-                  print("  ", t[i if i >= 0 else 0:][:5000])
-
-          titulo("TCE-PE: consultas reais")
-          html, _ = pegar(PE + "Municipios!json")
-          municipios_pe = mostrar_registros(html) if html else []
-          # Unidades jurisdicionadas: tenta as entidades cujo nome sugere a lista de unidades.
-          candidatas = [n for n in entidades if re.search(r"^Unidades?Jurisdicionadas?$|^UnidadeGestora|^UnidadesGestoras|^Entes?$|^Orgaos", n, re.I)]
-          print("\n  entidades candidatas para a lista de unidades:", candidatas)
-          camaras = []
-          for nome in candidatas[:3]:
-              html, _ = pegar(PE + f"{nome}!json")
-              regs = mostrar_registros(html) if html else []
-              for r in regs:
-                  linha = " ".join(str(v) for v in r.values())
-                  if re.search(r"C[AÂ]MARA", linha, re.I): camaras.append((nome, r))
-              if regs:
-                  print(f"  registros com 'Câmara' em {nome}: {sum(1 for n, _ in camaras if n == nome)}")
-                  for _, r in [c for c in camaras if c[0] == nome][:6]: print("   câmara:", json.dumps(r, ensure_ascii=False)[:500])
-          # Subunidades com "Câmara" no nome, como plano B.
-          html, _ = pegar(PE + "SubunidadesUnidadesJurisdicionadas!json?NomeSubunidade=" + urllib.parse.quote("CÂMARA MUNICIPAL DO RECIFE"))
-          if html: mostrar_registros(html)
-          html, _ = pegar(PE + "SubunidadesUnidadesJurisdicionadas!json")
-          subs = mostrar_registros(html) if html else []
-          sub_camaras = [r for r in subs if re.search(r"C[AÂ]MARA", str(r.get("NomeSubunidade", "")), re.I)]
-          print(f"  subunidades com 'Câmara' no nome: {len(sub_camaras)}")
-          for r in sub_camaras[:8]: print("   ", json.dumps(r, ensure_ascii=False)[:300])
-
-          # Unidade gestora da Câmara do Recife e de uma Câmara pequena.
-          ugs = []
-          for _, r in camaras:
-              ug = r.get("ID_UNIDADE_GESTORA") or r.get("IdUnidadeGestora") or r.get("CODIGO")
-              ugs.append((ug, json.dumps(r, ensure_ascii=False)[:160]))
-          for r in sub_camaras:
-              ugs.append((r.get("ID_UNIDADE_GESTORA"), r.get("NomeSubunidade")))
-          recife = [u for u in ugs if u[0] and re.search(r"RECIFE", str(u[1]), re.I)]
-          outras = [u for u in ugs if u[0] and not re.search(r"RECIFE", str(u[1]), re.I)]
-          escolhidas = (recife[:1] + outras[:1]) or ugs[:2]
-          print("\n  Câmaras escolhidas para consultar despesas:", escolhidas)
-          for ug, rot in escolhidas:
-              for ano in (2025,):
-                  url = PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA={ano}"
-                  html, _ = pegar(url, "application/json")
-                  if html:
-                      regs = mostrar_registros(html, ("VALOREMPENHADO", "VALORLIQUIDADO", "VALORPAGO"), ("MESREFERENCIA", "ELEMENTODESPESA", "MODALIDADE", "UNIDADEORCAMENTARIA"))
-                      if regs:
-                          print("   todos os campos do primeiro registro:", json.dumps(regs[0], ensure_ascii=False)[:2500])
-                  url = PE + f"EmpenhoPagamento!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA={ano}"
-                  html, _ = pegar(url, "application/json")
-                  if html: mostrar_registros(html, ("VALOR",), ("TIPO",))
-              url = PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA=2025&MESREFERENCIA=3"
-              html, _ = pegar(url, "application/json")
-              if html: mostrar_registros(html, ("VALORPAGO",))
-          for nome in ("TransferenciasConcedidasMunicipais", "DadosLimiteGastos", "EmpenhoResumo"):
-              if nome in entidades and recife:
-                  html, _ = pegar(PE + f"{nome}!json?ID_UNIDADE_GESTORA={recife[0][0]}&ANOREFERENCIA=2025", "application/json")
-                  if html: mostrar_registros(html)
+              d = como_json(html)
+              print("  cabeçalho:", {k: v for k, v in (d or {}).get("resposta", {}).items() if k != "conteudo"})
+              regs = registros(d)[0] or []
+              ugs = collections.Counter(r.get("ID_UNIDADE_GESTORA") for r in regs)
+              nat = {r.get("ID_UNIDADE_GESTORA"): r.get("NATUREZA") for r in ujs}
+              print(f"  {len(regs)} empenhos de {len(ugs)} unidades; natureza das unidades: {collections.Counter(nat.get(u) for u in ugs)}")
+              print(f"  pago: {sum(num(r.get('VALORPAGO')) for r in regs):,.2f}")
 
           # ------------------------------------------------------------------
-          titulo("TCE-CE: lista de métodos da API antiga")
-          CE = "https://api.tce.ce.gov.br/index.php/"
-          docs = {}
-          for url in ("https://api.tce.ce.gov.br/", CE + "metodos", CE + "doc"):
-              html, final = pegar(url)
-              if not html: continue
-              for m in re.finditer(r'href="([^"]*doc/(\d+)/([a-z_0-9]+))"', html, re.I):
-                  docs[m.group(3)] = urllib.parse.urljoin(final, m.group(1))
-              if docs: break
-              print("  texto:", texto_da_pagina(html, 2500))
-          print(f"  {len(docs)} métodos:", sorted(docs))
-          for nome in sorted(docs):
-              if re.search(r"balancete|liquidac|pagamento|orgao|municipio|despesa|empenho|unidade", nome, re.I) and nome not in ("notas_empenhos", "notas_pagamentos", "despesa_elemento_projeto", "orgaos", "unidades_gestoras"):
-                  html, _ = pegar(docs[nome])
-                  if html:
-                      t = texto_da_pagina(html, 9000); i = t.find("Método:")
-                      print("  ", t[i if i >= 0 else 0:][:4000])
-
-          titulo("TCE-CE: consultas reais")
-          SIM = CE + "sim/1_0/"
-          html, _ = pegar(SIM + "municipios.json", "application/json")
-          muni = mostrar_registros(html) if html else []
-          codigos = {}
-          for r in muni:
-              nome = str(r.get("nome_municipio", "")).upper()
-              codigos[nome] = r.get("codigo_municipio")
-          alvo = [(n, c) for n, c in codigos.items() if n.startswith("FORTALEZA")][:1] + [(n, c) for n, c in codigos.items() if n.startswith("ACARA")][:1]
-          if not alvo and muni: alvo = [(str(muni[0]), muni[0].get("codigo_municipio"))]
-          print("  municípios escolhidos:", alvo)
-          for nome, cod in alvo:
-              html, _ = pegar(SIM + f"orgaos.json?codigo_municipio={cod}&exercicio_orcamento=202500", "application/json")
-              orgaos = mostrar_registros(html, contar=("codigo_tipo_unidade",)) if html else []
-              for o in orgaos: print("   órgão:", o.get("codigo_orgao"), o.get("codigo_tipo_unidade"), o.get("nome_orgao"))
-              cam = [o for o in orgaos if re.search(r"C[AÂ]MARA|LEGISLAT", str(o.get("nome_orgao", "")), re.I)]
-              if not cam: continue
-              org = cam[0].get("codigo_orgao")
-              if "balancete_despesa_orcamentaria" in docs:
-                  for q in (f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}",
-                            f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}&data_referencia=202512"):
-                      html, _ = pegar(SIM + "balancete_despesa_orcamentaria.json?" + q, "application/json")
-                      if html: mostrar_registros(html, contar=("codigo_elemento_despesa", "data_referencia"))
-              html, _ = pegar(SIM + f"notas_pagamentos.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}", "application/json")
-              if html: mostrar_registros(html, ("valor_nota_pagamento",), ("data_referencia", "estado_de_estornado"))
-              html, _ = pegar(SIM + f"notas_empenhos.json?codigo_municipio={cod}&codigo_orgao={org}&data_referencia_empenho=202503", "application/json")
-              if html: mostrar_registros(html, ("valor_empenhado",), ("codigo_elemento_despesa",))
-              if "liquidacoes" in docs:
-                  html, _ = pegar(SIM + f"liquidacoes.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}", "application/json")
-                  if html: mostrar_registros(html, contar=("data_referencia",))
-
-          titulo("TCE-CE: API nova (api-dados-abertos.tce.ce.gov.br)")
-          html, final = pegar("https://api-dados-abertos.tce.ce.gov.br/sim")
+          titulo("TCE-CE: API nova, especificação")
+          CEN = "https://api-dados-abertos.tce.ce.gov.br/sim/"
+          html, _ = pegar(CEN + "swagger-initializer.js")
           if html:
-              print("  scripts:", re.findall(r'<script[^>]+src="([^"]+)"', html, re.I)[:10])
-              print("  urls no html:", sorted(set(re.findall(r'(?:url|href|src)\s*[:=]\s*["\']([^"\']+)["\']', html, re.I)))[:30])
-              print("  começo do html:", html[:1500])
-          for caminho in ("/sim/openapi.json", "/sim/swagger.json", "/sim/v3/api-docs", "/sim/api-docs", "/openapi.json"):
-              html, _ = pegar("https://api-dados-abertos.tce.ce.gov.br" + caminho, "application/json")
-              if html:
-                  d = como_json(html)
+              print("  ", html[:1500])
+              for u in re.findall(r'url\s*:\s*["\']([^"\']+)["\']', html):
+                  spec, _ = pegar(urllib.parse.urljoin(CEN, u), "application/json", tempo=240)
+                  d = como_json(spec) if spec else None
                   if isinstance(d, dict):
+                      print("  servidores:", d.get("servers") or d.get("host"), d.get("basePath"))
                       caminhos = d.get("paths") or {}
-                      print(f"  {len(caminhos)} caminhos:", list(caminhos)[:80])
-                      break
-                  print("  começo:", html[:500])
+                      print(f"  {len(caminhos)} caminhos:")
+                      for c, ops in caminhos.items():
+                          params = [x.get("name") for op in ops.values() if isinstance(op, dict) for x in op.get("parameters", []) if isinstance(x, dict)]
+                          print(f"    {c} {params[:20]}")
+                  elif spec:
+                      print("  começo:", spec[:800])
+
+          titulo("TCE-CE: balancete da câmara contra notas de pagamento e Tesouro")
+          CE = "https://api.tce.ce.gov.br/index.php/sim/1_0/"
+          html, _ = pegar(CE + "tipos_unidades_administrativas.json", "application/json")
+          if html: mostrar_registros(html)
+          for cod, nome in (("057", "Fortaleza"), ("003", "Acarape")):
+              for ano, ref in ((2025, "202512"), (2024, "202412")):
+                  html, _ = pegar(CE + f"balancete_despesa_orcamentaria.json?codigo_municipio={cod}&exercicio_orcamento={ano}00&codigo_orgao=01&data_referencia={ref}", "application/json")
+                  regs = registros(como_json(html))[0] if html else []
+                  if not regs: continue
+                  campos = ("valor_empenhado_ate_mes", "valor_anulacoes_empenhos_ate_mes", "valor_liquidado_ate_mes", "valor_estornos_liquidacao_ate_mes", "valor_pago_ate_mes", "valor_estornos_pagos_ate_mes")
+                  print(f"  {nome} {ano}: {len(regs)} linhas; tipos de balancete {collections.Counter(r.get('tipo_balancete') for r in regs)}")
+                  for c in campos: print(f"    {c}: {sum(num(r.get(c)) for r in regs):,.2f}")
+                  print("    pago por elemento:", [(k, round(v)) for k, v in somar_por(regs, lambda x: x.get("codigo_elemento_despesa"), "valor_pago_ate_mes")])
+                  intra = sum(num(r.get("valor_pago_ate_mes")) for r in regs if str(r.get("codigo_elemento_despesa", ""))[2:4] == "91")
+                  print(f"    pago intra-orçamentário (modalidade 91): {intra:,.2f}")
+                  if ano == 2025:
+                      html, _ = pegar(CE + f"notas_pagamentos.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao=01", "application/json")
+                      np_ = registros(como_json(html))[0] if html else []
+                      ok = [r for r in np_ if str(r.get("estado_de_estornado")) != "1"]
+                      no_ano = [r for r in ok if str(r.get("data_referencia", "")).startswith("2025")]
+                      print(f"    notas de pagamento não estornadas: {sum(num(r.get('valor_nota_pagamento')) for r in ok):,.2f}; só as de 2025: {sum(num(r.get('valor_nota_pagamento')) for r in no_ano):,.2f}")
+          # Último mês disponível de 2026 e balancete sem filtro de órgão.
+          for ref in ("202610", "202609", "202608"):
+              html, _ = pegar(CE + f"balancete_despesa_orcamentaria.json?codigo_municipio=003&exercicio_orcamento=202600&codigo_orgao=01&data_referencia={ref}", "application/json")
+              if html:
+                  regs = registros(como_json(html))[0] or []
+                  print(f"  Acarape 2026 até {ref}: {len(regs)} linhas; pago {sum(num(r.get('valor_pago_ate_mes')) for r in regs):,.2f}")
+                  break
+          html, _ = pegar(CE + "balancete_despesa_orcamentaria.json?codigo_municipio=003&exercicio_orcamento=202500&data_referencia=202512", "application/json")
+          if html:
+              regs = registros(como_json(html))[0] or []
+              print(f"  Acarape 2025 sem filtro de órgão: {len(regs)} linhas; órgãos {collections.Counter(r.get('codigo_orgao') for r in regs)}")
+
+          titulo("TCE-CE: código da câmara em uma amostra de municípios")
+          html, _ = pegar(CE + "municipios.json", "application/json")
+          muni = registros(como_json(html))[0] if html else []
+          amostra = muni[::18][:11]
+          for r in amostra:
+              html, _ = pegar(CE + f"orgaos.json?codigo_municipio={r.get('codigo_municipio')}&exercicio_orcamento=202500", "application/json", mostrar=False)
+              org = registros(como_json(html))[0] if html else []
+              cam = [(o.get("codigo_orgao"), o.get("codigo_tipo_unidade"), o.get("nome_orgao")) for o in (org or []) if o.get("codigo_tipo_unidade") == "02" or re.search(r"C[AÂ]MARA|LEGISLAT", str(o.get("nome_orgao", "")), re.I)]
+              print(f"  {r.get('nome_municipio')} ({r.get('geoibgeId')}): {len(org or [])} órgãos; câmara: {cam}")
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
