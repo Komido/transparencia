@@ -1,0 +1,50 @@
+name: Quanto custa o STF (Tesouro Nacional)
+
+# Baixa as planilhas anuais "Despesas e Transferências Totais da União
+# (critério valor pago)" do Tesouro Transparente, soma os pagamentos do
+# Supremo Tribunal Federal por tipo de despesa e confere a despesa com
+# pessoal com o Relatório de Gestão Fiscal do STF no SICONFI
+# (scripts/stf_para_json.py). Grava site/dados/stf.json. Só refaz a conta
+# quando alguma planilha muda. Uma vez por mês, disparada pelo agendador do
+# banco (pg_cron, etl.disparar_github); ver
+# supabase/migrations/20261118010000_disparo_stf.sql.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stf
+  cancel-in-progress: false
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Somar os gastos do STF
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/stf_para_json.py
+
+      - name: Gravar se mudou
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- site/dados/stf.json \
+             && [ -z "$(git ls-files --others --exclude-standard site/dados/stf.json)" ]; then
+            echo "Nada mudou."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/dados/stf.json
+          git commit -q -m "Atualiza gastos do STF"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
