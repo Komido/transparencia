@@ -21,7 +21,7 @@ jobs:
       # Tesouro (SICONFI). Confere em uma amostra variada se o anexo vem nos
       # dois tipos de relatório e se a base de cálculo implícita bate com o
       # Anexo 3. Só leitura, respeitando o robots.txt e o Crawl-Delay.
-      - name: SIOPE (API do FNDE) e SIOPS (downloads), mínimos das prefeituras
+      - name: SIOPS no TabNet do DATASUS, indicadores dos municípios
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -89,33 +89,43 @@ jobs:
           # DADOS_ABERTOS_SIOPE, recurso Indicadores_Siope) e SIOPS pelos
           # downloads do Fundo Nacional de Saúde e do gov.br: o que existe, em
           # que formato, e se traz o percentual de cada prefeitura.
-          B = "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/"
-          for url in (B + "?$format=json", B + "$metadata?$format=xml",
-                      B + "Indicadores_Siope?$top=5&$format=json",
-                      "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/aplicacao#!/recursos"):
+          # SIOPS no sistema de tabulação do DATASUS (TabNet): a página das
+          # séries históricas de indicadores dos municípios, os formulários
+          # (.def) que ela usa e as opções de linha, coluna, conteúdo e ano.
+          def pagina(url, limite=2_000_000):
               if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite"); continue
-              st, cab, final, corpo = baixar(url, limite=400_000)
-              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              print("  ", corpo.decode("utf-8", "replace")[:2500])
+                  print(f"\n### {url}\n  robots.txt não permite"); return None, None
+              st, cab, final, corpo = baixar(url, limite=limite)
+              tipo = cab.get("Content-Type", "")
+              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
+              enc = "utf-8" if "utf-8" in tipo.lower() else "latin-1"
+              return corpo.decode(enc, "replace"), final
 
-          def links(url, padrao):
-              if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite"); return
-              st, cab, final, corpo = baixar(url, limite=3_000_000)
-              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              texto = corpo.decode("utf-8", "replace")
-              achados = []
-              for m in re.finditer(r'href="([^"]+)"[^>]*>(.*?)</a>', texto, re.S):
+          texto, final = pagina("http://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM")
+          defs = []
+          if texto:
+              for m in re.finditer(r'(?:href|action)="([^"]+)"[^>]*>(.*?)</', texto, re.S | re.I):
                   href, rotulo = m.group(1), re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
-                  if re.search(padrao, href + " " + rotulo, re.I):
-                      achados.append((rotulo[:140], urllib.parse.urljoin(final, href)))
-              for r in achados[:60]: print("   ", r)
-              print(f"   ({len(achados)} links)")
-              return achados
+                  url = urllib.parse.urljoin(final, href)
+                  print("   ", rotulo[:120], "|", url)
+                  if ".def" in url.lower(): defs.append(url)
+          for url in defs[:3]:
+              texto, final = pagina(url)
+              if not texto: continue
+              acao = re.search(r'<form[^>]*action="([^"]+)"', texto, re.I)
+              print("   form action:", acao and urllib.parse.urljoin(final, acao.group(1)))
+              for sel in re.finditer(r'<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', texto, re.S | re.I):
+                  opcoes = re.findall(r'<option[^>]*value="([^"]*)"[^>]*>([^<]*)', sel.group(2), re.I)
+                  print(f"   select {sel.group(1)}: {len(opcoes)} opções; primeiras: {[(v, r.strip()) for v, r in opcoes[:25]]}")
+              for inp in re.finditer(r'<input[^>]*>', texto, re.I):
+                  print("   ", inp.group(0)[:160])
 
-          achados = links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops/indicadores", r"csv|zip|xls|ods|indicador|munic|download|\.pdf")
-          # Começo dos dois primeiros arquivos de planilha que aparecerem.
-          for rotulo, url in [a for a in (achados or []) if re.search(r"\.(csv|zip|xlsx?|ods)", a[1], re.I)][:2]:
-              print("\n  arquivo:", rotulo); espiar(url)
+          # Relatório antigo de indicadores por município (PHP).
+          texto, final = pagina("http://siops.datasus.gov.br/relindicadoresmun2.php?escmun=3")
+          if texto:
+              for sel in re.finditer(r'<select[^>]*name="([^"]+)"[^>]*>(.*?)</select>', texto, re.S | re.I):
+                  opcoes = re.findall(r'<option[^>]*value="([^"]*)"[^>]*>([^<]*)', sel.group(2), re.I)
+                  print(f"   select {sel.group(1)}: {len(opcoes)} opções; primeiras: {[(v, r.strip()) for v, r in opcoes[:15]]}")
+              acao = re.search(r'<form[^>]*action="([^"]+)"', texto, re.I)
+              print("   form action:", acao and acao.group(1))
           PY
