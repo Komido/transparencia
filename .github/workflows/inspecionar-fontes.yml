@@ -89,14 +89,15 @@ jobs:
           # DADOS_ABERTOS_SIOPE, recurso Indicadores_Siope) e SIOPS pelos
           # downloads do Fundo Nacional de Saúde e do gov.br: o que existe, em
           # que formato, e se traz o percentual de cada prefeitura.
-          for url in ("https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/",
-                      "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/$metadata",
-                      "https://www.fnde.gov.br/olinda-ide/servico"):
+          B = "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/odata/"
+          for url in (B + "?$format=json", B + "$metadata?$format=xml",
+                      B + "Indicadores_Siope?$top=5&$format=json",
+                      "https://www.fnde.gov.br/olinda-ide/servico/DADOS_ABERTOS_SIOPE/versao/v1/aplicacao#!/recursos"):
               if not permitido(url):
                   print(f"\n### {url}\n  robots.txt não permite"); continue
               st, cab, final, corpo = baixar(url, limite=400_000)
               print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              print("  ", corpo.decode("utf-8", "replace")[:3000])
+              print("  ", corpo.decode("utf-8", "replace")[:2500])
 
           def links(url, padrao):
               if not permitido(url):
@@ -108,11 +109,13 @@ jobs:
               for m in re.finditer(r'href="([^"]+)"[^>]*>(.*?)</a>', texto, re.S):
                   href, rotulo = m.group(1), re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
                   if re.search(padrao, href + " " + rotulo, re.I):
-                      achados.append((rotulo[:120], urllib.parse.urljoin(final, href)))
+                      achados.append((rotulo[:140], urllib.parse.urljoin(final, href)))
               for r in achados[:60]: print("   ", r)
               print(f"   ({len(achados)} links)")
+              return achados
 
-          links("https://portalfns.saude.gov.br/siops/siops-downloads/", r"siops|csv|zip|indicador|munic")
-          links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops/demonstrativos-e-dados-informados/demonstrativos/municipios", r"csv|zip|xls|indicador|download|dados")
-          links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops", r"csv|zip|xls|indicador|download|dados abertos")
+          achados = links("https://www.gov.br/saude/pt-br/acesso-a-informacao/siops/indicadores", r"csv|zip|xls|ods|indicador|munic|download|\.pdf")
+          # Começo dos dois primeiros arquivos de planilha que aparecerem.
+          for rotulo, url in [a for a in (achados or []) if re.search(r"\.(csv|zip|xlsx?|ods)", a[1], re.I)][:2]:
+              print("\n  arquivo:", rotulo); espiar(url)
           PY
