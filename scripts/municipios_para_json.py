@@ -42,6 +42,21 @@ Paulo (RREO) e Monte Carmelo (RREO Simplificado), 2025: a soma das funções
 bate com a linha "DESPESAS (EXCETO INTRA-ORÇAMENTÁRIAS) (I)". O Anexo 2 é
 pedido com o mesmo tipo de relatório em que veio o Anexo 3.
 
+Mínimos da Constituição: Anexo 14 do mesmo relatório ("Demonstrativo
+Simplificado do RREO"), com o que a prefeitura declarou ter aplicado no ano
+em educação (manutenção e desenvolvimento do ensino, mínimo de 25% da receita
+de impostos e repasses constitucionais), no salário dos profissionais da
+educação básica (mínimo de 70% do FUNDEB) e em saúde (mínimo de 15%), com o
+valor apurado e o mínimo de cada um. Conferido em 18/11/2026 numa amostra de
+18 cidades, 2024 e 2025: cerca de 80% trazem as linhas; a base implícita
+(valor ÷ percentual) bate com impostos e repasses do Anexo 3 (educação, até
+0,6%), com eles sem as parcelas extras de 1% do FPM (saúde, que a LC 141/2012
+não conta; até 2% em 19 de 21) e com o FUNDEB recebido (até 2,6%). Para não
+pedir 11 mil anexos todo mês, o Anexo 14 só é pedido de novo quando o Anexo 3
+da prefeitura mudou (outro SHA-256), quando ainda não há dado bom ou nos
+meses de RECOLETA_MINIMOS, em que todos são pedidos de novo. Situação ("ms"):
+ok, sem_linhas (anexo sem essas linhas), sem_anexo e erro.
+
 Situação das despesas ("ds"): ok, nao_fecha (soma das funções diferente do
 total), formato (sem a coluna ou sem o total), sem_anexo (o Anexo 3 veio e o
 2 não) e erro.
@@ -83,6 +98,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import statistics
 import sys
 import time
@@ -257,6 +273,66 @@ def url_rreo(ano, cod, tipo="completo", anexo="RREO-Anexo 03"):
     return f"{API}/rreo?{q}"
 
 
+# Anexo 14: linhas reconhecidas pelo nome (a "conta"), colunas pelo título.
+MINIMOS = (
+    ("educacao", re.compile(r"Manuten[çc][ãa]o e Desenvolvimento do Ensino", re.I)),
+    ("fundeb", re.compile(r"70\s*% do FUNDEB", re.I)),
+    ("saude", re.compile(r"Servi[çc]os P[úu]blicos de Sa[úu]de", re.I)),
+)
+COLUNAS_MINIMO = (
+    ("minimo", re.compile(r"M[íi]nimo a Aplicar", re.I)),
+    ("aplicado", re.compile(r"% Aplicado", re.I)),
+    ("valor", re.compile(r"^Valor Apurado", re.I)),
+)
+RECOLETA_MINIMOS = {3, 6, 9, 12}  # meses em que o Anexo 14 de todas é pedido de novo
+
+
+def resumir_minimos(itens):
+    """{"ms": situação, "min": {chave: [percentual aplicado, valor apurado,
+    percentual mínimo]}} a partir das linhas do Anexo 14."""
+    if not itens:
+        return {"ms": "sem_anexo"}
+    saida = {}
+    for chave, padrao in MINIMOS:
+        valores = {}
+        for i in itens:
+            if not padrao.search(i.get("conta") or "") or i.get("valor") is None:
+                continue
+            coluna = i.get("coluna") or ""
+            nome = next((n for n, c in COLUNAS_MINIMO if c.search(coluna)), None)
+            if nome and nome not in valores:
+                valores[nome] = float(i["valor"])
+        if "aplicado" in valores:
+            saida[chave] = [round(valores["aplicado"], 2),
+                            None if valores.get("valor") is None else round(valores["valor"], 2),
+                            valores.get("minimo")]
+    return {"ms": "ok", "min": saida} if saida else {"ms": "sem_linhas"}
+
+
+def buscar_minimos(ano, cod, tipo):
+    """Resumo do Anexo 14, ou {"ms": "erro"} se o pedido falhar."""
+    resposta = pedir(url_rreo(ano, cod, tipo, "RREO-Anexo 14"))
+    if resposta is None:
+        return {"ms": "erro"}
+    dados, sha = resposta
+    resumo = resumir_minimos(dados.get("items") or [])
+    resumo["msha256"] = sha
+    return resumo
+
+
+def manter_ou_buscar_minimos(resumo, antes_ano, ano, cod, recoletar):
+    """Reaproveita o Anexo 14 anterior quando o Anexo 3 não mudou (mesmo
+    SHA-256) e o pedido anterior deu certo; senão, e nos meses de recoleta,
+    pede de novo."""
+    mesmo = antes_ano.get("sha256") == resumo.get("sha256")
+    if mesmo and not recoletar and antes_ano.get("ms") in ("ok", "sem_linhas", "sem_anexo"):
+        for k in ("ms", "min", "msha256"):
+            if k in antes_ano:
+                resumo[k] = antes_ano[k]
+        return
+    resumo.update(buscar_minimos(ano, cod, resumo["tipo"]))
+
+
 def resumir_despesas(itens):
     """Despesa liquidada do ano por função e a situação ("ds")."""
     if not itens:
@@ -367,7 +443,7 @@ def gravar_json(caminho, dados, indentar=False):
     os.replace(temporario, caminho)
 
 
-def buscar_uf(uf, anos, so_despesas=False):
+def buscar_uf(uf, anos, so_despesas=False, so_minimos=False):
     municipios = {c: m for c, m in lista_de_entes().items() if m["uf"] == uf}
     if not municipios:
         falhar(f"nenhum município na lista de entes para {uf}")
@@ -376,6 +452,7 @@ def buscar_uf(uf, anos, so_despesas=False):
     saida = {"uf": uf, "atualizado": dt.date.today().isoformat(), "municipios": {}}
     erros = 0
     total = 0
+    recoletar = so_minimos or dt.date.today().month in RECOLETA_MINIMOS
     for n, (cod, m) in enumerate(sorted(municipios.items()), start=1):
         antes = anterior["municipios"].get(str(cod), {})
         registro = {"nome": m["nome"], "pop": m["pop"], "anos": dict(antes.get("anos", {}))}
@@ -384,6 +461,13 @@ def buscar_uf(uf, anos, so_despesas=False):
                 registro["anos"][str(ano)] = {"s": "df"}
                 continue
             total += 1
+            if so_minimos:
+                reg = registro["anos"].get(str(ano))
+                if reg and reg.get("tipo") in TIPOS:
+                    for k in ("ms", "min", "msha256"):
+                        reg.pop(k, None)
+                    reg.update(buscar_minimos(ano, cod, reg["tipo"]))
+                continue
             if so_despesas:
                 reg = registro["anos"].get(str(ano))
                 if reg and reg.get("tipo") in TIPOS:
@@ -393,7 +477,8 @@ def buscar_uf(uf, anos, so_despesas=False):
                     if reg["ds"] == "erro":
                         erros += 1
                 continue
-            ordem = ordem_dos_tipos(registro["anos"].get(str(ano), {}).get("tipo"), m["pop"])
+            antes_ano = registro["anos"].get(str(ano)) or {}
+            ordem = ordem_dos_tipos(antes_ano.get("tipo"), m["pop"])
             resumo = buscar_relatorio(ano, cod, ordem)
             if resumo is None:
                 erros += 1
@@ -406,6 +491,7 @@ def buscar_uf(uf, anos, so_despesas=False):
                 continue
             if resumo.get("tipo") in TIPOS:
                 resumo.update(buscar_despesas(ano, cod, resumo["tipo"]))
+                manter_ou_buscar_minimos(resumo, antes_ano, ano, cod, recoletar)
             registro["anos"][str(ano)] = resumo
         saida["municipios"][str(cod)] = registro
         if n % 25 == 0 or n == len(municipios):
@@ -427,6 +513,14 @@ def buscar_uf(uf, anos, so_despesas=False):
                 despesas[(ano, ds)] = despesas.get((ano, ds), 0) + 1
     for (ano, ds), q in sorted(despesas.items()):
         print(f"{uf} {ano} despesas: {q} {ds}")
+    minimos = {}
+    for r in saida["municipios"].values():
+        for ano in anos:
+            ms = r["anos"].get(str(ano), {}).get("ms")
+            if ms:
+                minimos[(ano, ms)] = minimos.get((ano, ms), 0) + 1
+    for (ano, ms), q in sorted(minimos.items()):
+        print(f"{uf} {ano} mínimos (Anexo 14): {q} {ms}")
     gravar_json(caminho, saida, indentar=True)
 
 
@@ -459,6 +553,65 @@ def indicadores_despesa(reg_ano, pop):
             "educacao_hab": f.get("Educação", 0.0) / pop, "camara_hab": f.get("Legislativa", 0.0) / pop}
 
 
+# Parte do FPM que são as parcelas extras de 1% (CF, art. 159, I, d, e, f):
+# entram na base da educação, mas não na da saúde (LC 141/2012, art. 7º, só
+# a alínea b). Total repassado: 22,5% + extras; a de setembro (EC 112/2021)
+# foi de 0,25 ponto em 2022 e 2023, 0,5 em 2024 e 1 a partir de 2025.
+def fpm_extra(ano):
+    setembro = 0.0 if ano < 2022 else 0.25 if ano < 2024 else 0.5 if ano == 2024 else 1.0
+    extras = (1.0 if ano >= 2008 else 0.0) + (1.0 if ano >= 2015 else 0.0) + setembro
+    return extras / (22.5 + extras)
+
+
+def bases_do_anexo3(v, ano):
+    """Bases de comparação a partir do Anexo 3: impostos da cidade e cotas
+    constitucionais (educação), o mesmo sem as parcelas extras do FPM
+    (saúde) e o FUNDEB recebido."""
+    base = sum(v[c] for c in ("iptu", "iss", "itbi", "irrf", "fpm", "icms", "ipva", "itr"))
+    return {"educacao": base, "saude": base - v["fpm"] * fpm_extra(int(ano)), "fundeb": v["fundeb"]}
+
+
+def minimos_do_site(reg):
+    """[[percentual, base declarada, mínimo] ou None] na ordem de MINIMOS."""
+    saida = []
+    for chave, _ in MINIMOS:
+        x = (reg.get("min") or {}).get(chave)
+        if not x or x[0] is None or x[0] <= 0:
+            saida.append(None)
+            continue
+        pct, valor, minimo = x
+        base = round(valor * 100 / pct) if valor else None
+        saida.append([pct, base, minimo])
+    return saida
+
+
+def conferir_minimos(por_uf, anos):
+    """Mediana da diferença entre a base declarada no Anexo 14 e a do Anexo 3.
+    Se passar de 2% num ano com muitas cidades, a atualização para."""
+    for ano in anos:
+        difs = {chave: [] for chave, _ in MINIMOS}
+        for d in por_uf.values():
+            for r in d["municipios"].values():
+                reg = r["anos"].get(str(ano)) or {}
+                if reg.get("s") != "ok" or reg.get("ms") != "ok" or "v" not in reg:
+                    continue
+                bases = bases_do_anexo3(reg["v"], ano)
+                for (chave, _), x in zip(MINIMOS, minimos_do_site(reg)):
+                    if x and x[1] and bases[chave] > 0:
+                        difs[chave].append(abs(x[1] / bases[chave] - 1))
+        for chave, xs in difs.items():
+            if len(xs) < 300:
+                print(f"  {ano} {chave}: só {len(xs)} cidades com as duas bases; conferência pulada")
+                continue
+            med = statistics.median(xs)
+            ate2 = sum(1 for x in xs if x <= 0.02) / len(xs)
+            ate5 = sum(1 for x in xs if x <= 0.05) / len(xs)
+            print(f"  {ano} {chave}: base do Anexo 14 contra o Anexo 3, mediana {med:.2%}; "
+                  f"{ate2:.0%} até 2%, {ate5:.0%} até 5%, em {len(xs)} cidades")
+            if med > 0.02:
+                falhar(f"{ano}: a base de {chave} do Anexo 14 não bate com o Anexo 3 (mediana {med:.2%})")
+
+
 def mediana(valores):
     return round(statistics.median(valores), 2) if valores else None
 
@@ -487,8 +640,9 @@ def montar():
                 for k, x in ind.items():
                     nacional.setdefault((ano, f, k), []).append(x)
                     estadual.setdefault((uf, ano, k), []).append(x)
+    conferir_minimos(por_uf, anos)
     indice = {"atualizado": dt.date.today().isoformat(), "anos": anos, "campos": CAMPOS_SITE,
-              "campos_despesa": CAMPOS_DESPESA,
+              "campos_despesa": CAMPOS_DESPESA, "minimos": [chave for chave, _ in MINIMOS],
               "faixas": [{"ate": teto, "rotulo": rotulo} for teto, rotulo in FAIXAS],
               "medianas": {}, "cidades": []}
     for (ano, f, k), xs in nacional.items():
@@ -531,6 +685,10 @@ def montar():
                     registro["d"] = [round(x) for x in grupos_de_despesa(reg["funcoes"])]
                 if reg.get("dmotivo"):
                     registro["dm"] = reg["dmotivo"]
+                if reg.get("ms"):
+                    registro["ms"] = reg["ms"]
+                if reg.get("ms") == "ok":
+                    registro["mi"] = minimos_do_site(reg)
                 item["a"][ano] = registro
             site["municipios"].append(item)
             indice["cidades"].append([int(cod), r["nome"], uf, r["pop"]])
@@ -546,6 +704,7 @@ def main():
     p.add_argument("--anos", help="anos separados por vírgula; padrão: os dois últimos com relatório vencido")
     p.add_argument("--montar", action="store_true")
     p.add_argument("--so-despesas", action="store_true", help="só o Anexo 2, para quem já tem o Anexo 3")
+    p.add_argument("--so-minimos", action="store_true", help="só o Anexo 14, para quem já tem o Anexo 3")
     a = p.parse_args()
     if a.montar:
         montar()
@@ -556,7 +715,7 @@ def main():
     if any(not 2015 <= x <= dt.date.today().year for x in anos):
         falhar(f"anos fora do intervalo: {anos}")
     print(f"{a.uf}: anos {anos}", flush=True)
-    buscar_uf(a.uf, anos, so_despesas=a.so_despesas)
+    buscar_uf(a.uf, anos, so_despesas=a.so_despesas, so_minimos=a.so_minimos)
 
 
 if __name__ == "__main__":

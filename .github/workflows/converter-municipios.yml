@@ -3,7 +3,9 @@ name: Resumir as contas das prefeituras (Tesouro, SICONFI)
 # O Tesouro Nacional publica o Relatório Resumido da Execução Orçamentária de
 # cada prefeitura na API do SICONFI, uma prefeitura por pedido. Esta tarefa
 # pede o Anexo 3 (de onde vem a receita: impostos da cidade e repasses) e o
-# Anexo 2 (despesa por área) do ano completo de todas as prefeituras do país
+# Anexo 2 (despesa por área) do ano completo de todas as prefeituras do país,
+# mais o Anexo 14 (mínimos de educação, FUNDEB e saúde; só quando o Anexo 3
+# mudou ou nos meses de recoleta, ver RECOLETA_MINIMOS no script)
 # (scripts/municipios_para_json.py),
 # um estado por passo, e grava dados-fonte/municipios/UF.json com o SHA-256 de
 # cada resposta. No fim, monta os arquivos que o site lê em
@@ -29,7 +31,7 @@ on:
         required: false
         default: "todas"
       modo:
-        description: "tudo (receitas e despesas) ou despesas (só o Anexo 2, para quem já tem o Anexo 3)"
+        description: "tudo (receitas, despesas e mínimos), despesas (só o Anexo 2) ou minimos (só o Anexo 14), os dois últimos para quem já tem o Anexo 3"
         required: false
         default: "tudo"
 
@@ -82,6 +84,7 @@ jobs:
           case "${MODO:-tudo}" in
             tudo|"") ;;
             despesas) extra+=(--so-despesas) ;;
+            minimos) extra+=(--so-minimos) ;;
             *) echo "Modo inválido: $MODO"; exit 1 ;;
           esac
           if [ -n "${ANOS:-}" ]; then
