@@ -23,7 +23,7 @@ jobs:
       # a Câmara? Só leitura. O robots.txt do portal proíbe /api/ e pede 10
       # segundos entre pedidos: são poucos pedidos, todos fora de /api/, com
       # 10 segundos de intervalo. Nomes de pessoas não vão para o registro.
-      - name: TCE-RS, colunas do arquivo de empenhos de 2025 e tabelas de apoio
+      - name: TCE-RS, código das cidades e salário dos vereadores no arquivo de 2025
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -56,63 +56,63 @@ jobs:
                   p = Links(); p.feed(r.read().decode("utf-8", "replace"))
               return sorted({urllib.parse.urljoin(BASE, h) for h in p.links if re.search(r"/dados/.+\.(csv|zip|7z|json|xml)", h)})
 
-          # Tabelas de apoio: tipos de unidade orçamentária e elementos de despesa.
-          for conjunto in ("tipos-de-unidade-orcamentaria", "elemento-de-despesa"):
+          # Tabelas de apoio que liguem o código do órgão à cidade.
+          class Conjuntos(html.parser.HTMLParser):
+              def __init__(self): super().__init__(); self.nomes = []
+              def handle_starttag(self, tag, attrs):
+                  h = dict(attrs).get("href") or ""
+                  if tag == "a" and h.startswith("/dataset/") and "?" not in h: self.nomes.append(h.split("/")[2])
+          for termo in ("orgaos", "municipios", "auxiliar", "entidades"):
+              with pedir(f"{BASE}/dataset?q={termo}&tags=Auxiliar") as r:
+                  c = Conjuntos(); c.feed(r.read().decode("utf-8", "replace"))
+              print(f"busca {termo!r} (etiqueta Auxiliar): {sorted(set(c.nomes))[:30]}")
+          with pedir(f"{BASE}/dataset?tags=Auxiliar") as r:
+              c = Conjuntos(); c.feed(r.read().decode("utf-8", "replace"))
+          aux = sorted(set(c.nomes))
+          print(f"conjuntos com a etiqueta Auxiliar: {aux}")
+          for conjunto in [n for n in aux if re.search(r"orgao|munic|entidade", n)][:3]:
               urls = recursos(conjunto)
               print(f"\n{conjunto}: {urls}")
               csvs = [u for u in urls if u.endswith(".csv")]
               if csvs:
-                  with pedir(csvs[0]) as r:
-                      t = r.read(400_000)
+                  with pedir(csvs[0]) as r: t = r.read(300_000)
                   try: texto = t.decode("utf-8-sig")
                   except UnicodeDecodeError: texto = t.decode("latin-1")
-                  ls = texto.splitlines()
-                  print(f"  {len(ls)} linhas lidas; primeiras:")
-                  for l in ls[:40 if conjunto.startswith("tipos") else 8]: print("   ", l[:200])
+                  for l in texto.splitlines()[:12]: print("   ", l[:220])
 
-          # Arquivo anual de 2025.
+          # Câmaras no arquivo de 2025: nomes dos órgãos (instituições, não
+          # pessoas), total pago em 2025 e como o salário dos vereadores aparece.
           urls = recursos("despesa-orcamentaria-por-empenhos-2025")
-          print(f"\nempenhos 2025: {urls}")
           url = next(u for u in urls if u.endswith(".csv.zip"))
-          with pedir(url, tempo=60) as r:
-              tamanho = int(r.headers.get("Content-Length") or 0)
-              print(f"  {url}: {tamanho / 1e6:.0f} MB, Last-Modified {r.headers.get('Last-Modified')}, Accept-Ranges {r.headers.get('Accept-Ranges')}")
-              destino = "/tmp/rs.zip"
-              inicio = time.time()
-              with open(destino, "wb") as fh:
-                  while True:
-                      b = r.read(1 << 20)
-                      if not b: break
-                      fh.write(b)
-          print(f"  baixado em {(time.time() - inicio) / 60:.1f} min: {os.path.getsize(destino) / 1e6:.0f} MB")
-          z = zipfile.ZipFile(destino)
-          for i in z.infolist(): print(f"  dentro do zip: {i.filename}, {i.file_size / 1e6:.0f} MB")
-          nome = max(z.infolist(), key=lambda i: i.file_size).filename
-          bruto = z.open(nome).read(200_000)
-          try: bruto.decode("utf-8-sig"); cod = "utf-8-sig"
-          except UnicodeDecodeError: cod = "latin-1"
-          primeira = bruto.decode(cod, "replace").splitlines()[0]
-          sep = max(";,\t|", key=primeira.count)
-          leitor = csv.DictReader(io.TextIOWrapper(z.open(nome), encoding=cod, newline="", errors="replace"), delimiter=sep)
-          cols = leitor.fieldnames
-          print(f"  codificação {cod}, separador {sep!r}, {len(cols)} colunas: {cols}")
-          pessoal = [c for c in cols if re.search(r"nome|credor|cpf|cnpj|favorecido|historico|hist", c, re.I)]
-          print(f"  colunas que podem ter dados de pessoas (não impressas nos exemplos): {pessoal}")
-          poucos = collections.defaultdict(collections.Counter)
-          linhas = 0
-          camaras = collections.Counter()
+          with pedir(url, tempo=60) as r, open("/tmp/rs.zip", "wb") as fh:
+              while True:
+                  b = r.read(1 << 20)
+                  if not b: break
+                  fh.write(b)
+          z = zipfile.ZipFile("/tmp/rs.zip")
+          nome = z.infolist()[0].filename
+          leitor = csv.reader(io.TextIOWrapper(z.open(nome), encoding="utf-8-sig", newline="", errors="replace"))
+          cab = next(leitor); I = {c: cab.index(c) for c in cab}
+          orgaos = collections.Counter(); pago = 0.0; rubricas = collections.Counter(); pf = collections.Counter()
+          inicio = time.time(); n = 0
           for l in leitor:
-              linhas += 1
-              if linhas <= 3: print("  exemplo:", {k: v for k, v in l.items() if k not in pessoal})
-              for c in cols:
-                  if c in pessoal: continue
-                  if len(poucos[c]) < 400 or l[c] in poucos[c]: poucos[c][l[c]] += 1
-              for c in cols:
-                  if c not in pessoal and re.search(r"C[AÂ]MARA|LEGISLATIV", l[c] or "", re.I): camaras[c] += 1
-          print(f"\n  linhas: {linhas}")
-          for c in cols:
-              if c in pessoal: continue
-              n = len(poucos[c])
-              print(f"  {c}: {n}{'+' if n >= 400 else ''} valores; mais comuns: {poucos[c].most_common(12)}")
-          print(f"  colunas onde aparece 'câmara' ou 'legislativo': {camaras.most_common()}")
+              n += 1
+              if l[I["tp_unidade"]] != "CMM" or l[I["tipo_operacao"]] != "P" or l[I["ano_operacao"]] != "2025": continue
+              v = float(l[I["vl_pagamento"]] or 0)
+              pago += v
+              orgaos[(l[I["cd_orgao"]], l[I["nome_orgao"]])] += v
+              chave = (l[I["cd_elemento"]], l[I["cd_rubrica"]], l[I["ds_rubrica"]])
+              rubricas[chave] += v
+              if l[I["tp_pessoa"]] == "PF": pf[chave] += v
+          print(f"\nlidas {n} linhas em {(time.time() - inicio) / 60:.1f} min")
+          print(f"câmaras (cd_orgao distintos) com pagamento em 2025: {len({o for o, _ in orgaos})}; total pago: R$ {pago / 1e6:.1f} milhões")
+          print("exemplos de nome_orgao:", sorted({nm for _, nm in orgaos})[:25])
+          prefixos = collections.Counter(re.sub(r"\s+DE\s+.*$|\s+D[AO]S?\s+.*$", "", nm.strip().upper()) for _, nm in orgaos)
+          print("começo dos nomes:", prefixos.most_common(10))
+          print("\nrubricas de pessoal (3.1) nas câmaras, por valor pago (R$ mi | a pessoa física):")
+          for (el, rub, ds), v in rubricas.most_common(200):
+              if el.startswith("3.1"): print(f"  {v / 1e6:8.1f} | {pf[(el, rub, ds)] / 1e6:7.1f} | {el} {rub} {ds}")
+          print("\noutras rubricas mais pagas:")
+          for (el, rub, ds), v in [x for x in rubricas.most_common(60) if not x[0][0].startswith("3.1")][:25]:
+              print(f"  {v / 1e6:8.1f} | {el} {rub} {ds}")
           PY
