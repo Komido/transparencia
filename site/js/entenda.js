@@ -6,8 +6,8 @@
 
 import * as f from './formato.js';
 import { preencherTabela } from './graficos.js';
-import { carregarPainel } from './dados.js';
-import { $, definir } from './comum.js';
+import { carregarPainel, carregarStf } from './dados.js';
+import { $, definir, barra, el, inflacao, fatorParaHoje } from './comum.js';
 import * as c from './calculos.js';
 
 async function montarPartidos() {
@@ -48,5 +48,55 @@ async function montarSalarioMinimo() {
   }
 }
 
+// Quanto custa o STF: o ano fechado mais recente, os anteriores e a
+// conferência cruzada com o relatório de pessoal do próprio STF.
+const EXPLICA_STF = {
+  ativos: 'salários, encargos e benefícios de quem trabalha no tribunal',
+  aposentados: 'de quem trabalhou no tribunal',
+  funcionamento: 'contratos, sistemas, segurança, limpeza e benefícios dos servidores',
+  investimentos: 'reformas, computadores e equipamentos',
+};
+async function montarCustoStf() {
+  const caixa = $('#stf-custo');
+  if (!caixa) return;
+  try {
+    const [painel, d] = await Promise.all([carregarPainel(), carregarStf()]);
+    if (!d) return;
+    const ctx = inflacao(painel);
+    const hoje = (v, ano) => v * (fatorParaHoje(ctx, ano) ?? 1);
+    const ultimo = d.anos[d.anos.length - 1];
+    const [total, partes] = d.valores[String(ultimo)];
+    const dl = $('#stf-custo-numeros');
+    dl.replaceChildren();
+    const div = el('div', null, null, dl);
+    el('dt', null, `Pago pelo STF em ${ultimo}`, div);
+    el('dd', null, f.reaisPorExtenso(hoje(total, ultimo)), div);
+    const antes = d.anos.slice(0, -1).reverse();
+    if (antes.length) {
+      el('dd', 'detalhe', antes.map((a) => `${a}: ${f.reaisPorExtenso(hoje(d.valores[String(a)][0], a))}`).join(' · '), div);
+    }
+    definir('stf-custo-titulo', `Para onde foi o dinheiro em ${ultimo}`);
+    const lista = $('#stf-custo-barras');
+    lista.replaceChildren();
+    d.categorias.forEach(([k, rotulo], i) => {
+      const v = partes[i];
+      if (!(v > 0)) return;
+      const pct = (v / total) * 100;
+      barra(lista, { nome: rotulo, explica: EXPLICA_STF[k], valor: `${f.parteDoTotal(pct)} · ${f.reaisPorExtenso(hoje(v, ultimo))}`, pct });
+    });
+    const conf = d.conferencia[String(ultimo)];
+    const dif = (conf.planilha / conf.rgf - 1) * 100;
+    definir('stf-custo-conferencia', `Conferência cruzada: a despesa com pessoal desta conta em ${ultimo} (${f.reaisPorExtenso(conf.planilha)}) `
+      + `foi comparada com a do relatório de pessoal que o próprio STF entrega ao Tesouro (${f.reaisPorExtenso(conf.rgf)}). `
+      + `Diferença: ${f.numero(Math.abs(dif), 1)}%. As duas medem coisas um pouco diferentes (o pago no ano e o liquidado nos 12 meses); `
+      + 'se a diferença passar de 15%, a atualização para.');
+    caixa.hidden = false;
+    $('#stf-custo-vazio').hidden = true;
+  } catch (erro) {
+    console.error(erro);
+  }
+}
+
 montarPartidos();
 montarSalarioMinimo();
+montarCustoStf();

@@ -299,6 +299,27 @@ export async function carregarEmendasUf(uf) {
   return d;
 }
 
+// Quanto o STF pagou por ano (Tesouro Nacional; scripts/stf_para_json.py):
+// {anos, categorias: [[chave, rótulo]], valores: {ano: [total, [por
+// categoria]]}, conferencia: {ano: {planilha, rgf}}}, em reais da época.
+export async function carregarStf() {
+  const resposta = await fetch('/dados/stf.json', { credentials: 'same-origin' });
+  if (resposta.status === 404) return null;
+  if (!resposta.ok) throw new Error(`Falha ao carregar os gastos do STF (HTTP ${resposta.status})`);
+  const d = await resposta.json();
+  const n = Array.isArray(d?.categorias) ? d.categorias.length : 0;
+  const ehValor = (x) => Array.isArray(x) && x.length === 2 && Number.isFinite(x[0]) && x[0] > 0
+    && Array.isArray(x[1]) && x[1].length === n && x[1].every(Number.isFinite);
+  if (!d || !ehData(d.atualizado) || !ehLinkSeguro(d.fonte) || !n
+    || !d.categorias.every((c) => Array.isArray(c) && c.length === 2 && ehTexto(c[0]) && ehTexto(c[1]))
+    || !Array.isArray(d.anos) || !d.anos.length || !d.anos.every(Number.isInteger)
+    || !d.anos.every((a) => ehValor(d.valores?.[String(a)]))
+    || !d.anos.every((a) => Number.isFinite(d.conferencia?.[String(a)]?.planilha) && Number.isFinite(d.conferencia?.[String(a)]?.rgf))) {
+    falhar('gastos do STF');
+  }
+  return d;
+}
+
 // Gastos das câmaras municipais por tipo de despesa (Tribunal de Contas de
 // SP e do RS; scripts/camaras_sp_para_json.py e camaras_rs_para_json.py):
 // {anos, categorias: [[chave, rótulo]], cidades: {código: {ano: [total pago,
