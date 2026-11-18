@@ -1395,6 +1395,21 @@ a.botao { text-decoration: none; }
 .votos-da-proposta .item-voto { font-size: var(--fs-2); }
 
 /* Ministros do STF (Entenda): tabela no computador, um cartão por ministro no celular. */
+/* Quadro "Como conferimos" (metodologia): tabela no computador, cartões no
+   celular, com o rótulo em cima do texto, que é longo. */
+.tabela-cartoes { width: 100%; border-collapse: collapse; font-size: var(--fs-2); margin: 0 0 var(--e-3); overflow-wrap: normal; }
+.tabela-cartoes th, .tabela-cartoes td { text-align: left; vertical-align: top; padding: var(--e-2) var(--e-3) var(--e-2) 0; border-top: 1px solid var(--borda); }
+.tabela-cartoes thead th { border-top: 0; font-size: var(--fs-1); font-weight: 600; color: var(--tinta-2); }
+.tabela-cartoes tbody th { font-weight: 600; }
+.tabela-cartoes .papel { display: block; margin-top: 2px; font-size: var(--fs-1); font-weight: 400; color: var(--tinta-2); }
+@media (max-width: 640px) {
+  .tabela-cartoes thead { display: none; }
+  .tabela-cartoes, .tabela-cartoes tbody, .tabela-cartoes tr, .tabela-cartoes th, .tabela-cartoes td { display: block; }
+  .tabela-cartoes tr { border-top: 1px solid var(--borda); padding: var(--e-2) 0; }
+  .tabela-cartoes th, .tabela-cartoes td { border: 0; padding: 3px 0; }
+  .tabela-cartoes tbody th { font-size: var(--fs-3); }
+  .tabela-cartoes td::before { content: attr(data-rotulo); display: block; color: var(--tinta-2); font-size: var(--fs-1); }
+}
 .tabela-stf { width: 100%; border-collapse: collapse; font-size: var(--fs-2); margin: 0 0 var(--e-3); }
 .tabela-stf th, .tabela-stf td { text-align: left; vertical-align: top; padding: var(--e-2) var(--e-3) var(--e-2) 0; border-top: 1px solid var(--borda); }
 .tabela-stf thead th { border-top: 0; font-size: var(--fs-1); font-weight: 600; color: var(--tinta-2); }

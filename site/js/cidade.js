@@ -445,18 +445,51 @@ async function desenharCamaraTipos(ano) {
     barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
   }
   const semSubsidio = !itens.some((x) => x.k === 'vereadores');
-  // O custo acima vem do relatório da prefeitura ao Tesouro (SICONFI).
-  const iCam = estado.indice.campos_despesa?.indexOf('camara') ?? -1;
-  const sic = estado.m?.a?.[String(anoUsado)];
-  const custoTesouro = iCam >= 0 && sic?.ds === 'ok' ? sic.d?.[iCam] : null;
-  const longe = custoTesouro > 0 && (total / custoTesouro < 0.8 || total / custoTesouro > 1.25);
   definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
-    + `Fonte: ${d.tribunal ?? TRIBUNAL[uf]}, cada pagamento da Câmara pelo tipo de despesa. `
-    + (longe
-      ? `Neste ano, o total é bem diferente do custo que a prefeitura informou ao Tesouro (${f.reaisPorExtenso(custoTesouro * fator)}); o site mostra cada número como a fonte publicou.`
-      : 'Pode diferir um pouco do custo informado pela prefeitura ao Tesouro, que conta a despesa liquidada, não a paga.')
+    + `Fonte: ${d.tribunal ?? TRIBUNAL[uf]}, cada pagamento da Câmara pelo tipo de despesa.`
     + (semSubsidio ? ' Neste ano, a Câmara não registrou nenhum pagamento como salário de vereador (subsídio); ele pode ter sido lançado junto com o dos servidores.' : ''));
+  desenharConferenciaCamara(d, anoUsado, total, fator);
   mostrar();
+}
+
+// Conferência cruzada das câmaras: o total pago pelo Tribunal de Contas
+// contra o custo da Câmara que a prefeitura informou ao Tesouro (SICONFI,
+// função Legislativa, despesa liquidada), na cidade e no estado inteiro.
+// Diferença medida sobre o maior dos dois: até 20% é o mesmo que a razão
+// entre 0,8 e 1,25 que o script confere.
+function desenharConferenciaCamara(d, ano, total, fator) {
+  const p = campo('mun-camara-tipos-conferencia')[0];
+  const iCam = estado.indice.campos_despesa?.indexOf('camara') ?? -1;
+  p.hidden = iCam < 0;
+  if (iCam < 0) return;
+  const custo = (r) => {
+    const a = r?.a?.[String(ano)];
+    return a?.ds === 'ok' && a.d?.[iCam] > 0 ? a.d[iCam] : null;
+  };
+  const diferenca = (a, b) => (Math.abs(a - b) / Math.max(a, b)) * 100;
+  const daqui = custo(estado.m);
+  let texto;
+  if (!daqui) {
+    texto = `Conferência cruzada: a prefeitura não tem relatório válido no Tesouro Nacional para ${ano}, então este total não pôde ser comparado.`;
+  } else {
+    const dif = diferenca(total, daqui);
+    const pct = textoDiferenca(dif);
+    texto = `Conferência cruzada: a prefeitura informou ao Tesouro Nacional um custo de ${f.reaisPorExtenso(daqui * fator)} para a Câmara em ${ano}, `
+      + (dif > 20
+        ? `${pct} diferente deste total; o site mostra cada número como a fonte publicou.`
+        : `diferença de ${pct} (o tribunal conta o que foi pago; o Tesouro, o que foi liquidado).`);
+  }
+  // O estado inteiro: quantas câmaras com as duas fontes ficam a até 20%.
+  let com = 0, perto = 0;
+  for (const r of estado.d?.municipios ?? []) {
+    const tce = d.cidades[r.c]?.[String(ano)]?.[0];
+    const sic = custo(r);
+    if (!(tce > 0) || !sic) continue;
+    com += 1;
+    if (diferenca(tce, sic) <= 20) perto += 1;
+  }
+  if (com >= 50) texto += ` No estado, ${f.parteDoTotal((perto / com) * 100)} das ${f.numero(com)} câmaras com as duas fontes ficam a até 20% de diferença.`;
+  p.textContent = texto;
 }
 
 // ---------------------------------------------------------------------------
@@ -608,7 +641,41 @@ async function desenharEmendas(ano, moradores) {
   const fonteTesouro = anoComTotal ? ' e Tesouro Nacional (série Emendas Parlamentares Individuais e de Bancada)' : '';
   notas.push(`Fonte: Portal da Transparência, pagamentos à prefeitura de ${nome} (${uf}) e aos fundos municipais${fonteTesouro}, em dinheiro de hoje. Emendas pagas a hospitais, entidades ou ao governo do estado não entram.${avisoBanco} Atualização: ${f.dataCurta(d.atualizado)}.`);
   definir('mun-emendas-nota', notas.join(' '));
+  desenharConferenciaEmendas(d, anoNota, codigo7, anoComTotal, anoNota === emAndamento);
   caixa.hidden = false;
+}
+
+// Diferença em %, sem mostrar "0,0%" quando as fontes batem quase exatas.
+const textoDiferenca = (dif) => (dif < 0.1 ? 'menos de 0,1%' : `${f.numero(dif, dif < 10 ? 1 : 0)}%`);
+
+// Conferência cruzada das emendas individuais e de bancada: o que o Portal
+// da Transparência registra como pago à prefeitura e aos fundos municipais
+// contra a série do Tesouro Nacional, que registra cada transferência.
+function desenharConferenciaEmendas(d, ano, codigo7, anoComTotal, emAndamento) {
+  const p = campo('mun-emendas-conferencia')[0];
+  const par = d.conferencia?.[codigo7]?.[String(ano)];
+  p.hidden = !par;
+  if (!par) return;
+  const fator = fatorParaHoje(estado.ctx, ano) ?? 1;
+  const [portal, tesouro] = par.map((v) => v * fator);
+  const maior = Math.max(portal, tesouro);
+  const dif = maior > 0 ? (Math.abs(tesouro - portal) / maior) * 100 : 0;
+  const pct = textoDiferenca(dif);
+  let texto = 'Conferência cruzada: o Tesouro Nacional publica, cidade a cidade, só as emendas individuais e de bancada. '
+    + `Em ${ano}, elas somam ${valorGrande(portal)} no Portal da Transparência e ${valorGrande(tesouro)} no Tesouro`;
+  if (anoComTotal) {
+    texto += `. Neste ano a diferença é esperada, pelos pagamentos registrados ao Banco do Brasil sem a cidade (explicado abaixo); a página usa o maior dos dois.`;
+  } else if (dif <= 5) {
+    texto += `: as duas fontes batem (diferença de ${pct}).`;
+  } else {
+    texto += `: diferença de ${pct}.${emAndamento ? ' No ano em andamento, as duas fontes podem estar atualizadas até datas diferentes.' : ''}`;
+  }
+  const pais = d.conferencia_pais?.[String(ano)];
+  if (pais && !anoComTotal && Math.max(...pais) > 0) {
+    const difPais = (Math.abs(pais[1] - pais[0]) / Math.max(...pais)) * 100;
+    texto += ` No país inteiro, a diferença é de ${f.numero(difPais, 1)}%; se passar de 10% num ano fechado, a atualização para.`;
+  }
+  p.textContent = texto;
 }
 
 // ---------------------------------------------------------------------------
