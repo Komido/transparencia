@@ -16,39 +16,42 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      # Mínimos constitucionais das prefeituras: 25% dos impostos em educação,
-      # 70% do FUNDEB em salários e 15% em saúde, pelo Anexo 14 do RREO no
-      # Tesouro (SICONFI). Confere em uma amostra variada se o anexo vem nos
-      # dois tipos de relatório e se a base de cálculo implícita bate com o
-      # Anexo 3. Só leitura, respeitando o robots.txt e o Crawl-Delay.
-      - name: SIOPS no TabNet do DATASUS, indicadores dos municípios
+      # Câmaras de Pernambuco e do Ceará: em que cada Câmara gastou, pelas
+      # APIs de dados abertos dos Tribunais de Contas (TCE-PE e TCE-CE). Lista
+      # todas as entidades e métodos, a ligação entre unidade gestora, Câmara e
+      # município, e consulta uma Câmara pequena e uma grande para ver tamanho,
+      # campos, valor pago e se há limite de linhas. Só leitura, respeitando o
+      # robots.txt e o Crawl-Delay.
+      - name: Câmaras de PE e CE nas APIs dos Tribunais de Contas
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           python3 - <<'PY'
-          import io, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser, zipfile
+          import collections, json, re, time, urllib.error, urllib.parse, urllib.request, urllib.robotparser
 
           AGENTE = "ArrecadometroBrasil/1.0 (dados publicos)"
-          robots, atraso = {}, {}
+          robots, atraso, pedidos = {}, {}, [0]
 
-          def baixar(url, aceitar="*/*", limite=5_000_000, faixa=None, metodo="GET"):
+          def baixar(url, aceitar="*/*", limite=60_000_000, metodo="GET", tempo=180):
               time.sleep(atraso.get(urllib.parse.urlsplit(url).netloc, 2))
+              pedidos[0] += 1
               cab = {"User-Agent": AGENTE, "Accept": aceitar}
-              if faixa: cab["Range"] = f"bytes=0-{faixa - 1}"
               pedido = urllib.request.Request(url, headers=cab, method=metodo)
+              inicio = time.time()
               try:
-                  with urllib.request.urlopen(pedido, timeout=240) as r:
-                      return r.status, dict(r.headers), r.geturl(), (r.read(limite) if metodo == "GET" else b"")
+                  with urllib.request.urlopen(pedido, timeout=tempo) as r:
+                      corpo = r.read(limite) if metodo == "GET" else b""
+                      return r.status, dict(r.headers), r.geturl(), corpo, time.time() - inicio
               except urllib.error.HTTPError as e:
-                  return e.code, dict(e.headers or {}), url, e.read(3000)
+                  return e.code, dict(e.headers or {}), url, e.read(3000), time.time() - inicio
               except Exception as e:
-                  return 0, {}, url, repr(e).encode()
+                  return 0, {}, url, repr(e).encode(), time.time() - inicio
 
           def permitido(url):
               p = urllib.parse.urlsplit(url); base = f"{p.scheme}://{p.netloc}"
               if base not in robots:
-                  st, _, _, corpo = baixar(base + "/robots.txt", "text/plain", 200_000)
-                  linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 else []
+                  st, _, _, corpo, _ = baixar(base + "/robots.txt", "text/plain", 200_000)
+                  linhas = corpo.decode("utf-8", "replace").splitlines() if st == 200 and b"<html" not in corpo[:500].lower() else []
                   print(f"\nrobots.txt de {p.netloc}: HTTP {st}" + "".join("\n    " + l for l in linhas[:25]))
                   rp = urllib.robotparser.RobotFileParser(); rp.parse(linhas)
                   atraso[p.netloc] = max(2, float(rp.crawl_delay(AGENTE) or 0))
@@ -63,61 +66,202 @@ jobs:
               rp = robots[base]
               return rp != "proibido" and rp.can_fetch(AGENTE, url)
 
-          def pegar_json(url):
+          def pegar(url, aceitar="*/*", mostrar=True):
               if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite; pulado"); return None
-              st, cab, final, corpo = baixar(url, "application/json")
-              print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              if st != 200: print("  ", corpo[:300]); return None
-              try: return json.loads(corpo.decode("utf-8-sig", "replace"))
-              except Exception: print("  não é JSON:", corpo[:300]); return None
-
-          def espiar(url):
-              """Tamanho, data e o começo do arquivo (colunas), sem baixar tudo."""
-              if not permitido(url):
-                  print(f"    {url}: robots.txt não permite"); return
-              st, cab, final, _ = baixar(url, metodo="HEAD")
-              print(f"    HEAD {url}: HTTP {st} | {cab.get('Content-Type', '')} | {cab.get('Content-Length', '?')} bytes | {cab.get('Last-Modified', '')}")
-              st, cab, final, corpo = baixar(url, faixa=8000, limite=8000)
-              if st not in (200, 206): print(f"    começo: HTTP {st}"); return
-              if corpo[:2] == b"PK":
-                  print("    é zip; o começo não mostra as colunas"); return
-              texto = corpo.decode("utf-8", "replace") if b"\xc3" in corpo else corpo.decode("latin-1", "replace")
-              for l in texto.splitlines()[:4]: print("     |", l[:400])
-
-          # SIOPE pela API OData do FNDE (plataforma Olinda, serviço
-          # DADOS_ABERTOS_SIOPE, recurso Indicadores_Siope) e SIOPS pelos
-          # downloads do Fundo Nacional de Saúde e do gov.br: o que existe, em
-          # que formato, e se traz o percentual de cada prefeitura.
-          # SIOPS no sistema de tabulação do DATASUS (TabNet): a página das
-          # séries históricas de indicadores dos municípios, os formulários
-          # (.def) que ela usa e as opções de linha, coluna, conteúdo e ano.
-          def pagina(url, limite=2_000_000):
-              if not permitido(url):
-                  print(f"\n### {url}\n  robots.txt não permite"); return None, None
-              st, cab, final, corpo = baixar(url, limite=limite)
-              tipo = cab.get("Content-Type", "")
-              print(f"\n### {url}\n  HTTP {st} | {tipo} | {len(corpo)} bytes" + (f" | foi para {final}" if final != url else ""))
-              enc = "utf-8" if "utf-8" in tipo.lower() else "latin-1"
+                  print(f"\n### {url}\n  robots.txt não permite; pulado"); return None, None
+              st, cab, final, corpo, seg = baixar(url, aceitar)
+              if mostrar:
+                  print(f"\n### {url}\n  HTTP {st} | {cab.get('Content-Type', '')} | {len(corpo)} bytes | {seg:.1f} s" + (f" | foi para {final}" if final != url else ""))
+              if st != 200:
+                  print("  ", corpo[:400]); return None, None
+              tipo = cab.get("Content-Type", "").lower()
+              enc = "utf-8" if "utf-8" in tipo or b"\xc3" in corpo[:200000] else "latin-1"
               return corpo.decode(enc, "replace"), final
 
-          for url in ("https://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM",
-                      "http://siops-asp.datasus.gov.br/cgi/siops/serhist/MUNICIPIO/indicadores.HTM"):
-              texto, final = pagina(url)
-              if texto and len(texto) > 200:
-                  for m in re.finditer(r'(?:href|action)="([^"]+)"[^>]*>(.*?)</', texto, re.S | re.I):
-                      print("   ", re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()[:120], "|", urllib.parse.urljoin(final, m.group(1)))
-                  break
+          def texto_da_pagina(html, limite=8000):
+              t = re.sub(r"<script.*?</script>|<style.*?</style>", " ", html, flags=re.S | re.I)
+              t = re.sub(r"<[^>]+>", " | ", t)
+              t = re.sub(r"(\s*\|\s*)+", " | ", re.sub(r"[ \t\r\n]+", " ", t))
+              return t[:limite]
 
-          # Página antiga de indicadores por município: links e texto.
-          texto, final = pagina("http://siops.datasus.gov.br/relindicadoresmun2.php?escmun=3")
-          if texto:
-              print("   tags de formulário:", re.findall(r"<(form|select|input|option)[^>]{0,120}", texto, re.I)[:40])
-              for m in re.finditer(r'href="([^"]+)"[^>]*>(.*?)</a>', texto, re.S | re.I):
-                  href = m.group(1)
-                  if re.search(r"rel|indic|munic|uf|php", href, re.I):
-                      print("   link:", re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()[:80], "|", urllib.parse.urljoin(final, href))
-              corpo = re.sub(r"<script.*?</script>|<style.*?</style>", " ", texto, flags=re.S | re.I)
-              corpo = re.sub(r"<[^>]+>", " ", corpo)
-              print("   texto:", re.sub(r"\s+", " ", corpo)[:3000])
+          def como_json(texto):
+              try: return json.loads(texto)
+              except Exception: return None
+
+          def registros(dado):
+              """Acha a lista de registros dentro da resposta, qualquer que seja o envelope."""
+              if isinstance(dado, list): return dado, "lista na raiz"
+              if isinstance(dado, dict):
+                  for k, v in dado.items():
+                      if isinstance(v, list) and v and isinstance(v[0], dict): return v, k
+                  for k, v in dado.items():
+                      if isinstance(v, dict):
+                          r, c = registros(v)
+                          if r is not None: return r, f"{k}.{c}"
+              return None, None
+
+          def mostrar_registros(texto, campos_soma=(), contar=()):
+              dado = como_json(texto)
+              if dado is None:
+                  print("  não é JSON; começo:", texto[:600]); return []
+              if isinstance(dado, dict):
+                  print("  chaves de topo:", {k: (type(v).__name__, (len(v) if hasattr(v, '__len__') else v)) for k, v in list(dado.items())[:12]})
+              regs, onde = registros(dado)
+              if regs is None:
+                  print("  sem lista de registros; começo:", texto[:800]); return []
+              print(f"  {len(regs)} registros (em {onde}); campos: {list(regs[0].keys())}")
+              for r in regs[:2]: print("   exemplo:", json.dumps(r, ensure_ascii=False)[:900])
+              for c in campos_soma:
+                  try: print(f"  soma de {c}: {sum(float(str(r.get(c) or 0).replace(',', '.')) for r in regs):,.2f}")
+                  except Exception as e: print(f"  soma de {c}: {e}")
+              for c in contar:
+                  print(f"  valores de {c}:", collections.Counter(str(r.get(c)) for r in regs).most_common(25))
+              return regs
+
+          def titulo(t): print("\n" + "=" * 72 + "\n" + t + "\n" + "=" * 72)
+
+          # ------------------------------------------------------------------
+          titulo("TCE-PE: lista completa de entidades da API")
+          PE = "https://sistemas.tce.pe.gov.br/DadosAbertos/"
+          html, final = pegar(PE + "Exemplo!listar")
+          entidades = {}
+          if html:
+              for m in re.finditer(r'href="[^"]*dadosAbertos\.id=(\d+)"[^>]*>(.*?)</a>', html, re.S | re.I):
+                  nome = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
+                  entidades[nome] = int(m.group(1))
+              print(f"  {len(entidades)} entidades:")
+              for nome, i in sorted(entidades.items(), key=lambda x: x[1]): print(f"    {i:3d} {nome}")
+              print("  texto da página (para ver grupos e descrições):", texto_da_pagina(html, 6000))
+
+          titulo("TCE-PE: documentação das entidades que ligam unidade, Câmara e município")
+          interessa = [n for n in entidades if re.search(r"Unidade|Municip|Jurisdic|Orgao|Órg|Ente|Resumo|Limite|Transferencia|DespesasMunicipais|Liquidac|Pagamento", n, re.I)]
+          for nome in interessa:
+              html, _ = pegar(PE + f"Exemplo!detalhar?dadosAbertos.id={entidades[nome]}")
+              if html:
+                  t = texto_da_pagina(html, 9000)
+                  i = t.find("Entidade:")
+                  print("  ", t[i if i >= 0 else 0:][:5000])
+
+          titulo("TCE-PE: consultas reais")
+          html, _ = pegar(PE + "Municipios!json")
+          municipios_pe = mostrar_registros(html) if html else []
+          # Unidades jurisdicionadas: tenta as entidades cujo nome sugere a lista de unidades.
+          candidatas = [n for n in entidades if re.search(r"^Unidades?Jurisdicionadas?$|^UnidadeGestora|^UnidadesGestoras|^Entes?$|^Orgaos", n, re.I)]
+          print("\n  entidades candidatas para a lista de unidades:", candidatas)
+          camaras = []
+          for nome in candidatas[:3]:
+              html, _ = pegar(PE + f"{nome}!json")
+              regs = mostrar_registros(html) if html else []
+              for r in regs:
+                  linha = " ".join(str(v) for v in r.values())
+                  if re.search(r"C[AÂ]MARA", linha, re.I): camaras.append((nome, r))
+              if regs:
+                  print(f"  registros com 'Câmara' em {nome}: {sum(1 for n, _ in camaras if n == nome)}")
+                  for _, r in [c for c in camaras if c[0] == nome][:6]: print("   câmara:", json.dumps(r, ensure_ascii=False)[:500])
+          # Subunidades com "Câmara" no nome, como plano B.
+          html, _ = pegar(PE + "SubunidadesUnidadesJurisdicionadas!json?NomeSubunidade=" + urllib.parse.quote("CÂMARA MUNICIPAL DO RECIFE"))
+          if html: mostrar_registros(html)
+          html, _ = pegar(PE + "SubunidadesUnidadesJurisdicionadas!json")
+          subs = mostrar_registros(html) if html else []
+          sub_camaras = [r for r in subs if re.search(r"C[AÂ]MARA", str(r.get("NomeSubunidade", "")), re.I)]
+          print(f"  subunidades com 'Câmara' no nome: {len(sub_camaras)}")
+          for r in sub_camaras[:8]: print("   ", json.dumps(r, ensure_ascii=False)[:300])
+
+          # Unidade gestora da Câmara do Recife e de uma Câmara pequena.
+          ugs = []
+          for _, r in camaras:
+              ug = r.get("ID_UNIDADE_GESTORA") or r.get("IdUnidadeGestora") or r.get("CODIGO")
+              ugs.append((ug, json.dumps(r, ensure_ascii=False)[:160]))
+          for r in sub_camaras:
+              ugs.append((r.get("ID_UNIDADE_GESTORA"), r.get("NomeSubunidade")))
+          recife = [u for u in ugs if u[0] and re.search(r"RECIFE", str(u[1]), re.I)]
+          outras = [u for u in ugs if u[0] and not re.search(r"RECIFE", str(u[1]), re.I)]
+          escolhidas = (recife[:1] + outras[:1]) or ugs[:2]
+          print("\n  Câmaras escolhidas para consultar despesas:", escolhidas)
+          for ug, rot in escolhidas:
+              for ano in (2025,):
+                  url = PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA={ano}"
+                  html, _ = pegar(url, "application/json")
+                  if html:
+                      regs = mostrar_registros(html, ("VALOREMPENHADO", "VALORLIQUIDADO", "VALORPAGO"), ("MESREFERENCIA", "ELEMENTODESPESA", "MODALIDADE", "UNIDADEORCAMENTARIA"))
+                      if regs:
+                          print("   todos os campos do primeiro registro:", json.dumps(regs[0], ensure_ascii=False)[:2500])
+                  url = PE + f"EmpenhoPagamento!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA={ano}"
+                  html, _ = pegar(url, "application/json")
+                  if html: mostrar_registros(html, ("VALOR",), ("TIPO",))
+              url = PE + f"DespesasMunicipais!json?ID_UNIDADE_GESTORA={ug}&ANOREFERENCIA=2025&MESREFERENCIA=3"
+              html, _ = pegar(url, "application/json")
+              if html: mostrar_registros(html, ("VALORPAGO",))
+          for nome in ("TransferenciasConcedidasMunicipais", "DadosLimiteGastos", "EmpenhoResumo"):
+              if nome in entidades and recife:
+                  html, _ = pegar(PE + f"{nome}!json?ID_UNIDADE_GESTORA={recife[0][0]}&ANOREFERENCIA=2025", "application/json")
+                  if html: mostrar_registros(html)
+
+          # ------------------------------------------------------------------
+          titulo("TCE-CE: lista de métodos da API antiga")
+          CE = "https://api.tce.ce.gov.br/index.php/"
+          docs = {}
+          for url in ("https://api.tce.ce.gov.br/", CE + "metodos", CE + "doc"):
+              html, final = pegar(url)
+              if not html: continue
+              for m in re.finditer(r'href="([^"]*doc/(\d+)/([a-z_0-9]+))"', html, re.I):
+                  docs[m.group(3)] = urllib.parse.urljoin(final, m.group(1))
+              if docs: break
+              print("  texto:", texto_da_pagina(html, 2500))
+          print(f"  {len(docs)} métodos:", sorted(docs))
+          for nome in sorted(docs):
+              if re.search(r"balancete|liquidac|pagamento|orgao|municipio|despesa|empenho|unidade", nome, re.I) and nome not in ("notas_empenhos", "notas_pagamentos", "despesa_elemento_projeto", "orgaos", "unidades_gestoras"):
+                  html, _ = pegar(docs[nome])
+                  if html:
+                      t = texto_da_pagina(html, 9000); i = t.find("Método:")
+                      print("  ", t[i if i >= 0 else 0:][:4000])
+
+          titulo("TCE-CE: consultas reais")
+          SIM = CE + "sim/1_0/"
+          html, _ = pegar(SIM + "municipios.json", "application/json")
+          muni = mostrar_registros(html) if html else []
+          codigos = {}
+          for r in muni:
+              nome = str(r.get("nome_municipio", "")).upper()
+              codigos[nome] = r.get("codigo_municipio")
+          alvo = [(n, c) for n, c in codigos.items() if n.startswith("FORTALEZA")][:1] + [(n, c) for n, c in codigos.items() if n.startswith("ACARA")][:1]
+          if not alvo and muni: alvo = [(str(muni[0]), muni[0].get("codigo_municipio"))]
+          print("  municípios escolhidos:", alvo)
+          for nome, cod in alvo:
+              html, _ = pegar(SIM + f"orgaos.json?codigo_municipio={cod}&exercicio_orcamento=202500", "application/json")
+              orgaos = mostrar_registros(html, contar=("codigo_tipo_unidade",)) if html else []
+              for o in orgaos: print("   órgão:", o.get("codigo_orgao"), o.get("codigo_tipo_unidade"), o.get("nome_orgao"))
+              cam = [o for o in orgaos if re.search(r"C[AÂ]MARA|LEGISLAT", str(o.get("nome_orgao", "")), re.I)]
+              if not cam: continue
+              org = cam[0].get("codigo_orgao")
+              if "balancete_despesa_orcamentaria" in docs:
+                  for q in (f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}",
+                            f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}&data_referencia=202512"):
+                      html, _ = pegar(SIM + "balancete_despesa_orcamentaria.json?" + q, "application/json")
+                      if html: mostrar_registros(html, contar=("codigo_elemento_despesa", "data_referencia"))
+              html, _ = pegar(SIM + f"notas_pagamentos.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}", "application/json")
+              if html: mostrar_registros(html, ("valor_nota_pagamento",), ("data_referencia", "estado_de_estornado"))
+              html, _ = pegar(SIM + f"notas_empenhos.json?codigo_municipio={cod}&codigo_orgao={org}&data_referencia_empenho=202503", "application/json")
+              if html: mostrar_registros(html, ("valor_empenhado",), ("codigo_elemento_despesa",))
+              if "liquidacoes" in docs:
+                  html, _ = pegar(SIM + f"liquidacoes.json?codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao={org}", "application/json")
+                  if html: mostrar_registros(html, contar=("data_referencia",))
+
+          titulo("TCE-CE: API nova (api-dados-abertos.tce.ce.gov.br)")
+          html, final = pegar("https://api-dados-abertos.tce.ce.gov.br/sim")
+          if html:
+              print("  scripts:", re.findall(r'<script[^>]+src="([^"]+)"', html, re.I)[:10])
+              print("  urls no html:", sorted(set(re.findall(r'(?:url|href|src)\s*[:=]\s*["\']([^"\']+)["\']', html, re.I)))[:30])
+              print("  começo do html:", html[:1500])
+          for caminho in ("/sim/openapi.json", "/sim/swagger.json", "/sim/v3/api-docs", "/sim/api-docs", "/openapi.json"):
+              html, _ = pegar("https://api-dados-abertos.tce.ce.gov.br" + caminho, "application/json")
+              if html:
+                  d = como_json(html)
+                  if isinstance(d, dict):
+                      caminhos = d.get("paths") or {}
+                      print(f"  {len(caminhos)} caminhos:", list(caminhos)[:80])
+                      break
+                  print("  começo:", html[:500])
+
+          print(f"\npedidos feitos: {pedidos[0]}")
           PY
