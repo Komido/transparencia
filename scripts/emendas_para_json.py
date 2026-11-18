@@ -490,9 +490,11 @@ def main():
     # Tesouro não tem. Os autores continuam sendo só os do Portal.
     tesouro = emendas_do_tesouro()
     anos_total = [a for a in anos if pelo_banco.get(a, 0.0) >= LIMITE_BANCO]
+    conferencia_pais = {}
     for a in anos:
         t_ano = sum(v for (c, aa), v in tesouro.items() if aa == a)
         p_ano = sum(v for (c, aa), v in pago_ib.items() if aa == a)
+        conferencia_pais[str(a)] = [round(p_ano), round(t_ano)]
         print(f"  {a}: individuais e de bancada a municípios, Tesouro R$ {t_ano / 1e9:.2f} bi; Portal (prefeitura e fundos) R$ {p_ano / 1e9:.2f} bi")
         # Ano fechado e sem pagamento ao banco: as duas fontes têm de bater.
         if a < ano_atual and a not in anos_total and p_ano > 0 and abs(t_ano - p_ano) > 0.10 * p_ano:
@@ -509,6 +511,23 @@ def main():
             outros = pago.get((c, a), 0.0) - pago_ib.get((c, a), 0.0)
             total_cidade[(c, a)] = ib + outros
     print(f"anos com total pelo Tesouro: {anos_total}; cidades com total: {len(total_cidade)}")
+    # Conferência cruzada mostrada no site: individuais e de bancada de cada
+    # cidade no Portal (prefeitura e fundos) e na série do Tesouro, em reais
+    # da época. O registro mostra quantas cidades batem, por faixa.
+    conferencia_por_uf = collections.defaultdict(dict)
+    for a in anos:
+        faixas = collections.Counter()
+        for c in {c for (c, aa) in tesouro if aa == a} | {c for (c, aa) in pago_ib if aa == a}:
+            if c not in uf_do_codigo_global:
+                continue
+            p, t = round(pago_ib.get((c, a), 0.0)), round(tesouro.get((c, a), 0.0))
+            if p <= 0 and t <= 0:
+                continue
+            conferencia_por_uf[uf_do_codigo_global[c]].setdefault(c, {})[str(a)] = [p, t]
+            dif = abs(t - p) / max(p, t)
+            faixas["até 1%" if dif <= 0.01 else "até 5%" if dif <= 0.05 else "até 10%" if dif <= 0.10
+                   else "até 20%" if dif <= 0.20 else "mais de 20%" if p > 0 and t > 0 else "só numa fonte"] += 1
+        print(f"  {a}: cidades por diferença entre Portal e Tesouro: {sorted(faixas.items())}")
     total_por_uf = collections.defaultdict(lambda: collections.defaultdict(dict))
     for (c, a), v in sorted(total_cidade.items()):
         total_por_uf[uf_do_codigo_global[c]][c][str(a)] = round(v)
@@ -550,6 +569,10 @@ def main():
             "banco_comissao_relator": {str(a): round(pelo_banco_cr.get(a, 0.0)) for a in anos},
             "fonte_total": TESOURO,
             "total": {c: dict(anos_c) for c, anos_c in sorted(total_por_uf[uf].items())},
+            # Conferência cruzada: [Portal, Tesouro] das individuais e de
+            # bancada, em reais da época, por cidade e no país.
+            "conferencia": dict(sorted(conferencia_por_uf[uf].items())),
+            "conferencia_pais": conferencia_pais,
             "cidades": cidades,
         })
     print(f"gravados {len(por_uf)} estados, {sum(len(c) for c in por_uf.values())} cidades com emendas desde {PRIMEIRO_ANO}")

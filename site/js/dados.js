@@ -268,6 +268,8 @@ export async function buscarOnde() {
 const CAMPOS_EMENDAS = ['pago', 'emendas', 'autores'];
 export async function carregarEmendasUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('emendas: UF');
+  // Conferência cruzada: [Portal, Tesouro], em reais da época.
+  const ehPar = (x) => Array.isArray(x) && x.length === 2 && x.every((v) => Number.isFinite(v) && v >= 0);
   const resposta = await fetch(`/dados/emendas/${uf}.json`, { credentials: 'same-origin' });
   if (resposta.status === 404) return null;
   if (!resposta.ok) throw new Error(`Falha ao carregar as emendas de ${uf} (HTTP ${resposta.status})`);
@@ -283,6 +285,10 @@ export async function carregarEmendasUf(uf) {
       || !Object.entries(d.banco_comissao_relator).every(([a, v]) => /^\d{4}$/.test(a) && Number.isFinite(v) && v >= 0)))
     || (d.total !== undefined && (!d.total || typeof d.total !== 'object' || !Object.entries(d.total).every(([cod, anos]) => /^[0-9]{7}$/.test(cod)
       && anos && typeof anos === 'object' && Object.entries(anos).every(([a, v]) => (d.anos_total ?? []).includes(Number(a)) && Number.isFinite(v) && v >= 0))))
+    || (d.conferencia !== undefined && (!d.conferencia || typeof d.conferencia !== 'object' || !Object.entries(d.conferencia).every(([cod, anos]) => /^[0-9]{7}$/.test(cod)
+      && anos && typeof anos === 'object' && Object.entries(anos).every(([a, x]) => d.anos.includes(Number(a)) && ehPar(x)))))
+    || (d.conferencia_pais !== undefined && (!d.conferencia_pais || typeof d.conferencia_pais !== 'object'
+      || !Object.entries(d.conferencia_pais).every(([a, x]) => d.anos.includes(Number(a)) && ehPar(x))))
     || !d.cidades || typeof d.cidades !== 'object') {
     falhar(`emendas de ${uf}`);
   }
