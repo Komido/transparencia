@@ -250,7 +250,7 @@ p { margin: 0 0 var(--e-3); }
 .navegacao a[aria-current="page"] { color: var(--tinta); font-weight: 600; }
 
 /* Ao saltar para uma seção, ela não fica atrás do topo fixo. */
-main section[id], .texto h2[id] { scroll-margin-top: calc(var(--topo) + 8px); }
+main section[id], main h3[id], main article[id], .texto h2[id] { scroll-margin-top: calc(var(--topo) + 8px); }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

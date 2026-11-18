@@ -97,6 +97,15 @@ async function montarCustoStf() {
   }
 }
 
-montarPartidos();
-montarSalarioMinimo();
-montarCustoStf();
+// Link com #seção (ex.: #quem-julga-custo): os blocos acima crescem quando
+// os dados chegam e empurram o alvo para baixo. Refaz o salto no fim, a não
+// ser que a pessoa já tenha rolado a página.
+let usuarioRolou = false;
+['wheel', 'touchmove', 'keydown'].forEach((evento) => {
+  window.addEventListener(evento, () => { usuarioRolou = true; }, { passive: true, once: true });
+});
+
+Promise.allSettled([montarPartidos(), montarSalarioMinimo(), montarCustoStf()]).then(() => {
+  const alvo = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+  if (alvo && !usuarioRolou) requestAnimationFrame(() => alvo.scrollIntoView({ block: 'start' }));
+});
