@@ -55,6 +55,8 @@ TEMPORARIO = os.environ.get("RUNNER_TEMP", "/tmp")
 ORGAO = "10000"
 PRIMEIRO_ANO = 2023
 TOLERANCIA = 0.15
+# Muda quando a regra da conta muda, para refazer os anos já gravados.
+VERSAO_DA_CONTA = 2
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 CATEGORIAS = [
     ("ativos", "Servidores e ministros na ativa"),
@@ -168,7 +170,14 @@ def somar(linhas, ano):
             continue
         if grupo == "1":
             rtn = str(pega(l, "CATEGORIA_RTN") or "") if tem_rtn else ""
-            aposentado = rtn.startswith("2.2.3") if tem_rtn else str(pega(l, "ID_FUNCAO_PT") or "").strip() == "9"
+            if tem_rtn and rtn[:3] == "2.2":
+                aposentado = rtn.startswith("2.2.3")
+            else:
+                # Planilhas antigas sem a classificação: função 09 (previdência,
+                # "9" ou "09") ou ação de aposentadorias e pensões.
+                funcao = str(pega(l, "ID_FUNCAO_PT") or "").strip()
+                acao = str(pega(l, "NO_ACAO") or "").upper() if "NO_ACAO" in I else ""
+                aposentado = (funcao.isdigit() and int(funcao) == 9) or "APOSENTADORIA" in acao or "PENSO" in acao or "PENSÕ" in acao
             partes[INDICE["aposentados" if aposentado else "ativos"]] += valor
         elif grupo == "3":
             partes[INDICE["funcionamento"]] += valor
@@ -225,7 +234,7 @@ def main():
     anos = sorted(a for a in disponiveis if PRIMEIRO_ANO <= a < atual)
     print(f"planilhas no Tesouro: {sorted(disponiveis)}; anos usados: {anos}", flush=True)
     versoes = {str(a): disponiveis[a][1] for a in anos}
-    if antigo.get("versoes") == versoes:
+    if antigo.get("versoes") == versoes and antigo.get("versao") == VERSAO_DA_CONTA:
         print("Nenhuma planilha mudou; nada a gravar.")
         return
     valores, conferencia = {}, {}
@@ -245,7 +254,12 @@ def main():
             falhar(f"em {ano}, a despesa com pessoal da planilha e a do RGF diferem {dif:+.1%}")
         valores[str(ano)] = [round(total), [round(x) for x in partes]]
         conferencia[str(ano)] = {"planilha": round(pessoal), "rgf": round(rgf)}
+    for ano in anos:
+        partes = valores[str(ano)][1]
+        if partes[INDICE["aposentados"]] <= 0:
+            falhar(f"nenhuma aposentadoria do STF em {ano}: a separação entre ativos e aposentados falhou")
     gravar_json(DESTINO, {
+        "versao": VERSAO_DA_CONTA,
         "atualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "fonte": PAGINA,
         "versoes": versoes,
