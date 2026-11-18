@@ -75,3 +75,25 @@ jobs:
             done
             [ "$enviado" -eq 1 ] || exit 1
           done
+
+      # Um arquivo por cidade com a série inteira, para o gráfico da página da
+      # cidade. O script só grava com a série completa (desde março de 2023,
+      # sem mês faltando) e não reescreve arquivo igual: enquanto o histórico
+      # está sendo montado, nada muda aqui, e depois só muda quando entra mês
+      # novo. Um envio só por execução, para não gastar minutos de publicação.
+      - name: Série inteira por cidade
+        if: ${{ success() }}
+        run: |
+          set -uo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase --quiet
+          python3 scripts/beneficios_para_json.py --cidades
+          git add site/dados/beneficios/cidades 2>/dev/null || true
+          if git diff --cached --quiet; then echo "Nada mudou nos arquivos por cidade."; exit 0; fi
+          git commit -q -m "Atualiza série do Bolsa Família e BPC por cidade"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --quiet && git push --quiet; then exit 0; fi
+            sleep $((i * 5))
+          done
+          exit 1

@@ -38,6 +38,7 @@ Saídas:
 Uso:
   python3 scripts/beneficios_para_json.py --buscar [--minutos 300] [--max-meses 1] [--meses 2026-09,2025-09]
   python3 scripts/beneficios_para_json.py --montar
+  python3 scripts/beneficios_para_json.py --cidades   (série inteira por cidade, só com ela completa)
 
 Saída de --buscar: 0 quando gravou ao menos um mês; 3 quando não havia mês a
 buscar ou não havia tempo para um mês inteiro; 1 em erro.
@@ -321,10 +322,61 @@ def montar():
     print(f"montados {len(por_uf)} estados; meses no site {no_site[0]} a {no_site[-1]}; {len(meses)} meses gravados")
 
 
+CIDADES = f"{DESTINO}/cidades"
+
+
+def montar_cidades():
+    """Um arquivo pequeno por cidade com a série inteira, desde PRIMEIRO_MES
+    (site/dados/beneficios/cidades/CÓDIGO.json), lido pelo gráfico da página
+    da cidade. Só grava com a série completa, sem mês faltando: enquanto o
+    histórico está sendo montado, cada noite mudaria os 5.570 arquivos e
+    gastaria minutos de publicação à toa. Arquivo igual ao anterior não é
+    reescrito."""
+    todos = {}
+    for a in sorted(glob.glob(f"{FONTE}/????-??.json")):
+        with open(a, encoding="utf-8") as fh:
+            d = json.load(fh)
+        if d.get("campos") != CAMPOS:
+            falhar(f"{a}: campos diferentes de {CAMPOS}")
+        todos[d["mes"]] = d
+    if not todos:
+        print("nenhum mês gravado ainda; nada a montar por cidade")
+        return
+    meses = meses_entre(PRIMEIRO_MES, max(todos))
+    faltam = [m for m in meses if m not in todos]
+    if faltam:
+        print(f"série incompleta: faltam {len(faltam)} meses ({faltam[0]} a {faltam[-1]}); "
+              "os arquivos por cidade ficam para quando ela fechar")
+        return
+    codigos = sorted(set().union(*(todos[m]["municipios"] for m in meses)))
+    if not 5560 <= len(codigos) <= 5580 or not all(len(c) == 7 and c.isdigit() for c in codigos):
+        falhar(f"{len(codigos)} códigos de cidade na série; esperado perto de 5.570, com 7 dígitos")
+    mudaram = 0
+    for cod in codigos:
+        serie = [None if (v := todos[m]["municipios"].get(cod)) is None
+                 else [None if x is None else round(x) for x in v] for m in meses]
+        texto = json.dumps({"inicio": PRIMEIRO_MES, "campos": CAMPOS, "s": serie},
+                           ensure_ascii=False, separators=(",", ":")) + "\n"
+        caminho = f"{CIDADES}/{cod}.json"
+        try:
+            with open(caminho, encoding="utf-8") as fh:
+                if fh.read() == texto:
+                    continue
+        except OSError:
+            pass
+        os.makedirs(CIDADES, exist_ok=True)
+        with open(caminho + ".tmp", "w", encoding="utf-8") as fh:
+            fh.write(texto)
+        os.replace(caminho + ".tmp", caminho)
+        mudaram += 1
+    print(f"arquivos por cidade: {len(codigos)} cidades, {mudaram} mudaram; série de {meses[0]} a {meses[-1]}")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--buscar", action="store_true")
     p.add_argument("--montar", action="store_true")
+    p.add_argument("--cidades", action="store_true", help="um arquivo por cidade com a série inteira (só com ela completa)")
     p.add_argument("--minutos", type=float, default=300)
     p.add_argument("--max-meses", type=int, help="parar depois de gravar este número de meses")
     p.add_argument("--meses", help="meses AAAA-MM separados por vírgula (padrão: automático)")
@@ -343,8 +395,10 @@ def main():
         return
     if a.montar:
         montar()
-    if not (a.buscar or a.montar):
-        falhar("informe --buscar e/ou --montar")
+    if a.cidades:
+        montar_cidades()
+    if not (a.buscar or a.montar or a.cidades):
+        falhar("informe --buscar, --montar e/ou --cidades")
 
 
 if __name__ == "__main__":
