@@ -23,7 +23,7 @@ jobs:
       # gastos do STF (portal de transparência do STF e o arquivo anual
       # "Orçamento da despesa" do Portal da Transparência, que cobre o
       # orçamento federal inteiro). Só leitura, respeitando o robots.txt.
-      - name: STF, terceira rodada (linha sucessória, ministros, Senado 2002)
+      - name: STF, linha sucessória (começo da tabela oficial)
         continue-on-error: true
         env:
           PYTHONUNBUFFERED: "1"
@@ -169,8 +169,8 @@ jobs:
           PALAVRAS = re.compile(r"ministr|composi|biografi|curr[ií]cul|transpar|or[cç]ament|despes|execu|remunera|di[aá]ria|passage|csv|xls|dados|abert|download", re.I)
 
           import calendar, subprocess
-          print("=" * 70 + "\nSenado: junho e dezembro de 2002, em quinzenas\n" + "=" * 70)
-          for mes in (5, 6, 12):
+          print("=" * 70 + "\nSenado: (pulado nesta rodada)\n" + "=" * 70)
+          for mes in ():
               fim = calendar.monthrange(2002, mes)[1]
               for d0, d1 in ((1, 15), (16, fim)):
                   url = f"https://legis.senado.leg.br/dadosabertos/votacao?dataInicio=2002-{mes:02d}-{d0:02d}&dataFim=2002-{mes:02d}-{d1:02d}"
@@ -199,14 +199,13 @@ jobs:
                   open("/tmp/linha.pdf", "wb").write(corpo)
                   txt = subprocess.run(["pdftotext", "-layout", "/tmp/linha.pdf", "-"], capture_output=True, text=True).stdout
                   linhas = [l for l in txt.splitlines() if l.strip()]
-                  print(f"  HTTP {st}, {len(corpo)} bytes, {len(linhas)} linhas de texto; as últimas 70:")
-                  for l in linhas[-70:]: print("   ", l[:220])
+                  print(f"  HTTP {st}, {len(corpo)} bytes, {len(linhas)} linhas de texto; as primeiras 130:")
+                  for l in linhas[:130]: print("   ", l[:230])
               except Exception as e:
                   print(f"  erro {e!r}")
 
           print("\n" + "=" * 70 + "\nSTF: página de cada ministro (nascimento, posse, indicação)\n" + "=" * 70)
-          for nome in ("EdsonFachin", "AlexandreMoraes", "GilmarMendes", "CarmenLucia", "DiasToffoli", "LuizFux",
-                       "NunesMarques", "AndreMendonca", "CristianoZanin", "FlavioDino"):
+          for nome in ():
               url = f"https://portal.stf.jus.br/textos/verTexto.asp?servico=bibliotecaConsultaProdutoBibliotecaPastaMinistro&pagina={nome}Principal"
               if not permitido(url): print(f"  {nome}: robots.txt não permite"); continue
               try:
