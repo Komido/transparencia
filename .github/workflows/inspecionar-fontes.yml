@@ -108,47 +108,19 @@ jobs:
               try: return json.loads(corpo.decode("utf-8")).get("items") or []
               except Exception: return None
 
-          resumo = []
-          for ano in (2025, 2024):
-              for cod in AMOSTRA:
-                  achado = None
-                  for tipo in TIPOS:
-                      itens = anexo(ano, cod, tipo, "RREO-Anexo 14")
-                      if itens: achado = (tipo, itens); break
-                  if not achado:
-                      print(f"\n{ano} {cod}: sem Anexo 14 nos dois tipos"); resumo.append((ano, cod, "-", None, None, None)); continue
-                  tipo, itens = achado
-                  linhas = [i for i in itens if TEMA.search(i.get("conta") or "")]
-                  print(f"\n{ano} {cod} ({tipo}): {len(itens)} linhas no Anexo 14, {len(linhas)} sobre ensino/FUNDEB/saúde")
+          # Cidades grandes que vieram sem as linhas de educação e saúde na
+          # coleta: todas as linhas do Anexo 14 de 2025, para ver se o texto é
+          # outro.
+          for cod in ("3509502", "3518800", "3525904"):
+              for tipo in TIPOS:
+                  itens = anexo(2025, cod, tipo, "RREO-Anexo 14")
+                  if not itens: continue
+                  print(f"\n{cod} ({tipo}): {len(itens)} linhas")
                   vistos = set()
-                  for i in linhas:
-                      chave = (i.get("cod_conta"), i.get("coluna"))
+                  for i in itens:
+                      chave = (i.get("cod_conta"), i.get("conta"))
                       if chave in vistos: continue
                       vistos.add(chave)
-                      print(f"   {i.get('cod_conta')} | {(i.get('conta') or '')[:110]} | {i.get('coluna')} | {i.get('valor')}")
-                  def valor(padrao_conta, padrao_coluna):
-                      for i in linhas:
-                          if re.search(padrao_conta, i.get("conta") or "", re.I) and re.search(padrao_coluna, i.get("coluna") or "", re.I):
-                              return i.get("valor")
-                      return None
-                  mde_v, mde_p = valor(r"Manuten", r"Valor Apurado"), valor(r"Manuten", r"Aplicado")
-                  sau_v, sau_p = valor(r"Sa[uú]de", r"Valor Apurado"), valor(r"Sa[uú]de", r"Aplicado")
-                  # Base pelo Anexo 3: impostos próprios (sem taxas) e cotas
-                  # constitucionais. Aproximada: confere a ordem de grandeza.
-                  a3 = anexo(ano, cod, tipo, "RREO-Anexo 03") or []
-                  col = [i for i in a3 if i.get("coluna") == "TOTAL (ÚLTIMOS 12 MESES)"]
-                  pc = {i.get("cod_conta"): float(i.get("valor") or 0) for i in col}
-                  contas = ("RREO3IPTU", "RREO3ISS", "RREO3ITBI", "RREO3IRRF", "RREO3CotaParteDoFPM",
-                            "RREO3CotaParteDoICMS", "RREO3CotaParteDoIPVA", "RREO3CotaParteDoITR")
-                  base3 = sum(pc.get(c, 0.0) for c in contas)
-                  if not any(c in pc for c in contas[:2]):
-                      print("   contas do Anexo 3:", sorted(k for k in pc if "IPTU" in k or "ISS" in k or "ITBI" in k or "IR" in k)[:12])
-                  def razao(v, p):
-                      return (float(v) / (float(p) / 100)) / base3 if v and p and base3 else None
-                  rm, rs = razao(mde_v, mde_p), razao(sau_v, sau_p)
-                  print(f"   MDE {mde_p}% (R$ {mde_v}); saúde {sau_p}% (R$ {sau_v}); base Anexo 3 R$ {base3:,.0f}; "
-                        f"base implícita / Anexo 3: MDE {rm and round(rm, 3)}, saúde {rs and round(rs, 3)}")
-                  resumo.append((ano, cod, tipo, mde_p, sau_p, rm))
-          print("\nRESUMO (ano, cidade, tipo, % educação, % saúde, base implícita/Anexo 3):")
-          for r in resumo: print("  ", r)
+                      print(f"   {i.get('cod_conta')} | {(i.get('conta') or '')[:140]}")
+                  break
           PY
