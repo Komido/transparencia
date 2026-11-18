@@ -131,60 +131,44 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # Terceira rodada (18/11): a API nova do TCE-CE traz o mesmo balanço
-          # mensal da despesa? E, em PE, quantas câmaras separam o salário dos
-          # vereadores num subelemento próprio (janeiro, o mês mais pesado).
-          titulo("TCE-CE: API nova, métodos e parâmetros")
+          # Quarta rodada (18/11): o balancete da despesa na API nova do TCE-CE
+          # (/balancetes_despesas_orcamentarias), parâmetros, paginação e se o
+          # pago bate com a API antiga em Acarape e Fortaleza.
+          titulo("TCE-CE: API nova, balancete da despesa")
           CEN = "https://api-dados-abertos.tce.ce.gov.br/sim/"
           yml, _ = pegar(CEN + "openapi_prod.yaml", tempo=240)
           if yml:
               linhas = yml.splitlines()
               caminhos = [(i, l.strip().rstrip(":")) for i, l in enumerate(linhas) if re.match(r"^  /\S+:\s*$", l)]
-              print(f"  {len(caminhos)} caminhos: {[c for _, c in caminhos]}")
-              m = re.search(r"servers:\s*\n((?:\s+-.*\n|\s+\w+:.*\n)+)", yml)
-              print("  servidores:", m.group(1)[:400] if m else "?")
               for j, (i, c) in enumerate(caminhos):
-                  if re.search(r"balancete_despesa_orcamentaria|/orgaos|/municipios$", c):
-                      fim = caminhos[j + 1][0] if j + 1 < len(caminhos) else i + 200
+                  if c == "/balancetes_despesas_orcamentarias":
+                      fim = caminhos[j + 1][0] if j + 1 < len(caminhos) else i + 300
                       bloco = "\n".join(linhas[i:fim])
-                      print(f"\n  --- {c} ---\n" + bloco[:3500])
-          for q in ("municipios", "orgaos?codigo_municipio=003&exercicio_orcamento=202500",
-                    "balancete_despesa_orcamentaria?codigo_municipio=003&exercicio_orcamento=202500&codigo_orgao=01&data_referencia=202512"):
-              html, _ = pegar(CEN + q, "application/json", tempo=240)
-              if html:
+                      params = re.findall(r"- name: (\S+)\n\s+in: query\n\s+required: (\w+)", bloco)
+                      print("  parâmetros (nome, obrigatório):", params)
+                      ref = re.search(r"\$ref: '#/components/schemas/(\w+)'", bloco)
+                      if ref:
+                          k = yml.find(f"\n    {ref.group(1)}:")
+                          print("  esquema da resposta:", yml[k:k + 200])
+                          item = re.search(r"\$ref: '#/components/schemas/(\w+)'", yml[k + 10:k + 2000])
+                          if item:
+                              k2 = yml.find(f"\n    {item.group(1)}:")
+                              print("  campos:", re.findall(r"\n        (\w+):\n", yml[k2:k2 + 8000]))
+          for cod, nome in (("003", "Acarape"), ("057", "Fortaleza")):
+              for q in (f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao=01&data_referencia=202512",
+                        f"codigo_municipio={cod}&exercicio_orcamento=202500&data_referencia_doc=202512&codigo_orgao=01"):
+                  html, _ = pegar(CEN + "balancetes_despesas_orcamentarias?" + q, "application/json", tempo=240)
+                  if not html: continue
                   d = como_json(html)
-                  if d is None: print("  começo:", html[:600]); continue
-                  if isinstance(d, dict): print("  chaves de topo:", {k: (type(v).__name__) for k, v in d.items()})
-                  regs = registros(d)[0]
-                  print(f"  {len(regs)} registros; campos: {list(regs[0].keys()) if regs else None}")
-                  for r in regs[:2]: print("   ", json.dumps(r, ensure_ascii=False)[:700])
-                  if "balancete" in q and regs:
-                      for c in ("valor_pago_ate_mes", "valor_estornos_pagos_ate_mes"):
-                          print(f"   soma {c}: {sum(float(str(r.get(c) or 0)) for r in regs):,.2f}")
-                  print("  começo bruto:", html[:300])
-
-          titulo("TCE-PE: janeiro de 2025, função Legislativa, subelementos do salário")
-          PE = "https://sistemas.tce.pe.gov.br/DadosAbertos/"
-          html, _ = pegar(PE + "DespesasMunicipais!json?FUNCAO=Legislativa&ANOREFERENCIA=2025&MESREFERENCIA=1", "application/json", tempo=420)
-          if html:
-              d = como_json(html)
-              print("  cabeçalho:", {k: v for k, v in (d or {}).get("resposta", {}).items() if k != "conteudo"})
-              regs = registros(d)[0]
-              ugs = collections.defaultdict(set)
-              for r in regs:
-                  if (r.get("ELEMENTODESPESA") or "").lower().startswith("vencimentos"):
-                      ugs[r.get("ID_UNIDADE_GESTORA")].add((r.get("SUBELEMENTODESPESA") or "").strip().upper())
-              subs = collections.Counter(x for v in ugs.values() for x in v)
-              print(f"  {len(regs)} empenhos; {len(ugs)} unidades com Vencimentos; subelementos (nº de unidades): {subs.most_common(30)}")
-              com_subsidio = [u for u, v in ugs.items() if any("SUBS" in x for x in v)]
-              print(f"  unidades com subelemento de subsídio: {len(com_subsidio)}")
-              zerado = collections.Counter(r.get("ID_UNIDADE_GESTORA") for r in regs if float(r.get("VALORPAGO") or 0) == 0 and float(r.get("VALORLIQUIDADO") or 0) > 0)
-              print(f"  unidades com empenho liquidado e pago zero: {len(zerado)}; exemplos {zerado.most_common(8)}")
-              print("  elementos (pago):", sorted(((k, round(v)) for k, v in collections.Counter({}).items()), key=lambda x: -x[1])[:5])
-              el = collections.defaultdict(float)
-              for r in regs: el[r.get("ELEMENTODESPESA")] += float(r.get("VALORPAGO") or 0)
-              print("  pago por elemento:", sorted(((k, round(v)) for k, v in el.items()), key=lambda x: -x[1])[:40])
-              print("  modalidades:", collections.Counter(r.get("MODALIDADE") for r in regs).most_common(6))
+                  regs = registros(d)[0] if d is not None else []
+                  print(f"  {nome}: {len(regs)} registros; campos: {list(regs[0].keys()) if regs else None}")
+                  if regs:
+                      print("   ", json.dumps(regs[0], ensure_ascii=False)[:900])
+                      for c in regs[0]:
+                          if c.startswith("valor"):
+                              print(f"    soma {c}: {sum(num(r.get(c)) for r in regs):,.2f}")
+                      print("    períodos:", collections.Counter(str(r.get("data_referencia") or r.get("data_referencia_doc")) for r in regs).most_common(5))
+                      break
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
