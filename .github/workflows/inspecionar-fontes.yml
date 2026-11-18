@@ -169,18 +169,43 @@ jobs:
           PALAVRAS = re.compile(r"ministr|composi|biografi|curr[ií]cul|transpar|or[cç]ament|despes|execu|remunera|di[aá]ria|passage|csv|xls|dados|abert|download", re.I)
 
           import subprocess
-          r = subprocess.run(["sudo", "apt-get", "install", "-y", "-qq", "python3-openpyxl"], capture_output=True, text=True)
-          print("apt python3-openpyxl:", r.returncode, r.stderr[-300:])
-          import openpyxl
+          import zipfile, xml.etree.ElementTree as ET
+          NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+          def ler_xlsx(caminho):
+              """[(aba, [linhas])] lendo o XML do xlsx, sem bibliotecas de fora."""
+              z = zipfile.ZipFile(caminho)
+              compart = []
+              if "xl/sharedStrings.xml" in z.namelist():
+                  for si in ET.fromstring(z.read("xl/sharedStrings.xml")).findall("m:si", NS):
+                      compart.append("".join(t.text or "" for t in si.iter("{%s}t" % NS["m"])))
+              livro = ET.fromstring(z.read("xl/workbook.xml"))
+              nomes = [sh.get("name") for sh in livro.find("m:sheets", NS)]
+              abas = sorted([n for n in z.namelist() if re.match(r"xl/worksheets/sheet\d+\.xml$", n)], key=lambda n: int(re.findall(r"\d+", n)[-1]))
+              saida = []
+              for nome, arq in zip(nomes, abas):
+                  linhas = []
+                  for row in ET.fromstring(z.read(arq)).iter("{%s}row" % NS["m"]):
+                      vals = []
+                      for c in row.findall("m:c", NS):
+                          v = c.find("m:v", NS)
+                          t = c.get("t")
+                          if v is None:
+                              ist = c.find("m:is", NS)
+                              vals.append("".join(x.text or "" for x in ist.iter("{%s}t" % NS["m"])) if ist is not None else None)
+                          elif t == "s":
+                              vals.append(compart[int(v.text)])
+                          else:
+                              vals.append(v.text)
+                      linhas.append(vals)
+                  saida.append((nome, linhas))
+              return saida
           print("=" * 70 + "\nTesouro: Despesas e Transferências Totais da União (valor pago), 2025\n" + "=" * 70)
           url = "https://www.tesourotransparente.gov.br/ckan/dataset/8675a0a4-31c5-4593-a24d-fb8e17376eca/resource/f40d5431-058d-48b8-9ab6-065fb0fce5b3/download/limite-gastos-lc200dez25.xlsx"
           try:
               st, tipo, final, corpo = baixar(url, 60_000_000)
               open("/tmp/lc200.xlsx", "wb").write(corpo)
-              wb = openpyxl.load_workbook("/tmp/lc200.xlsx", read_only=True, data_only=True)
-              for ws in wb.worksheets:
-                  linhas = list(ws.iter_rows(values_only=True))
-                  print(f"\n  aba {ws.title!r}: {len(linhas)} linhas")
+              for titulo, linhas in ler_xlsx("/tmp/lc200.xlsx"):
+                  print(f"\n  aba {titulo!r}: {len(linhas)} linhas")
                   for l in linhas[:8]: print("    ", [c for c in l if c is not None][:14])
                   for n, l in enumerate(linhas):
                       t = " ".join(str(c) for c in l if c is not None)
