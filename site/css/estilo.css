@@ -1430,3 +1430,13 @@ a.botao { text-decoration: none; }
   .tabela-stf td::before { content: attr(data-rotulo); color: var(--tinta-2); font-size: var(--fs-1); }
   .tabela-stf .papel { display: inline; margin-left: 6px; }
 }
+
+/* Em que a Câmara gastou: os números principais em linha, logo abaixo das
+   barras, e as notas em duas colunas no computador, alinhadas com as barras. */
+#mun-camara-tipos .numeros { margin-top: var(--e-4); }
+#mun-camara-tipos .numeros dd:not(.detalhe) { font-size: clamp(1.25rem, 5.5vw, 1.75rem); }
+.notas-colunas .nota { margin: 0 0 var(--e-3); }
+@media (min-width: 1024px) {
+  .notas-colunas { columns: 2; column-gap: var(--e-6); }
+  .notas-colunas .nota { max-width: none; break-inside: avoid; }
+}

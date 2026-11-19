@@ -505,7 +505,7 @@ const TETO_VEREADOR = [
   [500000, 60, 'de 300 mil a 500 mil habitantes'], [Infinity, 75, 'com mais de 500 mil habitantes'],
 ];
 
-async function textoMediaVereador(d, ano, partes) {
+async function mediaVereador(d, ano, partes) {
   const i = d.categorias.findIndex(([k]) => k === 'vereadores');
   if (i < 0 || !(partes[i] > 0)) return null;
   if (estado.vereadores === undefined) {
@@ -515,21 +515,22 @@ async function textoMediaVereador(d, ano, partes) {
   if (!v || ano < v.inicio || ano > v.fim) return null;
   const n = v.cidades[estado.cidade.codigo7]?.length;
   if (!n) return null;
-  const media = partes[i] / n / 12;
-  let texto = `Salário médio de cada vereador em ${ano}: ${f.moeda(media, 0)} por mês `
-    + `(subsídio pago no ano, ${f.reaisPorExtenso(partes[i])}, ÷ ${n} vereadores ÷ 12 meses). `
-    + `Aqui os valores são os de ${ano}, sem a correção pela inflação usada no resto do bloco, para comparar com o teto daquele ano.`;
+  const r = { subsidio: partes[i], n, media: partes[i] / n / 12 };
   const dep = DEPUTADO_ESTADUAL_MAXIMO[ano];
   const pop = estado.m?.a?.[String(ano)]?.p || estado.m?.p;
   if (dep && pop) {
     const [, pct, faixa] = TETO_VEREADOR.find(([limite]) => pop <= limite);
-    const teto = (dep * pct) / 100;
-    texto += ` Pela Constituição, numa cidade ${faixa}, o vereador pode receber até ${pct}% do salário de um deputado estadual: no máximo cerca de ${f.moeda(teto, 0)} por mês em ${ano}.`
-      + (media <= teto
-        ? ' A média fica abaixo desse teto.'
-        : ' A média fica um pouco acima desse valor: a soma do ano pode incluir 13º salário, adicional de férias e o salário maior do presidente da Câmara. Quem confere se o teto foi cumprido é o Tribunal de Contas.');
+    Object.assign(r, { pct, faixa, teto: (dep * pct) / 100 });
   }
-  return texto;
+  return r;
+}
+
+// Um número em destaque: rótulo, valor e uma linha de detalhe.
+function numeroDe(dl, rotulo, valor, detalhe) {
+  const div = el('div', null, null, dl);
+  el('dt', null, rotulo, div);
+  el('dd', null, valor, div);
+  if (detalhe) el('dd', 'detalhe', detalhe, div);
 }
 
 // Câmaras pequenas gastam poucos milhões: "R$ 1,4 mi", não "R$ 1 mi".
@@ -548,6 +549,7 @@ async function desenharCamaraTipos(ano) {
   const caixa = $('#mun-camara-tipos');
   caixa.hidden = true;
   campo('mun-camara-media')[0].hidden = true;
+  $('#mun-camara-tipos-numeros').replaceChildren();
   $('#mun-baixar-camaras').hidden = true;
   const { codigo7, uf } = estado.cidade;
   if (!UFS_COM_CAMARAS.has(uf)) return;
@@ -604,18 +606,33 @@ async function desenharCamaraTipos(ano) {
     const pct = (x.valor / soma) * 100;
     barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
   }
-  const media = await textoMediaVereador(d, anoUsado, partes);
+  const media = await mediaVereador(d, anoUsado, partes);
   if (anoEscolhido() !== ano) return;
+  const dl = $('#mun-camara-tipos-numeros');
+  dl.replaceChildren();
+  numeroDe(dl, `Total pago em ${anoUsado}`, f.reaisPorExtenso(total * fator), 'em dinheiro de hoje');
+  const conferencia = desenharConferenciaCamara(d, anoUsado, total, fator);
+  if (conferencia) numeroDe(dl, 'Conferência com o Tesouro Nacional', conferencia.valor, conferencia.detalhe);
   const pMedia = campo('mun-camara-media')[0];
   pMedia.hidden = !media;
-  pMedia.textContent = media ?? '';
+  if (media) {
+    numeroDe(dl, 'Salário médio de cada vereador, por mês', f.moeda(media.media, 0),
+      `${f.reaisPorExtenso(media.subsidio)} ÷ ${media.n} vereadores ÷ 12 meses, em valores de ${anoUsado}`);
+    const acima = media.teto && media.media > media.teto;
+    if (media.teto) {
+      numeroDe(dl, 'Teto do salário de vereador, por mês', f.moeda(media.teto, 0),
+        `pela Constituição, ${media.pct}% do salário de deputado estadual; ${acima ? 'a média passa um pouco do teto' : 'a média fica abaixo do teto'}`);
+    }
+    pMedia.textContent = `Salário médio: o subsídio pago no ano dividido pelos vereadores eleitos e por 12 meses, em valores de ${anoUsado}, `
+      + 'sem a correção pela inflação usada no resto do bloco, para comparar com o teto daquele ano. Todos os vereadores de uma Câmara recebem o mesmo subsídio, e só o presidente pode receber mais; a média pode incluir 13º salário e adicional de férias. '
+      + (media.teto ? `Pela Constituição, numa cidade ${media.faixa}, o vereador pode receber até ${media.pct}% do salário de um deputado estadual; o site usa o maior salário de deputado estadual que a Constituição permite. ` : '')
+      + (acima ? 'Nesta Câmara, a média passa um pouco do teto mensal, o que pode vir dessas parcelas; quem confere se o teto foi cumprido é o Tribunal de Contas.' : '');
+  }
   const separaSubsidio = d.categorias.some(([k]) => k === 'vereadores');
   const semSubsidio = separaSubsidio && !itens.some((x) => x.k === 'vereadores');
-  definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
-    + `Fonte: ${tribunal}, cada pagamento da Câmara pelo tipo de despesa.`
+  definir('mun-camara-tipos-nota', `Fonte: ${tribunal}, cada pagamento da Câmara pelo tipo de despesa. As barras e o total estão em dinheiro de hoje.`
     + (separaSubsidio ? '' : ` O ${tribunal} registra o salário dos vereadores (subsídio) no mesmo código do salário dos servidores, por isso os dois aparecem juntos.`)
     + (semSubsidio ? ' Neste ano, a Câmara não registrou nenhum pagamento como salário de vereador (subsídio); ele pode ter sido lançado junto com o dos servidores.' : ''));
-  desenharConferenciaCamara(d, anoUsado, total, fator);
   mostrar();
 }
 
@@ -628,23 +645,23 @@ function desenharConferenciaCamara(d, ano, total, fator) {
   const p = campo('mun-camara-tipos-conferencia')[0];
   const iCam = estado.indice.campos_despesa?.indexOf('camara') ?? -1;
   p.hidden = iCam < 0;
-  if (iCam < 0) return;
+  if (iCam < 0) return null;
   const custo = (r) => {
     const a = r?.a?.[String(ano)];
     return a?.ds === 'ok' && a.d?.[iCam] > 0 ? a.d[iCam] : null;
   };
   const diferenca = (a, b) => (Math.abs(a - b) / Math.max(a, b)) * 100;
   const daqui = custo(estado.m);
-  let texto;
+  let numero;
+  let texto = 'Conferência cruzada: o total do tribunal é comparado com o custo da Câmara que a prefeitura informou ao Tesouro Nacional. O tribunal conta o que foi pago; o Tesouro, o que foi liquidado.';
   if (!daqui) {
-    texto = `Conferência cruzada: a prefeitura não tem relatório válido no Tesouro Nacional para ${ano}, então este total não pôde ser comparado.`;
+    numero = { valor: 'sem dado', detalhe: `a prefeitura não tem relatório válido de ${ano} no Tesouro` };
   } else {
     const dif = diferenca(total, daqui);
-    const pct = textoDiferenca(dif);
-    texto = `Conferência cruzada: a prefeitura informou ao Tesouro Nacional um custo de ${f.reaisPorExtenso(daqui * fator)} para a Câmara em ${ano}, `
-      + (dif > 20
-        ? `${pct} diferente deste total; o site mostra cada número como a fonte publicou.`
-        : `diferença de ${pct} (o tribunal conta o que foi pago; o Tesouro, o que foi liquidado).`);
+    numero = dif < 0.1
+      ? { valor: 'igual', detalhe: `a prefeitura informou ${f.reaisPorExtenso(daqui * fator)}; diferença menor que 0,1%` }
+      : { valor: `${textoDiferenca(dif)} de diferença`, detalhe: `a prefeitura informou ${f.reaisPorExtenso(daqui * fator)}` };
+    if (dif > 20) texto += ' Aqui a diferença passa de 20%, e o site mostra cada número como a fonte publicou.';
   }
   // O estado inteiro: quantas câmaras com as duas fontes ficam a até 20%.
   let com = 0, perto = 0;
@@ -657,6 +674,7 @@ function desenharConferenciaCamara(d, ano, total, fator) {
   }
   if (com >= 50) texto += ` No estado, ${f.parteDoTotal((perto / com) * 100)} das ${f.numero(com)} câmaras com as duas fontes ficam a até 20% de diferença.`;
   p.textContent = texto;
+  return numero;
 }
 
 // ---------------------------------------------------------------------------
