@@ -140,6 +140,8 @@ jobs:
           st, cab, _, corpo, _ = baixar("https://pit.tce.pr.gov.br/robots.txt", "text/plain", 5000)
           print("  robots.txt:", st, cab.get("Content-Type"), corpo[:300])
           base = "https://pit.tce.pr.gov.br/Arquivos/{}_PIT_TodosArquivos.zip"
+          if not permitido(base.format(2025)):
+              raise SystemExit("o robots.txt do PIT não permite baixar os arquivos")
           for ano in (2026, 2025, 2024):
               st, cab, _, _, seg = baixar(base.format(ano), metodo="HEAD", tempo=120)
               print(f"  {ano}: HEAD HTTP {st} | {cab.get('Content-Length')} bytes | {cab.get('Last-Modified')} | {cab.get('Content-Type')} | aceita partes: {cab.get('Accept-Ranges')}")
