@@ -176,7 +176,38 @@ def candidatos(ano):
 # quociente partidário) e "ELEITO POR MÉDIA" (pelas sobras); suplente e não
 # eleito ficam de fora. Em 2024 eram cerca de 58 mil.
 ELEICAO_VEREADORES = (2024, 2025, 2028)
+# Mandato anterior: só a quantidade de vereadores eleitos em cada cidade, sem
+# nomes, para o salário médio por vereador dos anos 2021 a 2024 na página da
+# cidade (subsídio pago ÷ vereadores ÷ 12).
+ELEICAO_ANTERIOR = (2020, 2021, 2024)
 DESTINO_VEREADORES = "site/dados/vereadores"
+
+
+def contar_vereadores(mapa, ano):
+    """{UF: {código IBGE: vereadores eleitos}} da eleição do ano."""
+    por_cidade = collections.Counter()
+    sem_codigo = collections.Counter()
+    for l in candidatos(ano):
+        if l.get("DS_CARGO") != "VEREADOR" or not (l.get("DS_SIT_TOT_TURNO") or "").startswith("ELEITO"):
+            continue
+        ue = (l.get("SG_UE") or "").strip().lstrip("0")
+        ibge = mapa.get(ue)
+        if not ibge:
+            sem_codigo[f"{l.get('NM_UE')} ({l.get('SG_UF')})"] += 1
+            continue
+        por_cidade[(l.get("SG_UF"), ibge)] += 1
+    total = sum(por_cidade.values())
+    if not 55000 <= total <= 62000:
+        falhar(f"{total} vereadores eleitos em {ano}; esperado perto de 58 mil")
+    if len(sem_codigo) > 5:
+        falhar(f"{len(sem_codigo)} cidades sem código do IBGE nos vereadores de {ano}: {list(sem_codigo)[:10]}")
+    por_uf = collections.defaultdict(dict)
+    for (uf, ibge), n in por_cidade.items():
+        if not 5 <= n <= 60:
+            falhar(f"{ibge} ({uf}): {n} vereadores eleitos em {ano}; a lei permite de 9 a 55")
+        por_uf[uf][ibge] = n
+    print(f"vereadores {ano}: {total} eleitos em {len(por_cidade)} cidades (só a contagem)", flush=True)
+    return por_uf
 
 
 def vereadores(mapa):
@@ -211,6 +242,8 @@ def vereadores(mapa):
         if not 5 <= len(lista) <= 60:
             falhar(f"{ibge} ({uf}): {len(lista)} vereadores eleitos; a lei permite de 9 a 55")
         por_uf[uf][ibge] = sorted(lista, key=lambda x: sem_acento(x[0]))
+    ano_ant, inicio_ant, fim_ant = ELEICAO_ANTERIOR
+    anterior = contar_vereadores(mapa, ano_ant)
     for uf in UFS:
         gravar_json(f"{DESTINO_VEREADORES}/{uf}.json", {
             "uf": uf, "fonte": "TSE, dados abertos (candidatos e códigos de municípios)",
@@ -218,6 +251,8 @@ def vereadores(mapa):
             "campos": ["nome", "feminino", "partido", "eleito_por"],
             "partidos": {p: partidos[p] for p in sorted({x[2] for lst in por_uf[uf].values() for x in lst})},
             "cidades": por_uf[uf],
+            "anterior": {"eleicao": ano_ant, "inicio": inicio_ant, "fim": fim_ant,
+                         "quantidade": dict(sorted(anterior.get(uf, {}).items()))},
         })
     print(f"vereadores {ano}: {total} eleitos em {len(por_cidade)} cidades", flush=True)
     return partidos
