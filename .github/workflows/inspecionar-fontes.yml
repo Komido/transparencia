@@ -143,7 +143,7 @@ jobs:
               local = open("site" + caminho, "rb").read()
               print(f"  {caminho}: HTTP {st} | {len(corpo)} bytes publicados, {len(local)} no repositório | "
                     f"{'IGUAL' if hashlib.sha256(corpo).digest() == hashlib.sha256(local).digest() else 'DIFERENTE'} | "
-                    f"tem PR: {b'PR' in corpo and (b\"'PR'\" in corpo or b'camaras-pr' in corpo or b'\"uf\":\"PR\"' in corpo)} | {cab.get('Last-Modified') or cab.get('ETag')}")
+                    f"tem PR: {any(m in corpo for m in (b'PR: ', b'camaras-pr', b'uf": "PR', b'"uf":"PR"', b"'PR'"))} | {cab.get('Last-Modified') or cab.get('ETag')}")
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
