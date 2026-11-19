@@ -16,27 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      # Minas Gerais: em 17/11 o portal de dados do TCE-MG não respondia daqui
-      # e, de São Paulo, mostrava um certificado que as ferramentas recusam.
-      # Só diagnóstico: a cadeia de certificados que o servidor manda e o
-      # resultado da verificação, sem desligar verificação nenhuma.
-      - name: Certificados dos portais do TCE-MG
-        run: |
-          for h in dadosabertos.tce.mg.gov.br www.tce.mg.gov.br fiscalizandocomtce.tce.mg.gov.br; do
-            echo "=== $h"
-            timeout 60 openssl s_client -connect "$h:443" -servername "$h" -showcerts </dev/null 2>&1 \
-              | grep -E "^ *[0-9] s:|^ *i:|Verify return code|verify error|Certificate chain|errno|connect:" | head -20 || echo "sem resposta"
-            timeout 60 openssl s_client -connect "$h:443" -servername "$h" </dev/null 2>/dev/null \
-              | openssl x509 -noout -subject -issuer -dates -ext authorityInfoAccess 2>/dev/null || true
-          done
-
       # Câmaras de Pernambuco e do Ceará: em que cada Câmara gastou, pelas
       # APIs de dados abertos dos Tribunais de Contas (TCE-PE e TCE-CE). Lista
       # todas as entidades e métodos, a ligação entre unidade gestora, Câmara e
       # município, e consulta uma Câmara pequena e uma grande para ver tamanho,
       # campos, valor pago e se há limite de linhas. Só leitura, respeitando o
       # robots.txt e o Crawl-Delay.
-      - name: Tribunais de Contas de MG e PR (despesas das câmaras)
+      - name: Arquivo anual do TCE-PR (despesas das câmaras)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -145,43 +131,52 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # 19/11: Minas Gerais (o portal voltou?) e Paraná (área "Download de
-          # Dados" do PIT, consolidado do estado). Só leitura.
-          import ssl
-          def listar(url, filtro=r"dado|despesa|empenho|download|consolid|arquivo|csv|zip|legisl|camara|câmara|municip", maximo=60):
-              html, final = pegar(url, tempo=120)
-              if not html: return None, None
-              links = []
-              for m in re.finditer(r'<a[^>]+href="([^"#]+)"[^>]*>(.*?)</a>', html, re.S | re.I):
-                  t = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
-                  u = urllib.parse.urljoin(final, m.group(1))
-                  if re.search(filtro, u + " " + t, re.I) and u not in [x for x, _ in links]:
-                      links.append((u, t))
-              print(f"  links ligados ao assunto: {len(links)}")
-              for u, t in links[:maximo]: print(f"    {t[:70]!r} -> {u}")
-              formularios = re.findall(r"<(form|select|input)[^>]{0,200}", html, re.I)
-              if formularios: print("  formulários:", formularios[:25])
-              print("  texto:", texto_da_pagina(html, 1500))
-              return html, final
+          # 19/11: Paraná. O Portal Informação para Todos (PIT) do TCE-PR tem um
+          # zip por ano com todos os temas de todos os municípios, gerado uma
+          # vez por semana. Tamanho, arquivos de dentro, colunas e amostra dos
+          # que tratam de despesa e de entidades. Só leitura.
+          import io, os, zipfile
+          titulo("TCE-PR: arquivo anual consolidado do PIT")
+          st, cab, _, corpo, _ = baixar("https://pit.tce.pr.gov.br/robots.txt", "text/plain", 5000)
+          print("  robots.txt:", st, cab.get("Content-Type"), corpo[:300])
+          base = "https://pit.tce.pr.gov.br/Arquivos/{}_PIT_TodosArquivos.zip"
+          for ano in (2026, 2025, 2024):
+              st, cab, _, _, seg = baixar(base.format(ano), metodo="HEAD", tempo=120)
+              print(f"  {ano}: HEAD HTTP {st} | {cab.get('Content-Length')} bytes | {cab.get('Last-Modified')} | {cab.get('Content-Type')} | aceita partes: {cab.get('Accept-Ranges')}")
+          destino = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "pr-2025.zip")
+          url = base.format(2025)
+          inicio = time.time()
+          req = urllib.request.Request(url, headers={"User-Agent": AGENTE})
+          with urllib.request.urlopen(req, timeout=600) as r, open(destino, "wb") as fh:
+              while bloco := r.read(1 << 20):
+                  fh.write(bloco)
+          print(f"  2025 baixado: {os.path.getsize(destino) / 1e6:.0f} MB em {(time.time() - inicio) / 60:.1f} min")
 
-          titulo("TCE-MG: portal de dados abertos")
-          for url in ("https://dadosabertos.tce.mg.gov.br/", "https://dadosabertos.tce.mg.gov.br/dataset",
-                      "https://www.tce.mg.gov.br/", "https://fiscalizandocomtce.tce.mg.gov.br/"):
-              try:
-                  ctx = ssl.create_default_context()
-                  with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": AGENTE}), timeout=60, context=ctx) as r:
-                      print(f"\n  {url}: TLS ok, HTTP {r.status}")
-              except Exception as e:
-                  print(f"\n  {url}: {e!r}"[:400])
-                  continue
-              listar(url)
+          def abrir_texto(z, info):
+              bruto = z.open(info)
+              amostra = bruto.peek(4000)[:4000] if hasattr(bruto, "peek") else b""
+              enc = "utf-8-sig" if (amostra.startswith(b"\xef\xbb\xbf") or b"\xc3" in amostra) else "latin-1"
+              return io.TextIOWrapper(z.open(info), encoding=enc, errors="replace", newline="")
 
-          titulo("TCE-PR: download de dados do PIT")
-          for url in ("https://pit.tce.pr.gov.br/Dados/DadosConsulta/Consolidado",
-                      "https://pit.tce.pr.gov.br/Dados/DadosConsulta/Consulta"):
-              listar(url)
-          html, _ = pegar("https://www1.tce.pr.gov.br/transparencia-do-tce-pr/dados-abertos-tce-pr/dados-abertos-acessar.htm", tempo=120)
-          if html: print("  texto:", texto_da_pagina(html, 2500))
+          def mostrar_zip(z, nivel=""):
+              for info in z.infolist():
+                  print(f"  {nivel}{info.filename} | {info.file_size / 1e6:.1f} MB (compactado {info.compress_size / 1e6:.1f} MB)")
+              for info in z.infolist():
+                  nome = info.filename.lower()
+                  if nome.endswith(".zip"):
+                      with z.open(info) as interno:
+                          dados = io.BytesIO(interno.read())
+                      print(f"\n  >>> dentro de {info.filename}:")
+                      mostrar_zip(zipfile.ZipFile(dados), nivel + "    ")
+                      continue
+                  if not re.search(r"despes|empenh|pagament|liquid|entidade|relacion|municip|orgao|órgão|unidade", nome):
+                      continue
+                  with abrir_texto(z, info) as t:
+                      linhas = [t.readline() for _ in range(4)]
+                  print(f"\n  --- {info.filename}")
+                  for l in linhas: print("     |", l.rstrip()[:900])
+          z = zipfile.ZipFile(destino)
+          mostrar_zip(z)
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
