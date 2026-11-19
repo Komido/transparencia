@@ -16,13 +16,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # Minas Gerais: em 17/11 o portal de dados do TCE-MG não respondia daqui
+      # e, de São Paulo, mostrava um certificado que as ferramentas recusam.
+      # Só diagnóstico: a cadeia de certificados que o servidor manda e o
+      # resultado da verificação, sem desligar verificação nenhuma.
+      - name: Certificados dos portais do TCE-MG
+        run: |
+          for h in dadosabertos.tce.mg.gov.br www.tce.mg.gov.br fiscalizandocomtce.tce.mg.gov.br; do
+            echo "=== $h"
+            timeout 60 openssl s_client -connect "$h:443" -servername "$h" -showcerts </dev/null 2>&1 \
+              | grep -E "^ *[0-9] s:|^ *i:|Verify return code|verify error|Certificate chain|errno|connect:" | head -20 || echo "sem resposta"
+            timeout 60 openssl s_client -connect "$h:443" -servername "$h" </dev/null 2>/dev/null \
+              | openssl x509 -noout -subject -issuer -dates -ext authorityInfoAccess 2>/dev/null || true
+          done
+
       # Câmaras de Pernambuco e do Ceará: em que cada Câmara gastou, pelas
       # APIs de dados abertos dos Tribunais de Contas (TCE-PE e TCE-CE). Lista
       # todas as entidades e métodos, a ligação entre unidade gestora, Câmara e
       # município, e consulta uma Câmara pequena e uma grande para ver tamanho,
       # campos, valor pago e se há limite de linhas. Só leitura, respeitando o
       # robots.txt e o Crawl-Delay.
-      - name: Câmaras de PE e CE nas APIs dos Tribunais de Contas
+      - name: Tribunais de Contas de MG e PR (despesas das câmaras)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -131,44 +145,43 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # Quarta rodada (18/11): o balancete da despesa na API nova do TCE-CE
-          # (/balancetes_despesas_orcamentarias), parâmetros, paginação e se o
-          # pago bate com a API antiga em Acarape e Fortaleza.
-          titulo("TCE-CE: API nova, balancete da despesa")
-          CEN = "https://api-dados-abertos.tce.ce.gov.br/sim/"
-          yml, _ = pegar(CEN + "openapi_prod.yaml", tempo=240)
-          if yml:
-              linhas = yml.splitlines()
-              caminhos = [(i, l.strip().rstrip(":")) for i, l in enumerate(linhas) if re.match(r"^  /\S+:\s*$", l)]
-              for j, (i, c) in enumerate(caminhos):
-                  if c == "/balancetes_despesas_orcamentarias":
-                      fim = caminhos[j + 1][0] if j + 1 < len(caminhos) else i + 300
-                      bloco = "\n".join(linhas[i:fim])
-                      params = re.findall(r"- name: (\S+)\n\s+in: query\n\s+required: (\w+)", bloco)
-                      print("  parâmetros (nome, obrigatório):", params)
-                      ref = re.search(r"\$ref: '#/components/schemas/(\w+)'", bloco)
-                      if ref:
-                          k = yml.find(f"\n    {ref.group(1)}:")
-                          print("  esquema da resposta:", yml[k:k + 200])
-                          item = re.search(r"\$ref: '#/components/schemas/(\w+)'", yml[k + 10:k + 2000])
-                          if item:
-                              k2 = yml.find(f"\n    {item.group(1)}:")
-                              print("  campos:", re.findall(r"\n        (\w+):\n", yml[k2:k2 + 8000]))
-          for cod, nome in (("003", "Acarape"), ("057", "Fortaleza")):
-              for q in (f"codigo_municipio={cod}&exercicio_orcamento=202500&codigo_orgao=01&data_referencia=202512",
-                        f"codigo_municipio={cod}&exercicio_orcamento=202500&data_referencia_doc=202512&codigo_orgao=01"):
-                  html, _ = pegar(CEN + "balancetes_despesas_orcamentarias?" + q, "application/json", tempo=240)
-                  if not html: continue
-                  d = como_json(html)
-                  regs = registros(d)[0] if d is not None else []
-                  print(f"  {nome}: {len(regs)} registros; campos: {list(regs[0].keys()) if regs else None}")
-                  if regs:
-                      print("   ", json.dumps(regs[0], ensure_ascii=False)[:900])
-                      for c in regs[0]:
-                          if c.startswith("valor"):
-                              print(f"    soma {c}: {sum(num(r.get(c)) for r in regs):,.2f}")
-                      print("    períodos:", collections.Counter(str(r.get("data_referencia") or r.get("data_referencia_doc")) for r in regs).most_common(5))
-                      break
+          # 19/11: Minas Gerais (o portal voltou?) e Paraná (área "Download de
+          # Dados" do PIT, consolidado do estado). Só leitura.
+          import ssl
+          def listar(url, filtro=r"dado|despesa|empenho|download|consolid|arquivo|csv|zip|legisl|camara|câmara|municip", maximo=60):
+              html, final = pegar(url, tempo=120)
+              if not html: return None, None
+              links = []
+              for m in re.finditer(r'<a[^>]+href="([^"#]+)"[^>]*>(.*?)</a>', html, re.S | re.I):
+                  t = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip()
+                  u = urllib.parse.urljoin(final, m.group(1))
+                  if re.search(filtro, u + " " + t, re.I) and u not in [x for x, _ in links]:
+                      links.append((u, t))
+              print(f"  links ligados ao assunto: {len(links)}")
+              for u, t in links[:maximo]: print(f"    {t[:70]!r} -> {u}")
+              formularios = re.findall(r"<(form|select|input)[^>]{0,200}", html, re.I)
+              if formularios: print("  formulários:", formularios[:25])
+              print("  texto:", texto_da_pagina(html, 1500))
+              return html, final
+
+          titulo("TCE-MG: portal de dados abertos")
+          for url in ("https://dadosabertos.tce.mg.gov.br/", "https://dadosabertos.tce.mg.gov.br/dataset",
+                      "https://www.tce.mg.gov.br/", "https://fiscalizandocomtce.tce.mg.gov.br/"):
+              try:
+                  ctx = ssl.create_default_context()
+                  with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": AGENTE}), timeout=60, context=ctx) as r:
+                      print(f"\n  {url}: TLS ok, HTTP {r.status}")
+              except Exception as e:
+                  print(f"\n  {url}: {e!r}"[:400])
+                  continue
+              listar(url)
+
+          titulo("TCE-PR: download de dados do PIT")
+          for url in ("https://pit.tce.pr.gov.br/Dados/DadosConsulta/Consolidado",
+                      "https://pit.tce.pr.gov.br/Dados/DadosConsulta/Consulta"):
+              listar(url)
+          html, _ = pegar("https://www1.tce.pr.gov.br/transparencia-do-tce-pr/dados-abertos-tce-pr/dados-abertos-acessar.htm", tempo=120)
+          if html: print("  texto:", texto_da_pagina(html, 2500))
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
