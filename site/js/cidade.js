@@ -490,6 +490,48 @@ const TIPOS_CAMARA = {
   outros: 'auxílio-alimentação, indenizações, contas de anos anteriores e outros',
 };
 
+// Salário médio de cada vereador (SP, RS e PR, onde o subsídio vem num
+// código próprio): subsídio pago no ano ÷ vereadores eleitos (TSE) ÷ 12, em
+// valores da época, comparado com o teto do artigo 29, VI, da Constituição,
+// uma parte do salário do deputado estadual conforme a população. Salário de
+// deputado estadual: o máximo da Constituição, 75% do deputado federal
+// (Decreto Legislativo 172/2022), que é o valor pago em SP (Lei 17.617/2023);
+// em 2025, R$ 33.006,39 em janeiro e R$ 34.774,64 de fevereiro em diante, e a
+// conta usa a média do ano. Sem nomes de vereadores.
+const DEPUTADO_ESTADUAL_MAXIMO = { 2025: (33006.39 + 11 * 34774.64) / 12 };
+const TETO_VEREADOR = [
+  [10000, 20, 'com até 10 mil habitantes'], [50000, 30, 'de 10 mil a 50 mil habitantes'],
+  [100000, 40, 'de 50 mil a 100 mil habitantes'], [300000, 50, 'de 100 mil a 300 mil habitantes'],
+  [500000, 60, 'de 300 mil a 500 mil habitantes'], [Infinity, 75, 'com mais de 500 mil habitantes'],
+];
+
+async function textoMediaVereador(d, ano, partes) {
+  const i = d.categorias.findIndex(([k]) => k === 'vereadores');
+  if (i < 0 || !(partes[i] > 0)) return null;
+  if (estado.vereadores === undefined) {
+    try { estado.vereadores = await carregarVereadoresUf(estado.cidade.uf); } catch (erro) { console.error(erro); estado.vereadores = null; }
+  }
+  const v = estado.vereadores;
+  if (!v || ano < v.inicio || ano > v.fim) return null;
+  const n = v.cidades[estado.cidade.codigo7]?.length;
+  if (!n) return null;
+  const media = partes[i] / n / 12;
+  let texto = `Salário médio de cada vereador em ${ano}: ${f.moeda(media, 0)} por mês `
+    + `(subsídio pago no ano, ${f.reaisPorExtenso(partes[i])}, ÷ ${n} vereadores ÷ 12 meses). `
+    + `Aqui os valores são os de ${ano}, sem a correção pela inflação usada no resto do bloco, para comparar com o teto daquele ano.`;
+  const dep = DEPUTADO_ESTADUAL_MAXIMO[ano];
+  const pop = estado.m?.a?.[String(ano)]?.p || estado.m?.p;
+  if (dep && pop) {
+    const [, pct, faixa] = TETO_VEREADOR.find(([limite]) => pop <= limite);
+    const teto = (dep * pct) / 100;
+    texto += ` Pela Constituição, numa cidade ${faixa}, o vereador pode receber até ${pct}% do salário de um deputado estadual: no máximo cerca de ${f.moeda(teto, 0)} por mês em ${ano}.`
+      + (media <= teto
+        ? ' A média fica abaixo desse teto.'
+        : ' A média fica um pouco acima desse valor: a soma do ano pode incluir 13º salário, adicional de férias e o salário maior do presidente da Câmara. Quem confere se o teto foi cumprido é o Tribunal de Contas.');
+  }
+  return texto;
+}
+
 // Câmaras pequenas gastam poucos milhões: "R$ 1,4 mi", não "R$ 1 mi".
 const milhoes = (v) => (Math.abs(v) >= 1e6 && Math.abs(v) < 1e8 ? `R$\u00A0${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v));
 
@@ -505,6 +547,7 @@ function textoCamaraFora(motivo, tribunal, ano) {
 async function desenharCamaraTipos(ano) {
   const caixa = $('#mun-camara-tipos');
   caixa.hidden = true;
+  campo('mun-camara-media')[0].hidden = true;
   $('#mun-baixar-camaras').hidden = true;
   const { codigo7, uf } = estado.cidade;
   if (!UFS_COM_CAMARAS.has(uf)) return;
@@ -561,6 +604,11 @@ async function desenharCamaraTipos(ano) {
     const pct = (x.valor / soma) * 100;
     barraDe(lista, x.rotulo, TIPOS_CAMARA[x.k], `${f.parteDoTotal(pct)} · ${milhoes(x.valor * fator)}`, pct);
   }
+  const media = await textoMediaVereador(d, anoUsado, partes);
+  if (anoEscolhido() !== ano) return;
+  const pMedia = campo('mun-camara-media')[0];
+  pMedia.hidden = !media;
+  pMedia.textContent = media ?? '';
   const separaSubsidio = d.categorias.some(([k]) => k === 'vereadores');
   const semSubsidio = separaSubsidio && !itens.some((x) => x.k === 'vereadores');
   definir('mun-camara-tipos-nota', `Total pago em ${anoUsado}: ${f.reaisPorExtenso(total * fator)}, em dinheiro de hoje. `
