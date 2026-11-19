@@ -1,4 +1,4 @@
-name: Câmaras municipais de SP, RS, PE e CE, em que gastaram (Tribunais de Contas)
+name: Câmaras municipais de SP, RS, PE, CE e PR, em que gastaram (Tribunais de Contas)
 
 # Baixa os arquivos anuais de despesas dos municípios dos Tribunais de Contas
 # de SP (mais de 2 GB por ano) e do RS (1,4 GB por ano, com 10 segundos entre
@@ -10,6 +10,8 @@ name: Câmaras municipais de SP, RS, PE e CE, em que gastaram (Tribunais de Cont
 # dois tribunais (scripts/camaras_pe_para_json.py, 12 consultas por ano, e
 # scripts/camaras_ce_para_json.py, uma ou duas por cidade e ano): só o ano
 # fechado mais recente é consultado de novo, e só até junho do ano seguinte.
+# PR vem do zip anual do TCE-PR (scripts/camaras_pr_para_json.py, 1,4 GB por
+# ano), baixado de novo só se mudou e só até junho do ano seguinte.
 # Um estado que falhar não impede os outros de gravar, mas a tarefa termina
 # com erro para avisar. Na execução manual, "estados" escolhe quais rodar. Uma
 # vez por mês, disparada pelo agendador do banco (pg_cron,
@@ -21,7 +23,7 @@ on:
       estados:
         description: "Estados a atualizar, separados por espaço"
         required: false
-        default: "SP RS PE CE"
+        default: "SP RS PE CE PR"
 
 permissions:
   contents: write
@@ -38,28 +40,34 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Somar os gastos das câmaras de SP
-        if: ${{ contains(inputs.estados || 'SP RS PE CE', 'SP') }}
+        if: ${{ contains(inputs.estados || 'SP RS PE CE PR', 'SP') }}
         env:
           PYTHONUNBUFFERED: "1"
         run: python3 scripts/camaras_sp_para_json.py
 
       - name: Somar os gastos das câmaras do RS
-        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE', 'RS') }}
+        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE PR', 'RS') }}
         env:
           PYTHONUNBUFFERED: "1"
         run: python3 scripts/camaras_rs_para_json.py
 
       - name: Somar os gastos das câmaras de PE
-        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE', 'PE') }}
+        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE PR', 'PE') }}
         env:
           PYTHONUNBUFFERED: "1"
         run: python3 scripts/camaras_pe_para_json.py
 
       - name: Somar os gastos das câmaras do CE
-        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE', 'CE') }}
+        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE PR', 'CE') }}
         env:
           PYTHONUNBUFFERED: "1"
         run: python3 scripts/camaras_ce_para_json.py
+
+      - name: Somar os gastos das câmaras do PR
+        if: ${{ !cancelled() && contains(inputs.estados || 'SP RS PE CE PR', 'PR') }}
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python3 scripts/camaras_pr_para_json.py
 
       - name: Gravar se mudou
         if: ${{ !cancelled() }}
