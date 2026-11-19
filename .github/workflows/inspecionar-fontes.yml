@@ -133,17 +133,25 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # 19/11: o site publicado já tem o código e os dados do PR? Compara
-          # os arquivos servidos pela Cloudflare com os do repositório.
-          titulo("Site publicado contra o repositório")
-          import hashlib
-          SITE = "https://arrecadometro-brasil.tsuneokomido.workers.dev"
-          for caminho in ("/js/cidade.js", "/js/dados.js", "/dados/camaras/PR.json", "/dados/camaras/PE.json", "/metodologia.html"):
-              st, cab, _, corpo, seg = baixar(SITE + caminho + "?v=" + str(int(time.time())), tempo=60)
-              local = open("site" + caminho, "rb").read()
-              print(f"  {caminho}: HTTP {st} | {len(corpo)} bytes publicados, {len(local)} no repositório | "
-                    f"{'IGUAL' if hashlib.sha256(corpo).digest() == hashlib.sha256(local).digest() else 'DIFERENTE'} | "
-                    f"tem PR: {any(m in corpo for m in (b'PR: ', b'camaras-pr', b'uf": "PR', b'"uf":"PR"', b"'PR'"))} | {cab.get('Last-Modified') or cab.get('ETag')}")
+          # 19/11: salário de deputado federal (Decreto Legislativo 172/2022) e
+          # de deputado estadual de SP (Lei 17.617/2023), para o teto do
+          # subsídio dos vereadores (Constituição, art. 29, VI). Só leitura.
+          titulo("Subsídios de deputados: textos oficiais")
+          for url in ("https://www2.camara.leg.br/legin/fed/decleg/2022/decretolegislativo-172-21-dezembro-2022-793529-publicacaooriginal-166604-pl.html",
+                      "https://www2.camara.leg.br/legin/fed/decleg/2022/decretolegislativo-172-21-dezembro-2022-793529-republicacao-166629-pl.html",
+                      "https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17617-16.01.2023.html",
+                      "https://www.al.sp.gov.br/repositorio/folha-de-pagamento/folha-deputados-2025-10.html"):
+              html, _ = pegar(url, tempo=90)
+              if not html: continue
+              t = texto_da_pagina(html, 200000)
+              trechos = [m.group(0) for m in re.finditer(r"[^|]{0,220}R\$\s*[\d.]+,\d{2}[^|]{0,160}", t)]
+              print(f"  {len(trechos)} trechos com valores:")
+              vistos = set()
+              for x in trechos:
+                  x = " ".join(x.split())
+                  if x not in vistos:
+                      vistos.add(x); print("   -", x[:420])
+                  if len(vistos) >= 12: break
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
