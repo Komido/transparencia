@@ -491,6 +491,13 @@ export async function carregarVereadoresUf(uf) {
       && x.length === 4 && ehTexto(x[0]) && (x[1] === 0 || x[1] === 1) && ehTexto(x[2]) && ['qp', 'media'].includes(x[3])))) {
     falhar(`vereadores de ${uf}`);
   }
+  // Mandato anterior: só a quantidade de eleitos por cidade (opcional).
+  const ant = d.anterior;
+  if (ant !== undefined && (!ant || !Number.isInteger(ant.eleicao) || !Number.isInteger(ant.inicio) || !Number.isInteger(ant.fim)
+    || !ant.quantidade || typeof ant.quantidade !== 'object'
+    || !Object.entries(ant.quantidade).every(([cod, n]) => /^[0-9]{7}$/.test(cod) && Number.isInteger(n) && n > 0 && n <= 60))) {
+    falhar(`vereadores do mandato anterior de ${uf}`);
+  }
   return d;
 }
 

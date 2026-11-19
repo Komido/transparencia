@@ -1440,3 +1440,19 @@ a.botao { text-decoration: none; }
   .notas-colunas { columns: 2; column-gap: var(--e-6); }
   .notas-colunas .nota { max-width: none; break-inside: avoid; }
 }
+
+/* Quanto custa a Câmara: no computador, o número à esquerda e a explicação à
+   direita, na mesma faixa, em vez de um texto estreito embaixo. */
+@media (min-width: 1024px) {
+  .camara-resumo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--e-6);
+    align-items: center;
+    border-top: 1px solid var(--borda);
+    border-bottom: 1px solid var(--borda);
+    margin-bottom: var(--e-4);
+  }
+  .camara-resumo .numeros { border: 0; margin: 0; }
+  .camara-resumo .nota { max-width: none; margin: 0; padding: var(--e-4) 0; }
+}
