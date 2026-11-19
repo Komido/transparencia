@@ -355,11 +355,11 @@ export async function carregarStf() {
 }
 
 // Gastos das câmaras municipais por tipo de despesa (Tribunais de Contas de
-// SP, RS, PE e CE; scripts/camaras_UF_para_json.py): {anos, categorias:
+// SP, RS, PE, CE e PR; scripts/camaras_UF_para_json.py): {anos, categorias:
 // [[chave, rótulo]], cidades: {código: {ano: [total pago, [por categoria]]}},
 // fora?: {código: {ano: motivo}}}, em reais da época. "fora" lista as câmaras
-// que o tribunal publica sem os pagamentos (PE e CE).
-const MOTIVOS_FORA = ['pago_zerado', 'incompleto'];
+// que o tribunal publica sem os pagamentos, ou sem órgão próprio (PE, CE e PR).
+const MOTIVOS_FORA = ['pago_zerado', 'incompleto', 'na_prefeitura'];
 export async function carregarCamarasUf(uf) {
   if (!/^[A-Z]{2}$/.test(uf)) falhar('câmaras: UF');
   const resposta = await fetch(`/dados/camaras/${uf}.json`, { credentials: 'same-origin' });

@@ -468,13 +468,14 @@ function desenharCamara(r, ano) {
 
 // Em que a Câmara gastou, pelo tipo de despesa de cada pagamento (Tribunal de
 // Contas do estado). Só onde o tribunal publica os lançamentos: por enquanto,
-// SP, RS, PE e CE. Sem nomes de pessoas.
-const UFS_COM_CAMARAS = new Set(['SP', 'RS', 'PE', 'CE']);
+// SP, RS, PE, CE e PR. Sem nomes de pessoas.
+const UFS_COM_CAMARAS = new Set(['SP', 'RS', 'PE', 'CE', 'PR']);
 const TRIBUNAL = {
   SP: 'Tribunal de Contas do Estado de São Paulo',
   RS: 'Tribunal de Contas do Estado do Rio Grande do Sul',
   PE: 'Tribunal de Contas do Estado de Pernambuco',
   CE: 'Tribunal de Contas do Estado do Ceará',
+  PR: 'Tribunal de Contas do Estado do Paraná',
 };
 const CAPITAL_SP = '3550308';
 const TIPOS_CAMARA = {
@@ -493,6 +494,9 @@ const TIPOS_CAMARA = {
 const milhoes = (v) => (Math.abs(v) >= 1e6 && Math.abs(v) < 1e8 ? `R$\u00A0${f.numero(v / 1e6, 1)} mi` : f.reaisCompacto(v));
 
 function textoCamaraFora(motivo, tribunal, ano) {
+  if (motivo === 'na_prefeitura') {
+    return `No ${tribunal}, a Câmara desta cidade não aparece como órgão próprio em ${ano}: os gastos dela foram lançados pela prefeitura, junto com os de outras áreas. Por isso a divisão por tipo de despesa da Câmara não aparece aqui.`;
+  }
   return motivo === 'pago_zerado'
     ? `O ${tribunal} publica as despesas desta Câmara em ${ano}, mas com o valor pago zerado. Sem o que foi de fato pago, a divisão por tipo de despesa não aparece aqui.`
     : `Os pagamentos desta Câmara que o ${tribunal} publica para ${ano} somam menos da metade do custo que a prefeitura informou ao Tesouro Nacional. Como os dados do tribunal parecem incompletos, a divisão por tipo de despesa não aparece aqui.`;
@@ -524,7 +528,7 @@ async function desenharCamaraTipos(ano) {
   const porAno = d.cidades[codigo7] ?? {};
   const anosCom = d.anos.filter((a) => porAno[String(a)]?.[0] > 0).sort((a, b) => a - b);
   const tribunal = d.tribunal ?? TRIBUNAL[uf];
-  // Câmara que o tribunal publica sem os pagamentos (PE e CE): explica em vez
+  // Câmara que o tribunal publica sem os pagamentos ou sem órgão próprio (PE, CE e PR): explica em vez
   // de esconder o bloco.
   const fora = d.fora?.[codigo7] ?? {};
   if (!anosCom.length) {
@@ -548,6 +552,7 @@ async function desenharCamaraTipos(ano) {
   const motivo = fora[String(ano)];
   const porque = motivo === 'pago_zerado' ? `o Tribunal de Contas publica ${ano} com o valor pago zerado`
     : motivo === 'incompleto' ? `os pagamentos de ${ano} no Tribunal de Contas parecem incompletos`
+      : motivo === 'na_prefeitura' ? `em ${ano}, o Tribunal de Contas registra os gastos da Câmara junto com os da prefeitura`
       : d.anos.includes(ano) ? `o Tribunal de Contas não traz pagamentos desta Câmara em ${ano}` : `o Tribunal de Contas ainda não publicou ${ano}`;
   definir('mun-camara-tipos-titulo', anoUsado === ano
     ? `Em que a Câmara gastou em ${anoUsado}`
