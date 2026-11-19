@@ -14,7 +14,7 @@ permissions:
 jobs:
   inspecionar:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -133,98 +133,17 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # 19/11, terceira rodada do Paraná: o estado inteiro em 2025. Cada
-          # registro de Empenho já traz o pago (vlPagamento), o código completo
-          # (categoria, grupo, modalidade, elemento, desdobramento), a função e
-          # a última remessa ao tribunal. Câmaras: totais, código do subsídio
-          # dos vereadores, remessas e comparação com o Tesouro (SICONFI).
-          import io, os, statistics, zipfile
-          import xml.etree.ElementTree as ET
-          titulo("TCE-PR: câmaras do estado inteiro em 2025")
-          base = "https://pit.tce.pr.gov.br/Arquivos/{}_PIT_TodosArquivos.zip"
-          if not permitido(base.format(2025)):
-              raise SystemExit("o robots.txt do PIT não permite baixar os arquivos")
-          destino = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "pr-2025.zip")
-          inicio = time.time()
-          with urllib.request.urlopen(urllib.request.Request(base.format(2025), headers={"User-Agent": AGENTE}), timeout=900) as r, open(destino, "wb") as fh:
-              print("  cabeçalhos da resposta:", {k: v for k, v in r.headers.items() if k.lower() in ("content-length", "last-modified", "etag", "accept-ranges", "content-type")})
-              while bloco := r.read(1 << 20):
-                  fh.write(bloco)
-          print(f"  2025 baixado: {os.path.getsize(destino) / 1e6:.0f} MB em {(time.time() - inicio) / 60:.1f} min", flush=True)
-          z = zipfile.ZipFile(destino)
-          despesas = {re.match(r"\d+_(\d+)_", i.filename).group(1): i for i in z.infolist() if i.filename.endswith("_Despesa.zip")}
-          eh_camara = lambda nome: bool(re.search(r"C[AÂ]MARA|LEGISLATIV", nome or "", re.I)) and not re.search(r"PREFEITURA|FUNDO|CONS[OÓ]RCIO", nome or "", re.I)
-          por_cidade, nomes_camara = {}, collections.defaultdict(set)
-          subsidio = collections.defaultdict(float)
-          remessas, anos_emp, funcoes_fora = collections.Counter(), collections.Counter(), collections.Counter()
-          outros_leg = collections.Counter()
-          t0 = time.time()
-          for cod, info in sorted(despesas.items()):
-              interno = zipfile.ZipFile(io.BytesIO(z.read(info)))
-              arq = [n for n in interno.namelist() if n.endswith("_Empenho.xml")]
-              if not arq:
-                  print(f"  {cod}: sem Empenho.xml ({interno.namelist()})"); continue
-              bruto = interno.read(arq[0])
-              # Alguns arquivos trazem referências a caracteres de controle
-              # (&#1; etc.), que o XML não aceita: viram espaço.
-              def troca(m):
-                  ref = m.group(1)
-                  n = int(ref[1:], 16) if ref[:1] in b"xX" else int(ref)
-                  return b" " if n < 32 and n not in (9, 10, 13) else m.group(0)
-              bruto = re.sub(rb"&#([xX][0-9a-fA-F]+|[0-9]+);", troca, bruto)
-              try:
-                  eventos = list(ET.iterparse(io.BytesIO(bruto)))
-              except ET.ParseError as erro:
-                  print(f"  {cod}: XML com erro ({erro}); cidade pulada"); continue
-              for _, el in eventos:
-                  if el.tag != "Empenho":
-                      el.clear(); continue
-                  r = el.attrib
-                  ent = r.get("nmEntidade")
-                  if not eh_camara(ent):
-                      if r.get("cdFuncao") == "01":
-                          outros_leg[ent] += 1
-                      el.clear(); continue
-                  nomes_camara[cod].add(ent)
-                  anos_emp[r.get("nrAnoEmpenho")] += 1
-                  remessas[(cod, r.get("ultimoEnvioSIMAMNesteExercicio"))] += 0
-                  if r.get("cdFuncao") != "01":
-                      funcoes_fora[r.get("dsFuncao")] += num(r.get("vlPagamento"))
-                  item = por_cidade.setdefault(cod, collections.Counter())
-                  pago, liq = num(r.get("vlPagamento")), num(r.get("vlLiquidacao"))
-                  chave = "intra" if r.get("cdModalidade") == "91" else ("ano" if r.get("nrAnoEmpenho") == "2025" else "outro_ano")
-                  item[f"pago_{chave}"] += pago
-                  item[f"liq_{chave}"] += liq
-                  if r.get("cdGrupoNatureza") == "1" and r.get("cdElemento") == "11" and chave == "ano":
-                      subsidio[(r.get("cdDesdobramento"), r.get("dsDesdobramento"))] += pago
-                  el.clear()
-          print(f"  leitura do estado: {(time.time() - t0) / 60:.1f} min; cidades com câmara: {len(por_cidade)} de {len(despesas)}")
-          print("  anos dos empenhos das câmaras:", dict(anos_emp))
-          print("  cidades com mais de um nome de câmara:", [(c, sorted(n)) for c, n in nomes_camara.items() if len(n) > 1][:10])
-          print("  câmaras gastando fora da função Legislativa (pago):", {k: round(v) for k, v in funcoes_fora.most_common(8)})
-          print("  órgãos que não parecem câmara, com empenhos na função Legislativa:", outros_leg.most_common(10))
-          ult = collections.Counter(v for (c, v) in remessas)
-          print("  última remessa do ano por câmara (valor: nº de câmaras):", ult.most_common(10))
-          print("  pago no elemento 11 (vencimentos) por desdobramento, R$ mi:")
-          for (dsd, ds), v in sorted(subsidio.items(), key=lambda x: -x[1])[:15]:
-              print(f"    {v / 1e6:9.2f}  {dsd} {ds}")
-          # Comparação com o Tesouro (função Legislativa, liquidado).
-          m = json.load(open("site/dados/municipios/PR.json", encoding="utf-8"))
-          i_cam = m["campos_despesa"].index("camara")
-          sic = {str(x["c"])[:6]: (x["a"].get("2025") or {}) for x in m["municipios"]}
-          for campo in ("pago_ano", "liq_ano"):
-              razoes = []
-              for cod, it in por_cidade.items():
-                  a = sic.get(cod) or {}
-                  if a.get("ds") == "ok" and a.get("d") and a["d"][i_cam] and it[campo] > 0:
-                      razoes.append(it[campo] / a["d"][i_cam])
-              if razoes:
-                  print(f"  {campo} / Tesouro: mediana {statistics.median(razoes):.3f}; {sum(0.8 <= x <= 1.25 for x in razoes) / len(razoes):.0%} das {len(razoes)} entre 0,8 e 1,25; "
-                        f"abaixo de 0,5: {sum(x < 0.5 for x in razoes)}")
-          for cod in ("410690", "411370", "410010"):
-              it = por_cidade.get(cod, {})
-              a = sic.get(cod) or {}
-              print(f"  {cod}: {dict((k, round(v)) for k, v in it.items())}; Tesouro {a.get('d', [None] * (i_cam + 1))[i_cam] if a.get('d') else None}")
+          # 19/11: o site publicado já tem o código e os dados do PR? Compara
+          # os arquivos servidos pela Cloudflare com os do repositório.
+          titulo("Site publicado contra o repositório")
+          import hashlib
+          SITE = "https://arrecadometro-brasil.tsuneokomido.workers.dev"
+          for caminho in ("/js/cidade.js", "/js/dados.js", "/dados/camaras/PR.json", "/dados/camaras/PE.json", "/metodologia.html"):
+              st, cab, _, corpo, seg = baixar(SITE + caminho + "?v=" + str(int(time.time())), tempo=60)
+              local = open("site" + caminho, "rb").read()
+              print(f"  {caminho}: HTTP {st} | {len(corpo)} bytes publicados, {len(local)} no repositório | "
+                    f"{'IGUAL' if hashlib.sha256(corpo).digest() == hashlib.sha256(local).digest() else 'DIFERENTE'} | "
+                    f"tem PR: {b'PR' in corpo and (b\"'PR'\" in corpo or b'camaras-pr' in corpo or b'\"uf\":\"PR\"' in corpo)} | {cab.get('Last-Modified') or cab.get('ETag')}")
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
