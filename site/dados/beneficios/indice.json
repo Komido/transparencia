@@ -1,5 +1,5 @@
 {
- "atualizado": "2026-11-19",
+ "atualizado": "2026-11-20",
  "fonte": "https://api.portaldatransparencia.gov.br/api-de-dados",
  "campos": [
   "nbf_valor",
@@ -23,6 +23,7 @@
   "2026-09"
  ],
  "todos_os_meses": [
+  "2025-01",
   "2025-02",
   "2025-03",
   "2025-04",
@@ -45,6 +46,16 @@
   "2026-09"
  ],
  "totais": {
+  "2025-01": {
+   "nbf": {
+    "valor": 13735770330.0,
+    "qtd": 20377567
+   },
+   "bpc": {
+    "valor": 9592756119.83,
+    "qtd": 5574166
+   }
+  },
   "2025-02": {
    "nbf": {
     "valor": 13713197588.0,
