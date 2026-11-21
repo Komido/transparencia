@@ -14,17 +14,15 @@ permissions:
 jobs:
   inspecionar:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      # Câmaras de Pernambuco e do Ceará: em que cada Câmara gastou, pelas
-      # APIs de dados abertos dos Tribunais de Contas (TCE-PE e TCE-CE). Lista
-      # todas as entidades e métodos, a ligação entre unidade gestora, Câmara e
-      # município, e consulta uma Câmara pequena e uma grande para ver tamanho,
-      # campos, valor pago e se há limite de linhas. Só leitura, respeitando o
-      # robots.txt e o Crawl-Delay.
-      - name: Arquivo anual do TCE-PR (despesas das câmaras)
+      # Câmaras de SC, PB e BA: o que os Tribunais de Contas publicam sobre os
+      # gastos das câmaras (APIs, arquivos para baixar e o portal da PB, que é
+      # montado por script). Só leitura, respeitando o robots.txt e o
+      # Crawl-Delay; arquivos grandes só têm o tamanho conferido.
+      - name: Tribunais de Contas de SC, PB e BA (despesas das câmaras)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
@@ -133,25 +131,112 @@ jobs:
               return sorted(c.items(), key=lambda x: -x[1])
 
           # ------------------------------------------------------------------
-          # 19/11: salário de deputado federal (Decreto Legislativo 172/2022) e
-          # de deputado estadual de SP (Lei 17.617/2023), para o teto do
-          # subsídio dos vereadores (Constituição, art. 29, VI). Só leitura.
-          titulo("Subsídios de deputados: textos oficiais")
-          for url in ("https://www2.camara.leg.br/legin/fed/decleg/2022/decretolegislativo-172-21-dezembro-2022-793529-publicacaooriginal-166604-pl.html",
-                      "https://www2.camara.leg.br/legin/fed/decleg/2022/decretolegislativo-172-21-dezembro-2022-793529-republicacao-166629-pl.html",
-                      "https://www.al.sp.gov.br/repositorio/legislacao/lei/2023/lei-17617-16.01.2023.html",
-                      "https://www.al.sp.gov.br/repositorio/folha-de-pagamento/folha-deputados-2025-10.html"):
-              html, _ = pegar(url, tempo=90)
-              if not html: continue
-              t = texto_da_pagina(html, 200000)
-              trechos = [m.group(0) for m in re.finditer(r"[^|]{0,220}R\$\s*[\d.]+,\d{2}[^|]{0,160}", t)]
-              print(f"  {len(trechos)} trechos com valores:")
-              vistos = set()
-              for x in trechos:
-                  x = " ".join(x.split())
-                  if x not in vistos:
-                      vistos.add(x); print("   -", x[:420])
-                  if len(vistos) >= 12: break
+          # 21/11: câmaras de SC, PB e BA, segunda rodada. Em 17/11 a primeira
+          # achou só páginas; agora segue os links das APIs, lista os arquivos para
+          # baixar (só o tamanho, sem baixar) e, no portal da PB, procura nos scripts
+          # da página o endereço da API. Só leitura.
+          import html as html_mod
+          from urllib.parse import urljoin
+
+          def links(pagina, base):
+              vistos, saida = set(), []
+              for m in re.finditer(r'<a\b[^>]*href\s*=\s*["\']([^"\'#]+)["\'][^>]*>(.*?)</a>', pagina, flags=re.S | re.I):
+                  url = urljoin(base, html_mod.unescape(m.group(1)).strip())
+                  texto = " ".join(re.sub(r"<[^>]+>", " ", m.group(2)).split())[:90]
+                  if url.startswith("http") and url not in vistos:
+                      vistos.add(url); saida.append((url, texto))
+              return saida
+
+          def mostrar_links(pagina, base, filtro, maximo=60):
+              achados = [(u, x) for u, x in links(pagina, base) if re.search(filtro, u + " " + x, re.I)]
+              print(f"  {len(achados)} links com /{filtro[:60]}/:")
+              for u, x in achados[:maximo]: print(f"   - {x or '(sem texto)'} -> {u}")
+              return achados
+
+          def tamanho(url):
+              if not permitido(url): print("   robots.txt não permite:", url); return
+              st, cab, _, _, _ = baixar(url, metodo="HEAD", tempo=60)
+              print(f"   HEAD {url}: HTTP {st} | {cab.get('Content-Type', '')} | {cab.get('Content-Length', '?')} bytes | {cab.get('Last-Modified', '')}")
+
+          ARQUIVO = r"\.(zip|csv|json|xlsx?|txt|gz|7z|rar)(\?|$)"
+          FILTRO = r"api|endpoint|json|csv|zip|download|dados.?abertos|despesa|empenho|pagamento|esfinge|sagres|transpar"
+
+          titulo("SC: página de APIs de dados abertos do TCE-SC")
+          pag, final = pegar("https://www.tcesc.tc.br/apis-dados-abertos", "text/html")
+          if pag:
+              print("  texto:", texto_da_pagina(pag, 6000))
+              achados = mostrar_links(pag, final, r"servicos\.tcesc|api|endpoint|json")
+              no_texto = set(re.findall(r"https?://servicos\.tcesc\.tc\.br/[^\s\"'<>)]+", html_mod.unescape(pag)))
+              for u in sorted(no_texto)[:40]: print("   endereço no texto:", u)
+              alvos = sorted({u for u, _ in achados if "servicos.tcesc" in u} | no_texto)
+              for u in alvos[:15]:
+                  corpo, _ = pegar(u, "application/json", tempo=90)
+                  if corpo: mostrar_registros(corpo)
+
+          titulo("SC: e-Sfinge, arquivos para baixar")
+          for url in ("https://www.tcesc.tc.br/esfinge", "https://www.tcesc.tc.br/esfinge-captura"):
+              pag, final = pegar(url, "text/html")
+              if not pag: continue
+              print("  texto:", texto_da_pagina(pag, 2500))
+              for u, x in mostrar_links(pag, final, r"download|arquivo|tabela|zip|csv|dados")[:6]:
+                  if "tcesc" not in u: continue
+                  if re.search(ARQUIVO, u, re.I): tamanho(u); continue
+                  p2, f2 = pegar(u, "text/html")
+                  if not p2: continue
+                  print("  texto:", texto_da_pagina(p2, 2500))
+                  arquivos = [a for a, _ in mostrar_links(p2, f2, ARQUIVO + r"|download|20\d\d", 80) if re.search(ARQUIVO, a, re.I)]
+                  for a in arquivos[:5]: tamanho(a)
+
+          titulo("PB: portal de dados abertos do TCE-PB (montado por script)")
+          for base in ("https://dados-abertos.tce.pb.gov.br/", "https://dados.tce.pb.gov.br/"):
+              pag, final = pegar(base, "text/html", tempo=60)
+              if not pag: continue
+              print("  texto:", texto_da_pagina(pag, 1500))
+              arquivos = [a for a, _ in mostrar_links(pag, final, FILTRO) if re.search(ARQUIVO, a, re.I)]
+              for a in arquivos[:5]: tamanho(a)
+              scripts = [urljoin(final, s) for s in re.findall(r'<script[^>]+src\s*=\s*["\']([^"\']+)["\']', pag, re.I)]
+              print("  scripts:", scripts[:20])
+              enderecos = collections.Counter()
+              for s in scripts[:12]:
+                  js, _ = pegar(s, "*/*", tempo=90)
+                  if not js: continue
+                  for u in re.findall(r"https?://[A-Za-z0-9.\-]+(?:/[^\s\"'`<>)\\]*)?", js): enderecos[u] += 1
+                  for u in re.findall(r"[\"'`](/(?:api|v\d|dados|sagres|municipal|empenho|despesa)[^\s\"'`<>\\]{0,120})[\"'`]", js): enderecos[u] += 1
+              print(f"  {len(enderecos)} endereços nos scripts:")
+              for u in sorted(enderecos)[:200]:
+                  if not re.search(r"w3\.org|reactjs|react\.dev|github\.com/|mozilla|googleapis|gstatic|schema\.org|jquery|bootstrap|fontawesome", u):
+                      print("   -", u)
+
+          titulo("PB: documentação da API (docs-api.tce.pb.gov.br)")
+          base = "https://docs-api.tce.pb.gov.br"
+          pag, final = pegar(base + "/", "text/html", tempo=60)
+          if pag:
+              print("  texto:", texto_da_pagina(pag, 4000))
+              mostrar_links(pag, final, FILTRO + r"|swagger|openapi|redoc")
+          for c in ("/swagger.json", "/openapi.json", "/v3/api-docs", "/swagger/v1/swagger.json", "/api-docs"):
+              corpo, _ = pegar(base + c, "application/json", tempo=60)
+              d = como_json(corpo) if corpo else None
+              if isinstance(d, dict) and "paths" in d:
+                  print("  título:", (d.get("info") or {}).get("title"), "| servidores:", d.get("servers") or d.get("host"))
+                  for caminho, metodos in list(d["paths"].items())[:200]:
+                      resumo = next((v.get("summary") or v.get("description") or "" for v in metodos.values() if isinstance(v, dict)), "")
+                      print(f"   {','.join(m.upper() for m in metodos if m in ('get', 'post'))} {caminho} :: {resumo[:100]}")
+                  break
+
+          titulo("BA: Tribunal de Contas dos Municípios (TCM-BA)")
+          for url in ("https://www.tcm.ba.gov.br/", "https://e.tcm.ba.gov.br/"):
+              pag, final = pegar(url, "text/html", tempo=60)
+              if not pag: continue
+              print("  texto:", texto_da_pagina(pag, 1500))
+              achados = mostrar_links(pag, final, FILTRO + r"|cidadania|consulta|c[aâ]mara")
+              seguir = [u for u, x in achados if re.search(r"dados.?abertos|despesa|cidadania|api", u + " " + x, re.I)
+                        and "tcm.ba.gov.br" in u and not re.search(ARQUIVO + r"|\.pdf", u, re.I)]
+              for u in seguir[:4]:
+                  p2, f2 = pegar(u, "text/html", tempo=60)
+                  if not p2: continue
+                  print("  texto:", texto_da_pagina(p2, 2500))
+                  arquivos = [a for a, _ in mostrar_links(p2, f2, FILTRO, 80) if re.search(ARQUIVO, a, re.I)]
+                  for a in arquivos[:5]: tamanho(a)
 
           print(f"\npedidos feitos: {pedidos[0]}")
           PY
