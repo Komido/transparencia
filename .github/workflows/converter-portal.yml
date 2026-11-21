@@ -1,4 +1,5 @@
 name: Resumir o Portal da Transparência (cartão, despesa e viagens)
+run-name: Resumir o Portal da Transparência (${{ inputs.periodo }})
 
 # O Portal da Transparência (CGU) publica o cartão de pagamento do governo
 # federal e a execução da despesa em arquivos mensais, e as viagens a serviço
@@ -22,6 +23,10 @@ name: Resumir o Portal da Transparência (cartão, despesa e viagens)
 on:
   workflow_dispatch:
     inputs:
+      repeticao:
+        description: "sim: repetição do dia seguinte; só roda se nada deu certo nas últimas 30 horas"
+        required: false
+        default: "nao"
       periodo:
         description: "Anos a refazer"
         type: choice
@@ -36,7 +41,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Repetição do dia seguinte (agendador do banco, repeticao=sim; ver
+  # supabase/migrations/20261121010000_repeticao_mensal.sql): só segue se
+  # nenhuma execução desta tarefa, com o mesmo título, deu certo nas últimas
+  # 30 horas. Quando a do dia anterior passou, para aqui sem baixar nada dos
+  # servidores do governo.
+  conferir:
+    if: ${{ inputs.repeticao == 'sim' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    outputs:
+      ja_deu_certo: ${{ steps.ver.outputs.ja_deu_certo }}
+    steps:
+      - id: ver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          arquivo=$(basename "${GITHUB_WORKFLOW_REF%%@*}")
+          desde=$(date -u -d '30 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          titulo=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .display_title) || titulo=""
+          n=$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/$arquivo/runs" -f status=success -f per_page=30 \
+              | jq --arg desde "$desde" --arg titulo "$titulo" \
+                  '[.workflow_runs[] | select(.created_at >= $desde and .display_title == $titulo)] | length') || n=0
+          if [ -n "$titulo" ] && [ "${n:-0}" -gt 0 ]; then
+            echo "Deu certo $n vez(es) desde $desde; a repetição para aqui."
+            echo "ja_deu_certo=sim" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nada deu certo desde $desde; a repetição segue."
+          fi
+
   resumir:
+    needs: conferir
+    if: ${{ !cancelled() && needs.conferir.outputs.ja_deu_certo != 'sim' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:

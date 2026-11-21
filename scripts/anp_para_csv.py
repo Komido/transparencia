@@ -27,7 +27,9 @@ import json
 import os
 import re
 import sys
+import time
 import unicodedata
+import urllib.error
 import urllib.request
 
 from openpyxl import load_workbook
@@ -63,10 +65,20 @@ def normalizar(texto):
     return re.sub(r"\s+", " ", texto).strip().upper()
 
 
-def baixar(url):
-    pedido = urllib.request.Request(url, headers={"User-Agent": "ArrecadometroBrasil/1.0 (dados publicos)"})
-    with urllib.request.urlopen(pedido, timeout=120) as resposta:
-        return resposta.read()
+def baixar(url, tentativas=4):
+    """O servidor às vezes derruba a conexão (21/11/2026: "connection reset").
+    Tenta de novo com espera crescente; erro 4xx (fora 429) não se repete."""
+    for k in range(tentativas):
+        try:
+            pedido = urllib.request.Request(url, headers={"User-Agent": "ArrecadometroBrasil/1.0 (dados publicos)"})
+            with urllib.request.urlopen(pedido, timeout=120) as resposta:
+                return resposta.read()
+        except (urllib.error.URLError, OSError) as erro:
+            definitivo = isinstance(erro, urllib.error.HTTPError) and erro.code < 500 and erro.code != 429
+            if definitivo or k == tentativas - 1:
+                raise
+            print(f"  tentativa {k + 1} falhou: {erro}; nova tentativa em {30 * (k + 1)} s", flush=True)
+            time.sleep(30 * (k + 1))
 
 
 def mes_de(valor):
